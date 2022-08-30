@@ -44,14 +44,16 @@ extension ShellInstaller {
                 throw InstallerError.xCodeInstallationError
             }
 
-            try self.moveApp(atPath: FileHandler.downloadDirectory.appendingPathComponent(appFile[0]).path)
+            let installedFile = try self.moveApp(atPath: FileHandler.downloadDirectory.appendingPathComponent(appFile[0]).path)
+
+            // /Applications/Xcode.app/Contents/Resources/Packages/
 
             // third install packages provided with Xcode app
             for pkg in PKGTOINSTALL {
                 logger.debug("Installing package \(pkg.fileName())")
                 currentStep += 1
                 progress.update(step: currentStep, total: totalSteps, text: "Installing additional packages...")
-                resultOptional = try self.installPkg(atPath: pkg)
+                resultOptional = try self.installPkg(atPath: "\(installedFile)/Contents/resources/Packages/\(pkg)")
                 if resultOptional == nil || resultOptional!.code != 0 {
                     logger.error("Can not install pkg at : \(pkg)\n\(resultOptional!)")
                     throw InstallerError.xCodeInstallationError
@@ -90,7 +92,7 @@ extension ShellInstaller {
         return result
     }
 
-    func moveApp(atPath srcFile: String) throws {
+    func moveApp(atPath srcFile: String) throws -> String {
 
         // extract file name
         let fileName = srcFile.fileName()
@@ -103,5 +105,6 @@ extension ShellInstaller {
         // move synchronously
         try fileHandler.move(from: fileURL, to: appURL)
 
+        return appURL.path
     }
 }

@@ -30,10 +30,10 @@ class ShellInstaller: InstallerProtocol {
     let INSTALLERCOMMAND = "/usr/sbin/installer"
 
     // the pkg provided by Xcode to install
-    let PKGTOINSTALL = ["/Applications/Xcode.app/Contents/Resources/Packages/XcodeSystemResources.pkg",
-                        "/Applications/Xcode.app/Contents/Resources/Packages/CoreTypes.pkg",
-                        "/Applications/Xcode.app/Contents/Resources/Packages/MobileDevice.pkg",
-                        "/Applications/Xcode.app/Contents/Resources/Packages/MobileDeviceDevelopment.pkg"]
+    let PKGTOINSTALL = ["XcodeSystemResources.pkg",
+                        "CoreTypes.pkg",
+                        "MobileDevice.pkg",
+                        "MobileDeviceDevelopment.pkg"]
 
     // the shell access
     var shell: AsyncShellProtocol?
