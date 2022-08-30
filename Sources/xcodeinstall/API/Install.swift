@@ -40,7 +40,7 @@ class ShellInstaller: InstallerProtocol {
     // the shell access
     var shell: AsyncShellProtocol?
 
-    init(logger: Logger, shell: AsyncShellProtocol? = nil) {
+    init(logger: Logger, fileHandler: FileHandlerProtocol, shell: AsyncShellProtocol? = nil) {
         self.logger      = logger
         self.fileHandler = FileHandler(logger: self.logger)
 
@@ -110,12 +110,13 @@ class ShellInstaller: InstallerProtocol {
         //    if there is a download list cache AND file is present in list AND size DOES NOT match => False
         // all other cases return true (we can try to install even if their is no cached download list)
 
-        var match = fileHandler.fileExists(filePath: filePath, fileSize: 0)
+        var match = self.fileHandler.fileExists(filePath: filePath, fileSize: 0)
 
         if !match {
             return false
         }
 
+        // inject secrets handler to support AWS Secrets Manager
         // file exists, do an additional check
         let secrets = FileSecretsHandler(logger: self.logger)
 
@@ -123,7 +124,7 @@ class ShellInstaller: InstallerProtocol {
         if let dll = try? secrets.loadDownloadList() {
             if let dlFile = dll.find(fileName: filePath.fileName()) {
                 // compare download list cached sized with actual size
-                match = fileHandler.fileExists(filePath: filePath, fileSize: dlFile.fileSize)
+                match = self.fileHandler.fileExists(filePath: filePath, fileSize: dlFile.fileSize)
             }
         }
         return match

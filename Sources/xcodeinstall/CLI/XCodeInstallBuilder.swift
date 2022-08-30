@@ -33,30 +33,40 @@ class XCodeInstallBuilder {
         return self
     }
     func build() -> XCodeInstall {
-        let log = Log(logLevel: self.verbosity)
-
-        // TODO add choice between file and Secrets Manager
-        let secretsManager = FileSecretsHandler(logger: log.defaultLogger)
 
         guard downloaderNeeded || authenticatorNeeded || installerNeeded else {
             fatalError("This command requires either an authenticator,a downloader, or an installer")
         }
 
+        let log = Log(logLevel: self.verbosity)
+        let fileHandler = FileHandler(logger: log.defaultLogger)
+        // TODO add choice between file and Secrets Manager
+        let secretsManager = FileSecretsHandler(logger: log.defaultLogger)
+
         var result: XCodeInstall?
 
         if authenticatorNeeded {
             let auth = AppleAuthenticator(logger: log.defaultLogger, secrets: secretsManager)
-            result = XCodeInstall(authenticator: auth, secretsManager: secretsManager, logger: log.defaultLogger)
+            result = XCodeInstall(authenticator: auth,
+                                  secretsManager: secretsManager,
+                                  logger: log.defaultLogger,
+                                  fileHandler: fileHandler)
         }
 
         if downloaderNeeded {
             let down = AppleDownloader(logger: log.defaultLogger, secrets: secretsManager)
-            result = XCodeInstall(downloader: down, secretsManager: secretsManager, logger: log.defaultLogger)
-        }
+            result = XCodeInstall(downloader: down,
+                                  secretsManager: secretsManager,
+                                  logger: log.defaultLogger,
+                                  fileHandler: fileHandler)
+}
 
         if installerNeeded {
-            let inst = ShellInstaller(logger: log.defaultLogger, shell: AsyncShell())
-            result = XCodeInstall(installer: inst, secretsManager: secretsManager, logger: log.defaultLogger)
+            let inst = ShellInstaller(logger: log.defaultLogger, fileHandler: fileHandler, shell: AsyncShell())
+            result = XCodeInstall(installer: inst,
+                                  secretsManager: secretsManager,
+                                  logger: log.defaultLogger,
+                                  fileHandler: fileHandler)
         }
 
         // at this stage the guard statement ensured result is initialized

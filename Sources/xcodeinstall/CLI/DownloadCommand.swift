@@ -50,9 +50,8 @@ extension XCodeInstall {
                 _ = try await download.download(file: file, progressReport: progressBar)
 
                 // check if the downloaded file is complete 
-                let fileHandler = FileHandler(logger: logger)
-                let filePath: String = fileHandler.downloadFilePath(file: file)
-                let complete = try? fileHandler.checkFileSize(filePath: filePath, fileSize: file.fileSize)
+                let filePath: String = self.fileHandler.downloadFilePath(file: file)
+                let complete = try? self.fileHandler.checkFileSize(filePath: filePath, fileSize: file.fileSize)
                 if  !(complete ?? false) {
                     display("🛑 Downloaded file has incorrect size, it might be incomplete or corrupted")
                 }

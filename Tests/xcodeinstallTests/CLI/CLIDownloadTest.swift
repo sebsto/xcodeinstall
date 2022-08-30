@@ -18,6 +18,7 @@ class CLIDownloadTest: CLITest {
         let mockedReadline = MockedReadLine(["0"])
         var xci = xcodeinstall(input: mockedReadline)
         xci.downloader = MockAppleDownloader()
+        (xci.fileHandler as! MockFileHandler).nextFileCorrect = true
         
         
         let download = try parse(MainCommand.Download.self, [

@@ -14,7 +14,7 @@ extension ShellInstaller {
     func installCommandLineTools(atPath filePath: String, progress: ProgressUpdateProtocol) throws {
 
         // check if file exists
-        guard fileHandler.fileExists(filePath: filePath, fileSize: 0) else {
+        guard self.fileHandler.fileExists(filePath: filePath, fileSize: 0) else {
             logger.error("Command line disk image does not exist : \(filePath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
@@ -67,7 +67,7 @@ extension ShellInstaller {
         }
 
         // check if file exists
-        guard fileHandler.fileExists(filePath: dmgPath, fileSize: 0) else {
+        guard self.fileHandler.fileExists(filePath: dmgPath, fileSize: 0) else {
             logger.error("Disk Image does not exist : \(dmgPath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }

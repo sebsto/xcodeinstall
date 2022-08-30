@@ -9,11 +9,12 @@ import Foundation
 @testable import xcodeinstall
 
 // used to test Installer component (see InstallerTest)
-class MockFilehandler: FileHandlerProtocol {
-    
+class MockFileHandler: FileHandlerProtocol {
+        
     var moveSrc: URL? = nil
     var moveDst: URL? = nil
     var nextFileExist: Bool? = nil
+    var nextFileCorrect: Bool? = nil
     
     func move(from src: URL, to dst: URL) throws {
         moveSrc = src
@@ -25,6 +26,21 @@ class MockFilehandler: FileHandlerProtocol {
         } else {
             return true
         }
+    }
+    func downloadedFiles() throws -> [String] {
+        return ["name.pkg"]
+    }
+
+    func checkFileSize(filePath: String, fileSize: Int) throws -> Bool {
+        if let nfc = nextFileCorrect {
+            return nfc
+        } else {
+            return true
+        }
+    }
+    
+    func downloadFilePath(file: DownloadList.File) -> String {
+        return "/download/\(file.filename)"
     }
 
 }

@@ -58,8 +58,7 @@ extension XCodeInstall {
     private func promptForFile() throws -> String {
 
         // list files ready to install
-        let fhandler = FileHandler(logger: logger)
-        let installableFiles = try fhandler.downloadedFiles().filter({ fileName in
+        let installableFiles = try self.fileHandler.downloadedFiles().filter({ fileName in
             return fileName.hasSuffix(".xip") || fileName.hasSuffix(".dmg")
         })
 

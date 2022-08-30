@@ -49,6 +49,7 @@ struct XCodeInstall {
 
     var secretsManager: SecretsHandler
     var logger: Logger
+    var fileHandler: FileHandlerProtocol
 }
 
 protocol ReadLineProtocol {

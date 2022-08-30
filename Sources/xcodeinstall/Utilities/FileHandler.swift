@@ -12,6 +12,9 @@ import Logging
 protocol FileHandlerProtocol {
     func move(from src: URL, to dst: URL) throws
     func fileExists(filePath: String, fileSize: Int) -> Bool
+    func checkFileSize(filePath: String, fileSize: Int) throws -> Bool
+    func downloadedFiles() throws -> [String]
+    func downloadFilePath(file: DownloadList.File) -> String
 }
 
 enum FileHandlerError: Error {

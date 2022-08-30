@@ -17,6 +17,7 @@ class CLITest: XCTestCase {
     
     var mockedDisplay : DisplayProtocol!
     var mockedAuth : AppleAuthenticatorProtocol!
+    var fileHandler : FileHandlerProtocol!
     
     override func setUpWithError() throws {
         self.log = Log(logLevel: .debug)
@@ -24,6 +25,8 @@ class CLITest: XCTestCase {
 
         self.secretsHandler.clearSecrets(preserve: true)
         self.mockedDisplay = MockedDisplay()
+        
+        self.fileHandler = MockFileHandler()
     }
 
     override func tearDownWithError() throws {
@@ -38,9 +41,16 @@ class CLITest: XCTestCase {
 
         let result : XCodeInstall?
         if let i = input {
-            result = XCodeInstall(display: mockedDisplay,input: i, secretsManager: secretsHandler, logger: log.defaultLogger)
+            result = XCodeInstall(display: mockedDisplay,
+                                  input: i,
+                                  secretsManager: secretsHandler,
+                                  logger: log.defaultLogger,
+                                  fileHandler: self.fileHandler)
         } else {
-            result = XCodeInstall(display: mockedDisplay, secretsManager: secretsHandler, logger: log.defaultLogger)
+            result = XCodeInstall(display: mockedDisplay,
+                                  secretsManager: secretsHandler,
+                                  logger: log.defaultLogger,
+                                  fileHandler: self.fileHandler)
         }
         return result!
     }
