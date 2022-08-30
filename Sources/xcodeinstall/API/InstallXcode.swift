@@ -50,7 +50,7 @@ extension ShellInstaller {
         
         // third install packages provided with Xcode app
         for pkg in PKGTOINSTALL {
-            logger.debug("Installing package \(pkg.fileName())")
+            logger.debug("Installing package \(pkg)")
             currentStep += 1
             progress.update(step: currentStep, total: totalSteps, text: "Installing additional packages... \(pkg)")
             resultOptional = try self.installPkg(atPath: "\(installedFile)/Contents/resources/Packages/\(pkg)")
