@@ -81,23 +81,15 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "test --verbose"
+            argument = "list --verbose -x 14 -m"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "list --verbose -o -x 14 -m"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "download -x 14 -m"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "--verbose install"
+            argument = "download --verbose -x 13 -m"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "download --verbose -f  -x 14 -m"
+            argument = "install --verbose "
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
