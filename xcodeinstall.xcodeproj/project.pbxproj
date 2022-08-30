@@ -1,0 +1,987 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 52;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0041064728BD25410033A3A2 /* InstallPkg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064628BD25410033A3A2 /* InstallPkg.swift */; };
+		0041064828BD25410033A3A2 /* InstallPkg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064628BD25410033A3A2 /* InstallPkg.swift */; };
+		0041064A28BD25810033A3A2 /* InstallXcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064928BD25810033A3A2 /* InstallXcode.swift */; };
+		0041064B28BD25810033A3A2 /* InstallXcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064928BD25810033A3A2 /* InstallXcode.swift */; };
+		0041064D28BD25A90033A3A2 /* InstallCLTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064C28BD25A90033A3A2 /* InstallCLTools.swift */; };
+		0041064E28BD25A90033A3A2 /* InstallCLTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064C28BD25A90033A3A2 /* InstallCLTools.swift */; };
+		0041065028BD25C90033A3A2 /* InstallStringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064F28BD25C90033A3A2 /* InstallStringExtension.swift */; };
+		0041065128BD25C90033A3A2 /* InstallStringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064F28BD25C90033A3A2 /* InstallStringExtension.swift */; };
+		0041065328BD25EC0033A3A2 /* InstallDownloadListExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */; };
+		0041065428BD25EC0033A3A2 /* InstallDownloadListExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */; };
+		007585C7289BDF820094D2DC /* URLRequestExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C6289BDF820094D2DC /* URLRequestExtension.swift */; };
+		007585C8289BDF820094D2DC /* URLRequestExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C6289BDF820094D2DC /* URLRequestExtension.swift */; };
+		007585CA289BE0090094D2DC /* URLRequestCurlTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C9289BE0090094D2DC /* URLRequestCurlTest.swift */; };
+		007585CE289BEEFD0094D2DC /* DownloadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585CD289BEEFD0094D2DC /* DownloadTest.swift */; };
+		007585D7289C17670094D2DC /* DownloadListParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585D6289C17670094D2DC /* DownloadListParserTest.swift */; };
+		007585DB289C1E1E0094D2DC /* TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585DA289C1E1E0094D2DC /* TestHelper.swift */; };
+		007585DD289C1F520094D2DC /* SyncShellTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585DC289C1F520094D2DC /* SyncShellTest.swift */; };
+		007585DF289D6DE00094D2DC /* FileSecretHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585DE289D6DE00094D2DC /* FileSecretHandlerTest.swift */; };
+		007585E928A0E1590094D2DC /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 007585E828A0E1590094D2DC /* Logging */; };
+		007585F128A0E1790094D2DC /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 007585F028A0E1790094D2DC /* Logging */; };
+		0075860128A2D8C50094D2DC /* SwiftToolsSupport in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 007585FF28A2D8C50094D2DC /* SwiftToolsSupport */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		0075860E28A3BCF80094D2DC /* CLIProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0075860D28A3BCF80094D2DC /* CLIProgressBar.swift */; };
+		007A542A2885734D00AC4622 /* CLIMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A54292885734D00AC4622 /* CLIMain.swift */; };
+		007A542F288624F300AC4622 /* SecretsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A542E288624F300AC4622 /* SecretsHandler.swift */; };
+		007A54312886278600AC4622 /* Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A54302886278600AC4622 /* Download.swift */; };
+		007A5433288A3D0A00AC4622 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A5432288A3D0A00AC4622 /* HTTPClient.swift */; };
+		007A5435288A41E700AC4622 /* HTTPClientTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A5434288A41E700AC4622 /* HTTPClientTest.swift */; };
+		007A5436288A4A9C00AC4622 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Authentication.swift */; };
+		007A5437288A4A9C00AC4622 /* SecretsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A542E288624F300AC4622 /* SecretsHandler.swift */; };
+		007A5438288A4A9C00AC4622 /* URLLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* URLLogger.swift */; };
+		007A5439288A4A9C00AC4622 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A5432288A3D0A00AC4622 /* HTTPClient.swift */; };
+		007A543B288A55CE00AC4622 /* NetworkAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A543A288A55CE00AC4622 /* NetworkAgent.swift */; };
+		007A543C288A596D00AC4622 /* NetworkAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A543A288A55CE00AC4622 /* NetworkAgent.swift */; };
+		007A5440288A607100AC4622 /* AuthenticationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A543F288A607100AC4622 /* AuthenticationTest.swift */; };
+		007A5442288AC8A000AC4622 /* AuthenticationMFA.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A5441288AC8A000AC4622 /* AuthenticationMFA.swift */; };
+		007A5443288AC8A000AC4622 /* AuthenticationMFA.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A5441288AC8A000AC4622 /* AuthenticationMFA.swift */; };
+		007A5445288AD6BE00AC4622 /* MFAuthenticationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A5444288AD6BE00AC4622 /* MFAuthenticationTest.swift */; };
+		007CBDFA28B4A10500B67F71 /* DownloadDelegateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007CBDF928B4A10500B67F71 /* DownloadDelegateTest.swift */; };
+		0092F865288DC29F00CFE571 /* DownloadListParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0092F864288DC29F00CFE571 /* DownloadListParser.swift */; };
+		0092F866288DC29F00CFE571 /* DownloadListParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0092F864288DC29F00CFE571 /* DownloadListParser.swift */; };
+		0092F868288F116100CFE571 /* SyncShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0092F867288F116100CFE571 /* SyncShell.swift */; };
+		0092F869288F116100CFE571 /* SyncShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0092F867288F116100CFE571 /* SyncShell.swift */; };
+		009A912F288C213F003C0DF4 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 009A912E288C213F003C0DF4 /* ArgumentParser */; };
+		009A9131288C27D0003C0DF4 /* CLIAuthenticate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009A9130288C27D0003C0DF4 /* CLIAuthenticate.swift */; };
+		009A9132288C27D0003C0DF4 /* CLIAuthenticate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009A9130288C27D0003C0DF4 /* CLIAuthenticate.swift */; };
+		009A9134288C2857003C0DF4 /* CLIList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009A9133288C2857003C0DF4 /* CLIList.swift */; };
+		009A9135288C2857003C0DF4 /* CLIList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009A9133288C2857003C0DF4 /* CLIList.swift */; };
+		009A9136288C2C14003C0DF4 /* Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A54302886278600AC4622 /* Download.swift */; };
+		009A9137288C2C14003C0DF4 /* CLIMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007A54292885734D00AC4622 /* CLIMain.swift */; };
+		009A913A288C2C3F003C0DF4 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 009A9139288C2C3F003C0DF4 /* ArgumentParser */; };
+		00CECC8A28B0BA7600120779 /* AsyncShellTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECC8928B0BA7600120779 /* AsyncShellTest.swift */; };
+		00CECC8C28B0BABE00120779 /* AsyncShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECC8B28B0BABE00120779 /* AsyncShell.swift */; };
+		00CECC8D28B0BABE00120779 /* AsyncShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECC8B28B0BABE00120779 /* AsyncShell.swift */; };
+		00CECC8F28B0BAEC00120779 /* ShellSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECC8E28B0BAEC00120779 /* ShellSupport.swift */; };
+		00CECC9028B0BAEC00120779 /* ShellSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECC8E28B0BAEC00120779 /* ShellSupport.swift */; };
+		00CECC9228B1743000120779 /* FileHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECC9128B1743000120779 /* FileHandler.swift */; };
+		00CECC9328B1743000120779 /* FileHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECC9128B1743000120779 /* FileHandler.swift */; };
+		00CECC9528B1788C00120779 /* FileHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECC9428B1788C00120779 /* FileHandlerTest.swift */; };
+		00CECC9F28B24C3C00120779 /* MockedNetworkClasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECC9E28B24C3C00120779 /* MockedNetworkClasses.swift */; };
+		00CECCA128B253E000120779 /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCA028B253E000120779 /* List.swift */; };
+		00CECCA228B253E000120779 /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCA028B253E000120779 /* List.swift */; };
+		00CECCA428B2543900120779 /* DownloadListData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCA328B2543900120779 /* DownloadListData.swift */; };
+		00CECCA528B2543900120779 /* DownloadListData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCA328B2543900120779 /* DownloadListData.swift */; };
+		00CECCA728B2548600120779 /* DispatchSemaphore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCA628B2548600120779 /* DispatchSemaphore.swift */; };
+		00CECCA828B2548600120779 /* DispatchSemaphore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCA628B2548600120779 /* DispatchSemaphore.swift */; };
+		00CECCAA28B34B3300120779 /* CLIDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCA928B34B3300120779 /* CLIDownload.swift */; };
+		00CECCAB28B34B3300120779 /* CLIDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCA928B34B3300120779 /* CLIDownload.swift */; };
+		00CECCAD28B34B8300120779 /* CLIInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCAC28B34B8300120779 /* CLIInstall.swift */; };
+		00CECCAE28B34B8300120779 /* CLIInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCAC28B34B8300120779 /* CLIInstall.swift */; };
+		00CECCB028B34C4F00120779 /* XCodeInstallBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCAF28B34C4F00120779 /* XCodeInstallBuilder.swift */; };
+		00CECCB128B34C4F00120779 /* XCodeInstallBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCAF28B34C4F00120779 /* XCodeInstallBuilder.swift */; };
+		00CECCB328B34C9000120779 /* InstallCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCB228B34C9000120779 /* InstallCommand.swift */; };
+		00CECCB428B34C9000120779 /* InstallCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCB228B34C9000120779 /* InstallCommand.swift */; };
+		00CECCB628B34CD500120779 /* Install.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCB528B34CD500120779 /* Install.swift */; };
+		00CECCB728B34CD500120779 /* Install.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCB528B34CD500120779 /* Install.swift */; };
+		00CECCB928B34FE800120779 /* CLIAuthTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCB828B34FE800120779 /* CLIAuthTest.swift */; };
+		00CECCBB28B3507B00120779 /* CLIDownloadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCBA28B3507B00120779 /* CLIDownloadTest.swift */; };
+		00CECCBD28B3770000120779 /* CLIListTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCBC28B3770000120779 /* CLIListTest.swift */; };
+		00CECCBF28B3776800120779 /* CLIInstallTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCBE28B3776800120779 /* CLIInstallTest.swift */; };
+		00CECCC128B37B6E00120779 /* InstallTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCC028B37B6E00120779 /* InstallTest.swift */; };
+		00CECCC328B3839A00120779 /* ListTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCC228B3839A00120779 /* ListTest.swift */; };
+		00DC835728AA5FD700B6346D /* SystemPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 00DC835628AA5FD700B6346D /* SystemPackage */; settings = {ATTRIBUTES = (Required, ); }; };
+		00DC835928AB6EA000B6346D /* SwiftToolsSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 00DC835828AB6EA000B6346D /* SwiftToolsSupport */; };
+		00DC835A28AB6EA000B6346D /* SwiftToolsSupport in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 00DC835828AB6EA000B6346D /* SwiftToolsSupport */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		00DC835C28AB73F300B6346D /* LoggerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC835B28AB73F300B6346D /* LoggerTest.swift */; };
+		00DC837128ABCF5100B6346D /* XcodeInstallCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC837028ABCF5100B6346D /* XcodeInstallCommand.swift */; };
+		00DC837228ABCF5100B6346D /* XcodeInstallCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC837028ABCF5100B6346D /* XcodeInstallCommand.swift */; };
+		00DC837428ABD03600B6346D /* AuthenticateCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC837328ABD03600B6346D /* AuthenticateCommand.swift */; };
+		00DC837528ABD03600B6346D /* AuthenticateCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC837328ABD03600B6346D /* AuthenticateCommand.swift */; };
+		00DC837728ABD34800B6346D /* DownloadCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC837628ABD34800B6346D /* DownloadCommand.swift */; };
+		00DC837828ABD34800B6346D /* DownloadCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC837628ABD34800B6346D /* DownloadCommand.swift */; };
+		00DC837A28ABD36100B6346D /* ListCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC837928ABD36100B6346D /* ListCommand.swift */; };
+		00DC837B28ABD36100B6346D /* ListCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC837928ABD36100B6346D /* ListCommand.swift */; };
+		00DC837D28ABD38900B6346D /* SignOutCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC837C28ABD38900B6346D /* SignOutCommand.swift */; };
+		00DC837E28ABD38900B6346D /* SignOutCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC837C28ABD38900B6346D /* SignOutCommand.swift */; };
+		00DC83B628AD282300B6346D /* DownloadDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC83B528AD282300B6346D /* DownloadDelegate.swift */; };
+		00DC83B728AD282300B6346D /* DownloadDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC83B528AD282300B6346D /* DownloadDelegate.swift */; };
+		00DC83B928AD3E1500B6346D /* XcodeInstallBuilderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC83B828AD3E1500B6346D /* XcodeInstallBuilderTest.swift */; };
+		00EE5FA828A7E69C00B09D2B /* SwiftToolsSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 007585FF28A2D8C50094D2DC /* SwiftToolsSupport */; };
+		00EE5FA928A7EB8100B09D2B /* CLIProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0075860D28A3BCF80094D2DC /* CLIProgressBar.swift */; };
+		00EE5FAC28A8F47000B09D2B /* FileSecretsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EE5FAB28A8F47000B09D2B /* FileSecretsHandler.swift */; };
+		00EE5FAD28A8F47000B09D2B /* FileSecretsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EE5FAB28A8F47000B09D2B /* FileSecretsHandler.swift */; };
+		00EE5FAF28A9070500B09D2B /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EE5FAE28A9070500B09D2B /* Logger.swift */; };
+		00EE5FB028A9070500B09D2B /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EE5FAE28A9070500B09D2B /* Logger.swift */; };
+		00EE603328AA3FCD00B09D2B /* MockedCLIClasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EE603228AA3FCD00B09D2B /* MockedCLIClasses.swift */; };
+		00EE603528AA44CA00B09D2B /* CLITest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EE603428AA44CA00B09D2B /* CLITest.swift */; };
+		00F8A31928BA139B004FB43A /* MockedUtilitiesClasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00F8A31828BA139B004FB43A /* MockedUtilitiesClasses.swift */; };
+		00F8A31B28BACDF7004FB43A /* InstallSupportedFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00F8A31A28BACDF7004FB43A /* InstallSupportedFiles.swift */; };
+		00F8A31C28BACDF7004FB43A /* InstallSupportedFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00F8A31A28BACDF7004FB43A /* InstallSupportedFiles.swift */; };
+		OBJ_23 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Authentication.swift */; };
+		OBJ_24 /* URLLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* URLLogger.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		007A54282885730100AC4622 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "xcodeinstall::xcodeinstall";
+			remoteInfo = xcodeinstall;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		007585EC28A0E1790094D2DC /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				0075860128A2D8C50094D2DC /* SwiftToolsSupport in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		007585FA28A2D81B0094D2DC /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				00DC835A28AB6EA000B6346D /* SwiftToolsSupport in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0041064628BD25410033A3A2 /* InstallPkg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallPkg.swift; sourceTree = "<group>"; };
+		0041064928BD25810033A3A2 /* InstallXcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallXcode.swift; sourceTree = "<group>"; };
+		0041064C28BD25A90033A3A2 /* InstallCLTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallCLTools.swift; sourceTree = "<group>"; };
+		0041064F28BD25C90033A3A2 /* InstallStringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallStringExtension.swift; sourceTree = "<group>"; };
+		0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallDownloadListExtension.swift; sourceTree = "<group>"; };
+		007585C6289BDF820094D2DC /* URLRequestExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRequestExtension.swift; sourceTree = "<group>"; };
+		007585C9289BE0090094D2DC /* URLRequestCurlTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRequestCurlTest.swift; sourceTree = "<group>"; };
+		007585CD289BEEFD0094D2DC /* DownloadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTest.swift; sourceTree = "<group>"; };
+		007585D0289C07130094D2DC /* Download List.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "Download List.json"; path = "Tests/Data/Download List.json"; sourceTree = SOURCE_ROOT; };
+		007585D1289C07130094D2DC /* curl.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = curl.txt; path = Tests/Data/curl.txt; sourceTree = SOURCE_ROOT; };
+		007585D2289C07130094D2DC /* Download Error.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "Download Error.json"; path = "Tests/Data/Download Error.json"; sourceTree = SOURCE_ROOT; };
+		007585D3289C07130094D2DC /* auth_response.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = auth_response.json; path = Tests/Data/auth_response.json; sourceTree = SOURCE_ROOT; };
+		007585D5289C16850094D2DC /* Download Unknown Error.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "Download Unknown Error.json"; path = "Tests/Data/Download Unknown Error.json"; sourceTree = SOURCE_ROOT; };
+		007585D6289C17670094D2DC /* DownloadListParserTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadListParserTest.swift; sourceTree = "<group>"; };
+		007585DA289C1E1E0094D2DC /* TestHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestHelper.swift; sourceTree = "<group>"; };
+		007585DC289C1F520094D2DC /* SyncShellTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncShellTest.swift; sourceTree = "<group>"; };
+		007585DE289D6DE00094D2DC /* FileSecretHandlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSecretHandlerTest.swift; sourceTree = "<group>"; };
+		0075860D28A3BCF80094D2DC /* CLIProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIProgressBar.swift; sourceTree = "<group>"; };
+		007A54292885734D00AC4622 /* CLIMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIMain.swift; sourceTree = "<group>"; };
+		007A542E288624F300AC4622 /* SecretsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretsHandler.swift; sourceTree = "<group>"; };
+		007A54302886278600AC4622 /* Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Download.swift; sourceTree = "<group>"; };
+		007A5432288A3D0A00AC4622 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
+		007A5434288A41E700AC4622 /* HTTPClientTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClientTest.swift; sourceTree = "<group>"; };
+		007A543A288A55CE00AC4622 /* NetworkAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkAgent.swift; sourceTree = "<group>"; };
+		007A543F288A607100AC4622 /* AuthenticationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationTest.swift; sourceTree = "<group>"; };
+		007A5441288AC8A000AC4622 /* AuthenticationMFA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationMFA.swift; sourceTree = "<group>"; };
+		007A5444288AD6BE00AC4622 /* MFAuthenticationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFAuthenticationTest.swift; sourceTree = "<group>"; };
+		007CBDF928B4A10500B67F71 /* DownloadDelegateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadDelegateTest.swift; sourceTree = "<group>"; };
+		0092F864288DC29F00CFE571 /* DownloadListParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadListParser.swift; sourceTree = "<group>"; };
+		0092F867288F116100CFE571 /* SyncShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncShell.swift; sourceTree = "<group>"; };
+		009A9130288C27D0003C0DF4 /* CLIAuthenticate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIAuthenticate.swift; sourceTree = "<group>"; };
+		009A9133288C2857003C0DF4 /* CLIList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIList.swift; sourceTree = "<group>"; };
+		00CECC8928B0BA7600120779 /* AsyncShellTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncShellTest.swift; sourceTree = "<group>"; };
+		00CECC8B28B0BABE00120779 /* AsyncShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncShell.swift; sourceTree = "<group>"; };
+		00CECC8E28B0BAEC00120779 /* ShellSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellSupport.swift; sourceTree = "<group>"; };
+		00CECC9128B1743000120779 /* FileHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandler.swift; sourceTree = "<group>"; };
+		00CECC9428B1788C00120779 /* FileHandlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandlerTest.swift; sourceTree = "<group>"; };
+		00CECC9E28B24C3C00120779 /* MockedNetworkClasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockedNetworkClasses.swift; sourceTree = "<group>"; };
+		00CECCA028B253E000120779 /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = List.swift; sourceTree = "<group>"; };
+		00CECCA328B2543900120779 /* DownloadListData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadListData.swift; sourceTree = "<group>"; };
+		00CECCA628B2548600120779 /* DispatchSemaphore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DispatchSemaphore.swift; sourceTree = "<group>"; };
+		00CECCA928B34B3300120779 /* CLIDownload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIDownload.swift; sourceTree = "<group>"; };
+		00CECCAC28B34B8300120779 /* CLIInstall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIInstall.swift; sourceTree = "<group>"; };
+		00CECCAF28B34C4F00120779 /* XCodeInstallBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCodeInstallBuilder.swift; sourceTree = "<group>"; };
+		00CECCB228B34C9000120779 /* InstallCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallCommand.swift; sourceTree = "<group>"; };
+		00CECCB528B34CD500120779 /* Install.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Install.swift; sourceTree = "<group>"; };
+		00CECCB828B34FE800120779 /* CLIAuthTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIAuthTest.swift; sourceTree = "<group>"; };
+		00CECCBA28B3507B00120779 /* CLIDownloadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIDownloadTest.swift; sourceTree = "<group>"; };
+		00CECCBC28B3770000120779 /* CLIListTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIListTest.swift; sourceTree = "<group>"; };
+		00CECCBE28B3776800120779 /* CLIInstallTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIInstallTest.swift; sourceTree = "<group>"; };
+		00CECCC028B37B6E00120779 /* InstallTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallTest.swift; sourceTree = "<group>"; };
+		00CECCC228B3839A00120779 /* ListTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTest.swift; sourceTree = "<group>"; };
+		00DC835B28AB73F300B6346D /* LoggerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerTest.swift; sourceTree = "<group>"; };
+		00DC837028ABCF5100B6346D /* XcodeInstallCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeInstallCommand.swift; sourceTree = "<group>"; };
+		00DC837328ABD03600B6346D /* AuthenticateCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticateCommand.swift; sourceTree = "<group>"; };
+		00DC837628ABD34800B6346D /* DownloadCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadCommand.swift; sourceTree = "<group>"; };
+		00DC837928ABD36100B6346D /* ListCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListCommand.swift; sourceTree = "<group>"; };
+		00DC837C28ABD38900B6346D /* SignOutCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignOutCommand.swift; sourceTree = "<group>"; };
+		00DC83B528AD282300B6346D /* DownloadDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadDelegate.swift; sourceTree = "<group>"; };
+		00DC83B828AD3E1500B6346D /* XcodeInstallBuilderTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeInstallBuilderTest.swift; sourceTree = "<group>"; };
+		00EE5FAB28A8F47000B09D2B /* FileSecretsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSecretsHandler.swift; sourceTree = "<group>"; };
+		00EE5FAE28A9070500B09D2B /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		00EE603228AA3FCD00B09D2B /* MockedCLIClasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockedCLIClasses.swift; sourceTree = "<group>"; };
+		00EE603428AA44CA00B09D2B /* CLITest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLITest.swift; sourceTree = "<group>"; };
+		00F8A31828BA139B004FB43A /* MockedUtilitiesClasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockedUtilitiesClasses.swift; sourceTree = "<group>"; };
+		00F8A31A28BACDF7004FB43A /* InstallSupportedFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallSupportedFiles.swift; sourceTree = "<group>"; };
+		OBJ_10 /* URLLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLLogger.swift; sourceTree = "<group>"; };
+		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		OBJ_9 /* Authentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Authentication.swift; sourceTree = "<group>"; };
+		"xcodeinstall::xcodeinstall::Product" /* xcodeinstall */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = xcodeinstall; sourceTree = BUILT_PRODUCTS_DIR; };
+		"xcodeinstall::xcodeinstallTests::Product" /* xcodeinstallTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = xcodeinstallTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		OBJ_26 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				00DC835928AB6EA000B6346D /* SwiftToolsSupport in Frameworks */,
+				007585E928A0E1590094D2DC /* Logging in Frameworks */,
+				009A912F288C213F003C0DF4 /* ArgumentParser in Frameworks */,
+				00DC835728AA5FD700B6346D /* SystemPackage in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_44 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				00EE5FA828A7E69C00B09D2B /* SwiftToolsSupport in Frameworks */,
+				009A913A288C2C3F003C0DF4 /* ArgumentParser in Frameworks */,
+				007585F128A0E1790094D2DC /* Logging in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		007585CF289C059E0094D2DC /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				007585D5289C16850094D2DC /* Download Unknown Error.json */,
+				007585D3289C07130094D2DC /* auth_response.json */,
+				007585D1289C07130094D2DC /* curl.txt */,
+				007585D2289C07130094D2DC /* Download Error.json */,
+				007585D0289C07130094D2DC /* Download List.json */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		009A9138288C2C3F003C0DF4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		00CECC9628B24B0A00120779 /* CLI */ = {
+			isa = PBXGroup;
+			children = (
+				00CECCAF28B34C4F00120779 /* XCodeInstallBuilder.swift */,
+				00DC837028ABCF5100B6346D /* XcodeInstallCommand.swift */,
+				00DC837328ABD03600B6346D /* AuthenticateCommand.swift */,
+				00DC837C28ABD38900B6346D /* SignOutCommand.swift */,
+				00DC837928ABD36100B6346D /* ListCommand.swift */,
+				00DC837628ABD34800B6346D /* DownloadCommand.swift */,
+				0092F864288DC29F00CFE571 /* DownloadListParser.swift */,
+				00CECCB228B34C9000120779 /* InstallCommand.swift */,
+				007A54292885734D00AC4622 /* CLIMain.swift */,
+				009A9130288C27D0003C0DF4 /* CLIAuthenticate.swift */,
+				009A9133288C2857003C0DF4 /* CLIList.swift */,
+				00CECCA928B34B3300120779 /* CLIDownload.swift */,
+				0075860D28A3BCF80094D2DC /* CLIProgressBar.swift */,
+				00CECCAC28B34B8300120779 /* CLIInstall.swift */,
+			);
+			path = CLI;
+			sourceTree = "<group>";
+		};
+		00CECC9728B24B3400120779 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				007A5432288A3D0A00AC4622 /* HTTPClient.swift */,
+				007A543A288A55CE00AC4622 /* NetworkAgent.swift */,
+				OBJ_9 /* Authentication.swift */,
+				007A5441288AC8A000AC4622 /* AuthenticationMFA.swift */,
+				00CECCA328B2543900120779 /* DownloadListData.swift */,
+				007A54302886278600AC4622 /* Download.swift */,
+				00CECCA028B253E000120779 /* List.swift */,
+				00DC83B528AD282300B6346D /* DownloadDelegate.swift */,
+				00CECCA628B2548600120779 /* DispatchSemaphore.swift */,
+				OBJ_10 /* URLLogger.swift */,
+				007585C6289BDF820094D2DC /* URLRequestExtension.swift */,
+				00CECCB528B34CD500120779 /* Install.swift */,
+				0041064C28BD25A90033A3A2 /* InstallCLTools.swift */,
+				0041064928BD25810033A3A2 /* InstallXcode.swift */,
+				0041064628BD25410033A3A2 /* InstallPkg.swift */,
+				0041064F28BD25C90033A3A2 /* InstallStringExtension.swift */,
+				0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */,
+				00F8A31A28BACDF7004FB43A /* InstallSupportedFiles.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		00CECC9828B24B6200120779 /* Secrets */ = {
+			isa = PBXGroup;
+			children = (
+				007A542E288624F300AC4622 /* SecretsHandler.swift */,
+				00EE5FAB28A8F47000B09D2B /* FileSecretsHandler.swift */,
+			);
+			path = Secrets;
+			sourceTree = "<group>";
+		};
+		00CECC9928B24B7A00120779 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				00EE5FAE28A9070500B09D2B /* Logger.swift */,
+				0092F867288F116100CFE571 /* SyncShell.swift */,
+				00CECC8B28B0BABE00120779 /* AsyncShell.swift */,
+				00CECC8E28B0BAEC00120779 /* ShellSupport.swift */,
+				00CECC9128B1743000120779 /* FileHandler.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		00CECC9A28B24B9900120779 /* CLI */ = {
+			isa = PBXGroup;
+			children = (
+				00EE603228AA3FCD00B09D2B /* MockedCLIClasses.swift */,
+				00EE603428AA44CA00B09D2B /* CLITest.swift */,
+				00CECCB828B34FE800120779 /* CLIAuthTest.swift */,
+				00CECCBC28B3770000120779 /* CLIListTest.swift */,
+				00CECCBA28B3507B00120779 /* CLIDownloadTest.swift */,
+				00CECCBE28B3776800120779 /* CLIInstallTest.swift */,
+				00DC83B828AD3E1500B6346D /* XcodeInstallBuilderTest.swift */,
+				007585D6289C17670094D2DC /* DownloadListParserTest.swift */,
+			);
+			path = CLI;
+			sourceTree = "<group>";
+		};
+		00CECC9B28B24BB600120779 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				00CECC9E28B24C3C00120779 /* MockedNetworkClasses.swift */,
+				007A5434288A41E700AC4622 /* HTTPClientTest.swift */,
+				007A543F288A607100AC4622 /* AuthenticationTest.swift */,
+				007A5444288AD6BE00AC4622 /* MFAuthenticationTest.swift */,
+				00CECCC228B3839A00120779 /* ListTest.swift */,
+				007585CD289BEEFD0094D2DC /* DownloadTest.swift */,
+				007CBDF928B4A10500B67F71 /* DownloadDelegateTest.swift */,
+				007585C9289BE0090094D2DC /* URLRequestCurlTest.swift */,
+				00CECCC028B37B6E00120779 /* InstallTest.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		00CECC9C28B24BD000120779 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				00F8A31828BA139B004FB43A /* MockedUtilitiesClasses.swift */,
+				007585DC289C1F520094D2DC /* SyncShellTest.swift */,
+				00CECC8928B0BA7600120779 /* AsyncShellTest.swift */,
+				00DC835B28AB73F300B6346D /* LoggerTest.swift */,
+				007585DA289C1E1E0094D2DC /* TestHelper.swift */,
+				00CECC9428B1788C00120779 /* FileHandlerTest.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		00CECC9D28B24BEA00120779 /* Secrets */ = {
+			isa = PBXGroup;
+			children = (
+				007585DE289D6DE00094D2DC /* FileSecretHandlerTest.swift */,
+			);
+			path = Secrets;
+			sourceTree = "<group>";
+		};
+		OBJ_12 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				007585CF289C059E0094D2DC /* Data */,
+				OBJ_13 /* xcodeinstallTests */,
+			);
+			name = Tests;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_13 /* xcodeinstallTests */ = {
+			isa = PBXGroup;
+			children = (
+				00CECC9B28B24BB600120779 /* API */,
+				00CECC9A28B24B9900120779 /* CLI */,
+				00CECC9C28B24BD000120779 /* Utilities */,
+				00CECC9D28B24BEA00120779 /* Secrets */,
+			);
+			name = xcodeinstallTests;
+			path = Tests/xcodeinstallTests;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_15 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				"xcodeinstall::xcodeinstall::Product" /* xcodeinstall */,
+				"xcodeinstall::xcodeinstallTests::Product" /* xcodeinstallTests.xctest */,
+			);
+			name = Products;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		OBJ_5 = {
+			isa = PBXGroup;
+			children = (
+				OBJ_6 /* Package.swift */,
+				OBJ_7 /* Sources */,
+				OBJ_12 /* Tests */,
+				OBJ_15 /* Products */,
+				009A9138288C2C3F003C0DF4 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		OBJ_7 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_8 /* xcodeinstall */,
+			);
+			name = Sources;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_8 /* xcodeinstall */ = {
+			isa = PBXGroup;
+			children = (
+				00CECC9728B24B3400120779 /* API */,
+				00CECC9628B24B0A00120779 /* CLI */,
+				00CECC9928B24B7A00120779 /* Utilities */,
+				00CECC9828B24B6200120779 /* Secrets */,
+			);
+			name = xcodeinstall;
+			path = Sources/xcodeinstall;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		"xcodeinstall::xcodeinstall" /* xcodeinstall */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_19 /* Build configuration list for PBXNativeTarget "xcodeinstall" */;
+			buildPhases = (
+				OBJ_22 /* Sources */,
+				OBJ_26 /* Frameworks */,
+				007585F728A0EB6F0094D2DC /* ShellScript */,
+				007585FA28A2D81B0094D2DC /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = xcodeinstall;
+			packageProductDependencies = (
+				009A912E288C213F003C0DF4 /* ArgumentParser */,
+				007585E828A0E1590094D2DC /* Logging */,
+				00DC835628AA5FD700B6346D /* SystemPackage */,
+				00DC835828AB6EA000B6346D /* SwiftToolsSupport */,
+			);
+			productName = xcodeinstall;
+			productReference = "xcodeinstall::xcodeinstall::Product" /* xcodeinstall */;
+			productType = "com.apple.product-type.tool";
+		};
+		"xcodeinstall::xcodeinstallTests" /* xcodeinstallTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_39 /* Build configuration list for PBXNativeTarget "xcodeinstallTests" */;
+			buildPhases = (
+				OBJ_42 /* Sources */,
+				OBJ_44 /* Frameworks */,
+				007585EC28A0E1790094D2DC /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				OBJ_45 /* PBXTargetDependency */,
+			);
+			name = xcodeinstallTests;
+			packageProductDependencies = (
+				009A9139288C2C3F003C0DF4 /* ArgumentParser */,
+				007585F028A0E1790094D2DC /* Logging */,
+				007585FF28A2D8C50094D2DC /* SwiftToolsSupport */,
+			);
+			productName = xcodeinstallTests;
+			productReference = "xcodeinstall::xcodeinstallTests::Product" /* xcodeinstallTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		OBJ_1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftMigration = 9999;
+				LastUpgradeCheck = 9999;
+			};
+			buildConfigurationList = OBJ_2 /* Build configuration list for PBXProject "xcodeinstall" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = OBJ_5;
+			packageReferences = (
+				009A912D288C213F003C0DF4 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
+				007585E028A0E1160094D2DC /* XCRemoteSwiftPackageReference "swift-tools-support-core" */,
+				007585E728A0E1590094D2DC /* XCRemoteSwiftPackageReference "swift-log" */,
+				00DC835528AA5FD700B6346D /* XCRemoteSwiftPackageReference "swift-system" */,
+			);
+			productRefGroup = OBJ_15 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				"xcodeinstall::xcodeinstall" /* xcodeinstall */,
+				"xcodeinstall::xcodeinstallTests" /* xcodeinstallTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		007585F728A0EB6F0094D2DC /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# export PATH=\"$PATH:/opt/homebrew/bin\"\nif which /opt/homebrew/bin/swiftlint > /dev/null; then\n  /opt/homebrew/bin/swiftlint --fix\n  /opt/homebrew/bin/swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		OBJ_22 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				00F8A31B28BACDF7004FB43A /* InstallSupportedFiles.swift in Sources */,
+				00DC837728ABD34800B6346D /* DownloadCommand.swift in Sources */,
+				009A9134288C2857003C0DF4 /* CLIList.swift in Sources */,
+				00CECCA728B2548600120779 /* DispatchSemaphore.swift in Sources */,
+				0041065028BD25C90033A3A2 /* InstallStringExtension.swift in Sources */,
+				0075860E28A3BCF80094D2DC /* CLIProgressBar.swift in Sources */,
+				007585C7289BDF820094D2DC /* URLRequestExtension.swift in Sources */,
+				00CECCB328B34C9000120779 /* InstallCommand.swift in Sources */,
+				007A5433288A3D0A00AC4622 /* HTTPClient.swift in Sources */,
+				00CECCAD28B34B8300120779 /* CLIInstall.swift in Sources */,
+				00CECCB628B34CD500120779 /* Install.swift in Sources */,
+				007A542A2885734D00AC4622 /* CLIMain.swift in Sources */,
+				0041064D28BD25A90033A3A2 /* InstallCLTools.swift in Sources */,
+				00CECCB028B34C4F00120779 /* XCodeInstallBuilder.swift in Sources */,
+				00DC83B628AD282300B6346D /* DownloadDelegate.swift in Sources */,
+				OBJ_23 /* Authentication.swift in Sources */,
+				OBJ_24 /* URLLogger.swift in Sources */,
+				0041064A28BD25810033A3A2 /* InstallXcode.swift in Sources */,
+				00DC837128ABCF5100B6346D /* XcodeInstallCommand.swift in Sources */,
+				00CECC8F28B0BAEC00120779 /* ShellSupport.swift in Sources */,
+				0041064728BD25410033A3A2 /* InstallPkg.swift in Sources */,
+				007A54312886278600AC4622 /* Download.swift in Sources */,
+				00EE5FAC28A8F47000B09D2B /* FileSecretsHandler.swift in Sources */,
+				007A543B288A55CE00AC4622 /* NetworkAgent.swift in Sources */,
+				007A5442288AC8A000AC4622 /* AuthenticationMFA.swift in Sources */,
+				00CECC9228B1743000120779 /* FileHandler.swift in Sources */,
+				00DC837D28ABD38900B6346D /* SignOutCommand.swift in Sources */,
+				00CECCA128B253E000120779 /* List.swift in Sources */,
+				0041065328BD25EC0033A3A2 /* InstallDownloadListExtension.swift in Sources */,
+				0092F865288DC29F00CFE571 /* DownloadListParser.swift in Sources */,
+				00EE5FAF28A9070500B09D2B /* Logger.swift in Sources */,
+				00CECCA428B2543900120779 /* DownloadListData.swift in Sources */,
+				00DC837A28ABD36100B6346D /* ListCommand.swift in Sources */,
+				0092F868288F116100CFE571 /* SyncShell.swift in Sources */,
+				007A542F288624F300AC4622 /* SecretsHandler.swift in Sources */,
+				00DC837428ABD03600B6346D /* AuthenticateCommand.swift in Sources */,
+				009A9131288C27D0003C0DF4 /* CLIAuthenticate.swift in Sources */,
+				00CECC8C28B0BABE00120779 /* AsyncShell.swift in Sources */,
+				00CECCAA28B34B3300120779 /* CLIDownload.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_42 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				007CBDFA28B4A10500B67F71 /* DownloadDelegateTest.swift in Sources */,
+				00EE5FA928A7EB8100B09D2B /* CLIProgressBar.swift in Sources */,
+				009A9136288C2C14003C0DF4 /* Download.swift in Sources */,
+				00CECC9F28B24C3C00120779 /* MockedNetworkClasses.swift in Sources */,
+				00DC83B728AD282300B6346D /* DownloadDelegate.swift in Sources */,
+				00CECCBB28B3507B00120779 /* CLIDownloadTest.swift in Sources */,
+				00EE5FB028A9070500B09D2B /* Logger.swift in Sources */,
+				00EE5FAD28A8F47000B09D2B /* FileSecretsHandler.swift in Sources */,
+				00DC837528ABD03600B6346D /* AuthenticateCommand.swift in Sources */,
+				00CECCBD28B3770000120779 /* CLIListTest.swift in Sources */,
+				009A9137288C2C14003C0DF4 /* CLIMain.swift in Sources */,
+				009A9135288C2857003C0DF4 /* CLIList.swift in Sources */,
+				00DC837B28ABD36100B6346D /* ListCommand.swift in Sources */,
+				007585DD289C1F520094D2DC /* SyncShellTest.swift in Sources */,
+				007585D7289C17670094D2DC /* DownloadListParserTest.swift in Sources */,
+				007A543C288A596D00AC4622 /* NetworkAgent.swift in Sources */,
+				00DC83B928AD3E1500B6346D /* XcodeInstallBuilderTest.swift in Sources */,
+				00CECCA828B2548600120779 /* DispatchSemaphore.swift in Sources */,
+				00CECC9328B1743000120779 /* FileHandler.swift in Sources */,
+				00CECC8A28B0BA7600120779 /* AsyncShellTest.swift in Sources */,
+				007A5436288A4A9C00AC4622 /* Authentication.swift in Sources */,
+				00DC837828ABD34800B6346D /* DownloadCommand.swift in Sources */,
+				00CECC9028B0BAEC00120779 /* ShellSupport.swift in Sources */,
+				007585DF289D6DE00094D2DC /* FileSecretHandlerTest.swift in Sources */,
+				00CECCB428B34C9000120779 /* InstallCommand.swift in Sources */,
+				007A5437288A4A9C00AC4622 /* SecretsHandler.swift in Sources */,
+				00CECCB128B34C4F00120779 /* XCodeInstallBuilder.swift in Sources */,
+				0041064B28BD25810033A3A2 /* InstallXcode.swift in Sources */,
+				00CECCB928B34FE800120779 /* CLIAuthTest.swift in Sources */,
+				007A5440288A607100AC4622 /* AuthenticationTest.swift in Sources */,
+				007585DB289C1E1E0094D2DC /* TestHelper.swift in Sources */,
+				00CECCA228B253E000120779 /* List.swift in Sources */,
+				00CECCC328B3839A00120779 /* ListTest.swift in Sources */,
+				00CECCB728B34CD500120779 /* Install.swift in Sources */,
+				0041064828BD25410033A3A2 /* InstallPkg.swift in Sources */,
+				00CECC9528B1788C00120779 /* FileHandlerTest.swift in Sources */,
+				007A5438288A4A9C00AC4622 /* URLLogger.swift in Sources */,
+				00EE603328AA3FCD00B09D2B /* MockedCLIClasses.swift in Sources */,
+				00CECC8D28B0BABE00120779 /* AsyncShell.swift in Sources */,
+				00DC837E28ABD38900B6346D /* SignOutCommand.swift in Sources */,
+				007A5439288A4A9C00AC4622 /* HTTPClient.swift in Sources */,
+				007A5445288AD6BE00AC4622 /* MFAuthenticationTest.swift in Sources */,
+				0041064E28BD25A90033A3A2 /* InstallCLTools.swift in Sources */,
+				007585CA289BE0090094D2DC /* URLRequestCurlTest.swift in Sources */,
+				00DC835C28AB73F300B6346D /* LoggerTest.swift in Sources */,
+				0092F866288DC29F00CFE571 /* DownloadListParser.swift in Sources */,
+				00CECCAB28B34B3300120779 /* CLIDownload.swift in Sources */,
+				009A9132288C27D0003C0DF4 /* CLIAuthenticate.swift in Sources */,
+				007A5435288A41E700AC4622 /* HTTPClientTest.swift in Sources */,
+				0092F869288F116100CFE571 /* SyncShell.swift in Sources */,
+				00F8A31928BA139B004FB43A /* MockedUtilitiesClasses.swift in Sources */,
+				00CECCBF28B3776800120779 /* CLIInstallTest.swift in Sources */,
+				0041065428BD25EC0033A3A2 /* InstallDownloadListExtension.swift in Sources */,
+				0041065128BD25C90033A3A2 /* InstallStringExtension.swift in Sources */,
+				00CECCA528B2543900120779 /* DownloadListData.swift in Sources */,
+				00CECCC128B37B6E00120779 /* InstallTest.swift in Sources */,
+				00EE603528AA44CA00B09D2B /* CLITest.swift in Sources */,
+				007585C8289BDF820094D2DC /* URLRequestExtension.swift in Sources */,
+				00CECCAE28B34B8300120779 /* CLIInstall.swift in Sources */,
+				00F8A31C28BACDF7004FB43A /* InstallSupportedFiles.swift in Sources */,
+				007A5443288AC8A000AC4622 /* AuthenticationMFA.swift in Sources */,
+				007585CE289BEEFD0094D2DC /* DownloadTest.swift in Sources */,
+				00DC837228ABCF5100B6346D /* XcodeInstallCommand.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		OBJ_45 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "xcodeinstall::xcodeinstall" /* xcodeinstall */;
+			targetProxy = 007A54282885730100AC4622 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		OBJ_20 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = xcodeinstall.xcodeproj/xcodeinstall_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(TOOLCHAIN_DIR)/usr/lib/swift/macosx",
+					"@executable_path",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
+				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
+				SWIFT_VERSION = 5.0;
+				TARGET_NAME = xcodeinstall;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		OBJ_21 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				ENABLE_TESTABILITY = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = xcodeinstall.xcodeproj/xcodeinstall_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(TOOLCHAIN_DIR)/usr/lib/swift/macosx",
+					"@executable_path",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
+				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
+				SWIFT_VERSION = 5.0;
+				TARGET_NAME = xcodeinstall;
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
+		OBJ_3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_NS_ASSERTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"SWIFT_PACKAGE=1",
+					"DEBUG=1",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "$(AVAILABLE_PLATFORMS)";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) SWIFT_PACKAGE DEBUG";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				USE_HEADERMAP = NO;
+			};
+			name = Debug;
+		};
+		OBJ_4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"SWIFT_PACKAGE=1",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "$(AVAILABLE_PLATFORMS)";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) SWIFT_PACKAGE";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				USE_HEADERMAP = NO;
+			};
+			name = Release;
+		};
+		OBJ_40 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = xcodeinstall.xcodeproj/xcodeinstallTests_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_VERSION = 5.0;
+				TARGET_NAME = xcodeinstallTests;
+				TVOS_DEPLOYMENT_TARGET = 14.0;
+				WATCHOS_DEPLOYMENT_TARGET = 7.0;
+			};
+			name = Debug;
+		};
+		OBJ_41 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				DRIVERKIT_DEPLOYMENT_TARGET = 19.0;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = xcodeinstall.xcodeproj/xcodeinstallTests_Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_VERSION = 5.0;
+				TARGET_NAME = xcodeinstallTests;
+				TVOS_DEPLOYMENT_TARGET = 14.0;
+				WATCHOS_DEPLOYMENT_TARGET = 7.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		OBJ_19 /* Build configuration list for PBXNativeTarget "xcodeinstall" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_20 /* Debug */,
+				OBJ_21 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_2 /* Build configuration list for PBXProject "xcodeinstall" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_3 /* Debug */,
+				OBJ_4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		OBJ_39 /* Build configuration list for PBXNativeTarget "xcodeinstallTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_40 /* Debug */,
+				OBJ_41 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		007585E028A0E1160094D2DC /* XCRemoteSwiftPackageReference "swift-tools-support-core" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-tools-support-core.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		007585E728A0E1590094D2DC /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		009A912D288C213F003C0DF4 /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-argument-parser.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		00DC835528AA5FD700B6346D /* XCRemoteSwiftPackageReference "swift-system" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-system.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		007585E828A0E1590094D2DC /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 007585E728A0E1590094D2DC /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
+		};
+		007585F028A0E1790094D2DC /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 007585E728A0E1590094D2DC /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
+		};
+		007585FF28A2D8C50094D2DC /* SwiftToolsSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 007585E028A0E1160094D2DC /* XCRemoteSwiftPackageReference "swift-tools-support-core" */;
+			productName = SwiftToolsSupport;
+		};
+		009A912E288C213F003C0DF4 /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 009A912D288C213F003C0DF4 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
+		};
+		009A9139288C2C3F003C0DF4 /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 009A912D288C213F003C0DF4 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
+		};
+		00DC835628AA5FD700B6346D /* SystemPackage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 00DC835528AA5FD700B6346D /* XCRemoteSwiftPackageReference "swift-system" */;
+			productName = SystemPackage;
+		};
+		00DC835828AB6EA000B6346D /* SwiftToolsSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 007585E028A0E1160094D2DC /* XCRemoteSwiftPackageReference "swift-tools-support-core" */;
+			productName = SwiftToolsSupport;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = OBJ_1 /* Project object */;
+}
