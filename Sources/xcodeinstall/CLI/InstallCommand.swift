@@ -22,9 +22,9 @@ extension XCodeInstall {
         let progress = CLIProgressBar(animationType: .countingProgressAnimation,
                                       stream: stdoutStream,
                                       message: "Installing...")
+        var fileToInstall: String = ""
         do {
             // when no file is specified, prompt user to select one
-            var fileToInstall: String
             if  nil == file {
                 fileToInstall = try promptForFile()
             } else {
@@ -39,8 +39,17 @@ extension XCodeInstall {
         } catch FileHandlerError.noDownloadedList {
             display("⚠️ There is no downloaded file to be installed")
             progress.complete(success: false)
+        } catch InstallerError.xCodeXIPInstallationError {
+            display("🛑 Can not expand XIP file. Is there enough space on / ? (16GiB required)")
+            progress.complete(success: false)
+        } catch InstallerError.xCodeMoveInstallationError {
+            display("🛑 Can not move Xcode to /Applications")
+            progress.complete(success: false)
+        } catch InstallerError.xCodePKGInstallationError {
+            display("🛑 Can not install additional packages. Be sure to run this command as root (sudo xcodinstall).")
+            progress.complete(success: false)
         } catch {
-            display("🛑 Error while installing \(String(describing: file))")
+            display("🛑 Error while installing \(String(describing: fileToInstall))")
             logger.debug("\(error)")
             progress.complete(success: false)
         }

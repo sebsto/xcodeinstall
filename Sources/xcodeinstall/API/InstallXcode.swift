@@ -27,7 +27,7 @@ extension ShellInstaller {
             resultOptional = try self.uncompressXIP(atPath: srcFile)
             if resultOptional == nil || resultOptional!.code != 0 {
                 logger.error("Can not unXip file : \(resultOptional!)")
-                throw InstallerError.xCodeInstallationError
+                throw InstallerError.xCodeXIPInstallationError
             }
 
             // second move file to /Applications
@@ -41,7 +41,7 @@ extension ShellInstaller {
             })
             if appFile.count != 1 {
                 logger.error("More than one app file to install in \(appFile), not sure which one is the correct one")
-                throw InstallerError.xCodeInstallationError
+                throw InstallerError.xCodeMoveInstallationError
             }
 
             let installedFile = try self.moveApp(atPath: FileHandler.downloadDirectory.appendingPathComponent(appFile[0]).path)
@@ -56,7 +56,7 @@ extension ShellInstaller {
                 resultOptional = try self.installPkg(atPath: "\(installedFile)/Contents/resources/Packages/\(pkg)")
                 if resultOptional == nil || resultOptional!.code != 0 {
                     logger.error("Can not install pkg at : \(pkg)\n\(resultOptional!)")
-                    throw InstallerError.xCodeInstallationError
+                    throw InstallerError.xCodePKGInstallationError
                 }
             }
 

@@ -15,7 +15,9 @@ protocol InstallerProtocol {
 enum InstallerError: Error {
     case unsupportedInstallation
     case fileDoesNotExistOrIncorrect
-    case xCodeInstallationError
+    case xCodeXIPInstallationError
+    case xCodeMoveInstallationError
+    case xCodePKGInstallationError
     case CLToolsInstallationError
 }
 
