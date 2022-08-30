@@ -40,7 +40,7 @@ extension ShellInstaller {
             return fileName.hasSuffix(".app")
         })
         if appFile.count != 1 {
-            logger.error("More than one app file to install in \(appFile), not sure which one is the correct one")
+            logger.error("Zero or several app file to install in \(appFile), not sure which one is the correct one")
             throw InstallerError.xCodeMoveInstallationError
         }
         
