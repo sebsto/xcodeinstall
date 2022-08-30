@@ -24,7 +24,7 @@ extension ShellInstaller {
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 
-        let cmd = "\(INSTALLERCOMMAND) -pkg \"\(pkgPath)\" -target /"
+        let cmd = "sudo \(INSTALLERCOMMAND) -pkg \"\(pkgPath)\" -target /"
         let result = try s.run(cmd)
         log(cmd, result)
 

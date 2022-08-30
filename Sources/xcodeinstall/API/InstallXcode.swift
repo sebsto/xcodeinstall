@@ -52,7 +52,7 @@ extension ShellInstaller {
         for pkg in PKGTOINSTALL {
             logger.debug("Installing package \(pkg.fileName())")
             currentStep += 1
-            progress.update(step: currentStep, total: totalSteps, text: "Installing additional packages...")
+            progress.update(step: currentStep, total: totalSteps, text: "Installing additional packages... \(pkg)")
             resultOptional = try self.installPkg(atPath: "\(installedFile)/Contents/resources/Packages/\(pkg)")
             if resultOptional == nil || resultOptional!.code != 0 {
                 logger.error("Can not install pkg at : \(pkg)\n\(resultOptional!)")
