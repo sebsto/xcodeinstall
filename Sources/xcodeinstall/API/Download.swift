@@ -9,7 +9,7 @@ import Foundation
 import Logging
 
 protocol AppleDownloaderProtocol {
-    func list(force: Bool) async throws -> [DownloadList.Download]
+    func list(force: Bool) async throws -> DownloadList
     func download(file: DownloadList.File,
                   progressReport: ProgressUpdateProtocol) async throws -> URLSessionDownloadTaskProtocol?
 }

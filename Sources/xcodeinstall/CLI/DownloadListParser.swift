@@ -24,10 +24,14 @@ struct DownloadListParser {
         self.sortMostRecentFirst = sortMostRecentFirst
     }
 
-    func parse(availableDownloads: [DownloadList.Download]) throws -> [DownloadList.Download] {
+    func parse(list: DownloadList?) throws -> [DownloadList.Download] {
+
+        guard let list = list?.downloads else {
+            throw DownloadError.noDownloadsInDownloadList
+        }
 
         // filter on items having Xcode in their name
-        let listOfXcode = availableDownloads.filter { download in
+        let listOfXcode = list.filter { download in
             if xCodeOnly {
                 return download.name.starts(with: "Xcode \(majorVersion)")
             } else {

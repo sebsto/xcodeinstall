@@ -36,7 +36,7 @@ class CLIDownloadTest: CLITest {
         // when
         do {
             // try await download.run() // can not call this as I can not inject all the mocks
-            try await xci.download(force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: true, datePublished: true)
+            try await xci.download(fileName: nil, force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: true, datePublished: true)
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")
@@ -51,7 +51,7 @@ class CLIDownloadTest: CLITest {
         XCTAssert(download.downloadListOptions.datePublished)
         
         // mocked list succeeded
-        assertDisplay("3 items")
+        assertDisplay("✅ file downloaded")
     }
     
     func testDownloadWithError() async throws {
@@ -61,13 +61,90 @@ class CLIDownloadTest: CLITest {
         
         // when
         do {
-            try await xci.download(force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: true, datePublished: true)
+            try await xci.download(fileName: nil, force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: true, datePublished: true)
             XCTAssert(false)
             
         } catch XCodeInstallError.configurationError {
-
+            
             // then
             XCTAssert(true)
         }
     }
+    
+    func testDownloadWithCorrectFileName() async throws {
+        
+        // given
+        
+        var xci = xcodeinstall()
+        xci.downloader = MockAppleDownloader()
+        (xci.fileHandler as! MockFileHandler).nextFileCorrect = true
+        let fileName = "Xcode 14 beta.xip"
+
+        let download = try parse(MainCommand.Download.self, [
+            "download",
+            "--name",
+            fileName
+        ])
+        
+        // when
+        do {
+
+
+            // try await download.run() // can not call this as I can not inject all the mocks
+            try await xci.download(fileName: fileName, force: false, xCodeOnly: false, majorVersion: "", sortMostRecentFirst: false, datePublished: false)
+        } catch {
+            // then
+            XCTAssert(false, "unexpected exception : \(error)")
+        }
+        
+        // test parsing of commandline arguments
+        XCTAssertEqual(download.name, fileName)
+        XCTAssertFalse(download.globalOptions.verbose)
+        XCTAssertFalse(download.downloadListOptions.force)
+        XCTAssertFalse(download.downloadListOptions.onlyXcode)
+        XCTAssertFalse(download.downloadListOptions.mostRecentFirst)
+        XCTAssertFalse(download.downloadListOptions.datePublished)
+        
+        // mocked list succeeded
+        assertDisplay("✅ \(fileName) downloaded")
+    }
+
+    func testDownloadWithIncorrectFileName() async throws {
+        
+        // given
+        
+        var xci = xcodeinstall()
+        xci.downloader = MockAppleDownloader()
+        (xci.fileHandler as! MockFileHandler).nextFileCorrect = true
+        let fileName = "xxx.xip"
+
+        let download = try parse(MainCommand.Download.self, [
+            "download",
+            "--name",
+            fileName
+        ])
+        
+        // when
+        do {
+
+
+            // try await download.run() // can not call this as I can not inject all the mocks
+            try await xci.download(fileName: fileName, force: false, xCodeOnly: false, majorVersion: "", sortMostRecentFirst: false, datePublished: false)
+        } catch {
+            // then
+            XCTAssert(false, "unexpected exception : \(error)")
+        }
+        
+        // test parsing of commandline arguments
+        XCTAssertEqual(download.name, fileName)
+        XCTAssertFalse(download.globalOptions.verbose)
+        XCTAssertFalse(download.downloadListOptions.force)
+        XCTAssertFalse(download.downloadListOptions.onlyXcode)
+        XCTAssertFalse(download.downloadListOptions.mostRecentFirst)
+        XCTAssertFalse(download.downloadListOptions.datePublished)
+        
+        // mocked list succeeded
+        assertDisplay("🛑 Unknown file name : xxx.xip")
+    }
+
 }

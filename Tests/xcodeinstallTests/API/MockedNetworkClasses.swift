@@ -88,15 +88,15 @@ struct MockAppleAuthentication: AppleAuthenticatorProtocol {
 }
 
 struct MockAppleDownloader : AppleDownloaderProtocol {
-    func list(force: Bool) async throws -> [DownloadList.Download] {
+    func list(force: Bool) async throws -> DownloadList {
         let filePath = testDataDirectory().appendingPathComponent("Download List.json");
         let listData = try Data(contentsOf: filePath)
         let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
         
-        guard let d = list.downloads else {
+        guard let _ = list.downloads else {
             throw MockError.invalidMockData
         }
-        return d
+        return list
     }
     func download(file: DownloadList.File, progressReport: ProgressUpdateProtocol) async throws -> URLSessionDownloadTaskProtocol? {
         // should create a file with matching size

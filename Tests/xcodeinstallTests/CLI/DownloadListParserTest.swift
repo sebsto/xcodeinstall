@@ -86,7 +86,7 @@ class DownloadListParserTest: XCTestCase {
 
             
             let dlp = DownloadListParser(logger: Log().defaultLogger, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
-            let filteredList = try dlp.parse(availableDownloads: downloads!)
+            let filteredList = try dlp.parse(list: list)
             XCTAssertNotNil(filteredList)
 
             // then
@@ -118,7 +118,7 @@ class DownloadListParserTest: XCTestCase {
 
             
             let dlp = DownloadListParser(logger: Log().defaultLogger, xCodeOnly: false, majorVersion: "13", sortMostRecentFirst: true)
-            let filteredList = try dlp.parse(availableDownloads: downloads!)
+            let filteredList = try dlp.parse(list: list)
             XCTAssertNotNil(filteredList)
 
             // then
@@ -167,7 +167,7 @@ class DownloadListParserTest: XCTestCase {
 
         // filter and sort the list
         let dlp = DownloadListParser(logger: Log().defaultLogger, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
-        let filteredList = try dlp.parse(availableDownloads: downloads!)
+        let filteredList = try dlp.parse(list: list)
         XCTAssertNotNil(filteredList)
         
         return (filteredList, dlp)

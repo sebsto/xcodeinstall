@@ -7,6 +7,17 @@
 
 import Foundation
 
+enum DownloadError: Error {
+    case authenticationRequired
+    case unknownError(errorCode: Int)
+    case parsingError(error: Error)
+    case noDownloadsInDownloadList
+    case invalidFileSpec
+    case invalidResponse
+    case zeroOrMoreThanOneFileToDownload(count: Int)
+    case unknownFile(file: String)
+}
+
 struct DownloadList: Codable {
 
     struct DownloadCategory: Codable {
@@ -64,13 +75,4 @@ struct DownloadList: Codable {
     let httpResponseHeaders: [String: String]?
     let downloads: [Download]?
 
-}
-
-enum DownloadError: Error {
-    case authenticationRequired
-    case unknownError(errorCode: Int)
-    case parsingError(error: Error)
-    case noDownloadsInDownloadList
-    case invalidFileSpec
-    case invalidResponse
 }

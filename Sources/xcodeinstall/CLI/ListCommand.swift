@@ -33,7 +33,7 @@ extension XCodeInstall {
                                             xCodeOnly: xCodeOnly,
                                             majorVersion: majorVersion,
                                             sortMostRecentFirst: sortMostRecentFirst)
-            let parsedList = try parser.parse(availableDownloads: list)
+            let parsedList = try parser.parse(list: list)
 
             // enrich the list to flag files already downloaded
             let enrichedList = parser.enrich(list: parsedList)

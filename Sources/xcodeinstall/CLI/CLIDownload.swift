@@ -17,16 +17,20 @@ extension MainCommand {
         @OptionGroup var globalOptions: GlobalOptions
         @OptionGroup var downloadListOptions: DownloadListOptions
 
+        @Option(name: .shortAndLong, help: "The exact package name to downloads. When omited, it asks interactively")
+        var name: String?
+
         func run() async throws {
             let main = XCodeInstallBuilder()
                             .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
                             .withDownloader()
                             .build()
-            try await main.download(force: downloadListOptions.force,
-                                            xCodeOnly: downloadListOptions.onlyXcode,
-                                            majorVersion: downloadListOptions.xCodeVersion,
-                                            sortMostRecentFirst: downloadListOptions.mostRecentFirst,
-                                            datePublished: downloadListOptions.datePublished)
+            try await main.download(fileName: name,
+                                    force: downloadListOptions.force,
+                                    xCodeOnly: downloadListOptions.onlyXcode,
+                                    majorVersion: downloadListOptions.xCodeVersion,
+                                    sortMostRecentFirst: downloadListOptions.mostRecentFirst,
+                                    datePublished: downloadListOptions.datePublished)
         }
     }
 

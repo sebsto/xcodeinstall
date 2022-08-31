@@ -14,7 +14,7 @@ extension AppleDownloader {
     // https://developer.apple.com
     // POST /services-account/QH65B2/downloadws/listDownloads.action
     //
-    func list(force: Bool) async throws -> [DownloadList.Download] {
+    func list(force: Bool) async throws -> DownloadList {
 
         var downloadList: DownloadList?
 
@@ -68,10 +68,10 @@ extension AppleDownloader {
             }
         }
 
-        guard let result = downloadList?.downloads else {
+        guard let dList = downloadList else {
             throw DownloadError.noDownloadsInDownloadList
         }
-        return result
+        return dList
 
     }
 }

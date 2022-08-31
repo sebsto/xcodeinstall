@@ -16,11 +16,12 @@ class ListTest: NetworkAgentTestCase {
         let ad = getAppleDownloader()
         
         // when
-        let result : [DownloadList.Download] = try await ad.list(force: false)
+        let result : DownloadList? = try await ad.list(force: false)
         
         // then
         XCTAssertNotNil(result)
-        XCTAssert(result.count > 0)
+        XCTAssertNotNil(result!.downloads)
+        XCTAssert(result!.downloads!.count > 0)
     }
 
     func testListForce() async throws {
@@ -38,7 +39,8 @@ class ListTest: NetworkAgentTestCase {
 
             // then
             XCTAssertNotNil(result)
-            XCTAssert(result.count == 953)
+            XCTAssertNotNil(result.downloads)
+            XCTAssert(result.downloads!.count == 953)
 
         } catch let error as DownloadError {
 
