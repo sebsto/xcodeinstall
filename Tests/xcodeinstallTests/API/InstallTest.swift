@@ -21,7 +21,7 @@ class InstallTest: XCTestCase {
     }
     
     override func setUpWithError() throws {
-        let mockedFileHandler = MockFileHandler()
+        let mockedFileHandler = MockedFileHandler()
         self._installer = ShellInstaller(logger: Log(logLevel: .debug).defaultLogger, fileHandler: mockedFileHandler)
         self._installer!.shell = MockShell()
         self._installer!.fileHandler = mockedFileHandler
@@ -84,7 +84,7 @@ class InstallTest: XCTestCase {
     func testXIP() {
         
         // given
-        let mfh = installer().fileHandler as! MockFileHandler
+        let mfh = installer().fileHandler as! MockedFileHandler
         mfh.nextFileExist = true
         
         let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
@@ -102,7 +102,7 @@ class InstallTest: XCTestCase {
     func testXIPNoFile() {
         
         // given
-        let mfh = installer().fileHandler as! MockFileHandler
+        let mfh = installer().fileHandler as! MockedFileHandler
         mfh.nextFileExist = false
         
         let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
@@ -124,7 +124,7 @@ class InstallTest: XCTestCase {
         XCTAssertNoThrow(try installer().moveApp(atPath: srcFile))
         
         // then
-        let mfh = installer().fileHandler as! MockFileHandler
+        let mfh = installer().fileHandler as! MockedFileHandler
         XCTAssertEqual(mfh.moveSrc?.path, URL(fileURLWithPath: srcFile).path)
         XCTAssertEqual(mfh.moveDst?.path, URL(fileURLWithPath: dstFile).path)
 
@@ -218,7 +218,7 @@ class InstallTest: XCTestCase {
         let fileName = "/test/Xcode 14 beta.xip"
         
         let installer = installer()
-        let mfh = installer.fileHandler as! MockFileHandler
+        let mfh = installer.fileHandler as! MockedFileHandler
         mfh.nextFileExist = true
 
         // when
@@ -235,7 +235,7 @@ class InstallTest: XCTestCase {
         let fileName = "/test/xxx.xip"
         
         let installer = installer()
-        let mfh = installer.fileHandler as! MockFileHandler
+        let mfh = installer.fileHandler as! MockedFileHandler
         mfh.nextFileExist = false
 
         // when
@@ -252,7 +252,7 @@ class InstallTest: XCTestCase {
         let fileName = "/test/Xcode 14 beta.xip"
 
         let installer = installer()
-        let mfh = installer.fileHandler as! MockFileHandler
+        let mfh = installer.fileHandler as! MockedFileHandler
         mfh.nextFileExist = true
 
         // when
@@ -332,7 +332,7 @@ class InstallTest: XCTestCase {
 
     func testInstallFileDoesNotExist() async {
         
-        let mfh = installer().fileHandler as! MockFileHandler
+        let mfh = installer().fileHandler as! MockedFileHandler
         mfh.nextFileExist = false
         
         // given
@@ -357,7 +357,7 @@ class InstallTest: XCTestCase {
 
     func testInstallFileUnsuported() async {
         
-        let mfh = installer().fileHandler as! MockFileHandler
+        let mfh = installer().fileHandler as! MockedFileHandler
         mfh.nextFileExist = true
         
         // given

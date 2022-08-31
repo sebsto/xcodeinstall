@@ -2,9 +2,11 @@ This is a command line utility to download and install Xcode in headless mode (f
 
 It works either interactively or unattended. In **interactive mode**, it prompts you for your Apple Developer account username, password and MFA code.  In **unattended mode**, it fetches your Apple Developer username and password from AWS Secrets Manager. (Instructions to configure this are below)
 
-When** MFA is configured** (which we highly recommend), a human interraction is required to enter the MFA code sent to your device.  This step cannot be automated.
+When **MFA is configured** (which we highly recommend), a human interraction is required to enter the MFA code sent to your device.  This step cannot be automated.
 
-The username and password ARE NOT STORED on the local volumes. They are used to interract with Apple's Developer Portal API and collect a session token.  The session token is stored in `$HOME/.xcodeinstall` in *interactive mode* or on AWS Secrets Manager when using it. The session stays valid for several days, sometimes weeks before it expires.  When the session expires, you have to authenticate again.
+The username and password ARE NOT STORED on the local volumes. They are used to interract with Apple's Developer Portal API and collect a session token.  The session token is stored in `$HOME/.xcodeinstall` in *interactive mode* or on AWS Secrets Manager when using username and password are also stored on it.
+
+The session stays valid for several days, sometimes weeks before it expires.  When the session expires, you have to authenticate again.
 
 ## Why install Xcode in headless mode?
 
@@ -91,6 +93,8 @@ The above triggers the following prompt on your registered machines (laptop, pho
 ### Download file 
 
 ### Install file 
+
+To install Xcode, run this tool from a user allowed to use `sudo` command.  On Amazon EC2, ``ec2-user` is part of the sudoers file. When running on your local machine, your normal admin account is also valid.
 
 ## How to store your secrets on AWS Secrets Manager
 

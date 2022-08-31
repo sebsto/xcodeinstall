@@ -26,7 +26,7 @@ class CLITest: XCTestCase {
         self.secretsHandler.clearSecrets(preserve: true)
         self.mockedDisplay = MockedDisplay()
         
-        self.fileHandler = MockFileHandler()
+        self.fileHandler = MockedFileHandler()
     }
 
     override func tearDownWithError() throws {

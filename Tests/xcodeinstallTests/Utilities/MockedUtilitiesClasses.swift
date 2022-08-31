@@ -9,7 +9,7 @@ import Foundation
 @testable import xcodeinstall
 
 // used to test Installer component (see InstallerTest)
-class MockFileHandler: FileHandlerProtocol {
+class MockedFileHandler: FileHandlerProtocol {
         
     var moveSrc: URL? = nil
     var moveDst: URL? = nil

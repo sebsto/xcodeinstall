@@ -18,7 +18,7 @@ class CLIDownloadTest: CLITest {
         let mockedReadline = MockedReadLine(["0"])
         var xci = xcodeinstall(input: mockedReadline)
         xci.downloader = MockAppleDownloader()
-        (xci.fileHandler as! MockFileHandler).nextFileCorrect = true
+        (xci.fileHandler as! MockedFileHandler).nextFileCorrect = true
         
         
         let download = try parse(MainCommand.Download.self, [
@@ -77,7 +77,7 @@ class CLIDownloadTest: CLITest {
         
         var xci = xcodeinstall()
         xci.downloader = MockAppleDownloader()
-        (xci.fileHandler as! MockFileHandler).nextFileCorrect = true
+        (xci.fileHandler as! MockedFileHandler).nextFileCorrect = true
         let fileName = "Xcode 14 beta.xip"
 
         let download = try parse(MainCommand.Download.self, [
@@ -115,7 +115,7 @@ class CLIDownloadTest: CLITest {
         
         var xci = xcodeinstall()
         xci.downloader = MockAppleDownloader()
-        (xci.fileHandler as! MockFileHandler).nextFileCorrect = true
+        (xci.fileHandler as! MockedFileHandler).nextFileCorrect = true
         let fileName = "xxx.xip"
 
         let download = try parse(MainCommand.Download.self, [
