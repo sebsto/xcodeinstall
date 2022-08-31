@@ -86,11 +86,11 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "download --verbose -x 13 -m"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "install --verbose "
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "authenticate --verbose"
