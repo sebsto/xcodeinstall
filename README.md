@@ -1,6 +1,19 @@
 This is a command line utility to download and install Xcode in headless mode (from a Terminal only).
 
-It works either interactively or unattended. In **interactive mode**, it prompts you for your Apple Developer account username, password and MFA code.  In **unattended mode**, it fetches your Apple Developer username and password from AWS Secrets Manager. (Instructions to configure this are below).
+![swift build workflow](https://github.com/sebsto/xcodeinstall/actions/workflows/swift.yml/badge.svg)
+
+## License
+
+This project is licensed under the Apache 2.0 License. 
+
+[![License][apache-badge]][apache-url]
+
+[apache-badge]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+[apache-url]: LICENSE
+
+## TL;DR
+
+`xcodeinstall` is a command line utility to download and install Xcode from the terminal only. It may work interactively or unattended. In **interactive mode**, it prompts you for your Apple Developer account username, password and MFA code.  In **unattended mode**, it fetches your Apple Developer username and password from AWS Secrets Manager. (Instructions to configure this are below).
 
 When **MFA is configured** (which we highly recommend), a human interaction is required to enter the MFA code sent to your device.  This step cannot be automated.
 
