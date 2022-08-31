@@ -59,7 +59,7 @@ extension XCodeInstall {
         }
     }
 
-    private func promptForFile() throws -> String {
+    func promptForFile() throws -> String {
 
         // list files ready to install
         let installableFiles = try self.fileHandler.downloadedFiles().filter({ fileName in

@@ -28,7 +28,7 @@ class MockedFileHandler: FileHandlerProtocol {
         }
     }
     func downloadedFiles() throws -> [String] {
-        return ["name.pkg"]
+        return ["name.pkg", "name.dmg"]
     }
 
     func checkFileSize(filePath: String, fileSize: Int) throws -> Bool {

@@ -35,4 +35,28 @@ class CLIInstallTest: CLITest {
         XCTAssert(inst.globalOptions.verbose)
         XCTAssertEqual(inst.name, "test.xip")
     }
+    
+    func testPromptForFile() {
+        
+        // given
+        let mockedReadline = MockedReadLine(["0"])
+        var xci = xcodeinstall(input: mockedReadline)
+        xci.installer = MockedInstaller()
+        xci.fileHandler = MockedFileHandler()
+
+        
+        // when
+        do {
+            let result = try xci.promptForFile()
+            
+            // then
+            XCTAssertTrue(result.hasSuffix("name.dmg"))
+
+        } catch {
+            // then
+            XCTAssert(false, "unexpected exception : \(error)")
+        }
+
+    }
+
 }
