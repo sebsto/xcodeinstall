@@ -1,0 +1,20 @@
+name: Swift
+
+#on: [push]
+on: 
+  push:
+    branches: [ master ] #trigger on each push to master
+  pull_request:
+    branches: [ master ] #trigger on each PR for master
+    
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build
+        run: swift build
+      - name: Run tests
+        run: swift test
