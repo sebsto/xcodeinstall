@@ -8,6 +8,10 @@ The username and password ARE NOT STORED on the local volume. They are used to i
 
 The session stays valid for several days, sometimes weeks before it expires.  When the session expires, you have to authenticate again. Apple typically prompt you for a new authentication when connecting from a new IP address or location (switching between laptop and EC2 instance for example)
 
+## Demo 
+
+<video src='https://github.com/sebsto/xcodeinstall/raw/main/img/xcodeinstall-demo.m4v' width=720></video>
+
 ## Why install Xcode in headless mode?
 
 When preparing a macOS machine in the cloud for CI/CD, you don't always have access to the login screen, or you don't want to access it.
