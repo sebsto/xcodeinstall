@@ -10,7 +10,7 @@ The session stays valid for several days, sometimes weeks before it expires.  Wh
 
 ## Demo 
 
-<video src='https://github.com/sebsto/xcodeinstall/raw/main/img/xcodeinstall-demo.m4v' width=720></video>
+![Video Demo](img/xcodeinstall-demo.gif)
 
 ## Why install Xcode in headless mode?
 

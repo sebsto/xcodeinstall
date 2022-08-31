@@ -4,6 +4,7 @@
 restoreSession.sh
 .vscode
 Tests/Data/curl.txt
+video/*
 
 # Xcode
 #
