@@ -28,8 +28,9 @@ extension XCodeInstall {
             if  nil == file {
                 fileToInstall = try promptForFile()
             } else {
-                fileToInstall = file!
+                fileToInstall = FileHandler.downloadDirectory.appendingPathComponent(file!).path
             }
+            logger.debug("Going to attemp to install \(fileToInstall)")
 
             try await inst.install(file: fileToInstall, progress: progress)
             progress.complete(success: true)
@@ -47,6 +48,9 @@ extension XCodeInstall {
             progress.complete(success: false)
         } catch InstallerError.xCodePKGInstallationError {
             display("🛑 Can not install additional packages. Be sure to run this command as root (sudo xcodinstall).")
+            progress.complete(success: false)
+        } catch InstallerError.unsupportedInstallation {
+            display("🛑 Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)")
             progress.complete(success: false)
         } catch {
             display("🛑 Error while installing \(String(describing: fileToInstall))")
