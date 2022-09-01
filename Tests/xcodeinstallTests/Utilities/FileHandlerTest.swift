@@ -239,19 +239,19 @@ class FileHandlerTest: XCTestCase {
         
         // given
         let log = Log().defaultLogger
-        let fsh = FileSecretsHandler(logger: log)
+        let fh  = FileHandler(logger: log)
         let fm  = FileManager.default
 
         // copy test file at destination
-        if fm.fileExists(atPath: fsh.downloadListPath.path) {
-            XCTAssertNoThrow(try fm.removeItem(at: fsh.downloadListPath))
+        if fm.fileExists(atPath: FileHandler.downloadListPath.path) {
+            XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
         }
         let testFilePath = testDataDirectory().appendingPathComponent("Download List.json");
-        XCTAssertNoThrow(try fm.copyItem(at: testFilePath, to: fsh.downloadListPath))
+        XCTAssertNoThrow(try fm.copyItem(at: testFilePath, to: FileHandler.downloadListPath))
 
         // when
         do {
-            let list = try fsh.loadDownloadList()
+            let list = try fh.loadDownloadList()
          
             // then
             XCTAssertNotNil(list)
@@ -261,7 +261,7 @@ class FileHandlerTest: XCTestCase {
         }
         
         // cleanup
-        XCTAssertNoThrow(try fm.removeItem(at: fsh.downloadListPath))
+        XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
 
         
     }
@@ -270,16 +270,16 @@ class FileHandlerTest: XCTestCase {
         
         // given
         let log = Log().defaultLogger
-        let fsh = FileSecretsHandler(logger: log)
+        let fh  = FileHandler(logger: log)
         let fm  = FileManager.default
 
         // delete existing file if any
-        if fm.fileExists(atPath: fsh.downloadListPath.path) {
-            XCTAssertNoThrow(try fm.removeItem(at: fsh.downloadListPath))
+        if fm.fileExists(atPath: FileHandler.downloadListPath.path) {
+            XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
         }
         
         // when && then
-        XCTAssertThrowsError(try fsh.loadDownloadList())
+        XCTAssertThrowsError(try fh.loadDownloadList())
 
     }
 

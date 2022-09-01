@@ -10,7 +10,7 @@ import Foundation
 
 // used to test Installer component (see InstallerTest)
 class MockedFileHandler: FileHandlerProtocol {
-        
+            
     var moveSrc: URL? = nil
     var moveDst: URL? = nil
     var nextFileExist: Bool? = nil
@@ -42,5 +42,26 @@ class MockedFileHandler: FileHandlerProtocol {
     func downloadFilePath(file: DownloadList.File) -> String {
         return "/download/\(file.filename)"
     }
+    
+    func saveDownloadList(list: DownloadList) throws -> DownloadList {
+        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
+        let listData = try Data(contentsOf: filePath)
+        return try JSONDecoder().decode(DownloadList.self, from: listData)
+    }
+    
+    func loadDownloadList() throws -> DownloadList {
+        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
+        let listData = try Data(contentsOf: filePath)
+        return try JSONDecoder().decode(DownloadList.self, from: listData)
+    }
+    
+    func baseFilePath() -> URL {
+        return URL(string: "file:///not_implemented.tmp")!
+    }
+    
+    func baseFilePath() -> String {
+        return "not_implemented.tmp"
+    }
+
 
 }

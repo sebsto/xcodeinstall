@@ -43,7 +43,8 @@ extension ShellInstaller {
             throw InstallerError.xCodeMoveInstallationError
         }
 
-        let installedFile = try self.moveApp(atPath: FileHandler.downloadDirectory.appendingPathComponent(appFile[0]).path)
+        let installedFile =
+            try self.moveApp(atPath: FileHandler.downloadDirectory.appendingPathComponent(appFile[0]).path)
 
         // /Applications/Xcode.app/Contents/Resources/Packages/
 

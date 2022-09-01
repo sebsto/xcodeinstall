@@ -40,13 +40,14 @@ class XCodeInstallBuilder {
 
         let log = Log(logLevel: self.verbosity)
         let fileHandler = FileHandler(logger: log.defaultLogger)
-        // TODO add choice between file and Secrets Manager
+
+        // FIXME: add choice between file and Secrets Manager
         let secretsManager = FileSecretsHandler(logger: log.defaultLogger)
 
         var result: XCodeInstall?
 
         if authenticatorNeeded {
-            let auth = AppleAuthenticator(logger: log.defaultLogger, secrets: secretsManager)
+            let auth = AppleAuthenticator(logger: log.defaultLogger, secrets: secretsManager, fileHandler: fileHandler)
             result = XCodeInstall(authenticator: auth,
                                   secretsManager: secretsManager,
                                   logger: log.defaultLogger,
@@ -54,7 +55,7 @@ class XCodeInstallBuilder {
         }
 
         if downloaderNeeded {
-            let down = AppleDownloader(logger: log.defaultLogger, secrets: secretsManager)
+            let down = AppleDownloader(logger: log.defaultLogger, secrets: secretsManager, fileHandler: fileHandler)
             result = XCodeInstall(downloader: down,
                                   secretsManager: secretsManager,
                                   logger: log.defaultLogger,

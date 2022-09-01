@@ -42,7 +42,7 @@ class ShellInstaller: InstallerProtocol {
 
     init(logger: Logger, fileHandler: FileHandlerProtocol, shell: AsyncShellProtocol? = nil) {
         self.logger      = logger
-        self.fileHandler = FileHandler(logger: self.logger)
+        self.fileHandler = fileHandler
 
         if let s = shell { // swiftlint:disable:this identifier_name
             self.shell = s
@@ -116,12 +116,8 @@ class ShellInstaller: InstallerProtocol {
             return false
         }
 
-        // inject secrets handler to support AWS Secrets Manager
-        // file exists, do an additional check
-        let secrets = FileSecretsHandler(logger: self.logger)
-
         // find file in downloadlist (if the cached download list exists)
-        if let dll = try? secrets.loadDownloadList() {
+        if let dll = try? self.fileHandler.loadDownloadList() {
             if let dlFile = dll.find(fileName: filePath.fileName()) {
                 // compare download list cached sized with actual size
                 match = self.fileHandler.fileExists(filePath: filePath, fileSize: dlFile.fileSize)

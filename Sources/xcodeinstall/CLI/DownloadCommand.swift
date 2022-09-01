@@ -10,6 +10,7 @@ import TSCBasic // to access stdoutStream as WritableByteStream (used by Progres
 
 extension XCodeInstall {
 
+    // swiftlint:disable: function_parameter_count
     func download(fileName: String?,
                   force: Bool,
                   xCodeOnly: Bool,

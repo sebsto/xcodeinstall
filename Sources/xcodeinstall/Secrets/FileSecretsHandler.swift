@@ -14,10 +14,9 @@ struct FileSecretsHandler: SecretsHandler {
     private let logger: Logger
 
     private let fileManager: FileManager
-    private let baseDirectory: URL
+    private var baseDirectory: URL
     private let cookiesPath: URL
     private let sessionPath: URL
-    private(set) var downloadListPath: URL
     private let newCookiesPath: URL
     private let newSessionPath: URL
 
@@ -28,13 +27,10 @@ struct FileSecretsHandler: SecretsHandler {
         fileManager = FileManager()
 
         let fileHandler = FileHandler(logger: logger)
-
         baseDirectory = fileHandler.baseFilePath()
 
         cookiesPath = baseDirectory.appendingPathComponent("cookies")
         sessionPath = baseDirectory.appendingPathComponent("session")
-
-        downloadListPath = baseDirectory.appendingPathComponent("downloadList")
 
         newCookiesPath = cookiesPath.appendingPathExtension("copy")
         newSessionPath = sessionPath.appendingPathExtension("copy")
@@ -162,23 +158,5 @@ struct FileSecretsHandler: SecretsHandler {
         let sessionData = try Data(contentsOf: sessionPath)
 
         return try JSONDecoder().decode(AppleSession.self, from: sessionData)
-    }
-
-    func saveDownloadList(list: DownloadList) throws -> DownloadList {
-
-        // save list
-        let data = try JSONEncoder().encode(list)
-        try data.write(to: downloadListPath)
-
-        return list
-
-    }
-
-    func loadDownloadList() throws -> DownloadList {
-
-        // read the raw file saved on disk
-        let listData = try Data(contentsOf: downloadListPath)
-
-        return try JSONDecoder().decode(DownloadList.self, from: listData)
     }
 }

@@ -11,6 +11,7 @@ import Logging
 // delegate class to receive download progress
 class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
+    var fileHandler: FileHandlerProtocol
     var progressUpdate: ProgressUpdateProtocol?
     var dstFilePath: URL?
     var totalFileSize: Int?
@@ -19,8 +20,9 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
     // to notify the main thread when download is finish
     private let sema: DispatchSemaphoreProtocol
-    init(semaphore: DispatchSemaphoreProtocol, logger: Logger) {
+    init(semaphore: DispatchSemaphoreProtocol, fileHandler: FileHandlerProtocol, logger: Logger) {
         self.sema = semaphore
+        self.fileHandler = fileHandler
         self.logger = logger
     }
 
@@ -39,10 +41,8 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
         logger.debug("Finished at \(location)\nMoving to \(dst)")
 
-        let fileHandler = FileHandler(logger: logger)
-
         // ignore the error here ? It is logged one level down. How to bring it up to the user ?
-        try? fileHandler.move(from: location, to: dst)
+        try? self.fileHandler.move(from: location, to: dst)
 
         // tell the main thread that we're done
         _ = self.sema.signal()

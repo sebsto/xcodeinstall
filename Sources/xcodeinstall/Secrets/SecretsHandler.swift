@@ -17,9 +17,6 @@ protocol SecretsHandler {
 
     func saveSession(_ session: AppleSession) throws -> AppleSession
     func loadSession() throws -> AppleSession
-
-    func saveDownloadList(list: DownloadList) throws -> DownloadList
-    func loadDownloadList() throws -> DownloadList
 }
 
 extension String {

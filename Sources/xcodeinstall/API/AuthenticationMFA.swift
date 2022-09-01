@@ -114,7 +114,7 @@ extension AppleAuthenticator {
             throw AuthenticationError.canNotReadMFATypes
         }
 
-        // TODO - add support for SMS fallback in case there is no trusted device
+        // FIXME: - add support for SMS fallback in case there is no trusted device
 
         // I should first understand and handle case where there is a 'trustedDevices' in the answer according to 
         // https://github.com/fastlane/fastlane/blob/master/spaceship/lib/spaceship/two_step_or_factor_client.rb#L18

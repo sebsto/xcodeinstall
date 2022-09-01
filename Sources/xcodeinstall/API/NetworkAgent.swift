@@ -43,13 +43,17 @@ class NetworkAgent {
     // user should be able to select with an option
     let secretsHandler: SecretsHandler
 
+    // A class to store / retrieve file, such as the download list cache
+    let fileHandler: FileHandlerProtocol
+
     // some ID returned by Apple API to authenticate us
     var session = AppleSession()
 
     // allows to inject an HTTPClient (test injects a mock)
-    init(client: HTTPClient, secrets: SecretsHandler, logger: Logger) {
+    init(client: HTTPClient, secrets: SecretsHandler, fileHandler: FileHandlerProtocol, logger: Logger) {
         self.httpClient     = client
         self.secretsHandler = secrets
+        self.fileHandler    = fileHandler
         self.logger = logger
     }
 

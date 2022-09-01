@@ -17,17 +17,18 @@ class NetworkAgentTestCase : XCTestCase {
     var session : MockURLSession!
     var sema    : DispatchSemaphoreProtocol!
     var delegate : DownloadDelegate!
-    
+    var fileHandler : FileHandlerProtocol!
+
     override func setUpWithError() throws {
         try super.setUpWithError()
         
         self.log     = Log(logLevel: .debug)
         self.secrets = FileSecretsHandler.init(logger: log.defaultLogger)
-        
+        self.fileHandler = FileHandler(logger: log.defaultLogger)
         self.session = MockURLSession()
         self.sema    = MockDispatchSemaphore()
         self.subject = HTTPClient(session: session)
-        self.agent   = NetworkAgent(client: subject, secrets: secrets, logger: log.defaultLogger)
+        self.agent   = NetworkAgent(client: subject, secrets: secrets, fileHandler: fileHandler, logger: log.defaultLogger)
         
         self.secrets.clearSecrets(preserve: true)
     }
@@ -43,14 +44,14 @@ class NetworkAgentTestCase : XCTestCase {
     }
     
     func getAppleDownloader() -> AppleDownloader {
-        let downloader = AppleDownloader(client: self.subject, secrets: self.secrets, logger: self.log.defaultLogger)
+        let downloader = AppleDownloader(client: self.subject, secrets: self.secrets, fileHandler: self.fileHandler, logger: self.log.defaultLogger)
         downloader.sema = self.sema
-        downloader.downloadDelegate = DownloadDelegate(semaphore: self.sema, logger: self.log.defaultLogger)
+        downloader.downloadDelegate = DownloadDelegate(semaphore: self.sema, fileHandler: self.fileHandler, logger: self.log.defaultLogger)
         return downloader
     }
     
     func getAppleAuthenticator() -> AppleAuthenticator {
-        return AppleAuthenticator(client: subject, secrets: self.secrets, logger: self.log.defaultLogger)
+        return AppleAuthenticator(client: subject, secrets: self.secrets, fileHandler: self.fileHandler, logger: self.log.defaultLogger)
     }
 }
 

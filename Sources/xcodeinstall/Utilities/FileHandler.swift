@@ -15,6 +15,10 @@ protocol FileHandlerProtocol {
     func checkFileSize(filePath: String, fileSize: Int) throws -> Bool
     func downloadedFiles() throws -> [String]
     func downloadFilePath(file: DownloadList.File) -> String
+    func saveDownloadList(list: DownloadList) throws -> DownloadList
+    func loadDownloadList() throws -> DownloadList
+    func baseFilePath() -> URL
+    func baseFilePath() -> String
 }
 
 enum FileHandlerError: Error {
@@ -27,8 +31,9 @@ struct FileHandler: FileHandlerProtocol {
     static let baseDirectory
            = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".xcodeinstall")
     static let downloadDirectory = baseDirectory.appendingPathComponent("download")
+    static let downloadListPath = baseDirectory.appendingPathComponent("downloadList")
 
-    let fm = FileManager() // swiftlint:disable:this identifier_name
+    let fm = FileManager.default // swiftlint:disable:this identifier_name
 
     let logger: Logger
 
@@ -41,18 +46,16 @@ struct FileHandler: FileHandlerProtocol {
     }
     func baseFilePath() -> URL {
 
-        let baseDirectory = FileHandler.baseDirectory
-
         // if base directory does not exist, create it
-        if !fm.fileExists(atPath: baseDirectory.path) {
+        if !fm.fileExists(atPath: FileHandler.baseDirectory.path) {
             do {
-                try fm.createDirectory(at: baseDirectory, withIntermediateDirectories: true)
+                try fm.createDirectory(at: FileHandler.baseDirectory, withIntermediateDirectories: true)
             } catch {
-                logger.error("🛑 Can not create base directory : \(baseDirectory.path)\n\(error)")
+                logger.error("🛑 Can not create base directory : \(FileHandler.baseDirectory.path)\n\(error)")
             }
         }
 
-        return baseDirectory
+        return FileHandler.baseDirectory
     }
 
     func move(from src: URL, to dst: URL) throws {
@@ -76,17 +79,15 @@ struct FileHandler: FileHandlerProtocol {
     }
     func downloadFilePath(file: DownloadList.File) -> URL {
 
-        let downloadDirectory = FileHandler.downloadDirectory
-
         // if download directory does not exist, create it
-        if !fm.fileExists(atPath: downloadDirectory.path) {
+        if !fm.fileExists(atPath: FileHandler.downloadDirectory.path) {
             do {
-                try fm.createDirectory(at: downloadDirectory, withIntermediateDirectories: true)
+                try fm.createDirectory(at: FileHandler.downloadDirectory, withIntermediateDirectories: true)
             } catch {
-                logger.error("🛑 Can not create base directory : \(downloadDirectory.path)\n\(error)")
+                logger.error("🛑 Can not create base directory : \(FileHandler.downloadDirectory.path)\n\(error)")
             }
         }
-        return downloadDirectory.appendingPathComponent(file.filename)
+        return FileHandler.downloadDirectory.appendingPathComponent(file.filename)
     }
 
     /// Check if file exists and has correct size
@@ -137,5 +138,23 @@ struct FileHandler: FileHandlerProtocol {
             logger.debug("\(error)")
             throw FileHandlerError.noDownloadedList
         }
+    }
+
+    func saveDownloadList(list: DownloadList) throws -> DownloadList {
+
+        // save list
+        let data = try JSONEncoder().encode(list)
+        try data.write(to: FileHandler.downloadListPath)
+
+        return list
+
+    }
+
+    func loadDownloadList() throws -> DownloadList {
+
+        // read the raw file saved on disk
+        let listData = try Data(contentsOf: FileHandler.downloadListPath)
+
+        return try JSONDecoder().decode(DownloadList.self, from: listData)
     }
 }

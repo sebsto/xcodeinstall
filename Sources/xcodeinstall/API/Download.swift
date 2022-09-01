@@ -26,18 +26,18 @@ class AppleDownloader: NetworkAgent, AppleDownloaderProtocol {
     var sema: DispatchSemaphoreProtocol = DispatchSemaphore( value: 0 )
 
     // used by testing to inject an HTTPClient that use a mocked URL Session
-    override init(client: HTTPClient, secrets: SecretsHandler, logger: Logger) {
-        super.init(client: client, secrets: secrets, logger: logger)
+    override init(client: HTTPClient, secrets: SecretsHandler, fileHandler: FileHandlerProtocol, logger: Logger) {
+        super.init(client: client, secrets: secrets, fileHandler: fileHandler, logger: logger)
     }
 
     // Ensure this class is initialized with a URLSession with download callbacks
-    init(logger: Logger, secrets: SecretsHandler) {
-        self.downloadDelegate = DownloadDelegate(semaphore: self.sema, logger: logger)
+    init(logger: Logger, secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
+        self.downloadDelegate = DownloadDelegate(semaphore: self.sema, fileHandler: fileHandler, logger: logger)
         let urlSession = URLSession(configuration: .default,
                                     delegate: downloadDelegate,
                                     delegateQueue: nil)
         let downloadClient = HTTPClient(session: urlSession)
-        super.init(client: downloadClient, secrets: secrets, logger: logger)
+        super.init(client: downloadClient, secrets: secrets, fileHandler: fileHandler, logger: logger)
     }
 
     func download(file: DownloadList.File,
@@ -53,10 +53,9 @@ class AppleDownloader: NetworkAgent, AppleDownloaderProtocol {
         let fileURL = "https://developer.apple.com/services-account/download?path=\(file.remotePath)"
 
         // pass a progress update client to the download delegate to receive progress updates
-        let fileHandler = FileHandler(logger: logger)
         self.downloadDelegate?.totalFileSize = file.fileSize
         self.downloadDelegate?.progressUpdate = progressReport
-        self.downloadDelegate?.dstFilePath = fileHandler.downloadFilePath(file: file)
+        self.downloadDelegate?.dstFilePath = URL(fileURLWithPath: self.fileHandler.downloadFilePath(file: file))
         self.downloadDelegate?.startTime = Date.now
 
         // make a call to start the download

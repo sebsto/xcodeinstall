@@ -20,7 +20,7 @@ extension AppleDownloader {
 
         if !force {
             // load the list from file if we have it
-            downloadList = try? secretsHandler.loadDownloadList()
+            downloadList = try? self.fileHandler.loadDownloadList()
         }
 
         if downloadList == nil {
@@ -55,7 +55,7 @@ extension AppleDownloader {
                 }
 
                 // success, save the list for reuse
-                _ = try self.secretsHandler.saveDownloadList(list: downloadList!)
+                _ = try self.fileHandler.saveDownloadList(list: downloadList!)
 
             } else {
 

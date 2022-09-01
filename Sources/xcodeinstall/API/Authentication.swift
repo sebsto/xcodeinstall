@@ -57,14 +57,14 @@ protocol AppleAuthenticatorProtocol {
 class AppleAuthenticator: NetworkAgent, AppleAuthenticatorProtocol {
 
     // used by testing to inject an HTTPClient that use a mocked URL Session
-    override init(client: HTTPClient, secrets: SecretsHandler, logger: Logger) {
-        super.init(client: client, secrets: secrets, logger: logger)
+    override init(client: HTTPClient, secrets: SecretsHandler, fileHandler: FileHandlerProtocol, logger: Logger) {
+        super.init(client: client, secrets: secrets, fileHandler: fileHandler, logger: logger)
     }
 
     // ensure this class is initialized with a regular URLSession
-    init(logger: Logger, secrets: SecretsHandler) {
+    init(logger: Logger, secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
         let apiClient = HTTPClient(session: URLSession.shared)
-        super.init(client: apiClient, secrets: secrets, logger: logger)
+        super.init(client: apiClient, secrets: secrets, fileHandler: fileHandler, logger: logger)
 
     }
 

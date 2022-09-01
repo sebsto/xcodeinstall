@@ -23,7 +23,8 @@ class URLRequestCurlTest: XCTestCase {
         self.log     = Log(logLevel: .debug)
         self.secrets = FileSecretsHandler.init(logger: log.defaultLogger)
         self.subject = HTTPClient(session: session)
-        self.agent   = NetworkAgent(client: subject, secrets: secrets, logger: log.defaultLogger)
+        let fileHandler = FileHandler(logger: self.log.defaultLogger)
+        self.agent   = NetworkAgent(client: subject, secrets: secrets, fileHandler: fileHandler, logger: log.defaultLogger)
     }
 
     func testRequestToCurl() throws {

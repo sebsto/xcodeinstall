@@ -18,7 +18,9 @@ class DownloadDelegateTest: XCTestCase {
         // given
         let testData = "test data"
         let sema = MockDispatchSemaphore()
-        let delegate = DownloadDelegate(semaphore: sema, logger: self.log.defaultLogger)
+        let logger = self.log.defaultLogger
+        let fileHandler = FileHandler(logger: logger)
+        let delegate = DownloadDelegate(semaphore: sema, fileHandler: fileHandler, logger: logger)
         delegate.progressUpdate = MockedProgressBar()
         
         let fm = FileManager()
@@ -62,7 +64,9 @@ class DownloadDelegateTest: XCTestCase {
         
         // given
         let sema = MockDispatchSemaphore()
-        let delegate = DownloadDelegate(semaphore: sema, logger: self.log.defaultLogger)
+        let logger = self.log.defaultLogger
+        let fileHandler = FileHandler(logger: logger)
+        let delegate = DownloadDelegate(semaphore: sema, fileHandler: fileHandler, logger: logger)
         delegate.startTime = Date.init(timeIntervalSinceNow: -60) // one minute ago
         delegate.totalFileSize = 1 * 1024  * 1024 * 1024 // 1 Gb
         delegate.progressUpdate = MockedProgressBar()

@@ -20,10 +20,8 @@ extension XCodeInstall {
                                                              "Use XCodeInstallBuilder to correctly initialize this class") // swiftlint:disable:this line_length
         }
 
-        let filehandler = FileHandler(logger: logger)
-
         display("Loading list of available downloads ", terminator: "")
-        display("\(force ? "forced download from Apple Developer Portal" : "fetched from cache in \(filehandler.baseFilePath())")") // swiftlint:disable:this line_length
+        display("\(force ? "forced download from Apple Developer Portal" : "fetched from cache in \(self.fileHandler.baseFilePath())")") // swiftlint:disable:this line_length
 
         do {
             let list = try await download.list(force: force)
@@ -40,7 +38,7 @@ extension XCodeInstall {
 
             display("")
             display("👉 Here is the list of available downloads:")
-            display("Files marked with (*) are already downloaded in \(filehandler.baseFilePath()) ")
+            display("Files marked with (*) are already downloaded in \(self.fileHandler.baseFilePath()) ")
             display("")
             let string = parser.prettyPrint(list: enrichedList, withDate: datePublished)
             display(string)
