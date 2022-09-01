@@ -16,21 +16,26 @@ extension MainCommand {
 
         @OptionGroup var globalOptions: GlobalOptions
         @OptionGroup var downloadListOptions: DownloadListOptions
+        @OptionGroup var cloudOption: CloudOptions
 
         @Option(name: .shortAndLong, help: "The exact package name to downloads. When omited, it asks interactively")
         var name: String?
 
         func run() async throws {
-            let main = XCodeInstallBuilder()
+            var xcib = XCodeInstallBuilder()
                             .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
                             .withDownloader()
-                            .build()
-            try await main.download(fileName: name,
-                                    force: downloadListOptions.force,
-                                    xCodeOnly: downloadListOptions.onlyXcode,
-                                    majorVersion: downloadListOptions.xCodeVersion,
-                                    sortMostRecentFirst: downloadListOptions.mostRecentFirst,
-                                    datePublished: downloadListOptions.datePublished)
+
+            if let region = cloudOption.secretManagerRegion {
+                xcib = xcib.withAWSSecretsManager(region: region)
+            }
+
+            try await xcib.build().download(fileName: name,
+                                            force: downloadListOptions.force,
+                                            xCodeOnly: downloadListOptions.onlyXcode,
+                                            majorVersion: downloadListOptions.xCodeVersion,
+                                            sortMostRecentFirst: downloadListOptions.mostRecentFirst,
+                                            datePublished: downloadListOptions.datePublished)
         }
     }
 

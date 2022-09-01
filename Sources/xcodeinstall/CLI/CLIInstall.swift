@@ -22,7 +22,7 @@ extension MainCommand {
         var name: String?
 
         func run() async throws {
-            let main = XCodeInstallBuilder()
+            let main = try XCodeInstallBuilder()
                             .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
                             .withInstaller()
                             .build()

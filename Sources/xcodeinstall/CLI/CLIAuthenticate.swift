@@ -15,14 +15,18 @@ extension MainCommand {
                CommandConfiguration(abstract: "Authenticate yourself against Apple Developer Portal")
 
         @OptionGroup var globalOptions: GlobalOptions
+        @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-            let main = XCodeInstallBuilder()
+            var xcib = XCodeInstallBuilder()
                             .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
                             .withAuthenticator()
-                            .build()
 
-            try await main.authenticate()
+            if let region = cloudOption.secretManagerRegion {
+                xcib = xcib.withAWSSecretsManager(region: region)
+            }
+
+            try await xcib.build().authenticate()
         }
     }
 
@@ -30,9 +34,10 @@ extension MainCommand {
         static var configuration = CommandConfiguration(abstract: "Signout from Apple Developer Portal")
 
         @OptionGroup var globalOptions: GlobalOptions
+        @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-            let main = XCodeInstallBuilder()
+            let main = try XCodeInstallBuilder()
                             .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
                             .withAuthenticator()
                             .build()
