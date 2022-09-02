@@ -106,11 +106,8 @@ extension AppleAuthenticator {
     // call MFAType API and return the number of digit required for PIN
     func handleTwoFactorAuthentication() async throws -> Int {
 
-        guard let data = try? await getMFAType() else {
-            throw AuthenticationError.canNotReadMFATypes
-        }
-
-        guard let mfaType = try? JSONDecoder().decode(MFAType?.self, from: data) else {
+        guard let data = try? await getMFAType(),
+              let mfaType = try? JSONDecoder().decode(MFAType?.self, from: data) else {
             throw AuthenticationError.canNotReadMFATypes
         }
 

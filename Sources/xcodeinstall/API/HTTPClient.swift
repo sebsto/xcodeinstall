@@ -36,7 +36,7 @@ protocol URLSessionDownloadTaskProtocol {
 // make the real URLSessionDownloadTask implemnet our protocol to keep the compiler happy
 extension URLSessionDownloadTask: URLSessionDownloadTaskProtocol {}
 
-// HTTP lient with dependency injection for URLSession
+// HTTP client with dependency injection for URLSession
 // our code will use this HTTPClient
 // by default, it uses a real URLSession, at testing time, we inject our mock 
 class HTTPClient: NSObject, URLSessionProtocol {
