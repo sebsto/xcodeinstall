@@ -27,15 +27,20 @@ extension XCodeInstall {
         var fileToDownload: DownloadList.File
         do {
 
+            // when filename was given by user
             if fileName != nil {
 
+                // search matching filename in the download list cache
                 let list = try await download.list(force: force)
-                guard let result = list.find(fileName: fileName!) else {
+                if let result = list.find(fileName: fileName!) {
+                    fileToDownload = result
+                } else {
                     throw DownloadError.unknownFile(file: fileName!)
                 }
-                fileToDownload = result
 
             } else {
+
+                // when no file was given, ask user
                 fileToDownload = try await self.askFile(force: force,
                                                         xCodeOnly: xCodeOnly,
                                                         majorVersion: majorVersion,
@@ -43,6 +48,7 @@ extension XCodeInstall {
                                                         datePublished: datePublished)
             }
 
+            // now we have a filename, let's proceed with download 
             let progressBar = CLIProgressBar(animationType: .percentProgressAnimation,
                                              stream: stdoutStream,
                                              message: "Downloading \(fileToDownload.displayName)")
