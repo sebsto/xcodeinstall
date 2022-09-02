@@ -44,7 +44,7 @@ extension MainCommand {
         @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-            var xcib = try XCodeInstallBuilder()
+            var xcib = XCodeInstallBuilder()
                             .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
                             .withDownloader()
 
