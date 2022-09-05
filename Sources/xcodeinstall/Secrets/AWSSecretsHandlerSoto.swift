@@ -19,7 +19,7 @@ class AWSSecretsHandlerSoto: AWSSecretsHandler {
         }
 
         self.awsClient = AWSClient(
-            credentialProvider: .default,
+            credentialProvider: .selector(.environment, .ec2, .configFile()),
             retryPolicy: .jitter(),
             httpClientProvider: .createNew)
         self.smClient = SecretsManager(client: awsClient,
