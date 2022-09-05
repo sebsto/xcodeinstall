@@ -10,7 +10,7 @@ import ArgumentParser
 @testable import xcodeinstall
 
 
-class CLITest: XCTestCase {
+class CLITest: AsyncTestCase {
     
     var log : Log!
     var secretsHandler : SecretsHandler!
@@ -19,18 +19,18 @@ class CLITest: XCTestCase {
     var mockedAuth : AppleAuthenticatorProtocol!
     var fileHandler : FileHandlerProtocol!
     
-    override func setUpWithError() throws {
+    override func asyncSetUpWithError() async throws {
         self.log = Log(logLevel: .debug)
         self.secretsHandler = FileSecretsHandler(logger: log.defaultLogger)
 
-        self.secretsHandler.clearSecrets(preserve: true)
+        try await self.secretsHandler.clearSecrets()
         self.mockedDisplay = MockedDisplay()
         
         self.fileHandler = MockedFileHandler()
     }
 
-    override func tearDownWithError() throws {
-        secretsHandler.restoreSecrets()
+    override func asyncTearDownWithError() async throws {
+//        secretsHandler.restoreSecrets()
     }
     
     func parse<A>(_ type: A.Type, _ arguments: [String]) throws -> A where A: AsyncParsableCommand {

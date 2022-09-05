@@ -59,7 +59,7 @@ class NetworkAgent {
 
     // to be shared between apiCall and download methods
     // prepare headers with correct cookies and X- value for Apple authentication
-    func prepareAuthenticationHeaders() -> [String: String] {
+    func prepareAuthenticationHeaders() async -> [String: String] {
 
         var requestHeaders: [String: String]  = [ "Content-Type": "application/json",
                                                   "Accept": "application/json, text/javascript",
@@ -67,15 +67,14 @@ class NetworkAgent {
                                                   "User-Agent": "curl/7.79.1"]
 
         // reload previous session if it exists
-        let session = try? secretsHandler.loadSession()
+        let session = try? await secretsHandler.loadSession()
         if let sess = session {
 
             // session is loaded
             self.session = sess
 
         } else {
-            // swiftlint:disable line_length
-            logger.debug("⚠️ I could not load session from file ~/.xcodeinstall/session (this is normal the first time you authenticate)")
+            logger.debug("⚠️ I could not load session (this is normal the first time you authenticate)")
         }
 
         // populate HTTP request with headers from session (either from self or the one just loaded)
@@ -90,13 +89,13 @@ class NetworkAgent {
         }
 
         // reload cookies if they exist
-        let cookies = try? secretsHandler.loadCookies()
+        let cookies = try? await secretsHandler.loadCookies()
         if let cook = cookies {
             // cookies existed, let's add them to our HTTPHeaders
             requestHeaders.merge(HTTPCookie.requestHeaderFields(with: cook)) { (current, _) in current }
         } else {
             // swiftlint:disable line_length
-            logger.debug("⚠️ I could not load cookies from file ~/.xcodeinstall/cookie (this is normal the first time you authenticate)")
+            logger.debug("⚠️ I could not load cookies (this is normal the first time you authenticate)")
         }
 
         return requestHeaders
@@ -114,7 +113,7 @@ class NetworkAgent {
         let request: URLRequest
 
         // let's add provided headers to our request (keeping new value in case of conflicts)
-        var requestHeaders = prepareAuthenticationHeaders()
+        var requestHeaders = await prepareAuthenticationHeaders()
 
         // add the headers our callers want in this request
         requestHeaders.merge(headers, uniquingKeysWith: { (_, new) in new })
@@ -149,13 +148,12 @@ class NetworkAgent {
         var headers = requestHeaders
 
         // reload cookies if they exist
-        let cookies = try? secretsHandler.loadCookies()
+        let cookies = try? await secretsHandler.loadCookies()
         if let cook = cookies {
             // cookies existed, let's add them to our HTTPHeaders
             headers.merge(HTTPCookie.requestHeaderFields(with: cook)) { (current, _) in current }
         } else {
-            // swiftlint:disable line_length
-            logger.debug("⚠️ I could not load cookies from file ~/.xcodeinstall/cookie (this is normal the first time you authenticate)")
+            logger.debug("⚠️ I could not load cookies (this is normal the first time you authenticate)")
         }
 
         // build the request

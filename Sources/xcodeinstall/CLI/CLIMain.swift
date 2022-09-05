@@ -46,7 +46,8 @@ struct MainCommand: AsyncParsableCommand {
         // Pass an array to `subcommands` to set up a nested tree of subcommands.
         // With language support for type-level introspection, this could be
         // provided by automatically finding nested `ParsableCommand` types.
-        subcommands: [Authenticate.self, Signout.self, List.self, Download.self, Install.self, StoreSecrets.self]
+        subcommands: [Authenticate.self, Signout.self, List.self,
+                      Download.self, Install.self, StoreSecrets.self]
 
         // A default subcommand, when provided, is automatically selected if a
         // subcommand is not given on the command line.

@@ -16,16 +16,69 @@ extension XCodeInstall {
                                                              "Use XCodeInstallBuilder to correctly initialize this class") // swiftlint:disable:this line_length
         }
 
-        // delete previous session, if any
-        secretsManager.clearSecrets(preserve: false)
+        do {
 
+            // delete previous session, if any
+            try await secretsManager.clearSecrets()
+
+            let appleCredentials = try await retrieveAppleCredentials()
+
+            display("Authenticating...")
+            try await auth.startAuthentication(username: appleCredentials.username,
+                                               password: appleCredentials.password)
+            display("✅ Authenticated.")
+
+        } catch AuthenticationError.invalidUsernamePassword {
+
+            // handle invalid username or password
+            display("🛑 Invalid username or password.")
+
+        } catch AuthenticationError.requires2FA {
+
+            // handle two factors authentication
+            try await startMFAFlow()
+
+        } catch AuthenticationError.unableToRetrieveAppleServiceKey(let error) {
+
+            // handle connection errors
+            display("🛑 Can not connect to Apple Developer Portal.\nOriginal error : \(error.localizedDescription)")
+
+        } catch {
+            display("🛑 Unexpected Error : \(error)")
+        }
+    }
+
+    // retrieve apple developer portal credentials.
+    // either from AWS Secrets Manager, either interactively
+    private func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
+
+        var appleCredentials: AppleCredentialsSecret
+        do {
+            // first try on AWS Secrets Manager
+            display("Retrieving Apple Developer Portal credentials...")
+            appleCredentials = try await secretsManager.retrieveAppleCredentials()
+
+        } catch SecretsHandlerError.invalidOperation {
+
+            // we have a file secrets handler, prompt for credentials interactively
+            appleCredentials = try promptForCredentials()
+
+        } catch {
+
+            // unexpected errors, do not handle here
+            throw error
+        }
+
+        return appleCredentials
+    }
+
+    // prompt user for apple developer portal credentials interactively
+    private func promptForCredentials() throws -> AppleCredentialsSecret {
         display("""
-⚠️⚠️⚠️\nThis tool prompts you for your Apple ID username, password, and two factors authentication code.
-These values are not stored anywhere. They are used to get an Apple session ID.
+⚠️⚠️ We prompt you for your Apple ID username, password, and two factors authentication code.
+These values are not stored anywhere. They are used to get an Apple session ID. ⚠️⚠️
 
-The Session ID is securely stored on your AWS Account, using AWS Secrets Manager.
-The AWS Secrets Manager secret name is "xcodeinstall_session"
-
+Alternatively, you may store your credentials on AWS Secrets Manager
 """)
 
         guard let username = input.readLine(prompt: "⌨️  Enter your Apple ID username: ", silent: false) else {
@@ -36,53 +89,35 @@ The AWS Secrets Manager secret name is "xcodeinstall_session"
             throw CLIError.invalidInput
         }
 
+        return AppleCredentialsSecret(username: username, password: password)
+    }
+
+    // manage the MFA authentication sequence
+    private func startMFAFlow() async throws {
+        guard let auth = authenticator else {
+            return
+        }
+
         do {
 
-            display("Authenticating...")
-            try await auth.startAuthentication(username: username, password: password)
-            display("✅ Authenticated.")
+            let codeLength = try await auth.handleTwoFactorAuthentication()
+            assert(codeLength > 0)
 
-            // handle invalid username or password
-        } catch AuthenticationError.invalidUsernamePassword {
-            display("🛑 Invalid username or password.")
-
-            // handle two factors authentication
-        } catch AuthenticationError.requires2FA {
-
-            // start the 2FA dance
-            do {
-
-                let codeLength = try await auth.handleTwoFactorAuthentication()
-                assert(codeLength > 0)
-
-                let prompt = "🔐 Two factors authentication is enabled, enter your 2FA code: "
-                guard let pinCode = input.readLine(prompt: prompt, silent: false) else {
-                    throw CLIError.invalidInput
-                }
-                try await auth.twoFactorAuthentication(pin: pinCode)
-                display("✅ Authenticated with MFA.")
-
-//            } catch AuthenticationError.requires2FATrustedDevice {
-//
-//                display("""
-// 🔐 Two factors authentication is enabled, with 4 digit code and trusted devices.
-// This tool does not support this authentication at the moment.
-// Please enable 2 factors authentication as described here: https://support.apple.com/en-us/HT204915
-// """)
-//                // Darwin.exit(-1)
-
-            } catch AuthenticationError.requires2FATrustedPhoneNumber {
-
-                display("""
-                🔐 Two factors authentication is enabled, with 4 digit code and trusted phone numbers.
-                This tool does not support SMS MFA at the moment.
-                Please enable 2 factors authentication as described here: https://support.apple.com/en-us/HT204915
-                """)
-
+            let prompt = "🔐 Two factors authentication is enabled, enter your 2FA code: "
+            guard let pinCode = input.readLine(prompt: prompt, silent: false) else {
+                throw CLIError.invalidInput
             }
+            try await auth.twoFactorAuthentication(pin: pinCode)
+            display("✅ Authenticated with MFA.")
 
-        } catch {
-            display("🛑 Unexpected Error : \(error)")
+        } catch AuthenticationError.requires2FATrustedPhoneNumber {
+
+            display("""
+            🔐 Two factors authentication is enabled, with 4 digits code and trusted phone numbers.
+            This tool does not support SMS MFA at the moment. Please enable 2 factors authentication
+            with trusted devices as described here: https://support.apple.com/en-us/HT204915
+            """)
+
         }
     }
 

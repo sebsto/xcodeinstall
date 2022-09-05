@@ -19,24 +19,53 @@ struct User: Codable {
 enum AuthenticationError: Error {
     case invalidUsernamePassword
     case requires2FA
-//    case requires2FATrustedDevice
+    //    case requires2FATrustedDevice
     case requires2FATrustedPhoneNumber
     case invalidPinCode
-    case unableToRetrieveAppleServiceKey
+    case unableToRetrieveAppleServiceKey(error: Error)
     case canNotReadMFATypes
     case unexpectedHTTPReturnCode(code: Int)
     case other(error: Error)
 }
 
-struct AppleServiceKey: Codable {
+struct AppleServiceKey: Codable, Equatable {
     let authServiceUrl: String
     let authServiceKey: String
+
+    static func == (lhs: AppleServiceKey, rhs: AppleServiceKey) -> Bool {
+        return lhs.authServiceKey == rhs.authServiceKey &&
+        lhs.authServiceUrl == rhs.authServiceUrl
+    }
 }
 
-struct AppleSession: Codable {
+struct AppleSession: Codable, Equatable {
     var itcServiceKey: AppleServiceKey?
     var xAppleIdSessionId: String?
     var scnt: String?
+
+    static func == (lhs: AppleSession, rhs: AppleSession) -> Bool {
+        return lhs.itcServiceKey == rhs.itcServiceKey &&
+        lhs.xAppleIdSessionId == rhs.xAppleIdSessionId &&
+        lhs.scnt == rhs.scnt
+    }
+
+    func data() throws -> Data {
+        return try JSONEncoder().encode(self)
+    }
+
+    func string() throws -> String? {
+        return String(data: try self.data(), encoding: .utf8)
+    }
+
+    init(fromData data: Data) throws {
+        self = try JSONDecoder().decode(AppleSession.self, from: data)
+    }
+
+    init(itcServiceKey: AppleServiceKey? = nil, xAppleIdSessionId: String? = nil, scnt: String? = nil) {
+        self.itcServiceKey = itcServiceKey
+        self.xAppleIdSessionId = xAppleIdSessionId
+        self.scnt = scnt
+    }
 }
 
 /**
@@ -68,61 +97,64 @@ class AppleAuthenticator: NetworkAgent, AppleAuthenticatorProtocol {
 
     }
 
-    func saveSession(response: HTTPURLResponse, session: AppleSession) throws {
+    func saveSession(response: HTTPURLResponse, session: AppleSession) async throws {
         guard let cookies = response.value(forHTTPHeaderField: "Set-Cookie") else {
             return
         }
 
         // save session data to reuse in future invocation
-        _ = try secretsHandler.saveCookies(cookies)
-        _ = try secretsHandler.saveSession(session)
+        _ = try await secretsHandler.saveCookies(cookies)
+        _ = try await secretsHandler.saveSession(session)
     }
 
     func startAuthentication(username: String, password: String) async throws {
 
-            if session.itcServiceKey == nil {
-                guard let appServiceKey = try? await getAppleServicekey() else {
-                    throw AuthenticationError.unableToRetrieveAppleServiceKey
-                }
-                session.itcServiceKey = appServiceKey
-                logger.debug("Got an Apple Service key : \(String(describing: session.itcServiceKey))")
+        if session.itcServiceKey == nil {
+            var appServiceKey: AppleServiceKey
+            do {
+                appServiceKey = try await getAppleServicekey()
+            } catch {
+                throw AuthenticationError.unableToRetrieveAppleServiceKey(error: error)
             }
+            session.itcServiceKey = appServiceKey
+            logger.debug("Got an Apple Service key : \(String(describing: session.itcServiceKey))")
+        }
 
-            let (_, response) =
-                    try await apiCall(url: "https://idmsa.apple.com/appleauth/auth/signin",
-                                      method: .POST,
-                                      body: try JSONEncoder().encode(User(accountName: username, password: password)),
-                                      validResponse: .range(0..<500))
+        let (_, response) =
+        try await apiCall(url: "https://idmsa.apple.com/appleauth/auth/signin",
+                          method: .POST,
+                          body: try JSONEncoder().encode(User(accountName: username, password: password)),
+                          validResponse: .range(0..<500))
 
-            // store the response to keep cookies and HTTP headers
-            session.xAppleIdSessionId  = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id")
-            session.scnt               = response.value(forHTTPHeaderField: "scnt")
+        // store the response to keep cookies and HTTP headers
+        session.xAppleIdSessionId  = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id")
+        session.scnt               = response.value(forHTTPHeaderField: "scnt")
 
-            // should I save other headers ?
-            // X-Apple-HC-Challenge
-            // X-Apple-HC-Bits
-            // X-Apple-Auth-Attributes
+        // should I save other headers ?
+        // X-Apple-HC-Challenge
+        // X-Apple-HC-Bits
+        // X-Apple-Auth-Attributes
 
-            switch response.statusCode {
+        switch response.statusCode {
 
-            case 200:
-                // we were already authenticated
+        case 200:
+            // we were already authenticated
 
-                try self.saveSession(response: response, session: session)
+            try await self.saveSession(response: response, session: session)
 
-            case 401, 403:
-                // invalid usernameor password
-                throw AuthenticationError.invalidUsernamePassword
+        case 401, 403:
+            // invalid usernameor password
+            throw AuthenticationError.invalidUsernamePassword
 
-            case 409:
-                // requires two-factors authentication
-                throw AuthenticationError.requires2FA
+        case 409:
+            // requires two-factors authentication
+            throw AuthenticationError.requires2FA
 
-            default:
-                logger.critical("💣 Unexpected return code : \(response.statusCode)")
-                logger.debug("URLResponse = \(response)")
-                throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)
-            }
+        default:
+            logger.critical("💣 Unexpected return code : \(response.statusCode)")
+            logger.debug("URLResponse = \(response)")
+            throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)
+        }
 
     }
 
@@ -130,9 +162,9 @@ class AppleAuthenticator: NetworkAgent, AppleAuthenticatorProtocol {
     func signout() async throws {
 
         let (_, _) = try await apiCall(url: "https://idmsa.apple.com/appleauth/signout",
-                                      validResponse: .range(0..<500))
+                                       validResponse: .range(0..<500))
 
-        secretsHandler.clearSecrets(preserve: false)
+        try await secretsHandler.clearSecrets()
 
     }
 

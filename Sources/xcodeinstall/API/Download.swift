@@ -44,7 +44,7 @@ class AppleDownloader: NetworkAgent, AppleDownloaderProtocol {
                   progressReport: ProgressUpdateProtocol) async throws -> URLSessionDownloadTaskProtocol? {
 
         guard !file.remotePath.isEmpty,
-              !file.filename.isEmpty ,
+              !file.filename.isEmpty,
               file.fileSize > 0 else {
             logger.error("🛑 Invalid file specification : \(file)")
             throw DownloadError.invalidFileSpec

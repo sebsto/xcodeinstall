@@ -90,11 +90,15 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "install --verbose "
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "authenticate --verbose"
+            argument = "authenticate -s us-east-2"
             isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "test --verbose"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>

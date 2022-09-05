@@ -9,7 +9,7 @@ import XCTest
 @testable import xcodeinstall
 
 // common initilaisation code for all network agents
-class NetworkAgentTestCase : XCTestCase {
+class NetworkAgentTestCase : AsyncTestCase {
     var subject : HTTPClient!
     var agent   : NetworkAgent!
     var log     : Log!
@@ -19,8 +19,7 @@ class NetworkAgentTestCase : XCTestCase {
     var delegate : DownloadDelegate!
     var fileHandler : FileHandlerProtocol!
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
+    override func asyncSetUpWithError() async throws {
         
         self.log     = Log(logLevel: .debug)
         self.secrets = FileSecretsHandler.init(logger: log.defaultLogger)
@@ -30,11 +29,7 @@ class NetworkAgentTestCase : XCTestCase {
         self.subject = HTTPClient(session: session)
         self.agent   = NetworkAgent(client: subject, secrets: secrets, fileHandler: fileHandler, logger: log.defaultLogger)
         
-        self.secrets.clearSecrets()
-    }
-    
-    override func tearDownWithError() throws {
-//        self.secrets.restoreSecrets()
+        try await self.secrets.clearSecrets()
     }
     
     func getAppleSession() -> AppleSession {

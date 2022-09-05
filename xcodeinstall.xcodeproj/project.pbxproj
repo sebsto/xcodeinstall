@@ -30,7 +30,7 @@
 		007585D7289C17670094D2DC /* DownloadListParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585D6289C17670094D2DC /* DownloadListParserTest.swift */; };
 		007585DB289C1E1E0094D2DC /* TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585DA289C1E1E0094D2DC /* TestHelper.swift */; };
 		007585DD289C1F520094D2DC /* SyncShellTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585DC289C1F520094D2DC /* SyncShellTest.swift */; };
-		007585DF289D6DE00094D2DC /* FileSecretHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585DE289D6DE00094D2DC /* FileSecretHandlerTest.swift */; };
+		007585DF289D6DE00094D2DC /* FileSecretsHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585DE289D6DE00094D2DC /* FileSecretsHandlerTest.swift */; };
 		007585E928A0E1590094D2DC /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 007585E828A0E1590094D2DC /* Logging */; };
 		007585F128A0E1790094D2DC /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 007585F028A0E1790094D2DC /* Logging */; };
 		0075860128A2D8C50094D2DC /* SwiftToolsSupport in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 007585FF28A2D8C50094D2DC /* SwiftToolsSupport */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -55,6 +55,11 @@
 		0092F866288DC29F00CFE571 /* DownloadListParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0092F864288DC29F00CFE571 /* DownloadListParser.swift */; };
 		0092F868288F116100CFE571 /* SyncShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0092F867288F116100CFE571 /* SyncShell.swift */; };
 		0092F869288F116100CFE571 /* SyncShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0092F867288F116100CFE571 /* SyncShell.swift */; };
+		0093C5D828C4C42B00AF5ABC /* NetworkAgentTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0093C5D728C4C42B00AF5ABC /* NetworkAgentTestCase.swift */; };
+		0093C5DA28C4C81900AF5ABC /* AsyncTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0093C5D928C4C81900AF5ABC /* AsyncTestCase.swift */; };
+		0093C5DC28C4CCBE00AF5ABC /* AWSSecretsHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0093C5DB28C4CCBE00AF5ABC /* AWSSecretsHandlerTest.swift */; };
+		0093C5E128C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0093C5E028C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift */; };
+		0093C5E228C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0093C5E028C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift */; };
 		009A912F288C213F003C0DF4 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 009A912E288C213F003C0DF4 /* ArgumentParser */; };
 		009A9131288C27D0003C0DF4 /* CLIAuthenticate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009A9130288C27D0003C0DF4 /* CLIAuthenticate.swift */; };
 		009A9132288C27D0003C0DF4 /* CLIAuthenticate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009A9130288C27D0003C0DF4 /* CLIAuthenticate.swift */; };
@@ -94,6 +99,7 @@
 		00CECCBF28B3776800120779 /* CLIInstallTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCBE28B3776800120779 /* CLIInstallTest.swift */; };
 		00CECCC128B37B6E00120779 /* InstallTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCC028B37B6E00120779 /* InstallTest.swift */; };
 		00CECCC328B3839A00120779 /* ListTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CECCC228B3839A00120779 /* ListTest.swift */; };
+		00D0649328C279650000197D /* SecretsHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D0649228C279650000197D /* SecretsHandlerTest.swift */; };
 		00DC835728AA5FD700B6346D /* SystemPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 00DC835628AA5FD700B6346D /* SystemPackage */; settings = {ATTRIBUTES = (Required, ); }; };
 		00DC835928AB6EA000B6346D /* SwiftToolsSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 00DC835828AB6EA000B6346D /* SwiftToolsSupport */; };
 		00DC835A28AB6EA000B6346D /* SwiftToolsSupport in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 00DC835828AB6EA000B6346D /* SwiftToolsSupport */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -180,7 +186,7 @@
 		007585D6289C17670094D2DC /* DownloadListParserTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadListParserTest.swift; sourceTree = "<group>"; };
 		007585DA289C1E1E0094D2DC /* TestHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestHelper.swift; sourceTree = "<group>"; };
 		007585DC289C1F520094D2DC /* SyncShellTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncShellTest.swift; sourceTree = "<group>"; };
-		007585DE289D6DE00094D2DC /* FileSecretHandlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSecretHandlerTest.swift; sourceTree = "<group>"; };
+		007585DE289D6DE00094D2DC /* FileSecretsHandlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSecretsHandlerTest.swift; sourceTree = "<group>"; };
 		0075860D28A3BCF80094D2DC /* CLIProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIProgressBar.swift; sourceTree = "<group>"; };
 		007A54292885734D00AC4622 /* CLIMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIMain.swift; sourceTree = "<group>"; };
 		007A542E288624F300AC4622 /* SecretsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretsHandler.swift; sourceTree = "<group>"; };
@@ -194,6 +200,10 @@
 		007CBDF928B4A10500B67F71 /* DownloadDelegateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadDelegateTest.swift; sourceTree = "<group>"; };
 		0092F864288DC29F00CFE571 /* DownloadListParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadListParser.swift; sourceTree = "<group>"; };
 		0092F867288F116100CFE571 /* SyncShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncShell.swift; sourceTree = "<group>"; };
+		0093C5D728C4C42B00AF5ABC /* NetworkAgentTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkAgentTestCase.swift; sourceTree = "<group>"; };
+		0093C5D928C4C81900AF5ABC /* AsyncTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncTestCase.swift; sourceTree = "<group>"; };
+		0093C5DB28C4CCBE00AF5ABC /* AWSSecretsHandlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AWSSecretsHandlerTest.swift; sourceTree = "<group>"; };
+		0093C5E028C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AWSSecretsHandlerSoto.swift; sourceTree = "<group>"; };
 		009A9130288C27D0003C0DF4 /* CLIAuthenticate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIAuthenticate.swift; sourceTree = "<group>"; };
 		009A9133288C2857003C0DF4 /* CLIList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIList.swift; sourceTree = "<group>"; };
 		00CECC8928B0BA7600120779 /* AsyncShellTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncShellTest.swift; sourceTree = "<group>"; };
@@ -216,6 +226,7 @@
 		00CECCBE28B3776800120779 /* CLIInstallTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIInstallTest.swift; sourceTree = "<group>"; };
 		00CECCC028B37B6E00120779 /* InstallTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallTest.swift; sourceTree = "<group>"; };
 		00CECCC228B3839A00120779 /* ListTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTest.swift; sourceTree = "<group>"; };
+		00D0649228C279650000197D /* SecretsHandlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretsHandlerTest.swift; sourceTree = "<group>"; };
 		00DC835B28AB73F300B6346D /* LoggerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerTest.swift; sourceTree = "<group>"; };
 		00DC837028ABCF5100B6346D /* XcodeInstallCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XcodeInstallCommand.swift; sourceTree = "<group>"; };
 		00DC837328ABD03600B6346D /* AuthenticateCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticateCommand.swift; sourceTree = "<group>"; };
@@ -336,6 +347,7 @@
 				007A542E288624F300AC4622 /* SecretsHandler.swift */,
 				00EE5FAB28A8F47000B09D2B /* FileSecretsHandler.swift */,
 				001E2E7E28C13C13009C1545 /* AWSSecretsHandler.swift */,
+				0093C5E028C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift */,
 			);
 			path = Secrets;
 			sourceTree = "<group>";
@@ -371,6 +383,7 @@
 			isa = PBXGroup;
 			children = (
 				00CECC9E28B24C3C00120779 /* MockedNetworkClasses.swift */,
+				0093C5D728C4C42B00AF5ABC /* NetworkAgentTestCase.swift */,
 				007A5434288A41E700AC4622 /* HTTPClientTest.swift */,
 				007A543F288A607100AC4622 /* AuthenticationTest.swift */,
 				007A5444288AD6BE00AC4622 /* MFAuthenticationTest.swift */,
@@ -386,6 +399,7 @@
 		00CECC9C28B24BD000120779 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				0093C5D928C4C81900AF5ABC /* AsyncTestCase.swift */,
 				00F8A31828BA139B004FB43A /* MockedUtilitiesClasses.swift */,
 				007585DC289C1F520094D2DC /* SyncShellTest.swift */,
 				00CECC8928B0BA7600120779 /* AsyncShellTest.swift */,
@@ -399,7 +413,9 @@
 		00CECC9D28B24BEA00120779 /* Secrets */ = {
 			isa = PBXGroup;
 			children = (
-				007585DE289D6DE00094D2DC /* FileSecretHandlerTest.swift */,
+				007585DE289D6DE00094D2DC /* FileSecretsHandlerTest.swift */,
+				00D0649228C279650000197D /* SecretsHandlerTest.swift */,
+				0093C5DB28C4CCBE00AF5ABC /* AWSSecretsHandlerTest.swift */,
 			);
 			path = Secrets;
 			sourceTree = "<group>";
@@ -587,6 +603,7 @@
 				007A5433288A3D0A00AC4622 /* HTTPClient.swift in Sources */,
 				00CECCAD28B34B8300120779 /* CLIInstall.swift in Sources */,
 				00CECCB628B34CD500120779 /* Install.swift in Sources */,
+				0093C5E128C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift in Sources */,
 				007A542A2885734D00AC4622 /* CLIMain.swift in Sources */,
 				0041064D28BD25A90033A3A2 /* InstallCLTools.swift in Sources */,
 				00CECCB028B34C4F00120779 /* XCodeInstallBuilder.swift in Sources */,
@@ -628,10 +645,12 @@
 				00EE5FA928A7EB8100B09D2B /* CLIProgressBar.swift in Sources */,
 				009A9136288C2C14003C0DF4 /* Download.swift in Sources */,
 				00CECC9F28B24C3C00120779 /* MockedNetworkClasses.swift in Sources */,
+				0093C5DC28C4CCBE00AF5ABC /* AWSSecretsHandlerTest.swift in Sources */,
 				00DC83B728AD282300B6346D /* DownloadDelegate.swift in Sources */,
 				00CECCBB28B3507B00120779 /* CLIDownloadTest.swift in Sources */,
 				00EE5FB028A9070500B09D2B /* Logger.swift in Sources */,
 				00EE5FAD28A8F47000B09D2B /* FileSecretsHandler.swift in Sources */,
+				0093C5DA28C4C81900AF5ABC /* AsyncTestCase.swift in Sources */,
 				00DC837528ABD03600B6346D /* AuthenticateCommand.swift in Sources */,
 				00CECCBD28B3770000120779 /* CLIListTest.swift in Sources */,
 				009A9137288C2C14003C0DF4 /* CLIMain.swift in Sources */,
@@ -644,11 +663,14 @@
 				00CECCA828B2548600120779 /* DispatchSemaphore.swift in Sources */,
 				00CECC9328B1743000120779 /* FileHandler.swift in Sources */,
 				00CECC8A28B0BA7600120779 /* AsyncShellTest.swift in Sources */,
+				00D0649328C279650000197D /* SecretsHandlerTest.swift in Sources */,
 				007A5436288A4A9C00AC4622 /* Authentication.swift in Sources */,
 				00DC837828ABD34800B6346D /* DownloadCommand.swift in Sources */,
+				0093C5E228C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift in Sources */,
 				00CECC9028B0BAEC00120779 /* ShellSupport.swift in Sources */,
-				007585DF289D6DE00094D2DC /* FileSecretHandlerTest.swift in Sources */,
+				007585DF289D6DE00094D2DC /* FileSecretsHandlerTest.swift in Sources */,
 				00CECCB428B34C9000120779 /* InstallCommand.swift in Sources */,
+				0093C5D828C4C42B00AF5ABC /* NetworkAgentTestCase.swift in Sources */,
 				007A5437288A4A9C00AC4622 /* SecretsHandler.swift in Sources */,
 				00CECCB128B34C4F00120779 /* XCodeInstallBuilder.swift in Sources */,
 				0041064B28BD25810033A3A2 /* InstallXcode.swift in Sources */,

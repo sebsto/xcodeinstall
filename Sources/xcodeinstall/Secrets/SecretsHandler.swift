@@ -7,16 +7,91 @@
 
 import Foundation
 
+// the data to be stored in Secrets Manager as JSON
+struct AppleCredentialsSecret: Codable {
+
+    let username: String
+    let password: String
+
+    func data() throws -> Data {
+        return try JSONEncoder().encode(self)
+    }
+
+    func string() throws -> String? {
+        return String(data: try self.data(), encoding: .utf8)
+    }
+
+    init(fromData data: Data) throws {
+        self = try JSONDecoder().decode(AppleCredentialsSecret.self, from: data)
+    }
+
+    init(username: String = "", password: String = "") {
+        self.username = username
+        self.password = password
+    }
+
+}
+
 protocol SecretsHandler {
 
-    func clearSecrets(preserve: Bool)
-    func restoreSecrets()
+    func clearSecrets() async throws
 
-    func saveCookies(_ cookies: String?) throws -> String?
-    func loadCookies() throws -> [HTTPCookie]
+//    func clearSecrets(preserve: Bool)
+//    func restoreSecrets()
 
-    func saveSession(_ session: AppleSession) throws -> AppleSession
-    func loadSession() throws -> AppleSession
+    func saveCookies(_ cookies: String?) async throws -> String?
+    func loadCookies() async throws -> [HTTPCookie]
+
+    func saveSession(_ session: AppleSession) async throws -> AppleSession
+    func loadSession() async throws -> AppleSession
+
+    func retrieveAppleCredentials() async throws -> AppleCredentialsSecret
+}
+
+extension SecretsHandler {
+
+    ///
+    /// Merge given cookies with the one stored already
+    ///
+    /// - Parameters
+    ///     - cookies : the new cookies to store (or to append)
+    ///     
+    /// - Returns : the new string with all cookies
+    ///
+    func mergeCookies(existingCookies: [HTTPCookie], newCookies: String?) async throws -> String? {
+
+        guard let cookieString = newCookies else {
+            return nil
+        }
+
+        var result = existingCookies
+
+        // transform received cookie string into [HTTPCookie]
+        let newCookies = cookieString.cookies()
+
+        // merge cookies, new values have priority
+
+        // browse new cookies
+        for newCookie in newCookies {
+
+            // if a newCookie match an existing one
+            if ( existingCookies.contains { cookie in cookie.name == newCookie.name }) {
+
+                // replace old with new
+                // assuming there is only one !!
+                result.removeAll { cookie in cookie.name == newCookie.name }
+                result.append(newCookie)
+            } else {
+                // add new to existing
+                result.append(newCookie)
+            }
+
+        }
+
+        // save new set of cookie as string
+        return result.string()
+
+    }
 }
 
 extension String {
@@ -47,9 +122,9 @@ extension Array where Element == HTTPCookie {
                 var cookieAsString = props.map { (key: HTTPCookiePropertyKey, value: Any) -> String in
                     switch key.rawValue {
                         // boolean values are handled separately
-                    case "Secure" : return "Secure"
-                    case "HttpOnly" : return "HttpOnly"
-                    case "Discard" : return ""
+                    case "Secure": return "Secure"
+                    case "HttpOnly": return "HttpOnly"
+                    case "Discard": return ""
 
                     // name and value are handled separately to produce name=value
                     // (and not Name=name and Value=value)

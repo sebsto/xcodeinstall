@@ -8,7 +8,7 @@
 import Foundation
 import ArgumentParser
 
-// download implementation
+// Install implementation
 extension MainCommand {
 
     struct Install: AsyncParsableCommand {

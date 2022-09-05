@@ -6,13 +6,13 @@
 //
 
 import Foundation
-import SotoSecretsManager
 import Logging
 
 // the errors thrown by the SecretsManager class
-enum SecretsManagerError: Error {
+enum SecretsHandlerError: Error {
     case invalidRegion(region: String)
     case secretDoesNotExist(secretname: String)
+    case invalidOperation // when trying to retrieve secrets Apple credentials from file
 }
 
 // the names we are using to store the secrets 
@@ -22,75 +22,158 @@ enum AWSSecretsName: String {
 }
 
 // the data to be stored in Secrets Manager as JSON
-struct AppleCredentialsSecret: Codable {
-    let username: String
-    let password: String
+struct AppleSessionSecret: Codable {
+    var rawCookies: String
+    var session: AppleSession
+
+    func data() throws -> Data {
+        return try JSONEncoder().encode(self)
+    }
+
+    func string() throws -> String? {
+        return String(data: try self.data(), encoding: .utf8)
+    }
+
+    func cookies() -> [HTTPCookie] {
+        return rawCookies.cookies()
+    }
+
+    init(fromData data: Data) throws {
+        self = try JSONDecoder().decode(AppleSessionSecret.self, from: data)
+    }
+
+    init(fromString string: String) throws {
+        if let data = string.data(using: .utf8) {
+            try self.init(fromData: data)
+        } else {
+            fatalError("Can not create data from string : \(string)")
+        }
+    }
+
+    init(cookies: String? = "cookies", session: AppleSession = AppleSession()) {
+        self.rawCookies = cookies == nil ? "cookies" : cookies!
+        self.session = session
+    }
+
 }
 
-// the data to be stored in Secrets Manager as JSON
-struct AppleSessionSecret {
-    let cookies: String
-    let session: AppleSession
-}
+// permissions needed
+// secretsmanager:CreateSecret
+// secretsmanager:TagResource ?
+// secretsmanager:GetSecretValue
+// secretsmanager:PutSecretValue
 
 // use a class to have a chance to call client.shutdown() at deinit
 class AWSSecretsHandler: SecretsHandler {
 
-    let awsClient: AWSClient
-    let smClient: SecretsManager
+    let maxRetries = 3
+
     let logger: Logger
 
-    init?(region: String, logger: Logger) throws {
-
+    init(logger: Logger) throws {
         self.logger = logger
+    }
 
-        guard let awsRegion = Region(awsRegionName: region) else {
-            logger.error("Invalid AWS Region name : \(region)")
-            throw SecretsManagerError.invalidRegion(region: region)
+    // factory function, at the moment returns a SotoBased implementation
+    // might change later to an AWS SDK based implementation
+    static func secretsHandler(region: String, logger: Logger) throws -> AWSSecretsHandler? {
+        return try AWSSecretsHandlerSoto(region: region, logger: logger)
+    }
+
+    func updateSecret(secretId: AWSSecretsName, newValue: AppleSessionSecret) async throws {
+        fatalError("must be implemented by subclasses")
+    }
+
+    func retrieveSecret(secretId: AWSSecretsName) async throws -> AppleSessionSecret {
+        fatalError("must be implemented by subclasses")
+    }
+
+// MARK: protocol implementation
+
+    // I do not delete the secrets because there is a 30 days deletion policy
+    // https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_DeleteSecret.html
+    // Instead, I update the secret value with an empty secret
+    func clearSecrets() async throws {
+
+        let emptySession = AppleSessionSecret()
+        try await updateSecret(secretId: AWSSecretsName.appleSessionToken, newValue: emptySession)
+
+    }
+
+    func saveCookies(_ cookies: String?) async throws -> String? {
+        guard let cookieString = cookies else {
+            return nil
         }
 
-        self.awsClient = AWSClient(
-                            credentialProvider: .default,
-                            httpClientProvider: .createNew)
-        self.smClient = SecretsManager(client: awsClient, region: awsRegion)
+        var result: String? = cookieString
+
+        do {
+
+            // read existing cookies and session
+            let existingSession = try await self.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+
+            // append the new cookies and return the whole new thing
+            result = try await mergeCookies(existingCookies: existingSession.cookies(), newCookies: cookies)
+
+            // create a new session secret object with merged cookies and existing session
+            let newSession = AppleSessionSecret(cookies: result, session: existingSession.session)
+
+            // save this new session secret object
+            try await self.updateSecret(secretId: AWSSecretsName.appleSessionToken, newValue: newSession)
+
+        } catch {
+            logger.error("⚠️ can not save cookies file in AWS Secret Manager: \(error)")
+            throw error
+        }
+
+        return result
 
     }
 
-    deinit {
-        try? self.awsClient.syncShutdown()
+    func loadCookies() async throws -> [HTTPCookie] {
+        do {
+            let session = try await self.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+            let result = session.cookies()
+            return result
+        } catch {
+            logger.error("Error when trying to load session : \(error)")
+            throw error
+        }
     }
 
-    func list() async throws {
-        print("calling list secrets")
-        let request = SecretsManager.ListSecretsRequest()
-        _ = try await smClient.listSecrets(request)
+    func saveSession(_ newSession: AppleSession) async throws -> AppleSession {
+
+        do {
+
+            // read existing cookies and session
+            let existingSession = try await self.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+
+            // create a new session secret object with existing cookies and new session
+            let newSessionSecret = AppleSessionSecret(cookies: existingSession.rawCookies, session: newSession)
+
+            try await self.updateSecret(secretId: AWSSecretsName.appleSessionToken, newValue: newSessionSecret)
+        } catch {
+            logger.error("Error when trying to save session : \(error)")
+            throw error
+        }
+
+        return newSession
     }
 
-    func clearSecrets(preserve: Bool) {
+    func loadSession() async throws -> AppleSession {
 
+        do {
+
+            let sessionSecret = try await self.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+            return sessionSecret.session
+
+        } catch {
+            logger.error("Error when trying to load session : \(error)")
+            throw error
+        }
     }
 
-    func restoreSecrets() {
-
-    }
-
-    func saveCookies(_ cookies: String?) throws -> String? {
-        return ""
-    }
-
-    func loadCookies() throws -> [HTTPCookie] {
-        return []
-    }
-
-    func saveSession(_ session: AppleSession) throws -> AppleSession {
-        return AppleSession(itcServiceKey: AppleServiceKey(authServiceUrl: "", authServiceKey: ""),
-                            xAppleIdSessionId: "",
-                            scnt: "")
-    }
-
-    func loadSession() throws -> AppleSession {
-        return AppleSession(itcServiceKey: AppleServiceKey(authServiceUrl: "", authServiceKey: ""),
-                            xAppleIdSessionId: "",
-                            scnt: "")
+    func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
+        return AppleCredentialsSecret(username: "", password: "")
     }
 }

@@ -98,7 +98,7 @@ class XcodeInstallBuilderTest: XCTestCase {
             
             // then
             XCTAssert(false, "expected to throw an error")
-        } catch SecretsManagerError.invalidRegion(let region){
+        } catch SecretsHandlerError.invalidRegion(let region){
             //expected
             XCTAssertEqual(region, "xxx")
         } catch {

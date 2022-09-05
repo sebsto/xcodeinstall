@@ -147,7 +147,7 @@ extension AppleAuthenticator {
                                       headers: requestHeader,
                                       validResponse: .range(200..<400))
 
-        try self.saveSession(response: response, session: session)
+        try await self.saveSession(response: response, session: session)
 
         // should we save additional cookies ?
         // return (try await getDESCookie(), session)

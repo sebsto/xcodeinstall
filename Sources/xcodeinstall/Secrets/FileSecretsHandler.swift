@@ -37,35 +37,36 @@ struct FileSecretsHandler: SecretsHandler {
     }
 
     // used when testing to start from a clean place
-    func restoreSecrets() {
-
-        // remove file
-        try? fileManager.removeItem(at: sessionPath)
-
-        // copy backup to file
-        try? fileManager.copyItem(at: newSessionPath, to: sessionPath)
-
-        // remove backup
-        try? fileManager.removeItem(at: newSessionPath)
-
-        // do it again with cookies file
-
-        try? fileManager.removeItem(at: cookiesPath)
-        try? fileManager.copyItem(at: newCookiesPath, to: cookiesPath)
-        try? fileManager.removeItem(at: newCookiesPath)
-
-    }
+//    func restoreSecrets() {
+//
+//        // remove file
+//        try? fileManager.removeItem(at: sessionPath)
+//
+//        // copy backup to file
+//        try? fileManager.copyItem(at: newSessionPath, to: sessionPath)
+//
+//        // remove backup
+//        try? fileManager.removeItem(at: newSessionPath)
+//
+//        // do it again with cookies file
+//
+//        try? fileManager.removeItem(at: cookiesPath)
+//        try? fileManager.copyItem(at: newCookiesPath, to: cookiesPath)
+//        try? fileManager.removeItem(at: newCookiesPath)
+//
+//    }
 
     // used when testing to start from a clean place
-    func clearSecrets(preserve: Bool = false) {
+//    func clearSecrets(preserve: Bool = false) {
+    func clearSecrets() async throws {
 
-        if preserve {
-
-            // move files instead of deleting them (if they exist)
-            try? fileManager.copyItem(at: cookiesPath, to: newCookiesPath)
-            try? fileManager.copyItem(at: sessionPath, to: newSessionPath)
-
-        }
+//        if preserve {
+//
+//            // move files instead of deleting them (if they exist)
+//            try? fileManager.copyItem(at: cookiesPath, to: newCookiesPath)
+//            try? fileManager.copyItem(at: sessionPath, to: newSessionPath)
+//
+//        }
 
         try? fileManager.removeItem(at: cookiesPath)
         try? fileManager.removeItem(at: sessionPath)
@@ -75,7 +76,7 @@ struct FileSecretsHandler: SecretsHandler {
     // save cookies in an HTTPUrlResponse
     // save to ~/.xcodeinstall/cookies
     // merge existing cookies into file when file already exists
-    func saveCookies(_ cookies: String?) throws -> String? {
+    func saveCookies(_ cookies: String?) async throws -> String? {
 
         guard let cookieString = cookies else {
             return nil
@@ -88,43 +89,21 @@ struct FileSecretsHandler: SecretsHandler {
             // if file exists,
             if fileManager.fileExists(atPath: cookiesPath.path) {
 
-                // read it, append the new cookies and save the whole new thing
-
                 // load existing cookies as [HTTPCookie]
-                var existingCookies = try self.loadCookies()
+                let existingCookies = try await self.loadCookies()
 
-                // transform received cookie string into [HTTPCookie]
-                let newCookies = cookieString.cookies()
-
-                // merge cookies, new values have priority
-
-                // browse new cookies
-                for newCookie in newCookies {
-
-                    // if a newCookie match an existing one
-                    if ( existingCookies.contains { cookie in cookie.name == newCookie.name }) {
-
-                        // replace old with new
-                        // assuming there is only one !!
-                        existingCookies.removeAll { cookie in cookie.name == newCookie.name }
-                        existingCookies.append(newCookie)
-                    } else {
-                        // add new to existing
-                        existingCookies.append(newCookie)
-                    }
-
-                }
-
-                // save new set of cookie as string
-                result = existingCookies.string()
+                // read it, append the new cookies and save the whole new thing
+                result = try await mergeCookies(existingCookies: existingCookies, newCookies: cookies)
                 try result?.data(using: .utf8)!.write(to: cookiesPath)
 
             } else {
+
                 // otherwise, just save the cookies
                 try cookieString.data(using: .utf8)!.write(to: cookiesPath)
             }
         } catch {
             logger.error("⚠️ can not write cookies file: \(error)")
+            throw error
         }
 
         return result
@@ -132,7 +111,7 @@ struct FileSecretsHandler: SecretsHandler {
     }
 
     // retrieve cookies
-    func loadCookies() throws -> [HTTPCookie] {
+    func loadCookies() async throws -> [HTTPCookie] {
 
         // read the raw file saved on disk
         let cookieLongString = try String(contentsOf: cookiesPath, encoding: .utf8)
@@ -141,22 +120,25 @@ struct FileSecretsHandler: SecretsHandler {
     }
 
     // save Apple Session values as JSON
-    func saveSession(_ session: AppleSession) throws -> AppleSession {
+    func saveSession(_ session: AppleSession) async throws -> AppleSession {
 
         // save session
-        let data = try JSONEncoder().encode(session)
-
-        try data.write(to: sessionPath)
+        try session.data().write(to: sessionPath)
 
         return session
     }
 
     // load Apple Session from JSON
-    func loadSession() throws -> AppleSession {
+    func loadSession() async throws -> AppleSession {
 
         // read the raw file saved on disk
         let sessionData = try Data(contentsOf: sessionPath)
 
-        return try JSONDecoder().decode(AppleSession.self, from: sessionData)
+        return try AppleSession(fromData: sessionData)
     }
+
+    func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
+        throw SecretsHandlerError.invalidOperation
+    }
+
 }

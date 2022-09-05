@@ -46,7 +46,7 @@ extension AppleDownloader {
                 // grab authentication cookie for later download
                 if let cookies = response.value(forHTTPHeaderField: "Set-Cookie") {
                     // save the new cookies we received (ADCDownloadAuth)
-                    _ = try self.secretsHandler.saveCookies(cookies)
+                    _ = try await self.secretsHandler.saveCookies(cookies)
                 } else {
                     // swiftlint:disable line_length
                     logger.error("🛑 Download List response does not contain authentication cookie, something is incorrect")
