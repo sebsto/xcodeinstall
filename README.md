@@ -35,7 +35,7 @@ It is a best practice to automate the preparation of your build environment to e
 
 ## How to install 
 
-Most of you are not interest by the source code. To install the brinary, use [homebrew] package manager and install a custom tap. 
+Most of you are not interest by the source code. To install the brinary, use [homebrew](https://brew.sh) package manager and install a custom tap, then install the package. 
 
 First, install the custom tap. This is a one-time operation.
 
@@ -52,7 +52,7 @@ Receiving objects: 100% (6/6), 5.55 KiB | 5.55 MiB/s, done.
 Tapped 1 formula (13 files, 21.7KB).
 ```
 
-Once the tap is added, install by typing `brew install xcodeinstall`
+Once the tap is added, install the package by typing `brew install xcodeinstall`
 
 ```zsh
 ➜  ~ brew install xcodeinstall 
@@ -362,4 +362,3 @@ I listed a couple of ideas below.
 
 - add a CloudWatch Log backend to Logging framework 
 - add possibility to emit SNS notifications on error, such as Session Expired  
-- add support to install with homebrew
