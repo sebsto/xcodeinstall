@@ -102,7 +102,6 @@
 		00D0649328C279650000197D /* SecretsHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D0649228C279650000197D /* SecretsHandlerTest.swift */; };
 		00D2440F28C5EAF2002AB0FB /* StoreSecretsCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D2440E28C5EAF2002AB0FB /* StoreSecretsCommand.swift */; };
 		00D2441028C5EAF2002AB0FB /* StoreSecretsCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D2440E28C5EAF2002AB0FB /* StoreSecretsCommand.swift */; };
-		00DC835728AA5FD700B6346D /* SystemPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 00DC835628AA5FD700B6346D /* SystemPackage */; settings = {ATTRIBUTES = (Required, ); }; };
 		00DC835928AB6EA000B6346D /* SwiftToolsSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 00DC835828AB6EA000B6346D /* SwiftToolsSupport */; };
 		00DC835A28AB6EA000B6346D /* SwiftToolsSupport in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 00DC835828AB6EA000B6346D /* SwiftToolsSupport */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		00DC835C28AB73F300B6346D /* LoggerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00DC835B28AB73F300B6346D /* LoggerTest.swift */; };
@@ -260,7 +259,6 @@
 				00DC835928AB6EA000B6346D /* SwiftToolsSupport in Frameworks */,
 				007585E928A0E1590094D2DC /* Logging in Frameworks */,
 				009A912F288C213F003C0DF4 /* ArgumentParser in Frameworks */,
-				00DC835728AA5FD700B6346D /* SystemPackage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -505,7 +503,6 @@
 			packageProductDependencies = (
 				009A912E288C213F003C0DF4 /* ArgumentParser */,
 				007585E828A0E1590094D2DC /* Logging */,
-				00DC835628AA5FD700B6346D /* SystemPackage */,
 				00DC835828AB6EA000B6346D /* SwiftToolsSupport */,
 				001E2E7C28C0875C009C1545 /* SotoSecretsManager */,
 			);
@@ -558,7 +555,6 @@
 				009A912D288C213F003C0DF4 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
 				007585E028A0E1160094D2DC /* XCRemoteSwiftPackageReference "swift-tools-support-core" */,
 				007585E728A0E1590094D2DC /* XCRemoteSwiftPackageReference "swift-log" */,
-				00DC835528AA5FD700B6346D /* XCRemoteSwiftPackageReference "swift-system" */,
 				001E2E7B28C0875C009C1545 /* XCRemoteSwiftPackageReference "soto" */,
 			);
 			productRefGroup = OBJ_15 /* Products */;
@@ -990,14 +986,6 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		00DC835528AA5FD700B6346D /* XCRemoteSwiftPackageReference "swift-system" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-system.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1035,11 +1023,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 009A912D288C213F003C0DF4 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
 			productName = ArgumentParser;
-		};
-		00DC835628AA5FD700B6346D /* SystemPackage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 00DC835528AA5FD700B6346D /* XCRemoteSwiftPackageReference "swift-system" */;
-			productName = SystemPackage;
 		};
 		00DC835828AB6EA000B6346D /* SwiftToolsSupport */ = {
 			isa = XCSwiftPackageProductDependency;
