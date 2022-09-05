@@ -21,6 +21,8 @@ The username and password ARE NOT STORED on the local volume. They are used to i
 
 The session stays valid for several days, sometimes weeks before it expires.  When the session expires, you have to authenticate again. Apple typically prompt you for a new authentication when connecting from a new IP address or location (switching between laptop and EC2 instance for example)
 
+> When using Secrets Manager for authentication, it is required to use it FROM THE SAME AWS REGION, for the `list` and `download` command.
+
 ## Demo 
 
 ![Video Demo](img/xcodeinstall-demo.gif)
@@ -33,13 +35,36 @@ It is a best practice to automate the preparation of your build environment to e
 
 ## How to install 
 
-When finished, I would like to distribute this tool with homebrew.  Installation will look like the below.
+Most of you are not interest by the source code. To install the brinary, use [homebrew] package manager and install a custom tap. 
 
-(not implemented yet)
+First, install the custom tap. This is a one-time operation.
 
-`brew add tap sebsto/sebsto`
+```zsh
+➜  ~ brew tap sebsto/macos
 
-`brew install xcodeinstall`
+==> Tapping sebsto/macos
+Cloning into '/opt/homebrew/Library/Taps/sebsto/homebrew-macos'...
+remote: Enumerating objects: 6, done.
+remote: Counting objects: 100% (6/6), done.
+remote: Compressing objects: 100% (5/5), done.
+remote: Total 6 (delta 0), reused 0 (delta 0), pack-reused 0
+Receiving objects: 100% (6/6), 5.55 KiB | 5.55 MiB/s, done.
+Tapped 1 formula (13 files, 21.7KB).
+```
+
+Once the tap is added, install by typing `brew install xcodeinstall`
+
+```zsh
+➜  ~ brew install xcodeinstall 
+
+==> Downloading https://github.com/sebsto/xcodeinstall/archive/refs/tags/v0.1.tar.gz
+Already downloaded: /Users/stormacq/Library/Caches/Homebrew/downloads/03a2cadcdf453516415f70a35b054cdcfb33bd3a2578ab43f8b07850b49eb19c--xcodeinstall-0.1.tar.gz
+==> Installing xcodeinstall from sebsto/macos
+==> swift build --configuration release --disable-sandbox
+🍺  /opt/homebrew/Cellar/xcodeinstall/0.1: 6 files, 22.3MB, built in 2 minutes 35 seconds
+```
+
+Once installed, it is in the path, you can just type `xcodeinstall` to start the tool.
 
 ## How to use 
 
@@ -102,7 +127,7 @@ Authenticating...
 🔐 Two factors authentication is enabled, enter your 2FA code: 000000
 ✅ Authenticated with MFA.
 ```
-When your Apple Developer Portal crednetials are stored on AWS Secrets Manager, you can just specify the AWS Region 
+When your Apple Developer Portal credentials are stored on AWS Secrets Manager, you can just specify the AWS Region 
 
 ```
 ➜  ~ xcodeinstall authenticate -s us-east-1
@@ -112,6 +137,8 @@ Authenticating...
 🔐 Two factors authentication is enabled, enter your 2FA code: 00000
 ✅ Authenticated with MFA.
 ```
+
+> When using Secrets Manager for authentication, it is required to use it FROM THE SAME AWS REGION, for the `list` and `download` command.
 
 The two above command (interactive and AWS Secrets Manager based) triggers the following prompt on your registered machines (laptop, phone, or tablet)
 
