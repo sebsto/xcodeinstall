@@ -16,9 +16,18 @@ extension MainCommand {
                              abstract: "Store your Apple Developer Portal username and password in AWS Secrets Manager")
 
         @OptionGroup var globalOptions: GlobalOptions
-        @OptionGroup var cloudOption: CloudOptions
+
+        // repeat of CloudOption but this time mandatory
+        @Option(name: [.customLong("secretmanager-region"), .short],
+                help: "Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region")
+        var secretManagerRegion: String
 
         func run() async throws {
+            let xcib = XCodeInstallBuilder()
+                            .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
+                            .withAWSSecretsManager(region: secretManagerRegion)
+
+            _ = try await xcib.build().storeSecrets()
         }
     }
 

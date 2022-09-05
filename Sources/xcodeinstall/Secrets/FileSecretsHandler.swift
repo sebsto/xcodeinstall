@@ -129,12 +129,15 @@ struct FileSecretsHandler: SecretsHandler {
     }
 
     // load Apple Session from JSON
-    func loadSession() async throws -> AppleSession {
+    // returns nil when can not read file 
+    func loadSession() async throws -> AppleSession? {
 
         // read the raw file saved on disk
-        let sessionData = try Data(contentsOf: sessionPath)
-
-        return try AppleSession(fromData: sessionData)
+        if let sessionData = try? Data(contentsOf: sessionPath) {
+            return try AppleSession(fromData: sessionData)
+        } else {
+            return nil
+        }
     }
 
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {

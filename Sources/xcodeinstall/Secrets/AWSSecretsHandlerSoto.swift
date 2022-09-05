@@ -15,7 +15,6 @@ class AWSSecretsHandlerSoto: AWSSecretsHandler {
     init?(region: String, logger: Logger) throws {
 
         guard let awsRegion = Region(awsRegionName: region) else {
-            logger.error("Invalid AWS Region name : \(region)")
             throw SecretsHandlerError.invalidRegion(region: region)
         }
 
@@ -49,7 +48,7 @@ class AWSSecretsHandlerSoto: AWSSecretsHandler {
     /// - Throws:
     ///         This function throws error from the underlying SDK
     ///
-    private func createSecret(secretId: String, secretValue: AppleSessionSecret) async throws {
+    private func createSecret(secretId: String, secretValue: Secrets) async throws {
         do {
             let secretString = try secretValue.string()
             let createSecretRequest = SecretsManager.CreateSecretRequest(description: "xcodeinstall secret",
@@ -76,7 +75,7 @@ class AWSSecretsHandlerSoto: AWSSecretsHandler {
     ///
 
     private func executeRequestAndCreateWhenNotExist(secretId: String,
-                                                     secretValue: AppleSessionSecret,
+                                                     secretValue: Secrets,
                                                      step: Int,
                                                      block: () async throws -> Void) async throws {
 
@@ -120,7 +119,7 @@ class AWSSecretsHandlerSoto: AWSSecretsHandler {
     /// - Throws:
     ///         This function throws error from the underlying SDK
     ///
-    override func updateSecret(secretId: AWSSecretsName, newValue: AppleSessionSecret) async throws {
+    override func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws {
         do {
 
             // maybe the secret does not exist yet - so wrap our call with
@@ -146,19 +145,26 @@ class AWSSecretsHandlerSoto: AWSSecretsHandler {
     }
 
     // FIXME: improve error handling when secret is not retrieved
-    override func retrieveSecret(secretId: AWSSecretsName) async throws -> AppleSessionSecret {
+    // swiftlint:disable force_cast
+    override func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T {
         do {
             let getSecretRequest = SecretsManager.GetSecretValueRequest(secretId: secretId.rawValue)
             logger.debug("Retrieving secret \(secretId)")
             let getSecretResponse = try await smClient.getSecretValue(getSecretRequest)
             logger.debug("Secret \(getSecretResponse.name ?? "nil") retrieved")
 
-            if let secret = getSecretResponse.secretString {
-                return try AppleSessionSecret(fromString: secret)
-            } else {
+            guard let secret = getSecretResponse.secretString else {
                 logger.error("⚠️ no value returned by AWS Secrets Manager secret \(secretId)")
-                return AppleSessionSecret()
+                return secretId == .appleCredentials ? AppleCredentialsSecret() as! T : AppleSessionSecret() as! T
             }
+
+            switch secretId {
+            case .appleCredentials:
+                return try AppleCredentialsSecret(fromString: secret) as! T
+            case .appleSessionToken:
+                return try AppleSessionSecret(fromString: secret) as! T
+            }
+
         } catch {
             logger.error("Unexpected error while retrieving secrets\n\(error)")
             throw error
@@ -166,5 +172,6 @@ class AWSSecretsHandlerSoto: AWSSecretsHandler {
         }
 
     }
+    // swiftlint:enable force_cast
 
 }

@@ -7,8 +7,13 @@
 
 import Foundation
 
+protocol Secrets {
+    func data() throws -> Data
+    func string() throws -> String?
+}
+
 // the data to be stored in Secrets Manager as JSON
-struct AppleCredentialsSecret: Codable {
+struct AppleCredentialsSecret: Codable, Secrets {
 
     let username: String
     let password: String
@@ -23,6 +28,14 @@ struct AppleCredentialsSecret: Codable {
 
     init(fromData data: Data) throws {
         self = try JSONDecoder().decode(AppleCredentialsSecret.self, from: data)
+    }
+
+    init(fromString string: String) throws {
+        if let data = string.data(using: .utf8) {
+            try self.init(fromData: data)
+        } else {
+            fatalError("Can not create data from string : \(string)")
+        }
     }
 
     init(username: String = "", password: String = "") {
@@ -43,7 +56,7 @@ protocol SecretsHandler {
     func loadCookies() async throws -> [HTTPCookie]
 
     func saveSession(_ session: AppleSession) async throws -> AppleSession
-    func loadSession() async throws -> AppleSession
+    func loadSession() async throws -> AppleSession?
 
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret
 }

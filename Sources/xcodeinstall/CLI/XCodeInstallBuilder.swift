@@ -41,10 +41,6 @@ class XCodeInstallBuilder {
     }
     func build() throws -> XCodeInstall {
 
-        guard downloaderNeeded || authenticatorNeeded || installerNeeded else {
-            fatalError("This command requires either an authenticator,a downloader, or an installer")
-        }
-
         let log = Log(logLevel: self.verbosity)
         let fileHandler = FileHandler(logger: log.defaultLogger)
 
@@ -84,6 +80,12 @@ class XCodeInstallBuilder {
             let inst = ShellInstaller(logger: log.defaultLogger, fileHandler: fileHandler, shell: AsyncShell())
             result = XCodeInstall(installer: inst,
                                   secretsManager: secretsManager,
+                                  logger: log.defaultLogger,
+                                  fileHandler: fileHandler)
+        }
+
+        if result == nil { // no API class needed, this is just to Store Apple Secrets
+            result = XCodeInstall(secretsManager: secretsManager,
                                   logger: log.defaultLogger,
                                   fileHandler: fileHandler)
         }
