@@ -41,7 +41,7 @@ struct MainCommand: AsyncParsableCommand {
         abstract: "A utility to download and install Xcode",
 
         // Commands can define a version for automatic '--version' support.
-        version: "0.1",
+        version: "0.2",
 
         // Pass an array to `subcommands` to set up a nested tree of subcommands.
         // With language support for type-level introspection, this could be
