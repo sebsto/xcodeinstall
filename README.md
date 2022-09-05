@@ -309,10 +309,19 @@ When using AWS Secrets Manager to retrieve your Apple Developer Portal username 
 {"username":"your_username","password":"your_password"}
 ```
 
-To help you to create this secret, you may use the following command: (Be sure to adjust the name of the AWS Region to your requirements. Using an AWS Region geographically close to you helps to reduce latency)
+To help you to create this secret, you may use the following command.
+
+Be sure to adjust the name of the AWS Region to your requirements. Using an AWS Region geographically close to you helps to reduce latency)
 
 ```zsh
 ➜  ~ xcodeinstall storesecrets -s us-east-1
+
+This command captures your Apple ID username and password and store them securely in AWS Secrets Manager.
+It allows this command to authenticate automatically, as long as no MFA is prompted.
+
+⌨️  Enter your Apple ID username: sebsto@me.com
+⌨️  Enter your Apple ID password: 
+✅ Credentials are securely stored
 ```
 
 ## How to contribute 
