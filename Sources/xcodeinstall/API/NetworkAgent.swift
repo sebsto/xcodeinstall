@@ -130,7 +130,7 @@ class NetworkAgent {
         let (data, response) = try await httpClient.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
               validResponse.isValid(response: httpResponse.statusCode) else {
-            logger.error("=== HTTP ERROR. Status code not in range \(validResponse) ===")
+            logger.error("=== HTTP ERROR. Status code \((response as? HTTPURLResponse)!.statusCode) not in range \(validResponse) ===")
             logger.debug("URLResponse : \(response)")
             throw URLError(.badServerResponse)
         }

@@ -145,9 +145,15 @@ extension AppleAuthenticator {
                                       method: .POST,
                                       body: try JSONEncoder().encode(body),
                                       headers: requestHeader,
-                                      validResponse: .range(200..<400))
+                                      validResponse: .range(200..<404))
 
-        try await self.saveSession(response: response, session: session)
+        if response.statusCode == 400 {
+            throw AuthenticationError.invalidPinCode
+        } else if response.statusCode == 403 {
+            throw AuthenticationError.unexpectedHTTPReturnCode(code: 403)
+        } else {
+            try await self.saveSession(response: response, session: session)
+        }
 
         // should we save additional cookies ?
         // return (try await getDESCookie(), session)
