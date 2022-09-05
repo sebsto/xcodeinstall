@@ -18,8 +18,10 @@ extension XCodeInstall {
 
         do {
             display("""
+
 This command captures your Apple ID username and password and store them securely in AWS Secrets Manager.
 It allows this command to authenticate automatically, as long as no MFA is prompted.
+
 """)
 
             guard let username = input.readLine(prompt: "⌨️  Enter your Apple ID username: ", silent: false) else {
