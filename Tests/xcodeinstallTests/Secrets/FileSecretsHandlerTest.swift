@@ -41,4 +41,8 @@ class FileSecretsHandlerTest: AsyncTestCase, SecretsHandlerTestProtocol {
     func testLoadAndSaveCookies() async throws {
         try await secretHandlerTest!.testLoadAndSaveCookies()
     }
+    
+    func testLoadSessionNoExist() async {
+        await secretHandlerTest!.testLoadSessionNoExist()
+    }
 }

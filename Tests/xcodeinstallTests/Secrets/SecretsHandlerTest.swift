@@ -13,6 +13,7 @@ protocol SecretsHandlerTestProtocol {
     func testMergeCookiesOneConflict() async throws
     func testLoadAndSaveSession() async throws
     func testLoadAndSaveCookies() async throws
+    func testLoadSessionNoExist() async
 }
 
 class SecretsHandlerTestBase<T: SecretsHandler> : XCTestCase {
@@ -130,5 +131,16 @@ class SecretsHandlerTestBase<T: SecretsHandler> : XCTestCase {
         XCTAssert(cookies.contains(where: { c in c.name == "aasp" }))
     }
 
+    func testLoadSessionNoExist() async {
+        
+        // given
+        // no session exist (clear session happened as setup time)
+        
+        // when
+        let newSession = try? await secrets!.loadSession()
+        
+        // then
+        XCTAssertNil(newSession)
 
+    }
 }

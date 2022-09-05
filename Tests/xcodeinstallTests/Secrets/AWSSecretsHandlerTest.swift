@@ -44,4 +44,8 @@ class AWSSecretsHandlerTest: AsyncTestCase, SecretsHandlerTestProtocol {
         try await secretHandlerTest!.testLoadAndSaveCookies()
     }
 
+    func testLoadSessionNoExist() async {
+        await secretHandlerTest!.testLoadSessionNoExist()
+    }
+
 }
