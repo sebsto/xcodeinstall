@@ -37,12 +37,15 @@ extension MainCommand {
         @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-            let main = try XCodeInstallBuilder()
+            var main = XCodeInstallBuilder()
                             .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
                             .withAuthenticator()
-                            .build()
 
-            try await main.signout()
+            if let region = cloudOption.secretManagerRegion {
+                main = main.withAWSSecretsManager(region: region)
+            }
+
+            try await main.build().signout()
         }
     }
 
