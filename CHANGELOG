@@ -1,0 +1,8 @@
+## version 0.2
+
+- add AWS Secrets Manager support to `signout` command ([#6d6380f](https://github.com/sebsto/xcodeinstall/commit/6d6380f46c570bc1a4ff8950f972edb13c371f05))
+- bump version to v0.2 ([#58e2f66](https://github.com/sebsto/xcodeinstall/commit/58e2f66d826223a353a9644f1725486a08e89daa))
+
+## version 0.1
+
+Initial Release 
