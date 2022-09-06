@@ -17,7 +17,9 @@ This project is licensed under the Apache 2.0 License.
 
 When **MFA is configured** (which we highly recommend), a human interaction is required to enter the MFA code sent to your device.  This step cannot be automated.
 
-The username and password ARE NOT STORED on the local volume. They are used to interact with Apple's Developer Portal API and collect a session token.  The session token is stored in `$HOME/.xcodeinstall` or on AWS Secrets Manager.
+When storing Apple session cookies on AWS Secrets Manager, you may authenticate interactively, using MFA, from your laptop, and have the command running unattended, from a script running on your cloud machine.
+
+The Apple Developer Portal username and password ARE NOT STORED on the local volume. They are used to interact with Apple's Developer Portal API and collect a session token.  The session token is stored in `$HOME/.xcodeinstall` or on AWS Secrets Manager.
 
 The session stays valid for several days, sometimes weeks before it expires.  When the session expires, you have to authenticate again. Apple typically prompt you for a new authentication when connecting from a new IP address or location (switching between laptop and EC2 instance for example)
 
@@ -111,7 +113,7 @@ OPTIONS:
   -h, --help              Show help information.
 ```
 
-Interactive authentication 
+### Interactive authentication 
 
 ```
 ➜  ~ xcodeinstall authenticate    
@@ -129,6 +131,9 @@ Authenticating...
 🔐 Two factors authentication is enabled, enter your 2FA code: 000000
 ✅ Authenticated with MFA.
 ```
+
+### Using AWS Secrets Manager
+
 When your Apple Developer Portal credentials are stored on AWS Secrets Manager, you can just specify the AWS Region 
 
 ```
@@ -314,7 +319,7 @@ aws iam create-policy                      \
 ```zsh
 # Attach a policy to a role 
 # CHANGE 000000000000 with your AWS Account ID
-aws iam attach-role-policy                                            \
+aws iam attach-role-policy                                                     \
      --policy-arn arn:aws:iam::000000000000:policy/xcodeinstall-permissions    \
      --role-name xcodeinstall
 ```
@@ -334,7 +339,7 @@ aws iam add-role-to-instance-profile             \
 # Identify the Instance ID of your EC2 Mac Instance.
 # You may use the AWS Console or search by tags like this (replace the tag value with yours)
 INSTANCE_ID=$(aws ec2 describe-instances                                                 \
-               --filter "Name=tag:Name,Values=M1 Monterey"                            \
+               --filter "Name=tag:Name,Values=M1 Monterey"                               \
                --query "Reservations[].Instances[?State.Name == 'running'].InstanceId[]" \
                --output text)
 
