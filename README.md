@@ -64,6 +64,8 @@ Already downloaded: /Users/stormacq/Library/Caches/Homebrew/downloads/03a2cadcdf
 🍺  /opt/homebrew/Cellar/xcodeinstall/0.1: 6 files, 22.3MB, built in 2 minutes 35 seconds
 ```
 
+I chose to compile the tool from source code, installation takes 2-3 minutes on an Apple Silicon machine.
+
 Once installed, it is in the path, you can just type `xcodeinstall` to start the tool.
 
 ## How to use 
@@ -228,9 +230,31 @@ When you known the name of the file (for example `Xcode 13.4.1.xip`), you can us
 
 ## Minimum IAM Permissions required to use AWS Secrets Manager 
 
-To be authorized to call AWS Secrets Manager from the EC2 instance where you run `xcodeinstall`, create an IAM role that contains the minimum set of permissions to allow `xcodeinstall` to interact with AWS Secrets Manager.
+The minimum IAM permisions required to use this tool with AWS Secrets Manager is as below (do not forget to replace 000000000000 with your AWS Account ID)
 
-From a machine where the AWS CLI is installed and where you have AWS credentials to create roles and permissions, type the following commands :
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "xcodeinstall",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:CreateSecret",
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:PutSecretValue"
+            ],
+            "Resource": "arn:aws:secretsmanager:*:000000000000:secret:xcodeinstall-*"
+        }
+    ]
+}
+```
+
+Once associated with an IAM Role, you can attach the role to any IAM principal : user, group or an AWS service, such as an EC2 Mac instance. Here are instructions to do so.
+
+ *Create* an IAM role that contains the minimum set of permissions to allow `xcodeinstall` to interact with AWS Secrets Manager, then *attach* this role to the EC2 Mac instance where you run `xcodeinstall`. 
+
+From a machine where the AWS CLI is installed and where you have AWS credentials allowing you to create roles and permissions (typically your laptop), type the following commands :
 
 
 1. First create a role that can be attached (trusted) by any EC2 instances:
