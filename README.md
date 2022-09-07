@@ -13,6 +13,11 @@ This project is licensed under the Apache 2.0 License.
 
 ## TL;DR
 
+![Download](img/download.png)
+![Install](img/install.png)
+
+## What is it
+
 `xcodeinstall` is a command line utility to download and install Xcode from the terminal only. It may work interactively or unattended. In **interactive mode**, it prompts you for your Apple Developer account username, password and MFA code.  In **unattended mode**, it fetches your Apple Developer username and password from AWS Secrets Manager. (Instructions to configure this are below).
 
 When **MFA is configured** (which we highly recommend), a human interaction is required to enter the MFA code sent to your device.  This step cannot be automated.
@@ -62,11 +67,9 @@ Once the tap is added, install the package by typing `brew install xcodeinstall`
 ==> Downloading https://github.com/sebsto/xcodeinstall/archive/refs/tags/v0.1.tar.gz
 Already downloaded: /Users/stormacq/Library/Caches/Homebrew/downloads/03a2cadcdf453516415f70a35b054cdcfb33bd3a2578ab43f8b07850b49eb19c--xcodeinstall-0.1.tar.gz
 ==> Installing xcodeinstall from sebsto/macos
-==> swift build --configuration release --disable-sandbox
-🍺  /opt/homebrew/Cellar/xcodeinstall/0.1: 6 files, 22.3MB, built in 2 minutes 35 seconds
+🍺  /opt/homebrew/Cellar/xcodeinstall/0.2: 8 files, 25.6MB, built in 2 seconds
+==> Running `brew cleanup xcodeinstall`...
 ```
-
-I chose to compile the tool from source code, installation takes 2-3 minutes on an Apple Silicon machine.
 
 Once installed, it is in the path, you can just type `xcodeinstall` to start the tool.
 
@@ -391,3 +394,7 @@ I listed a couple of ideas below.
 
 - add a CloudWatch Log backend to Logging framework 
 - add possibility to emit SNS notifications on error, such as Session Expired  
+
+## Credits 
+
+[xcode-install](https://github.com/xcpretty/xcode-install) and [fastlane/spaceship](https://github.com/fastlane/fastlane/tree/master/spaceship) both deserve credit for figuring out the hard parts of what makes this possible.
