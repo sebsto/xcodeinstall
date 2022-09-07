@@ -34,6 +34,7 @@ extension XCodeInstall {
 
             try await inst.install(file: fileToInstall, progress: progress)
             progress.complete(success: true)
+            display("✅ \(fileToInstall) installed")
         } catch CLIError.invalidInput {
             display("🛑 Invalid input")
             progress.complete(success: false)
