@@ -1,0 +1,23 @@
+name: Build And Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: swift build -v
+
+  test:
+    runs-on: self-hosted
+
+    steps:
+    - name: Run tests
+      run: swift test -v
