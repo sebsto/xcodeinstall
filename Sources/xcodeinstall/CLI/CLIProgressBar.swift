@@ -18,6 +18,7 @@ protocol ProgressUpdateProtocol: ProgressAnimationProtocol {}
 enum ProgressBarType {
     case percentProgressAnimation
     case countingProgressAnimation
+    case countingProgressAnimationMultiLine
 }
 
 struct CLIProgressBar: ProgressUpdateProtocol {
@@ -35,6 +36,8 @@ struct CLIProgressBar: ProgressUpdateProtocol {
             self.progressAnimation = PercentProgressAnimation(stream: self.stream, header: self.message)
         case .countingProgressAnimation:
             self.progressAnimation = NinjaProgressAnimation(stream: self.stream)
+        case .countingProgressAnimationMultiLine:
+            self.progressAnimation = MultiLineNinjaProgressAnimation(stream: self.stream)
         }
     }
 

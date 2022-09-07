@@ -19,7 +19,7 @@ extension XCodeInstall {
         }
 
         // progress bar to report progress feedback
-        let progress = CLIProgressBar(animationType: .countingProgressAnimation,
+        let progress = CLIProgressBar(animationType: .countingProgressAnimationMultiLine,
                                       stream: stdoutStream,
                                       message: "Installing...")
         var fileToInstall: String = ""
