@@ -116,7 +116,7 @@ OPTIONS:
   -h, --help              Show help information.
 ```
 
-### Interactive authentication 
+#### Interactive authentication 
 
 ```
 ➜  ~ xcodeinstall authenticate    
@@ -135,7 +135,7 @@ Authenticating...
 ✅ Authenticated with MFA.
 ```
 
-### Using AWS Secrets Manager
+#### Using AWS Secrets Manager
 
 When your Apple Developer Portal credentials are stored on AWS Secrets Manager, you can just specify the AWS Region 
 
