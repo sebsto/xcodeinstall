@@ -9,6 +9,8 @@ class Xcodeinstall < Formula
   SHA
   license "Apache-2.0"
 
+  # insert bottle definition here
+
   def install
     system "./scripts/build_fat_binary.sh"
     bin.install ".build/apple/Products/Release/xcodeinstall"
