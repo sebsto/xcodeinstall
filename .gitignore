@@ -8,6 +8,7 @@ test.log
 dist
 Tests/Data/curl.txt
 scripts/xcodeinstall.rb
+BOTTLE_BLOCK
 
 # Xcode
 #
