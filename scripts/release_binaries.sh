@@ -28,7 +28,7 @@ sed -i .bak -E -e "/  # insert bottle definition here/r BOTTLE_BLOCK" ./scripts/
 rm ./scripts/xcodeinstall.rb.bak
 
 echo "\n🍺 Pushing new formula\n"
-cp scripts/xcodeinstall.rb ../homebrew-macos
+cp ./scripts/xcodeinstall.rb ../homebrew-macos
 pushd ../homebrew-macos
 git add xcodeinstall.rb 
 git commit --quiet -m "update for $TAG"

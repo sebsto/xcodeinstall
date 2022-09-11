@@ -1,12 +1,11 @@
 ## version 0.3
 
+- Build scripts now produce a fat binary (multiple commits)
+- Build scripts produce brew bottles (binaries) (multiple commits)
+- Build scripts update brew formula (multiple commits)
 - bump version to v0.3
-
-## version 0.2
-
-- add build and release shell scripts ([#e84f9f6](https://github.com/sebsto/xcodeinstall/commit/e84f9f6a3ccd48e3850b925d2431aabf38030ad7))
+- add initial version for build and release shell scripts ([#e84f9f6](https://github.com/sebsto/xcodeinstall/commit/e84f9f6a3ccd48e3850b925d2431aabf38030ad7))
 - add AWS Secrets Manager support to `signout` command ([#6d6380f](https://github.com/sebsto/xcodeinstall/commit/6d6380f46c570bc1a4ff8950f972edb13c371f05))
-- bump version to v0.2 ([#58e2f66](https://github.com/sebsto/xcodeinstall/commit/58e2f66d826223a353a9644f1725486a08e89daa))
 
 ## version 0.1
 
