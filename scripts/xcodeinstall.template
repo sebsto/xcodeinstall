@@ -10,11 +10,7 @@ class Xcodeinstall < Formula
   license "Apache-2.0"
 
   def install
-    system "swift", "build",
-      "--configuration", "release",
-      "--arch", "x86_64",
-      "--arch", "arm64",
-      "--disable-sandbox"
+    system "./scripts/release_binaries.sh"
     bin.install ".build/release/xcodeinstall"
   end
 
