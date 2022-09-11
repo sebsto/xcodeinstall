@@ -1,8 +1,10 @@
 ## To release a new version.
 
-1. Be sure all changes are tested, commited and pushed.
+1. Update version number in `scripts/release-sources.sh`
 
-2. ./scripts/release_sources.sh
+2. Commit all other changes and push them
+
+3. `./scripts/release_sources.sh`
 
 This script 
 - creates a new version 
@@ -10,14 +12,14 @@ This script
 - creates a GitHub release 
 - creates a brew formula with the new release
 
-3. ./scripts/bottles.sh 
+4. `./scripts/bottles.sh` 
 
 This script
 - creates the brew bottles TAR file and the code to add to the formula 
 
-4. ./scripts/release_binaries.sh 
+5. `./scripts/release_binaries.sh` 
 
-This scripts 
+This script 
 - uploads the bottles to the GitHub Release
 - update the brew formula with the bootle definition 
 
@@ -27,11 +29,13 @@ While testing this procedure, it is usefull to undo a release.
 
 !! Destructive actions !! 
 
-1. ./scripts/delete_release.sh  
+1. `./scripts/delete_release.sh`  
 
-2. git reset HEAD~1
+2. `git reset HEAD~1`
 
 3. Reset Version file 
+
+```zsh
 SOURCE_FILE="Sources/xcodeinstall/Version.swift"
 
 cat <<EOF >"$SOURCE_FILE"
@@ -40,5 +44,6 @@ enum Version {
     static let version = ""
 }
 EOF
+```
 
-4. rm -rf ~/Library/Caches/Homebrew/downloads/*xcodeinstall-*.tar.gz  
+4. `rm -rf ~/Library/Caches/Homebrew/downloads/*xcodeinstall-*.tar.gz`  
