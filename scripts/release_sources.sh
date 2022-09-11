@@ -32,8 +32,9 @@ rm $TAG.tar.gz
 
 echo "\n🍺 Generate brew formula\n"
 # do not use / as separator as it is confused with / from the URL
-sed -E -e "s+URL+url \"$URL\"+g" \
-       -e "s/SHA/sha256 \"$SHA256\"/g" \
+sed -E -e "s+URL+url \"$URL\"+g"             \
+       -e "s/SHA/sha256 \"$SHA256\"/g"       \
+       -e "s/VERSION/version \"$VERSION\"/g" \
        scripts/xcodeinstall.template > scripts/xcodeinstall.rb
 
 echo "\n🍺 Pushing new formula\n"
