@@ -7,7 +7,6 @@ class Xcodeinstall < Formula
   homepage "https://github.com/sebsto/xcodeinstall"
   URL
   SHA
-  VERSION
   license "Apache-2.0"
 
   def install
