@@ -2,11 +2,10 @@
 set -e
 set -o pipefail
 
-echo "\n➕ Get version number\n"
+echo "\n➕ Get version number \n"
 VERSION=$(scripts/version.sh)
 
-mkdir -p dist/arm64
-mkdir -p dist/x86_64
+mkdir -p dist/fat
 
 echo "\n📦 Downloading packages according to Package.resolved\n"
 swift package resolve
@@ -14,15 +13,11 @@ swift package resolve
 echo "\n🩹 Patching Switft Tools Support Core dependency to produce a static library\n"
 sed -i .bak -E -e "s/^( *type: .dynamic,)$/\/\/\1/" .build/checkouts/swift-tools-support-core/Package.swift
 
-echo "\n🏗 Building the ARM version\n"
+echo "\n🏗 Building the fat binary (x86_64 and arm64) version\n"
 swift build --configuration release \
-            --arch arm64
-cp .build/arm64-apple-macosx/release/xcodeinstall dist/arm64
-
-echo "\n🏗 Building the x86_64 version\n"
-swift build --configuration release \
+            --arch arm64            \
             --arch x86_64
-cp .build/x86_64-apple-macosx/release/xcodeinstall dist/x86_64
+cp .build/apple/Products/Release/xcodeinstall dist/arm64
 
 
 

@@ -10,8 +10,8 @@ class Xcodeinstall < Formula
   license "Apache-2.0"
 
   def install
-    system "./scripts/release_binaries.sh"
-    bin.install ".build/release/xcodeinstall"
+    system "./scripts/build_fat_binaries.sh"
+    bin.install ".build/apple/Products/Release/xcodeinstall"
   end
 
   test do

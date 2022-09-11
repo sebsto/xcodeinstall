@@ -20,8 +20,8 @@ if [ ! -f VERSION ]; then
 fi
 VERSION=$(cat VERSION)
 
-# Supports macOS 10.11 and later
-OS_NAMES=(arm64_monterey monterey arm64_big_sur big_sur catalina)
+# Supports macOS 12 (Monterey) and later
+OS_NAMES=(arm64_monterey monterey)
 
 # Semantic version number split into a list using  Ugly, bash 3 compatible syntax
 IFS=" " read -r -a CURRENT_OS_VERSION <<<"$(sw_vers -productVersion | sed 's/\./ /g'))"
@@ -37,18 +37,9 @@ if [[ ${CURRENT_OS_VERSION_MAJOR} == "12" ]]; then
   else
     CURRENT_PLATFORM=arm64_monterey
   fi
-elif [[ ${CURRENT_OS_VERSION_MAJOR} == "11" ]]; then
-  # Big Sur
-  if [[ "x86_64" == "$(uname -m)" ]]; then
-    CURRENT_PLATFORM=big_sur
-  else
-    CURRENT_PLATFORM=arm64_big_sur
-  fi
-elif [[ ${CURRENT_OS_VERSION_MAJOR} == "10" && ${CURRENT_OS_VERSION_MINOR} == "15" ]]; then
-  CURRENT_PLATFORM=catalina
 else
-  echo "Unsupported macOS version. This script requires Catalina or better."
-  exit 1
+  echo "Unsupported macOS version. This script requires Monterey or better."
+  exit -1
 fi
 
 echo "CURRENT_PLATFORM: ${CURRENT_PLATFORM}"
