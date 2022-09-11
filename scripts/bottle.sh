@@ -95,8 +95,8 @@ mkdir -p "$BOTTLE_DIR"
 # Start of bottle block
 BOTTLE_BLOCK=$(
   cat <<-EOF
-bottle do
-  root_url "$ROOT_URL"
+  bottle do
+    root_url "$ROOT_URL"
 EOF
 )
 
@@ -124,7 +124,7 @@ done
 BOTTLE_BLOCK="$BOTTLE_BLOCK"$(
   cat <<-EOF
 
-end
+  end
 EOF
 )
 
