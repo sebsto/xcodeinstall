@@ -49,8 +49,8 @@ echo "CURRENT_PLATFORM: ${CURRENT_PLATFORM}"
 # Preflight checks
 #
 
-echo "Uninstall formula and it's tap. Then reinstalling and audit it
-"
+echo "🍼 Uninstall formula and it's tap. Then reinstalling and audit it"
+
 # Uninstall if necessary
 brew remove xcodeinstall 2>/dev/null || true # ignore failure
 brew untap sebsto/macos  2>/dev/null || true #ignore failure
@@ -73,7 +73,7 @@ brew style sebsto/macos/xcodeinstall
 # Build the formula for the current macOS version and architecture.
 #
 
-echo "==> 🍼 Bottling xcodeinstall ${VERSION} for: ${OS_NAMES[*]}"
+echo "🍼 Bottling xcodeinstall ${VERSION} for: ${OS_NAMES[*]}"
 brew install --build-bottle sebsto/macos/xcodeinstall
 
 # Generate bottle do block, dropping last 2 lines
