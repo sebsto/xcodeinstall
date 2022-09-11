@@ -17,7 +17,7 @@ echo "\n🏗 Building the fat binary (x86_64 and arm64) version\n"
 swift build --configuration release \
             --arch arm64            \
             --arch x86_64
-cp .build/apple/Products/Release/xcodeinstall dist/arm64
+cp .build/apple/Products/Release/xcodeinstall dist/fat
 
 
 
