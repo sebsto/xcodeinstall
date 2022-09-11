@@ -40,3 +40,5 @@ enum Version {
     static let version = ""
 }
 EOF
+
+4. rm -rf ~/Library/Caches/Homebrew/downloads/*xcodeinstall-*.tar.gz  
