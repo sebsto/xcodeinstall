@@ -393,7 +393,8 @@ I listed a couple of ideas below.
 ## List of ideas 
 
 - add a CloudWatch Log backend to Logging framework 
-- add possibility to emit SNS notifications on error, such as Session Expired  
+- add possibility to emit SNS notifications on error, such as Session Expired
+- clean room implementation of progres sbar to remove dependency on Swift Tools Core library 
 
 ## Credits 
 

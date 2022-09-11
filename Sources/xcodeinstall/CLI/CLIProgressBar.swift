@@ -8,6 +8,11 @@
 // found here https://www.fivestars.blog/articles/ultimate-guide-swift-executables/ and
 // https://www.fivestars.blog/articles/executables-progress/
 
+// alternatives to consider to reduce size of dependencies
+// https://github.com/vapor/console-kit/tree/main/Sources/ConsoleKit/Activity
+// https://github.com/nsscreencast/469-swift-command-line-progress-bar
+// https://github.com/jkandzi/Progress.swift/blob/master/Sources/Progress.swift
+
 import Foundation
 import TSCBasic
 import TSCUtility
