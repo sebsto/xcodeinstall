@@ -92,6 +92,7 @@ FILENAME="xcodeinstall--${VERSION}.${CURRENT_PLATFORM}.bottle.tar.gz"
 SHA256=$(shasum --algorithm 256 "${FILENAME}" | cut -f 1 -d ' ' -)
 
 mkdir -p "$BOTTLE_DIR"
+rm -rf $BOTTLE_DIR/*
 
 # Start of bottle block
 BOTTLE_BLOCK=$(
