@@ -22,3 +22,4 @@ EOF
 
 git add "$SOURCE_FILE" VERSION #> /dev/null 2>&1
 git commit --quiet -m "Bump source to version $VERSION" "$SOURCE_FILE" VERSION #> /dev/null 2>&1
+git push --quiet > /dev/null 2>&1

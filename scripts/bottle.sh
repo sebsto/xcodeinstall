@@ -18,6 +18,7 @@ if [ ! -f VERSION ]; then
 fi
 VERSION=$(cat VERSION)
 TAG=v$VERSION
+echo "🍼 Bottling version $VERSION"
 
 BOTTLE_DIR="$PWD/dist/bottle"
 ROOT_URL="https://github.com/sebsto/xcodeinstall/releases/download/${TAG}"
@@ -134,5 +135,3 @@ echo "${BOTTLE_BLOCK}" > BOTTLE_BLOCK
 echo "${BOTTLE_BLOCK}" 
 
 brew remove sebsto/macos/xcodeinstall
-
-open "${BOTTLE_DIR}"
