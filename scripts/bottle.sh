@@ -10,8 +10,17 @@
 # Variables
 #
 
+echo "\n➕ Get version number \n"
+if [ ! -f VERSION ]; then 
+    echo "VERSION file does not exist."
+    echo "It is created by 'scripts/release_sources.sh"
+    exit -1
+fi
+VERSION=$(cat VERSION)
+TAG=v$VERSION
+
 BOTTLE_DIR="$PWD/dist/bottle"
-ROOT_URL="https://github.com/sebsto/xcodeinstall/releases/download/v${VERSION}"
+ROOT_URL="https://github.com/sebsto/xcodeinstall/releases/download/${TAG}"
 
 if [ ! -f VERSION ]; then 
     echo "VERSION file does not exist."
