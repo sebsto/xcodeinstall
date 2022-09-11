@@ -13,7 +13,7 @@ VERSION=$(cat VERSION)
 mkdir -p dist/fat
 
 echo "\n📦 Downloading packages according to Package.resolved\n"
-swift package resolves --disable-sandbox
+swift package --disable-sandbox resolve
 
 echo "\n🩹 Patching Switft Tools Support Core dependency to produce a static library\n"
 sed -i .bak -E -e "s/^( *type: .dynamic,)$/\/\/\1/" .build/checkouts/swift-tools-support-core/Package.swift
