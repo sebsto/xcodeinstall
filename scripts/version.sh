@@ -20,5 +20,5 @@ enum Version {
 }
 EOF
 
-git add "$SOURCE_FILE" > /dev/null 2>&1
-git commit --quiet -m "Bump source to version $VERSION" "$SOURCE_FILE" > /dev/null 2>&1
+git add "$SOURCE_FILE" VERSION #> /dev/null 2>&1
+git commit --quiet -m "Bump source to version $VERSION" "$SOURCE_FILE" VERSION #> /dev/null 2>&1

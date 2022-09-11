@@ -9,3 +9,4 @@ echo "🧻 Cleaning build artefacts"
 swift package clean
 swift package reset
 rm -rf dist/*
+rm -rf ~/Library/Caches/Homebrew/downloads/*xcodeinstall*.tar.gz

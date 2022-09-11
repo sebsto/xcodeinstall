@@ -6,7 +6,7 @@
 
 This script 
 - creates a new version 
-- tags the branch an dpush it 
+- tags the branch and push the tag 
 - creates a GitHub release 
 - creates a brew formula with the new release
 
