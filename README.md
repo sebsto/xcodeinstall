@@ -1,6 +1,6 @@
 This is a command line utility to download and install Xcode in headless mode (from a Terminal only).
 
-![swift build workflow](https://github.com/sebsto/xcodeinstall/actions/workflows/swift.yml/badge.svg)
+[![Build And Test](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test.yml)
 
 ## License
 
