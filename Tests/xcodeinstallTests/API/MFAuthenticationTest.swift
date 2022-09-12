@@ -60,7 +60,7 @@ class MFAuthenticationTest: NetworkAgentTestCase {
 
         let url = "https://dummy"
 
-        session.nextData     = getMFAType().data(using: .utf8)
+        session.nextData     = getMFATypeOK().data(using: .utf8)
         session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
 
         do {
@@ -127,7 +127,7 @@ class MFAuthenticationTest: NetworkAgentTestCase {
     // test MFA encoding
     func testMFAEncoding() async  {
         
-        let data = getMFAType().data(using: .utf8)
+        let data = getMFATypeOK().data(using: .utf8)
         
         do {
         _ = try JSONDecoder().decode(MFAType.self, from: data!)
@@ -137,7 +137,21 @@ class MFAuthenticationTest: NetworkAgentTestCase {
         
     }
 
-    private func getMFAType() -> String {
+    // test MFA encoding
+    func testMFAEncodingUKExample1() async  {
+        
+        let data = getMFATypeUKExample1().data(using: .utf8)
+        
+        do {
+            _ = try JSONDecoder().decode(MFAType.self, from: data!)
+        } catch {
+            XCTAssert(false, "Error while decoding \(error)")
+        }
+        
+    }
+
+    
+    private func getMFATypeOK() -> String {
             return """
  {
    "trustedPhoneNumbers" : [ {
@@ -221,6 +235,50 @@ class MFAuthenticationTest: NetworkAgentTestCase {
    "restrictedAccount" : false,
    "managedAccount" : false
  }
+"""
+    }
+    
+    private func getMFATypeUKExample1() -> String {
+        return """
+{
+  "trustedPhoneNumbers" : [ {
+    "numberWithDialCode" : "+44 ••••• ••••24",
+    "pushMode" : "sms",
+    "lastTwoDigits" : "24",
+    "obfuscatedNumber" : "••••• ••••24",
+    "id" : 1
+  } ],
+  "securityCode" : {
+    "length" : 6,
+    "tooManyCodesSent" : false,
+    "tooManyCodesValidated" : false,
+    "securityCodeLocked" : false,
+    "securityCodeCooldown" : false
+  },
+  "authenticationType" : "hsa2",
+  "recoveryUrl" : "https://iforgot.apple.com/phone/add?prs_account_nm=ricsue%40amazon.co.uk&autoSubmitAccount=true&appId=142",
+  "cantUsePhoneNumberUrl" : "https://iforgot.apple.com/iforgot/phone/add?context=cantuse&prs_account_nm=ricsue%40amazon.co.uk&autoSubmitAccount=true&appId=142",
+  "recoveryWebUrl" : "https://iforgot.apple.com/password/verify/appleid?prs_account_nm=ricsue%40amazon.co.uk&autoSubmitAccount=true&appId=142",
+  "repairPhoneNumberUrl" : "https://gsa.apple.com/appleid/account/manage/repair/verify/phone",
+  "repairPhoneNumberWebUrl" : "https://appleid.apple.com/widget/account/repair?#!repair",
+  "aboutTwoFactorAuthenticationUrl" : "https://support.apple.com/kb/HT204921",
+  "autoVerified" : false,
+  "showAutoVerificationUI" : false,
+  "supportsCustodianRecovery" : false,
+  "hideSendSMSCodeOption" : false,
+  "supervisedChangePasswordFlow" : false,
+  "trustedPhoneNumber" : {
+    "numberWithDialCode" : "+44 ••••• ••••24",
+    "pushMode" : "sms",
+    "lastTwoDigits" : "24",
+    "obfuscatedNumber" : "••••• ••••24",
+    "id" : 1
+  },
+  "hsa2Account" : true,
+  "restrictedAccount" : false,
+  "supportsRecovery" : true,
+  "managedAccount" : false
+}
 """
     }
 

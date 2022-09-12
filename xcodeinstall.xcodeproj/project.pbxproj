@@ -185,7 +185,6 @@
 		007585D0289C07130094D2DC /* Download List.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "Download List.json"; path = "Tests/Data/Download List.json"; sourceTree = SOURCE_ROOT; };
 		007585D1289C07130094D2DC /* curl.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = curl.txt; path = Tests/Data/curl.txt; sourceTree = SOURCE_ROOT; };
 		007585D2289C07130094D2DC /* Download Error.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "Download Error.json"; path = "Tests/Data/Download Error.json"; sourceTree = SOURCE_ROOT; };
-		007585D3289C07130094D2DC /* auth_response.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = auth_response.json; path = Tests/Data/auth_response.json; sourceTree = SOURCE_ROOT; };
 		007585D5289C16850094D2DC /* Download Unknown Error.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "Download Unknown Error.json"; path = "Tests/Data/Download Unknown Error.json"; sourceTree = SOURCE_ROOT; };
 		007585D6289C17670094D2DC /* DownloadListParserTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadListParserTest.swift; sourceTree = "<group>"; };
 		007585DA289C1E1E0094D2DC /* TestHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestHelper.swift; sourceTree = "<group>"; };
@@ -283,7 +282,6 @@
 			isa = PBXGroup;
 			children = (
 				007585D5289C16850094D2DC /* Download Unknown Error.json */,
-				007585D3289C07130094D2DC /* auth_response.json */,
 				007585D1289C07130094D2DC /* curl.txt */,
 				007585D2289C07130094D2DC /* Download Error.json */,
 				007585D0289C07130094D2DC /* Download List.json */,

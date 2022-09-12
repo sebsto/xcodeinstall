@@ -57,19 +57,19 @@ import Foundation
 struct MFAType: Codable {
 
     struct PhoneNumber: Codable {
-        let numberWithDialCode: String
-        let pushMode: String
-        let obfuscatedNumber: String
-        let lastTwoDigits: String
-        let id: Int
+        let numberWithDialCode: String?
+        let pushMode: String?
+        let obfuscatedNumber: String?
+        let lastTwoDigits: String?
+        let id: Int?
     }
 
     struct SecurityCode: Codable {
-        let length: Int
-        let tooManyCodesSent: Bool
-        let tooManyCodesValidated: Bool
-        let securityCodeLocked: Bool
-        let securityCodeCooldown: Bool
+        let length: Int?
+        let tooManyCodesSent: Bool?
+        let tooManyCodesValidated: Bool?
+        let securityCodeLocked: Bool?
+        let securityCodeCooldown: Bool?
     }
 
     enum AuthenticationType: String, Codable {
@@ -77,28 +77,28 @@ struct MFAType: Codable {
         case hsa2
     }
 
-    let trustedPhoneNumbers: [PhoneNumber]
+    let trustedPhoneNumbers: [PhoneNumber]?
     let securityCode: SecurityCode?
-    let authenticationType: AuthenticationType
-    let recoveryUrl: String
-    let cantUsePhoneNumberUrl: String
-    let recoveryWebUrl: String
-    let repairPhoneNumberUrl: String
-    let repairPhoneNumberWebUrl: String
-    let aboutTwoFactorAuthenticationUrl: String
-    let twoFactorVerificationSupportUrl: String
-    let hasRecoveryKey: Bool
-    let supportsRecoveryKey: Bool
-    let autoVerified: Bool
-    let showAutoVerificationUI: Bool
-    let supportsCustodianRecovery: Bool
-    let hideSendSMSCodeOption: Bool
-    let supervisedChangePasswordFlow: Bool
-    let supportsRecovery: Bool
-    let trustedPhoneNumber: PhoneNumber
-    let hsa2Account: Bool
-    let restrictedAccount: Bool
-    let managedAccount: Bool
+    let authenticationType: AuthenticationType?
+    let recoveryUrl: String?
+    let cantUsePhoneNumberUrl: String?
+    let recoveryWebUrl: String?
+    let repairPhoneNumberUrl: String?
+    let repairPhoneNumberWebUrl: String?
+    let aboutTwoFactorAuthenticationUrl: String?
+    let twoFactorVerificationSupportUrl: String?
+    let hasRecoveryKey: Bool?
+    let supportsRecoveryKey: Bool?
+    let autoVerified: Bool?
+    let showAutoVerificationUI: Bool?
+    let supportsCustodianRecovery: Bool?
+    let hideSendSMSCodeOption: Bool?
+    let supervisedChangePasswordFlow: Bool?
+    let supportsRecovery: Bool?
+    let trustedPhoneNumber: PhoneNumber?
+    let hsa2Account: Bool?
+    let restrictedAccount: Bool?
+    let managedAccount: Bool?
 }
 
 extension AppleAuthenticator {
@@ -118,7 +118,8 @@ extension AppleAuthenticator {
         // when there is no 'trustedDevices', we are supposed to fallback to SMS to a phone number
         // but for my account, the API return no 'trustedDevices' but I still receive the code on my mac and iphone
 
-        guard mfaType.trustedPhoneNumbers.count > 0,
+        guard let count = mfaType.trustedPhoneNumbers?.count,
+              count > 0,
               let securityCodeLength = mfaType.securityCode?.length else {
             logger.warning("⚠️ No Security code length provided in answer")
             throw AuthenticationError.requires2FATrustedPhoneNumber
