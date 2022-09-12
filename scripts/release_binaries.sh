@@ -18,7 +18,6 @@ if [ ! -f ./scripts/xcodeinstall.rb ]; then
     echo "It is created by 'scripts/release_sources.sh"
     exit -1
 fi
-echo "🍺 Add bottles to brew formula"
 if [ ! -f ./BOTTLE_BLOCK ]; then 
     echo "Bottle block file does not exist. (./BOTTLE_BLOCK)"
     echo "It is created by 'scripts/bottle.sh"
