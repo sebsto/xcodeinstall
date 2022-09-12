@@ -23,6 +23,8 @@
 		0041065128BD25C90033A3A2 /* InstallStringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064F28BD25C90033A3A2 /* InstallStringExtension.swift */; };
 		0041065328BD25EC0033A3A2 /* InstallDownloadListExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */; };
 		0041065428BD25EC0033A3A2 /* InstallDownloadListExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */; };
+		0053F33628CF8DC4009E466D /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33528CF8DC4009E466D /* Version.swift */; };
+		0053F33728CF8DC4009E466D /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33528CF8DC4009E466D /* Version.swift */; };
 		007585C7289BDF820094D2DC /* URLRequestExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C6289BDF820094D2DC /* URLRequestExtension.swift */; };
 		007585C8289BDF820094D2DC /* URLRequestExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C6289BDF820094D2DC /* URLRequestExtension.swift */; };
 		007585CA289BE0090094D2DC /* URLRequestCurlTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C9289BE0090094D2DC /* URLRequestCurlTest.swift */; };
@@ -176,6 +178,7 @@
 		0041064C28BD25A90033A3A2 /* InstallCLTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallCLTools.swift; sourceTree = "<group>"; };
 		0041064F28BD25C90033A3A2 /* InstallStringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallStringExtension.swift; sourceTree = "<group>"; };
 		0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallDownloadListExtension.swift; sourceTree = "<group>"; };
+		0053F33528CF8DC4009E466D /* Version.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 		007585C6289BDF820094D2DC /* URLRequestExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRequestExtension.swift; sourceTree = "<group>"; };
 		007585C9289BE0090094D2DC /* URLRequestCurlTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRequestCurlTest.swift; sourceTree = "<group>"; };
 		007585CD289BEEFD0094D2DC /* DownloadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTest.swift; sourceTree = "<group>"; };
@@ -474,6 +477,7 @@
 		OBJ_8 /* xcodeinstall */ = {
 			isa = PBXGroup;
 			children = (
+				0053F33528CF8DC4009E466D /* Version.swift */,
 				00CECC9728B24B3400120779 /* API */,
 				00CECC9628B24B0A00120779 /* CLI */,
 				00CECC9928B24B7A00120779 /* Utilities */,
@@ -602,6 +606,7 @@
 				00CECCB328B34C9000120779 /* InstallCommand.swift in Sources */,
 				007A5433288A3D0A00AC4622 /* HTTPClient.swift in Sources */,
 				00CECCAD28B34B8300120779 /* CLIInstall.swift in Sources */,
+				0053F33628CF8DC4009E466D /* Version.swift in Sources */,
 				00CECCB628B34CD500120779 /* Install.swift in Sources */,
 				0093C5E128C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift in Sources */,
 				007A542A2885734D00AC4622 /* CLIMain.swift in Sources */,
@@ -688,6 +693,7 @@
 				00EE603328AA3FCD00B09D2B /* MockedCLIClasses.swift in Sources */,
 				00CECC8D28B0BABE00120779 /* AsyncShell.swift in Sources */,
 				00DC837E28ABD38900B6346D /* SignOutCommand.swift in Sources */,
+				0053F33728CF8DC4009E466D /* Version.swift in Sources */,
 				007A5439288A4A9C00AC4622 /* HTTPClient.swift in Sources */,
 				007A5445288AD6BE00AC4622 /* MFAuthenticationTest.swift in Sources */,
 				0041064E28BD25A90033A3A2 /* InstallCLTools.swift in Sources */,
