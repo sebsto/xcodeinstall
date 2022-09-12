@@ -8,6 +8,10 @@
 import Foundation
 import Logging
 
+func filterPassword(_ input: String) -> String {
+    return input.replacingOccurrences(of: "(\"password\":\").*(\"[,}])", with: "$1*****$2", options: .regularExpression)
+}
+
 func log(request: URLRequest, to logger: Logger) {
 
     logger.debug("\n - - - - - - - - - - OUTGOING - - - - - - - - - - \n")
@@ -32,7 +36,7 @@ func log(request: URLRequest, to logger: Logger) {
     if let body = request.httpBody {
         output += "\n \(String(data: body, encoding: .utf8) ?? "")"
    }
-    logger.debug("\(output)")
+    logger.debug("\(filterPassword(output))")
 }
 
 func log(response: HTTPURLResponse?, data: Data?, error: Error?, to logger: Logger) {

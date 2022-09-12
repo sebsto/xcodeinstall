@@ -44,6 +44,27 @@ class HTTPClientTest: NetworkAgentTestCase {
         
     }
     
+    // test if password are obfuscated in logs
+    func testPasswordObfuscation() async throws {
+        
+        // given
+        let username = "username"
+        let password = "myComplexPassw0rd!"
+        let body = try JSONEncoder().encode(User(accountName: username, password: password))
+        let str  = String(data: body, encoding: .utf8)
+        XCTAssertNotNil(str)
+        
+        // when
+        let obfuscated = filterPassword(str!)
+
+        // then
+        XCTAssertNotEqual(str, obfuscated)
+        XCTAssertFalse(obfuscated.contains(password))
+        
+        
+    }
+
+    
     // not a super usefull test, but it helped me to understand the dynamic of Mocks
     func testDataRequestsTheURL() async throws {
         
