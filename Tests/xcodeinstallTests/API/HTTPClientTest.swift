@@ -60,10 +60,7 @@ class HTTPClientTest: NetworkAgentTestCase {
         // then
         XCTAssertNotEqual(str, obfuscated)
         XCTAssertFalse(obfuscated.contains(password))
-        
-        
     }
-
     
     // not a super usefull test, but it helped me to understand the dynamic of Mocks
     func testDataRequestsTheURL() async throws {
