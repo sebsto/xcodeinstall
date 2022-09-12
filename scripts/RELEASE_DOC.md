@@ -1,8 +1,8 @@
 ## To release a new version.
 
-1. Update version number in `scripts/release-sources.sh`
+1. Commit all other changes and push them
 
-2. Commit all other changes and push them
+2. Update version number in `scripts/release-sources.sh`
 
 3. `./scripts/release_sources.sh`
 
