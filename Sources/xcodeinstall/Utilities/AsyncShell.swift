@@ -99,7 +99,7 @@ struct AsyncShell: AsyncShellProtocol {
         var result: ShellOutput?
 
         let sema: DispatchSemaphoreProtocol = DispatchSemaphore( value: 0 )
-        
+
         let shell = AsyncShell()
         let process = try shell.run(command,
                                     onCompletion: { process in
@@ -114,7 +114,7 @@ struct AsyncShell: AsyncShellProtocol {
         })
 
         process.waitUntilExit()
-        
+
         // wait for onCompletion callback to finish
         sema.wait()
 
