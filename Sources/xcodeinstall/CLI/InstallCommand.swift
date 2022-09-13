@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import TSCBasic
 
 extension XCodeInstall {
 
@@ -20,7 +19,6 @@ extension XCodeInstall {
 
         // progress bar to report progress feedback
         let progress = CLIProgressBar(animationType: .countingProgressAnimationMultiLine,
-                                      stream: stdoutStream,
                                       message: "Installing...")
         var fileToInstall: String = ""
         do {

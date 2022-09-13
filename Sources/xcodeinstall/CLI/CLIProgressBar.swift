@@ -14,36 +14,16 @@
 // https://github.com/jkandzi/Progress.swift/blob/master/Sources/Progress.swift
 
 import Foundation
-import TSCBasic
-import TSCUtility
-
-// abstract to the progress animation interface
-protocol ProgressUpdateProtocol: ProgressAnimationProtocol {}
-
-enum ProgressBarType {
-    case percentProgressAnimation
-    case countingProgressAnimation
-    case countingProgressAnimationMultiLine
-}
 
 struct CLIProgressBar: ProgressUpdateProtocol {
 
-    private let progressAnimation: ProgressAnimationProtocol
-    private let stream: WritableByteStream
+    private let progressAnimation: ProgressUpdateProtocol
+    private let stream: OutputBuffer = FileHandle.standardOutput
     private let message: String
 
-    init(animationType: ProgressBarType, stream: WritableByteStream, message: String) {
-        self.stream  = stream
+    init(animationType: ProgressBarType, message: String) {
         self.message = message
-
-        switch animationType {
-        case .percentProgressAnimation:
-            self.progressAnimation = PercentProgressAnimation(stream: self.stream, header: self.message)
-        case .countingProgressAnimation:
-            self.progressAnimation = NinjaProgressAnimation(stream: self.stream)
-        case .countingProgressAnimationMultiLine:
-            self.progressAnimation = MultiLineNinjaProgressAnimation(stream: self.stream)
-        }
+        self.progressAnimation = ProgressBar(output: stream, progressBarType: animationType, title: self.message)
     }
 
     /// Update the animation with a new step.

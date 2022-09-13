@@ -85,16 +85,16 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "download --verbose -x 13 -m"
+            argument = "download --verbose -s us-east-1 -x 13 -m"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "install --verbose "
-            isEnabled = "NO">
+            argument = "install"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "authenticate -s us-east-1 --verbose"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>

@@ -7,8 +7,7 @@
 
 import XCTest
 @testable import xcodeinstall
-@testable import TSCBasic
-
+ 
 class DownloadTest: NetworkAgentTestCase {
 
 

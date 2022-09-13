@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import TSCBasic // to access stdoutStream as WritableByteStream (used by ProgressBar)
 
 extension XCodeInstall {
 
@@ -50,7 +49,6 @@ extension XCodeInstall {
 
             // now we have a filename, let's proceed with download 
             let progressBar = CLIProgressBar(animationType: .percentProgressAnimation,
-                                             stream: stdoutStream,
                                              message: "Downloading \(fileToDownload.displayName)")
 
             _ = try await download.download(file: fileToDownload, progressReport: progressBar)
