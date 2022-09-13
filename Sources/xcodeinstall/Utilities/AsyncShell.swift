@@ -98,10 +98,13 @@ struct AsyncShell: AsyncShellProtocol {
         var stdErrBuffer: String = ""
         var result: ShellOutput?
 
+        let sema: DispatchSemaphoreProtocol = DispatchSemaphore( value: 0 )
+        
         let shell = AsyncShell()
         let process = try shell.run(command,
                                     onCompletion: { process in
             result = ShellOutput(out: stdOutBuffer, err: stdErrBuffer, code: process.terminationStatus)
+            _ = sema.signal()
         },
                                     onOutput: { string in
             stdOutBuffer += string
@@ -111,6 +114,9 @@ struct AsyncShell: AsyncShellProtocol {
         })
 
         process.waitUntilExit()
+        
+        // wait for onCompletion callback to finish
+        sema.wait()
 
         guard let res = result else {
             fatalError("Process finished but there is no output!")
