@@ -8,6 +8,8 @@
 import Foundation
 import Logging
 
+// FIXME consider using Swift 5.7 regexp
+// https://github.com/apple/swift-evolution/blob/main/proposals/0350-regex-type-overview.md
 func filterPassword(_ input: String) -> String {
     return input.replacingOccurrences(of: "(\"password\":\").*(\"[,}])", with: "$1*****$2", options: .regularExpression)
 }
@@ -48,7 +50,7 @@ func log(response: HTTPURLResponse?, data: Data?, error: Error?, to logger: Logg
     let path = "\(components?.path ?? "")"
     let query = "\(components?.query ?? "")"
     var output = ""
-    if let urlString = urlString {
+    if let urlString {
         output += "\(urlString)"
         output += "\n\n"
     }
@@ -61,8 +63,8 @@ func log(response: HTTPURLResponse?, data: Data?, error: Error?, to logger: Logg
     for (key, value) in response?.allHeaderFields ?? [:] {
         output += "\(key): \(value)\n"
     }
-    if let body = data {
-        output += "\n\(String(data: body, encoding: .utf8) ?? "")\n"
+    if let data {
+        output += "\n\(String(data: data, encoding: .utf8) ?? "")\n"
     }
     if error != nil {
         output += "\nError: \(error!.localizedDescription)\n"

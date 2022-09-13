@@ -68,10 +68,10 @@ class NetworkAgent {
 
         // reload previous session if it exists
         let session = try? await secretsHandler.loadSession()
-        if let sess = session {
+        if let session {
 
             // session is loaded
-            self.session = sess
+            self.session = session
 
         } else {
             logger.debug("⚠️ I could not load session (this is normal the first time you authenticate)")
@@ -90,9 +90,9 @@ class NetworkAgent {
 
         // reload cookies if they exist
         let cookies = try? await secretsHandler.loadCookies()
-        if let cook = cookies {
+        if let cookies {
             // cookies existed, let's add them to our HTTPHeaders
-            requestHeaders.merge(HTTPCookie.requestHeaderFields(with: cook)) { (current, _) in current }
+            requestHeaders.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
         } else {
             // swiftlint:disable line_length
             logger.debug("⚠️ I could not load cookies (this is normal the first time you authenticate)")
@@ -149,9 +149,9 @@ class NetworkAgent {
 
         // reload cookies if they exist
         let cookies = try? await secretsHandler.loadCookies()
-        if let cook = cookies {
+        if let cookies {
             // cookies existed, let's add them to our HTTPHeaders
-            headers.merge(HTTPCookie.requestHeaderFields(with: cook)) { (current, _) in current }
+            headers.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
         } else {
             logger.debug("⚠️ I could not load cookies (this is normal the first time you authenticate)")
         }
@@ -182,13 +182,13 @@ class NetworkAgent {
         request.httpMethod = method.rawValue
 
         // add body
-        if let bod = body {
-            request.httpBody = bod
+        if let body {
+            request.httpBody = body
         }
 
         // add headers
-        if let hea = headers {
-            for (key, value) in hea {
+        if let headers {
+            for (key, value) in headers {
                 request.addValue(value, forHTTPHeaderField: key)
             }
         }

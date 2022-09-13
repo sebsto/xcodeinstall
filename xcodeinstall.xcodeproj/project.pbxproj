@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -25,6 +25,8 @@
 		0041065428BD25EC0033A3A2 /* InstallDownloadListExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */; };
 		0053F33628CF8DC4009E466D /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33528CF8DC4009E466D /* Version.swift */; };
 		0053F33728CF8DC4009E466D /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33528CF8DC4009E466D /* Version.swift */; };
+		0053F33A28CFB3F3009E466D /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33928CFB3F3009E466D /* ProgressBar.swift */; };
+		0053F33B28CFB3F3009E466D /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33928CFB3F3009E466D /* ProgressBar.swift */; };
 		007585C7289BDF820094D2DC /* URLRequestExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C6289BDF820094D2DC /* URLRequestExtension.swift */; };
 		007585C8289BDF820094D2DC /* URLRequestExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C6289BDF820094D2DC /* URLRequestExtension.swift */; };
 		007585CA289BE0090094D2DC /* URLRequestCurlTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C9289BE0090094D2DC /* URLRequestCurlTest.swift */; };
@@ -179,6 +181,7 @@
 		0041064F28BD25C90033A3A2 /* InstallStringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallStringExtension.swift; sourceTree = "<group>"; };
 		0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallDownloadListExtension.swift; sourceTree = "<group>"; };
 		0053F33528CF8DC4009E466D /* Version.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
+		0053F33928CFB3F3009E466D /* ProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBar.swift; sourceTree = "<group>"; };
 		007585C6289BDF820094D2DC /* URLRequestExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRequestExtension.swift; sourceTree = "<group>"; };
 		007585C9289BE0090094D2DC /* URLRequestCurlTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRequestCurlTest.swift; sourceTree = "<group>"; };
 		007585CD289BEEFD0094D2DC /* DownloadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTest.swift; sourceTree = "<group>"; };
@@ -315,6 +318,7 @@
 				0075860D28A3BCF80094D2DC /* CLIProgressBar.swift */,
 				00CECCAC28B34B8300120779 /* CLIInstall.swift */,
 				001E2E8128C15293009C1545 /* CLIStoreSecrets.swift */,
+				0053F33928CFB3F3009E466D /* ProgressBar.swift */,
 			);
 			path = CLI;
 			sourceTree = "<group>";
@@ -572,6 +576,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		007585F728A0EB6F0094D2DC /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -607,6 +612,7 @@
 				0053F33628CF8DC4009E466D /* Version.swift in Sources */,
 				00CECCB628B34CD500120779 /* Install.swift in Sources */,
 				0093C5E128C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift in Sources */,
+				0053F33A28CFB3F3009E466D /* ProgressBar.swift in Sources */,
 				007A542A2885734D00AC4622 /* CLIMain.swift in Sources */,
 				0041064D28BD25A90033A3A2 /* InstallCLTools.swift in Sources */,
 				00CECCB028B34C4F00120779 /* XCodeInstallBuilder.swift in Sources */,
@@ -665,6 +671,7 @@
 				007585D7289C17670094D2DC /* DownloadListParserTest.swift in Sources */,
 				007A543C288A596D00AC4622 /* NetworkAgent.swift in Sources */,
 				00DC83B928AD3E1500B6346D /* XcodeInstallBuilderTest.swift in Sources */,
+				0053F33B28CFB3F3009E466D /* ProgressBar.swift in Sources */,
 				00CECCA828B2548600120779 /* DispatchSemaphore.swift in Sources */,
 				00CECC9328B1743000120779 /* FileHandler.swift in Sources */,
 				00CECC8A28B0BA7600120779 /* AsyncShellTest.swift in Sources */,
@@ -810,7 +817,7 @@
 					"SWIFT_PACKAGE=1",
 					"DEBUG=1",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -836,7 +843,7 @@
 					"$(inherited)",
 					"SWIFT_PACKAGE=1",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) -DXcode";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

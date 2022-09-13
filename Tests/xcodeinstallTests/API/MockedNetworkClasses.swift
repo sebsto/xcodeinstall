@@ -72,15 +72,15 @@ struct MockAppleAuthentication: AppleAuthenticatorProtocol {
     
     func startAuthentication(username: String, password: String) async throws {
         
-        if let error = nextError {
-            throw error
+        if let nextError {
+            throw nextError
         }
             
     }
     func signout() async throws {}
     func handleTwoFactorAuthentication() async throws -> Int {
-        if let error = nextMFAError {
-            throw error
+        if let nextMFAError {
+            throw nextMFAError
         }
         return 6
     }

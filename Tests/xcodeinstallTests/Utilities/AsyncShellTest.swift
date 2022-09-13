@@ -18,14 +18,14 @@ class MockShell : AsyncShellProtocol {
         let p = Process()
         let out = "out"
         let err = "err"
-        if let onc = onCompletion {
-            onc(p)
+        if let onCompletion {
+            onCompletion(p)
         }
-        if let ono = onOutput {
-            ono(out)
+        if let onOutput {
+            onOutput(out)
         }
-        if let one = onError {
-                one(err)
+        if let onError {
+            onError(err)
         }
         return p
     }

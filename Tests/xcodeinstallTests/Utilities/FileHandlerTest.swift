@@ -149,12 +149,10 @@ class FileHandlerTest: XCTestCase {
         // when
         let fh = FileHandler(logger: Log().defaultLogger)
         let expectedFileSize = test_data.data(using: .utf8)?.count
-        if let efs = expectedFileSize {
-            
-            
+        if let expectedFileSize {
             // then
-            XCTAssertNoThrow(try fh.checkFileSize(filePath: fileToCheck.path, fileSize: efs))
-            XCTAssertTrue(try fh.checkFileSize(filePath: fileToCheck.path, fileSize: efs))
+            XCTAssertNoThrow(try fh.checkFileSize(filePath: fileToCheck.path, fileSize: expectedFileSize))
+            XCTAssertTrue(try fh.checkFileSize(filePath: fileToCheck.path, fileSize: expectedFileSize))
 
             
         } else {
@@ -185,8 +183,8 @@ class FileHandlerTest: XCTestCase {
         // when
         let fh = FileHandler(logger: Log().defaultLogger)
         let expectedFileSize = test_data.data(using: .utf8)?.count
-        if let efs = expectedFileSize {
-            let exist = fh.fileExists(filePath: fileToCheck.path, fileSize: efs)
+        if let expectedFileSize {
+            let exist = fh.fileExists(filePath: fileToCheck.path, fileSize: expectedFileSize)
             
             // then
             XCTAssertTrue(exist)
@@ -200,8 +198,8 @@ class FileHandlerTest: XCTestCase {
         // when
         let fh = FileHandler(logger: Log().defaultLogger)
         let expectedFileSize = test_data.data(using: .utf8)?.count
-        if let efs = expectedFileSize {
-            let exist = fh.fileExists(filePath: fileToCheck.path, fileSize: efs)
+        if let expectedFileSize {
+            let exist = fh.fileExists(filePath: fileToCheck.path, fileSize: expectedFileSize)
             
             // then
             XCTAssertFalse(exist)

@@ -35,8 +35,8 @@ class URLRequestCurlTest: XCTestCase {
                          "header2" : "value2"]
         let data = "test data".data(using: .utf8)
         let cookie = HTTPCookie(properties: [.name : "cookieName", .value: "cookieValue", .path: "/", .originURL: url])
-        if let c = cookie {
-            headers.merge(HTTPCookie.requestHeaderFields(with: [c])) { (current, _) in current }
+        if let cookie {
+            headers.merge(HTTPCookie.requestHeaderFields(with: [cookie])) { (current, _) in current }
         }
 
         // when
@@ -62,8 +62,8 @@ class URLRequestCurlTest: XCTestCase {
                          "header2" : "value2"]
         let data = "test data".data(using: .utf8)
         let cookie = HTTPCookie(properties: [.name : "cookieName", .value: "cookieValue", .path: "/", .originURL: url])
-        if let c = cookie {
-            headers.merge(HTTPCookie.requestHeaderFields(with: [c])) { (current, _) in current }
+        if let cookie {
+            headers.merge(HTTPCookie.requestHeaderFields(with: [cookie])) { (current, _) in current }
         }
 
         // when

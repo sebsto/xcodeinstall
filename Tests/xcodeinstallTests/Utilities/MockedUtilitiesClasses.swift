@@ -21,8 +21,8 @@ class MockedFileHandler: FileHandlerProtocol {
         moveDst = dst
     }
     func fileExists(filePath: String, fileSize: Int) -> Bool {
-        if let nfe = nextFileExist {
-            return nfe
+        if let nextFileExist {
+            return nextFileExist
         } else {
             return true
         }
@@ -32,8 +32,8 @@ class MockedFileHandler: FileHandlerProtocol {
     }
 
     func checkFileSize(filePath: String, fileSize: Int) throws -> Bool {
-        if let nfc = nextFileCorrect {
-            return nfc
+        if let nextFileCorrect {
+            return nextFileCorrect
         } else {
             return true
         }

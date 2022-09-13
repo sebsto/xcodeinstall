@@ -44,8 +44,8 @@ class ShellInstaller: InstallerProtocol {
         self.logger      = logger
         self.fileHandler = fileHandler
 
-        if let s = shell { // swiftlint:disable:this identifier_name
-            self.shell = s
+        if let shell {
+            self.shell = shell
         }
     }
 

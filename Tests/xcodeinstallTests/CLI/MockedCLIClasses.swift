@@ -70,8 +70,8 @@ class MockedInstaller: InstallerProtocol {
 
     func install(file: String, progress: ProgressUpdateProtocol) async throws {
 
-        if let error = nextError {
-            throw error
+        if let nextError {
+            throw nextError
         }
         
     }

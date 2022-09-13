@@ -40,9 +40,9 @@ class CLITest: AsyncTestCase {
     func xcodeinstall(input : ReadLineProtocol? = nil) -> XCodeInstall {
 
         let result : XCodeInstall?
-        if let i = input {
+        if let input {
             result = XCodeInstall(display: mockedDisplay,
-                                  input: i,
+                                  input: input,
                                   secretsManager: secretsHandler,
                                   logger: log.defaultLogger,
                                   fileHandler: self.fileHandler)

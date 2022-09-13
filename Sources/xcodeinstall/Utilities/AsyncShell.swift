@@ -60,18 +60,18 @@ struct AsyncShell: AsyncShellProtocol {
         task.standardError  = errorPipe
 
         // when we receive a completion handler, assign it to the task
-        if let onc = onCompletion {
-            task.terminationHandler = onc
+        if let onCompletion {
+            task.terminationHandler = onCompletion
         }
 
         // when we receive an output handler, assign it to our stdOut FileHandleStream
-        if let ono = onOutput {
-            processStdOut.onStringOutput(ono)
+        if let onOutput {
+            processStdOut.onStringOutput(onOutput)
         }
 
         // when we receive an error handler, assign it to our stdErr FileHandleStream
-        if let one = onError {
-            processStdErr.onStringOutput(one)
+        if let onError {
+            processStdErr.onStringOutput(onError)
         }
 
         do {
