@@ -17,22 +17,9 @@ extension XCodeInstall {
         }
 
         do {
-            display("""
-
-This command captures your Apple ID username and password and store them securely in AWS Secrets Manager.
-It allows this command to authenticate automatically, as long as no MFA is prompted.
-
-""")
-
-            guard let username = input.readLine(prompt: "⌨️  Enter your Apple ID username: ", silent: false) else {
-                throw CLIError.invalidInput
-            }
-
-            guard let password = input.readLine(prompt: "⌨️  Enter your Apple ID password: ", silent: true) else {
-                throw CLIError.invalidInput
-            }
-
-            let credentials = AppleCredentialsSecret(username: username, password: password)
+            // separate func for testability
+            let input = try promptForCredentials()
+            let credentials = AppleCredentialsSecret(username: input[0], password: input[1])
 
             try await secretsHandler.storeAppleCredentials(credentials)
             display("✅ Credentials are securely stored")
@@ -43,4 +30,24 @@ It allows this command to authenticate automatically, as long as no MFA is promp
         }
 
     }
+
+    func promptForCredentials() throws -> [String] {
+        display("""
+
+This command captures your Apple ID username and password and store them securely in AWS Secrets Manager.
+It allows this command to authenticate automatically, as long as no MFA is prompted.
+
+""")
+
+        guard let username = input.readLine(prompt: "⌨️  Enter your Apple ID username: ", silent: false) else {
+            throw CLIError.invalidInput
+        }
+
+        guard let password = input.readLine(prompt: "⌨️  Enter your Apple ID password: ", silent: true) else {
+            throw CLIError.invalidInput
+        }
+
+        return [username, password]
+    }
+
 }

@@ -8,14 +8,19 @@
 import Foundation
 import SotoSecretsManager
 
-class AWSSecretsHandlerSoto: AWSSecretsHandler {
+// use a class to have a chance to call client.shutdown() at deinit
+class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
+
+    let maxRetries = 3
+
     let awsClient: AWSClient
     let smClient: SecretsManager
+    let logger: Logger
 
-    init?(region: String, logger: Logger) throws {
+    init(region: String, logger: Logger) throws {
 
         guard let awsRegion = Region(awsRegionName: region) else {
-            throw SecretsHandlerError.invalidRegion(region: region)
+            throw AWSSecretsHandlerError.invalidRegion(region: region)
         }
 
         self.awsClient = AWSClient(
@@ -24,8 +29,7 @@ class AWSSecretsHandlerSoto: AWSSecretsHandler {
             httpClientProvider: .createNew)
         self.smClient = SecretsManager(client: awsClient,
                                        region: awsRegion)
-
-        try super.init(logger: logger)
+        self.logger = logger
     }
 
     deinit {
@@ -119,7 +123,7 @@ class AWSSecretsHandlerSoto: AWSSecretsHandler {
     /// - Throws:
     ///         This function throws error from the underlying SDK
     ///
-    override func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws {
+    func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws {
         do {
 
             // maybe the secret does not exist yet - so wrap our call with
@@ -146,7 +150,7 @@ class AWSSecretsHandlerSoto: AWSSecretsHandler {
 
     // FIXME: improve error handling when secret is not retrieved
     // swiftlint:disable force_cast
-    override func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T {
+    func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T {
         do {
             let getSecretRequest = SecretsManager.GetSecretValueRequest(secretId: secretId.rawValue)
             logger.debug("Retrieving secret \(secretId)")

@@ -49,9 +49,8 @@ class XCodeInstallBuilder {
 
             // try to create a AWS Secrets Manager based Secret Handler.
             // call throws an error when region name is invalid
-            guard let ash = try? AWSSecretsHandler.secretsHandler(region: self.awsRegion,
-                                                                  logger: log.defaultLogger) else {
-                throw SecretsHandlerError.invalidRegion(region: self.awsRegion)
+            guard let ash = try? AWSSecretsHandler(region: self.awsRegion, logger: log.defaultLogger) else {
+                throw AWSSecretsHandlerError.invalidRegion(region: self.awsRegion)
             }
             secretsManager = ash
         } else {

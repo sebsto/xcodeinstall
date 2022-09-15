@@ -141,7 +141,7 @@ struct FileSecretsHandler: SecretsHandler {
     }
 
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
-        throw SecretsHandlerError.invalidOperation
+        throw AWSSecretsHandlerError.invalidOperation
     }
 
 }

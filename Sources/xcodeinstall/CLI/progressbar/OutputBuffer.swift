@@ -36,9 +36,7 @@ extension FileHandle: OutputBuffer {
     }
 
     public func clear() {
-//        let clearLineString = "\n"
         let clearLineString = "\u{001B}[2K \r"
-//        let clearLineString = "\u{0021}[2K"
         write(clearLineString)
     }
 }
