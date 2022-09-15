@@ -27,6 +27,10 @@
 		0053F33728CF8DC4009E466D /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33528CF8DC4009E466D /* Version.swift */; };
 		0053F33A28CFB3F3009E466D /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33928CFB3F3009E466D /* ProgressBar.swift */; };
 		0053F33B28CFB3F3009E466D /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33928CFB3F3009E466D /* ProgressBar.swift */; };
+		0057C20F28D314E9004A5BEC /* OutputBufferTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0057C20E28D314E9004A5BEC /* OutputBufferTest.swift */; };
+		0057C21128D319E9004A5BEC /* AppleSessionSecretTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0057C21028D319E9004A5BEC /* AppleSessionSecretTest.swift */; };
+		0057C21328D3245F004A5BEC /* CLIStoreSecretsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0057C21228D3245F004A5BEC /* CLIStoreSecretsTest.swift */; };
+		0057C21528D3785F004A5BEC /* MockedAWSSecretsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0057C21428D3785F004A5BEC /* MockedAWSSecretsHandler.swift */; };
 		007585C7289BDF820094D2DC /* URLRequestExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C6289BDF820094D2DC /* URLRequestExtension.swift */; };
 		007585C8289BDF820094D2DC /* URLRequestExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C6289BDF820094D2DC /* URLRequestExtension.swift */; };
 		007585CA289BE0090094D2DC /* URLRequestCurlTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 007585C9289BE0090094D2DC /* URLRequestCurlTest.swift */; };
@@ -181,6 +185,10 @@
 		0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallDownloadListExtension.swift; sourceTree = "<group>"; };
 		0053F33528CF8DC4009E466D /* Version.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 		0053F33928CFB3F3009E466D /* ProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBar.swift; sourceTree = "<group>"; };
+		0057C20E28D314E9004A5BEC /* OutputBufferTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputBufferTest.swift; sourceTree = "<group>"; };
+		0057C21028D319E9004A5BEC /* AppleSessionSecretTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSessionSecretTest.swift; sourceTree = "<group>"; };
+		0057C21228D3245F004A5BEC /* CLIStoreSecretsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIStoreSecretsTest.swift; sourceTree = "<group>"; };
+		0057C21428D3785F004A5BEC /* MockedAWSSecretsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockedAWSSecretsHandler.swift; sourceTree = "<group>"; };
 		007585C6289BDF820094D2DC /* URLRequestExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRequestExtension.swift; sourceTree = "<group>"; };
 		007585C9289BE0090094D2DC /* URLRequestCurlTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRequestCurlTest.swift; sourceTree = "<group>"; };
 		007585CD289BEEFD0094D2DC /* DownloadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTest.swift; sourceTree = "<group>"; };
@@ -381,6 +389,7 @@
 				00CECCBC28B3770000120779 /* CLIListTest.swift */,
 				00CECCBA28B3507B00120779 /* CLIDownloadTest.swift */,
 				00CECCBE28B3776800120779 /* CLIInstallTest.swift */,
+				0057C21228D3245F004A5BEC /* CLIStoreSecretsTest.swift */,
 				00DC83B828AD3E1500B6346D /* XcodeInstallBuilderTest.swift */,
 				007585D6289C17670094D2DC /* DownloadListParserTest.swift */,
 				00FDDFA628D0E38E00ED72E8 /* progressbar */,
@@ -423,8 +432,10 @@
 			isa = PBXGroup;
 			children = (
 				007585DE289D6DE00094D2DC /* FileSecretsHandlerTest.swift */,
-				00D0649228C279650000197D /* SecretsHandlerTest.swift */,
 				0093C5DB28C4CCBE00AF5ABC /* AWSSecretsHandlerTest.swift */,
+				00D0649228C279650000197D /* SecretsHandlerTest.swift */,
+				0057C21028D319E9004A5BEC /* AppleSessionSecretTest.swift */,
+				0057C21428D3785F004A5BEC /* MockedAWSSecretsHandler.swift */,
 			);
 			path = Secrets;
 			sourceTree = "<group>";
@@ -444,6 +455,7 @@
 				00FDDFA728D0E3AD00ED72E8 /* PercentProgressBarTest.swift */,
 				00FDDFA928D1138A00ED72E8 /* CountingMultiLineProgressBarTest.swift */,
 				00FDDFAB28D1147800ED72E8 /* CountingProgressBarTest.swift */,
+				0057C20E28D314E9004A5BEC /* OutputBufferTest.swift */,
 			);
 			path = progressbar;
 			sourceTree = "<group>";
@@ -682,11 +694,13 @@
 				00EE5FAD28A8F47000B09D2B /* FileSecretsHandler.swift in Sources */,
 				0093C5DA28C4C81900AF5ABC /* AsyncTestCase.swift in Sources */,
 				00DC837528ABD03600B6346D /* AuthenticateCommand.swift in Sources */,
+				0057C20F28D314E9004A5BEC /* OutputBufferTest.swift in Sources */,
 				00CECCBD28B3770000120779 /* CLIListTest.swift in Sources */,
 				009A9137288C2C14003C0DF4 /* CLIMain.swift in Sources */,
 				009A9135288C2857003C0DF4 /* CLIList.swift in Sources */,
 				00DC837B28ABD36100B6346D /* ListCommand.swift in Sources */,
 				007585DD289C1F520094D2DC /* SyncShellTest.swift in Sources */,
+				0057C21528D3785F004A5BEC /* MockedAWSSecretsHandler.swift in Sources */,
 				00FDDFAA28D1138A00ED72E8 /* CountingMultiLineProgressBarTest.swift in Sources */,
 				007585D7289C17670094D2DC /* DownloadListParserTest.swift in Sources */,
 				007A543C288A596D00AC4622 /* NetworkAgent.swift in Sources */,
@@ -715,6 +729,7 @@
 				0041064828BD25410033A3A2 /* InstallPkg.swift in Sources */,
 				00CECC9528B1788C00120779 /* FileHandlerTest.swift in Sources */,
 				007A5438288A4A9C00AC4622 /* URLLogger.swift in Sources */,
+				0057C21328D3245F004A5BEC /* CLIStoreSecretsTest.swift in Sources */,
 				00EE603328AA3FCD00B09D2B /* MockedCLIClasses.swift in Sources */,
 				00CECC8D28B0BABE00120779 /* AsyncShell.swift in Sources */,
 				00DC837E28ABD38900B6346D /* SignOutCommand.swift in Sources */,
@@ -723,6 +738,7 @@
 				007A5445288AD6BE00AC4622 /* MFAuthenticationTest.swift in Sources */,
 				0041064E28BD25A90033A3A2 /* InstallCLTools.swift in Sources */,
 				007585CA289BE0090094D2DC /* URLRequestCurlTest.swift in Sources */,
+				0057C21128D319E9004A5BEC /* AppleSessionSecretTest.swift in Sources */,
 				00DC835C28AB73F300B6346D /* LoggerTest.swift in Sources */,
 				0092F866288DC29F00CFE571 /* DownloadListParser.swift in Sources */,
 				001E2E8328C15293009C1545 /* CLIStoreSecrets.swift in Sources */,
