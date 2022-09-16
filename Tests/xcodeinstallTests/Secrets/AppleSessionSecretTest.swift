@@ -6,6 +6,7 @@
 //
 
 import XCTest
+@testable import xcodeinstall
 
 final class AppleSessionSecretTest: XCTestCase {
     

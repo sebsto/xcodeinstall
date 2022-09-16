@@ -6,6 +6,7 @@
 //
 
 import Foundation
+@testable import xcodeinstall
 
 struct MockedAWSSecretsHandlerSDK : AWSSecretsHandlerSDK {
     func updateSecret<T>(secretId: AWSSecretsName, newValue: T) async throws where T : Secrets {
