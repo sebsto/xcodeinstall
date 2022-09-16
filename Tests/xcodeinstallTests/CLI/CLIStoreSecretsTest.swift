@@ -19,7 +19,7 @@ class CLIStoreSecretsTest: CLITest {
         
         // use the real AWS Secrets Handler, but with a mocked SDK
         var secretHandler = try AWSSecretsHandler(region: "us-east-1", logger: log.defaultLogger)
-        secretHandler.awsSDK = MockedAWSSecretsHandlerSDK()
+        secretHandler.awsSDK = try MockedAWSSecretsHandlerSDK()
         xci.secretsManager = secretHandler
         
         let inst = try parse(MainCommand.StoreSecrets.self, [

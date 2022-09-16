@@ -21,7 +21,7 @@ class AWSSecretsHandlerTest: AsyncTestCase, SecretsHandlerTestProtocol {
         
         let log = Log(logLevel: .debug)
         secretHandlerTest!.secrets = try AWSSecretsHandler(region: AWS_REGION, logger: log.defaultLogger)
-//        secretHandlerTest!.secrets?.awsSDK = MockedAWSSecretsHandlerSDK()
+        secretHandlerTest!.secrets?.awsSDK = try MockedAWSSecretsHandlerSDK()
         try await secretHandlerTest!.secrets!.clearSecrets()
     }
     
