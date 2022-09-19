@@ -1,15 +1,9 @@
-This is a command line utility to download and install Xcode in headless mode (from a Terminal only).
-
 [![Build And Test](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test.yml)
+![language](https://img.shields.io/badge/swift-5.7-blue)
+![platform](https://img.shields.io/badge/platform-macOS-green)
+[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-## License
-
-This project is licensed under the Apache 2.0 License. 
-
-[![License][apache-badge]][apache-url]
-
-[apache-badge]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
-[apache-url]: LICENSE
+This is a command line utility to download and install Xcode in headless mode (from a Terminal only).
 
 ## TL;DR
 
