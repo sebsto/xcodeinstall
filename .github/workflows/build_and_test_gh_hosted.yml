@@ -15,6 +15,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Inspect
+      run: ls -al /Application/Xcode*
     - name: Build
       run: swift build -v
     - name: Run tests
