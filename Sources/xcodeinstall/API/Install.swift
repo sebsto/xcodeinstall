@@ -7,6 +7,7 @@
 
 import Foundation
 import Logging
+import CLIlib
 
 protocol InstallerProtocol {
     func install(file: String, progress: ProgressUpdateProtocol) async throws
@@ -126,15 +127,4 @@ class ShellInstaller: InstallerProtocol {
         return match
     }
 
-    @inlinable
-    func log(_ cmd: String, _ result: ShellOutput) {
-
-        let msg = "\n \(cmd) \n" +
-        "-- stdout -- \n" +
-        "\(result.out ?? "") \n" +
-        "-- stderr -- \n" +
-        "\(result.err ?? "") \n"
-
-        logger.debug("\(msg)")
-    }
 }

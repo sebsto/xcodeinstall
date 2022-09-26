@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CLIlib
 
 // MARK: PKG
 // generic PKG installation function
@@ -26,8 +27,6 @@ extension ShellInstaller {
 
         let cmd = "sudo \(INSTALLERCOMMAND) -pkg \"\(pkgPath)\" -target /"
         let result = try s.run(cmd)
-        log(cmd, result)
-
         return result
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CLIlib
 
 // MARK: XCODE
 // XCode installation functions
@@ -17,7 +18,7 @@ extension ShellInstaller {
         let totalSteps = 2 + PKGTOINSTALL.count
         var currentStep: Int = 0
 
-        var resultOptional: ShellOutput?
+        var resultOptional: CLIlib.ShellOutput?
 
         // first uncompress file
         logger.debug("Decompressing files")
@@ -83,7 +84,6 @@ extension ShellInstaller {
         "\(XIPCOMMAND) --expand \"\(filePath)\" && " +
         "popd"
         let result = try s.run(cmd)
-        log(cmd, result)
 
         return result
     }

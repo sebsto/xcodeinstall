@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CLIlib
 
 // MARK: Command Line Tools
 // Command Line Tools installation functions
@@ -75,7 +76,6 @@ extension ShellInstaller {
         // hdiutil mount ./xcode-cli.dmg
         let cmd = "\(HDIUTILCOMMAND) mount \"\(dmgPath)\""
         let result = try s.run(cmd)
-        log(cmd, result)
 
         return result
     }
@@ -90,7 +90,6 @@ extension ShellInstaller {
         // hdiutil unmount /Volumes/Command\ Line\ Developer\ Tools/
         let cmd = "\(HDIUTILCOMMAND) unmount \"\(volumePath)\""
         let result = try s.run(cmd)
-        log(cmd, result)
 
         return result
     }
