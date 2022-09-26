@@ -13,8 +13,8 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
 
     let maxRetries = 3
 
-    let awsClient: AWSClient
-    let smClient: SecretsManager
+    var awsClient: AWSClient // var for injection
+    var smClient: SecretsManager // var for injection 
     let logger: Logger
 
     init(region: String, logger: Logger) throws {

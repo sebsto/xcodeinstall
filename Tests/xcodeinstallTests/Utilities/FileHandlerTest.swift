@@ -280,7 +280,7 @@ class FileHandlerTest: XCTestCase {
         XCTAssertThrowsError(try fh.loadDownloadList())
 
     }
-
+    
 }
 
 

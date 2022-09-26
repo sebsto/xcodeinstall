@@ -47,7 +47,6 @@ class ProgressBar: ProgressUpdateProtocol {
 
     init(output: OutputBuffer, progressBarType: ProgressBarType, title: String? = nil) {
         self.output = output
-        // self.output.write("")
         self.progressBarType = progressBarType
         self.title = title
     }
@@ -56,19 +55,9 @@ class ProgressBar: ProgressUpdateProtocol {
 
         if (!titlePrinted),
            let title {
-
-            if self.progressBarType == .percentProgressAnimation {
-
-                // for progress bar - center the title on the bar
-                let numberOfSpaces = self.width - title.count
-                let prefix = " " * ((numberOfSpaces / 2) + "99% [".count)
-                output.write("\(prefix)\(blue)\(bold)\(title)\(reset)\n")
-            } else {
-                // other wise the title is left-aligned
-                output.write("\(blue)\(bold)\(title)\(reset)\n")
-            }
-            self.titlePrinted = true
+                printTitle(title)
         }
+
         switch self.progressBarType {
         case .percentProgressAnimation:
             percentProgress(step: step, total: total, text: text)
@@ -133,6 +122,24 @@ class ProgressBar: ProgressUpdateProtocol {
 
     private func countingProgressMultiLine(step: Int, total: Int, text: String = "") {
         output.write("[\(step)/\(total)] \(text)\n")
+    }
+
+    private func printTitle(_ title: String) {
+
+        switch self.progressBarType {
+        case .percentProgressAnimation:
+            // for progress bar - center the title on the bar
+            let numberOfSpaces = self.width - title.count
+            let prefix = " " * ((numberOfSpaces / 2) + "99% [".count)
+            output.write("\(prefix)\(blue)\(bold)\(title)\(reset)\n")
+
+        default:
+            // otherwise the title is left-aligned
+            output.write("\(blue)\(bold)\(title)\(reset)\n")
+
+        }
+
+        self.titlePrinted = true
     }
 
 }
