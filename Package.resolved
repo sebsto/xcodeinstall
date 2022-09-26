@@ -11,10 +11,10 @@
     },
     {
       "identity" : "clilib",
-      "kind" : "localSourceControl",
-      "location" : "/Users/stormacq/Documents/amazon/code/swift/mac/CLIlib",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sebsto/CLIlib/",
       "state" : {
-        "revision" : "366f9b29a20ab94ae511eed6d61cf162d7137877",
+        "revision" : "d64c3d2308b44c46f86b680a5452de8e1b0bd08f",
         "version" : "0.1.0"
       }
     },
