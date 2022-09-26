@@ -19,7 +19,10 @@ enum TestEnvironment {
         return false
     }
 
-    static var credentialProvider: CredentialProviderFactory { return isUsingLocalstack ? .static(accessKeyId: "foo", secretAccessKey: "bar") : .default }
+    static var credentialProvider: CredentialProviderFactory { 
+        return isUsingLocalstack ? 
+            .static(accessKeyId: "foo", secretAccessKey: "bar") :
+            .selector(.environment, .ec2, .configFile()) }
 
     /// current list of middleware
     static var middlewares: [AWSServiceMiddleware] {
