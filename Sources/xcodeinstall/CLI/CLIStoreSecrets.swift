@@ -24,6 +24,7 @@ extension MainCommand {
 
         func run() async throws {
             let xcib = XCodeInstallBuilder()
+                            .withVerbosity(verbose: globalOptions.verbose)
                             .withAWSSecretsManager(region: secretManagerRegion)
 
             _ = try await xcib.build().storeSecrets()

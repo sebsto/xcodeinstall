@@ -14,8 +14,13 @@ class XCodeInstallBuilder {
     private var downloaderNeeded: Bool = false
     private var installerNeeded: Bool = false
     private var awsSecretsManagerNeeded: Bool = false
+    private var verbosityNeeded: Bool = false
     private var awsRegion: String = ""
 
+    func withVerbosity(verbose: Bool) -> XCodeInstallBuilder {
+        self.verbosityNeeded = verbose 
+        return self
+    }
     func withDownloader() -> XCodeInstallBuilder {
         self.downloaderNeeded = true
         return self
@@ -35,6 +40,7 @@ class XCodeInstallBuilder {
     }
     func build() throws -> XCodeInstall {
 
+        var result: XCodeInstall?
         let fileHandler = FileHandler()
 
         let secretsManager: SecretsHandler
@@ -50,7 +56,11 @@ class XCodeInstallBuilder {
             secretsManager = FileSecretsHandler()
         }
 
-        var result: XCodeInstall?
+        if verbosityNeeded {
+            log = Log.verboseLogger()
+        } else {
+            log = Log.defaultLogger()
+        }
 
         if authenticatorNeeded {
             let auth = AppleAuthenticator(secrets: secretsManager, fileHandler: fileHandler)

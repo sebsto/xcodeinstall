@@ -6,6 +6,7 @@
 //
 
 import XCTest
+// import Logging 
 @testable import xcodeinstall
 
 class XcodeInstallBuilderTest: XCTestCase {
@@ -17,7 +18,24 @@ class XcodeInstallBuilderTest: XCTestCase {
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
-    
+
+    func testBuildXCodeWithVerbosity() throws {
+        
+        // given
+        // when
+        let xci = try? XCodeInstallBuilder()
+            .withVerbosity(verbose: true)
+            .build()
+        
+        // then
+        XCTAssertNotNil(xci)
+
+        // TODO how can I test logger is verbose ?
+        //XCTAssertNotNil(log.logLevel == .debug)
+        
+    }
+
+
     func testBuildXCodeWithAuthenticator() throws {
         
         // given

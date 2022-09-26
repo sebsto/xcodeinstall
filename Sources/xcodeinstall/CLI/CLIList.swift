@@ -8,7 +8,7 @@
 import Foundation
 import ArgumentParser
 
-// download implementation
+// list implementation
 extension MainCommand {
 
     struct DownloadListOptions: ParsableArguments {
@@ -45,6 +45,7 @@ extension MainCommand {
 
         func run() async throws {
             var xcib = XCodeInstallBuilder()
+                            .withVerbosity(verbose: globalOptions.verbose)
                             .withDownloader()
 
             if let region = cloudOption.secretManagerRegion {

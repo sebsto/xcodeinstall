@@ -23,6 +23,7 @@ extension MainCommand {
 
         func run() async throws {
             let main = try XCodeInstallBuilder()
+                            .withVerbosity(verbose: globalOptions.verbose)
                             .withInstaller()
                             .build()
             _ = try await main.install(file: name)
