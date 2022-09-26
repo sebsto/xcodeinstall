@@ -1,4 +1,9 @@
-[![Build And Test](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test.yml)
+[![Build & Test on EC2](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test.yml)
+
+[![Build & Test on GitHub](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test_gh_hosted.yml/badge.svg)](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test_gh_hosted.yml)
+
+
+
 ![language](https://img.shields.io/badge/swift-5.7-blue)
 ![platform](https://img.shields.io/badge/platform-macOS-green)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
