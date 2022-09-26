@@ -16,7 +16,7 @@ enum TestEnvironment {
     static var isUsingLocalstack: Bool {
 //        return Environment["AWS_DISABLE_LOCALSTACK"] != "true" ||
 //            (Environment["GITHUB_ACTIONS"] == "true" && Environment["AWS_ACCESS_KEY_ID"] == "")
-        return true
+        return false
     }
 
     static var credentialProvider: CredentialProviderFactory { return isUsingLocalstack ? .static(accessKeyId: "foo", secretAccessKey: "bar") : .default }
