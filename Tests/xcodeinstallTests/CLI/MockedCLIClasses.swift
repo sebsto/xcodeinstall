@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CLIlib
 @testable import xcodeinstall
 
 //
@@ -37,31 +38,6 @@ class MockedReadLine : ReadLineProtocol {
 
 enum MockError: Error {
     case invalidMockData
-}
-
-class MockedProgressBar: ProgressUpdateProtocol {
-    
-    var isComplete = false
-    var isClear    = false
-    var step  = 0
-    var total = 0
-    var text  = ""
-    
-    func update(step: Int, total: Int, text: String) {
-        self.step  = step
-        self.total = total
-        self.text  = text
-    }
-    
-    func complete(success: Bool) {
-        isComplete = success
-    }
-    
-    func clear() {
-        isClear = true
-    }
-    
-    
 }
 
 class MockedInstaller: InstallerProtocol {

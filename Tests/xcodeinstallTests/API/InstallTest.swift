@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import CLIlib
 @testable import xcodeinstall
 
 class InstallTest: XCTestCase {

@@ -7,6 +7,7 @@
 
 import Foundation
 import Logging
+import CLIlib
 
 protocol AppleDownloaderProtocol {
     func list(force: Bool) async throws -> DownloadList

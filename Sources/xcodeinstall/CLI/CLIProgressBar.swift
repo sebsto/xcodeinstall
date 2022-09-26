@@ -14,6 +14,7 @@
 // https://github.com/jkandzi/Progress.swift/blob/master/Sources/Progress.swift
 
 import Foundation
+import CLIlib
 
 struct CLIProgressBar: ProgressUpdateProtocol {
 

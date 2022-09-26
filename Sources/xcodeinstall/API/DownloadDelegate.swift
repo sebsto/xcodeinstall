@@ -7,6 +7,7 @@
 
 import Foundation
 import Logging
+import CLIlib
 
 // delegate class to receive download progress
 class DownloadDelegate: NSObject, URLSessionDownloadDelegate {

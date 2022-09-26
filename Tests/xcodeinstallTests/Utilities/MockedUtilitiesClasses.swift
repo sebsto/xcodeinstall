@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CLIlib
 @testable import xcodeinstall
 
 // used to test Installer component (see InstallerTest)
@@ -62,6 +63,61 @@ class MockedFileHandler: FileHandlerProtocol {
     func baseFilePath() -> String {
         return "not_implemented.tmp"
     }
+}
 
+class MockShell: AsyncShellProtocol {
+
+    var command: String = ""
+
+    func run(_ command: String,
+             onCompletion: ((Process) -> Void)?,
+             onOutput: ((String) -> Void)?,
+             onError: ((String) -> Void)?) throws -> Process {
+
+        self.command = command
+
+        let process = Process()
+        let out = "out"
+        let err = "err"
+        if let onCompletion {
+            onCompletion(process)
+        }
+        if let onOutput {
+            onOutput(out)
+        }
+        if let onError {
+            onError(err)
+        }
+        return process
+    }
+
+    func run(_ command: String) throws -> ShellOutput {
+        self.command = command
+        return ShellOutput(out: "out", err: "err", code: 0)
+    }
+
+}
+
+class MockedProgressBar: ProgressUpdateProtocol {
+
+    var isComplete = false
+    var isClear    = false
+    var step  = 0
+    var total = 0
+    var text  = ""
+
+    func update(step: Int, total: Int, text: String) {
+        self.step  = step
+        self.total = total
+        self.text  = text
+    }
+
+    func complete(success: Bool) {
+        isComplete = success
+    }
+
+    func clear() {
+        isClear = true
+    }
 
 }

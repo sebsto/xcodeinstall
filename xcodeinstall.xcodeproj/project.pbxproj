@@ -14,6 +14,7 @@
 		001E2E8328C15293009C1545 /* CLIStoreSecrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001E2E8128C15293009C1545 /* CLIStoreSecrets.swift */; };
 		001E2E8528C15829009C1545 /* SotoSecretsManager in Frameworks */ = {isa = PBXBuildFile; productRef = 001E2E8428C15829009C1545 /* SotoSecretsManager */; };
 		002E65A428E1A65400C13BBB /* CLIlib in Frameworks */ = {isa = PBXBuildFile; productRef = 002E65A328E1A65400C13BBB /* CLIlib */; };
+		002E65A628E1A9FB00C13BBB /* CLIlib in Frameworks */ = {isa = PBXBuildFile; productRef = 002E65A528E1A9FB00C13BBB /* CLIlib */; };
 		0041064728BD25410033A3A2 /* InstallPkg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064628BD25410033A3A2 /* InstallPkg.swift */; };
 		0041064828BD25410033A3A2 /* InstallPkg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064628BD25410033A3A2 /* InstallPkg.swift */; };
 		0041064A28BD25810033A3A2 /* InstallXcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064928BD25810033A3A2 /* InstallXcode.swift */; };
@@ -26,9 +27,6 @@
 		0041065428BD25EC0033A3A2 /* InstallDownloadListExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */; };
 		0053F33628CF8DC4009E466D /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33528CF8DC4009E466D /* Version.swift */; };
 		0053F33728CF8DC4009E466D /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33528CF8DC4009E466D /* Version.swift */; };
-		0053F33A28CFB3F3009E466D /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33928CFB3F3009E466D /* ProgressBar.swift */; };
-		0053F33B28CFB3F3009E466D /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0053F33928CFB3F3009E466D /* ProgressBar.swift */; };
-		0057C20F28D314E9004A5BEC /* OutputBufferTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0057C20E28D314E9004A5BEC /* OutputBufferTest.swift */; };
 		0057C21128D319E9004A5BEC /* AppleSessionSecretTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0057C21028D319E9004A5BEC /* AppleSessionSecretTest.swift */; };
 		0057C21328D3245F004A5BEC /* CLIStoreSecretsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0057C21228D3245F004A5BEC /* CLIStoreSecretsTest.swift */; };
 		0057C21528D3785F004A5BEC /* MockedAWSSecretsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0057C21428D3785F004A5BEC /* MockedAWSSecretsHandler.swift */; };
@@ -128,11 +126,6 @@
 		00F8A31928BA139B004FB43A /* MockedUtilitiesClasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00F8A31828BA139B004FB43A /* MockedUtilitiesClasses.swift */; };
 		00F8A31B28BACDF7004FB43A /* InstallSupportedFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00F8A31A28BACDF7004FB43A /* InstallSupportedFiles.swift */; };
 		00F8A31C28BACDF7004FB43A /* InstallSupportedFiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00F8A31A28BACDF7004FB43A /* InstallSupportedFiles.swift */; };
-		00FDDFA428D0E27300ED72E8 /* OutputBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FDDFA328D0E27300ED72E8 /* OutputBuffer.swift */; };
-		00FDDFA528D0E27300ED72E8 /* OutputBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FDDFA328D0E27300ED72E8 /* OutputBuffer.swift */; };
-		00FDDFA828D0E3AD00ED72E8 /* PercentProgressBarTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FDDFA728D0E3AD00ED72E8 /* PercentProgressBarTest.swift */; };
-		00FDDFAA28D1138A00ED72E8 /* CountingMultiLineProgressBarTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FDDFA928D1138A00ED72E8 /* CountingMultiLineProgressBarTest.swift */; };
-		00FDDFAC28D1147800ED72E8 /* CountingProgressBarTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00FDDFAB28D1147800ED72E8 /* CountingProgressBarTest.swift */; };
 		OBJ_23 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Authentication.swift */; };
 		OBJ_24 /* URLLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* URLLogger.swift */; };
 /* End PBXBuildFile section */
@@ -180,8 +173,6 @@
 		0041064F28BD25C90033A3A2 /* InstallStringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallStringExtension.swift; sourceTree = "<group>"; };
 		0041065228BD25EC0033A3A2 /* InstallDownloadListExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallDownloadListExtension.swift; sourceTree = "<group>"; };
 		0053F33528CF8DC4009E466D /* Version.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
-		0053F33928CFB3F3009E466D /* ProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBar.swift; sourceTree = "<group>"; };
-		0057C20E28D314E9004A5BEC /* OutputBufferTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputBufferTest.swift; sourceTree = "<group>"; };
 		0057C21028D319E9004A5BEC /* AppleSessionSecretTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSessionSecretTest.swift; sourceTree = "<group>"; };
 		0057C21228D3245F004A5BEC /* CLIStoreSecretsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIStoreSecretsTest.swift; sourceTree = "<group>"; };
 		0057C21428D3785F004A5BEC /* MockedAWSSecretsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockedAWSSecretsHandler.swift; sourceTree = "<group>"; };
@@ -248,10 +239,6 @@
 		00EE603428AA44CA00B09D2B /* CLITest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLITest.swift; sourceTree = "<group>"; };
 		00F8A31828BA139B004FB43A /* MockedUtilitiesClasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockedUtilitiesClasses.swift; sourceTree = "<group>"; };
 		00F8A31A28BACDF7004FB43A /* InstallSupportedFiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallSupportedFiles.swift; sourceTree = "<group>"; };
-		00FDDFA328D0E27300ED72E8 /* OutputBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputBuffer.swift; sourceTree = "<group>"; };
-		00FDDFA728D0E3AD00ED72E8 /* PercentProgressBarTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PercentProgressBarTest.swift; sourceTree = "<group>"; };
-		00FDDFA928D1138A00ED72E8 /* CountingMultiLineProgressBarTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountingMultiLineProgressBarTest.swift; sourceTree = "<group>"; };
-		00FDDFAB28D1147800ED72E8 /* CountingProgressBarTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountingProgressBarTest.swift; sourceTree = "<group>"; };
 		OBJ_10 /* URLLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLLogger.swift; sourceTree = "<group>"; };
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		OBJ_9 /* Authentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Authentication.swift; sourceTree = "<group>"; };
@@ -276,6 +263,7 @@
 			buildActionMask = 0;
 			files = (
 				009A913A288C2C3F003C0DF4 /* ArgumentParser in Frameworks */,
+				002E65A628E1A9FB00C13BBB /* CLIlib in Frameworks */,
 				007585F128A0E1790094D2DC /* Logging in Frameworks */,
 				001E2E8528C15829009C1545 /* SotoSecretsManager in Frameworks */,
 			);
@@ -329,7 +317,6 @@
 				0075860D28A3BCF80094D2DC /* CLIProgressBar.swift */,
 				00CECCAC28B34B8300120779 /* CLIInstall.swift */,
 				001E2E8128C15293009C1545 /* CLIStoreSecrets.swift */,
-				00FDDFA228D0E25900ED72E8 /* progressbar */,
 			);
 			path = CLI;
 			sourceTree = "<group>";
@@ -391,7 +378,6 @@
 				0057C21228D3245F004A5BEC /* CLIStoreSecretsTest.swift */,
 				00DC83B828AD3E1500B6346D /* XcodeInstallBuilderTest.swift */,
 				007585D6289C17670094D2DC /* DownloadListParserTest.swift */,
-				00FDDFA628D0E38E00ED72E8 /* progressbar */,
 			);
 			path = CLI;
 			sourceTree = "<group>";
@@ -437,26 +423,6 @@
 				0057C21828D440FE004A5BEC /* SotoTestEnvironment.swift */,
 			);
 			path = Secrets;
-			sourceTree = "<group>";
-		};
-		00FDDFA228D0E25900ED72E8 /* progressbar */ = {
-			isa = PBXGroup;
-			children = (
-				0053F33928CFB3F3009E466D /* ProgressBar.swift */,
-				00FDDFA328D0E27300ED72E8 /* OutputBuffer.swift */,
-			);
-			path = progressbar;
-			sourceTree = "<group>";
-		};
-		00FDDFA628D0E38E00ED72E8 /* progressbar */ = {
-			isa = PBXGroup;
-			children = (
-				00FDDFA728D0E3AD00ED72E8 /* PercentProgressBarTest.swift */,
-				00FDDFA928D1138A00ED72E8 /* CountingMultiLineProgressBarTest.swift */,
-				00FDDFAB28D1147800ED72E8 /* CountingProgressBarTest.swift */,
-				0057C20E28D314E9004A5BEC /* OutputBufferTest.swift */,
-			);
-			path = progressbar;
 			sourceTree = "<group>";
 		};
 		OBJ_12 /* Tests */ = {
@@ -567,6 +533,7 @@
 				009A9139288C2C3F003C0DF4 /* ArgumentParser */,
 				007585F028A0E1790094D2DC /* Logging */,
 				001E2E8428C15829009C1545 /* SotoSecretsManager */,
+				002E65A528E1A9FB00C13BBB /* CLIlib */,
 			);
 			productName = xcodeinstallTests;
 			productReference = "xcodeinstall::xcodeinstallTests::Product" /* xcodeinstallTests.xctest */;
@@ -643,8 +610,6 @@
 				0053F33628CF8DC4009E466D /* Version.swift in Sources */,
 				00CECCB628B34CD500120779 /* Install.swift in Sources */,
 				0093C5E128C5321C00AF5ABC /* AWSSecretsHandlerSoto.swift in Sources */,
-				0053F33A28CFB3F3009E466D /* ProgressBar.swift in Sources */,
-				00FDDFA428D0E27300ED72E8 /* OutputBuffer.swift in Sources */,
 				007A542A2885734D00AC4622 /* CLIMain.swift in Sources */,
 				0041064D28BD25A90033A3A2 /* InstallCLTools.swift in Sources */,
 				00CECCB028B34C4F00120779 /* XCodeInstallBuilder.swift in Sources */,
@@ -692,17 +657,14 @@
 				00EE5FAD28A8F47000B09D2B /* FileSecretsHandler.swift in Sources */,
 				0093C5DA28C4C81900AF5ABC /* AsyncTestCase.swift in Sources */,
 				00DC837528ABD03600B6346D /* AuthenticateCommand.swift in Sources */,
-				0057C20F28D314E9004A5BEC /* OutputBufferTest.swift in Sources */,
 				00CECCBD28B3770000120779 /* CLIListTest.swift in Sources */,
 				009A9137288C2C14003C0DF4 /* CLIMain.swift in Sources */,
 				009A9135288C2857003C0DF4 /* CLIList.swift in Sources */,
 				00DC837B28ABD36100B6346D /* ListCommand.swift in Sources */,
 				0057C21528D3785F004A5BEC /* MockedAWSSecretsHandler.swift in Sources */,
-				00FDDFAA28D1138A00ED72E8 /* CountingMultiLineProgressBarTest.swift in Sources */,
 				007585D7289C17670094D2DC /* DownloadListParserTest.swift in Sources */,
 				007A543C288A596D00AC4622 /* NetworkAgent.swift in Sources */,
 				00DC83B928AD3E1500B6346D /* XcodeInstallBuilderTest.swift in Sources */,
-				0053F33B28CFB3F3009E466D /* ProgressBar.swift in Sources */,
 				00CECCA828B2548600120779 /* DispatchSemaphore.swift in Sources */,
 				00CECC9328B1743000120779 /* FileHandler.swift in Sources */,
 				00D0649328C279650000197D /* SecretsHandlerTest.swift in Sources */,
@@ -738,7 +700,6 @@
 				00DC835C28AB73F300B6346D /* LoggerTest.swift in Sources */,
 				0092F866288DC29F00CFE571 /* DownloadListParser.swift in Sources */,
 				001E2E8328C15293009C1545 /* CLIStoreSecrets.swift in Sources */,
-				00FDDFA828D0E3AD00ED72E8 /* PercentProgressBarTest.swift in Sources */,
 				00CECCAB28B34B3300120779 /* CLIDownload.swift in Sources */,
 				009A9132288C27D0003C0DF4 /* CLIAuthenticate.swift in Sources */,
 				007A5435288A41E700AC4622 /* HTTPClientTest.swift in Sources */,
@@ -748,13 +709,11 @@
 				0041065428BD25EC0033A3A2 /* InstallDownloadListExtension.swift in Sources */,
 				0041065128BD25C90033A3A2 /* InstallStringExtension.swift in Sources */,
 				00CECCA528B2543900120779 /* DownloadListData.swift in Sources */,
-				00FDDFAC28D1147800ED72E8 /* CountingProgressBarTest.swift in Sources */,
 				00CECCC128B37B6E00120779 /* InstallTest.swift in Sources */,
 				00EE603528AA44CA00B09D2B /* CLITest.swift in Sources */,
 				007585C8289BDF820094D2DC /* URLRequestExtension.swift in Sources */,
 				00CECCAE28B34B8300120779 /* CLIInstall.swift in Sources */,
 				00F8A31C28BACDF7004FB43A /* InstallSupportedFiles.swift in Sources */,
-				00FDDFA528D0E27300ED72E8 /* OutputBuffer.swift in Sources */,
 				007A5443288AC8A000AC4622 /* AuthenticationMFA.swift in Sources */,
 				007585CE289BEEFD0094D2DC /* DownloadTest.swift in Sources */,
 				00DC837228ABCF5100B6346D /* XcodeInstallCommand.swift in Sources */,
@@ -1037,6 +996,10 @@
 			productName = SotoSecretsManager;
 		};
 		002E65A328E1A65400C13BBB /* CLIlib */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CLIlib;
+		};
+		002E65A528E1A9FB00C13BBB /* CLIlib */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CLIlib;
 		};
