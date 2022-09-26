@@ -7,6 +7,7 @@
 
 import XCTest
 import ArgumentParser
+import CLIlib
 @testable import xcodeinstall
 
 
