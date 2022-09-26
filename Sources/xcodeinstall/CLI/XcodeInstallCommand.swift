@@ -7,7 +7,6 @@
 
 import Foundation
 import CLIlib
-import Logging
 
 struct XCodeInstall {
 
@@ -32,7 +31,6 @@ struct XCodeInstall {
     var installer: InstallerProtocol?
 
     var secretsManager: SecretsHandler
-    var logger: Logger
     var fileHandler: FileHandlerProtocol
 }
 

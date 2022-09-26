@@ -29,7 +29,7 @@ extension XCodeInstall {
             } else {
                 fileToInstall = FileHandler.downloadDirectory.appendingPathComponent(file!).path
             }
-            logger.debug("Going to attemp to install \(fileToInstall)")
+            log.debug("Going to attemp to install \(fileToInstall)")
 
             try await inst.install(file: fileToInstall, progress: progress)
             progress.complete(success: true)
@@ -54,7 +54,7 @@ extension XCodeInstall {
             progress.complete(success: false)
         } catch {
             display("🛑 Error while installing \(String(describing: fileToInstall))")
-            logger.debug("\(error)")
+            log.debug("\(error)")
             progress.complete(success: false)
         }
     }

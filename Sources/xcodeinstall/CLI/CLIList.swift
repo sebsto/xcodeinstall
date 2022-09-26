@@ -45,7 +45,6 @@ extension MainCommand {
 
         func run() async throws {
             var xcib = XCodeInstallBuilder()
-                            .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
                             .withDownloader()
 
             if let region = cloudOption.secretManagerRegion {

@@ -7,6 +7,7 @@
 
 import Foundation
 import SotoSecretsManager
+import CLIlib
 
 // use a class to have a chance to call client.shutdown() at deinit
 class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
@@ -15,9 +16,8 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
 
     var awsClient: AWSClient // var for injection
     var smClient: SecretsManager // var for injection 
-    let logger: Logger
 
-    init(region: String, logger: Logger) throws {
+    init(region: String) throws {
 
         guard let awsRegion = Region(awsRegionName: region) else {
             throw AWSSecretsHandlerError.invalidRegion(region: region)
@@ -29,7 +29,6 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
             httpClientProvider: .createNew)
         self.smClient = SecretsManager(client: awsClient,
                                        region: awsRegion)
-        self.logger = logger
     }
 
     deinit {
@@ -60,7 +59,7 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
                                                                          secretString: secretString)
             _ = try await smClient.createSecret(createSecretRequest)
         } catch {
-            logger.error("Can not create secret \(secretId) : \(error)")
+            log.error("Can not create secret \(secretId) : \(error)")
             throw error
         }
     }
@@ -92,22 +91,22 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
 
             // create the resource and try again
             if error == .resourceNotFoundException {
-                logger.debug("Secrets \(secretId) does not exist, creating it")
+                log.debug("Secrets \(secretId) does not exist, creating it")
                 try await self.createSecret(secretId: secretId, secretValue: secretValue)
 
                 if step <= maxRetries {
                     // recursive call to ourselevs
-                    logger.debug("Re-trying the block call (attempt #\(step + 1))")
+                    log.debug("Re-trying the block call (attempt #\(step + 1))")
                     try await self.executeRequestAndCreateWhenNotExist(secretId: secretId,
                                                                        secretValue: secretValue,
                                                                        step: step + 1,
                                                                        block: block)
                 } else {
-                    logger.error("Max attempt to call Secrets Manager")
+                    log.error("Max attempt to call Secrets Manager")
                 }
 
             } else {
-                logger.error("AWS API Error\n\(error)")
+                log.error("AWS API Error\n\(error)")
                 throw error
             }
 
@@ -137,13 +136,13 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
                 let putSecretRequest = SecretsManager.PutSecretValueRequest(secretId: secretId.rawValue,
                                                                             secretString: secretString)
 
-                logger.debug("Updating secret \(secretId) with \(newValue)")
+                log.debug("Updating secret \(secretId) with \(newValue)")
                 let putSecretResponse = try await smClient.putSecretValue(putSecretRequest)
-                logger.debug("\(putSecretResponse.name ?? "") has version \(putSecretResponse.versionId ?? "")")
+                log.debug("\(putSecretResponse.name ?? "") has version \(putSecretResponse.versionId ?? "")")
             })
 
         } catch {
-            logger.error("Unexpected error while updating secrets\n\(error)")
+            log.error("Unexpected error while updating secrets\n\(error)")
             throw error
         }
     }
@@ -153,12 +152,12 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
     func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T {
         do {
             let getSecretRequest = SecretsManager.GetSecretValueRequest(secretId: secretId.rawValue)
-            logger.debug("Retrieving secret \(secretId)")
+            log.debug("Retrieving secret \(secretId)")
             let getSecretResponse = try await smClient.getSecretValue(getSecretRequest)
-            logger.debug("Secret \(getSecretResponse.name ?? "nil") retrieved")
+            log.debug("Secret \(getSecretResponse.name ?? "nil") retrieved")
 
             guard let secret = getSecretResponse.secretString else {
-                logger.error("⚠️ no value returned by AWS Secrets Manager secret \(secretId)")
+                log.error("⚠️ no value returned by AWS Secrets Manager secret \(secretId)")
                 return secretId == .appleCredentials ? AppleCredentialsSecret() as! T : AppleSessionSecret() as! T
             }
 
@@ -170,7 +169,7 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
             }
 
         } catch {
-            logger.error("Unexpected error while retrieving secrets\n\(error)")
+            log.error("Unexpected error while retrieving secrets\n\(error)")
             throw error
 
         }

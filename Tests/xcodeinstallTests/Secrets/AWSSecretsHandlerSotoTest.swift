@@ -15,7 +15,6 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
     
     static var awsClient : AWSClient!
     static var smClient  : SecretsManager!
-    var log : Log?
     var secretHandler : AWSSecretsHandlerSoto?
     
     override func setUpWithError() throws {
@@ -30,9 +29,7 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
             Self.smClient = SecretsManager(client: AWSSecretsHandlerSotoTest.awsClient,
                                            endpoint: TestEnvironment.getEndPoint())
             
-            log = Log(logLevel: .debug)
-
-            secretHandler = try AWSSecretsHandlerSoto(region: region, logger: log!.defaultLogger)
+            secretHandler = try AWSSecretsHandlerSoto(region: region)
             XCTAssertNotNil(secretHandler)
             XCTAssertNoThrow(try secretHandler!.awsClient.syncShutdown()) // shut down the class provided AWS Client
 
@@ -68,7 +65,7 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
         
         // when
         do {
-            let _ = try AWSSecretsHandlerSoto(region: region, logger: log!.defaultLogger)
+            let _ = try AWSSecretsHandlerSoto(region: region)
             
             // then
             // no error
@@ -87,7 +84,7 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
         
         // when
         do {
-            let _ = try AWSSecretsHandlerSoto(region: region, logger: log!.defaultLogger)
+            let _ = try AWSSecretsHandlerSoto(region: region)
             
             // then
             // error

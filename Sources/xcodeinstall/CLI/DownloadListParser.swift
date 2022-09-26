@@ -6,19 +6,14 @@
 //
 
 import Foundation
-import Logging
 
 struct DownloadListParser {
-
-    let logger: Logger
 
     var xCodeOnly: Bool
     var majorVersion: String
     var sortMostRecentFirst: Bool
 
-    init(logger: Logger, xCodeOnly: Bool = true, majorVersion: String = "13", sortMostRecentFirst: Bool = false) {
-        self.logger = logger
-
+    init(xCodeOnly: Bool = true, majorVersion: String = "13", sortMostRecentFirst: Bool = false) {
         self.xCodeOnly = xCodeOnly
         self.majorVersion = majorVersion
         self.sortMostRecentFirst = sortMostRecentFirst
@@ -71,7 +66,7 @@ struct DownloadListParser {
     /// It adds a flag for each file in the list to indicate if the file is already downloaded and available in cache
     func enrich(list: [DownloadList.Download]) -> [DownloadList.Download] {
 
-        let fileHandler = FileHandler(logger: self.logger)
+        let fileHandler = FileHandler()
 
         return list.map { download in
 

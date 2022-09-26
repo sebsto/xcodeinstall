@@ -12,7 +12,6 @@ import XCTest
 class NetworkAgentTestCase : AsyncTestCase {
     var subject : HTTPClient!
     var agent   : NetworkAgent!
-    var log     : Log!
     var secrets : FileSecretsHandler!
     var session : MockURLSession!
     var sema    : DispatchSemaphoreProtocol!
@@ -21,13 +20,12 @@ class NetworkAgentTestCase : AsyncTestCase {
 
     override func asyncSetUpWithError() async throws {
         
-        self.log     = Log(logLevel: .debug)
-        self.secrets = FileSecretsHandler.init(logger: log.defaultLogger)
-        self.fileHandler = FileHandler(logger: log.defaultLogger)
+        self.secrets = FileSecretsHandler.init()
+        self.fileHandler = FileHandler()
         self.session = MockURLSession()
         self.sema    = MockDispatchSemaphore()
         self.subject = HTTPClient(session: session)
-        self.agent   = NetworkAgent(client: subject, secrets: secrets, fileHandler: fileHandler, logger: log.defaultLogger)
+        self.agent   = NetworkAgent(client: subject, secrets: secrets, fileHandler: fileHandler)
         
         try await self.secrets.clearSecrets()
     }
@@ -39,13 +37,13 @@ class NetworkAgentTestCase : AsyncTestCase {
     }
     
     func getAppleDownloader() -> AppleDownloader {
-        let downloader = AppleDownloader(client: self.subject, secrets: self.secrets, fileHandler: self.fileHandler, logger: self.log.defaultLogger)
+        let downloader = AppleDownloader(client: self.subject, secrets: self.secrets, fileHandler: self.fileHandler)
         downloader.sema = self.sema
-        downloader.downloadDelegate = DownloadDelegate(semaphore: self.sema, fileHandler: self.fileHandler, logger: self.log.defaultLogger)
+        downloader.downloadDelegate = DownloadDelegate(semaphore: self.sema, fileHandler: self.fileHandler)
         return downloader
     }
     
     func getAppleAuthenticator() -> AppleAuthenticator {
-        return AppleAuthenticator(client: subject, secrets: self.secrets, fileHandler: self.fileHandler, logger: self.log.defaultLogger)
+        return AppleAuthenticator(client: subject, secrets: self.secrets, fileHandler: self.fileHandler)
     }
 }

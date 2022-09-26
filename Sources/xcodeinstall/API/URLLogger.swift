@@ -7,6 +7,7 @@
 
 import Foundation
 import Logging
+import CLIlib
 
 // FIXME consider using Swift 5.7 regexp
 // https://github.com/apple/swift-evolution/blob/main/proposals/0350-regex-type-overview.md
@@ -16,8 +17,8 @@ func filterPassword(_ input: String) -> String {
 
 func log(request: URLRequest, to logger: Logger) {
 
-    logger.debug("\n - - - - - - - - - - OUTGOING - - - - - - - - - - \n")
-    defer { logger.debug("\n - - - - - - - - - -  END - - - - - - - - - - \n") }
+    log.debug("\n - - - - - - - - - - OUTGOING - - - - - - - - - - \n")
+    defer { log.debug("\n - - - - - - - - - -  END - - - - - - - - - - \n") }
     let urlAsString = request.url?.absoluteString ?? ""
     let urlComponents = URLComponents(string: urlAsString)
     let method = request.httpMethod != nil ? "\(request.httpMethod ?? "")" : ""

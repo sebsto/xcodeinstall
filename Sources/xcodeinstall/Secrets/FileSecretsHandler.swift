@@ -6,12 +6,10 @@
 //
 
 import Foundation
-import Logging
+import CLIlib
 
 // store secrets on files in $HOME/.xcodeinstaller
 struct FileSecretsHandler: SecretsHandler {
-
-    private let logger: Logger
 
     private let fileManager: FileManager
     private var baseDirectory: URL
@@ -20,13 +18,11 @@ struct FileSecretsHandler: SecretsHandler {
     private let newCookiesPath: URL
     private let newSessionPath: URL
 
-    init(logger: Logger) {
-
-        self.logger = logger
+    init() {
 
         fileManager = FileManager()
 
-        let fileHandler = FileHandler(logger: logger)
+        let fileHandler = FileHandler()
         baseDirectory = fileHandler.baseFilePath()
 
         cookiesPath = baseDirectory.appendingPathComponent("cookies")
@@ -102,7 +98,7 @@ struct FileSecretsHandler: SecretsHandler {
                 try cookieString.data(using: .utf8)!.write(to: cookiesPath)
             }
         } catch {
-            logger.error("⚠️ can not write cookies file: \(error)")
+            log.error("⚠️ can not write cookies file: \(error)")
             throw error
         }
 

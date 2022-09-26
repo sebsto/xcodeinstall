@@ -51,7 +51,7 @@ class FileHandlerTest: XCTestCase {
         
         // when
         let dstFile : URL = self.tempDir().appendingPathComponent("temp2.txt")
-        let fh = FileHandler(logger: Log().defaultLogger)
+        let fh = FileHandler()
         XCTAssertNoThrow(try fh.move(from: srcFile, to: dstFile) )
         
         // then
@@ -90,7 +90,7 @@ class FileHandlerTest: XCTestCase {
         
         
         // when
-        let fh = FileHandler(logger: Log().defaultLogger)
+        let fh = FileHandler()
         XCTAssertNoThrow(try fh.move(from: srcFile, to: dstFile) )
         
         // then
@@ -125,7 +125,7 @@ class FileHandlerTest: XCTestCase {
         let dstFile = URL(fileURLWithPath: "/does_not_exist")
 
         // when
-        let fh = FileHandler(logger: Log().defaultLogger)
+        let fh = FileHandler()
         XCTAssertThrowsError( try fh.move(from: srcFile, to: dstFile))
         
         // then
@@ -147,7 +147,7 @@ class FileHandlerTest: XCTestCase {
         let fileToCheck = createSrcFile()
         
         // when
-        let fh = FileHandler(logger: Log().defaultLogger)
+        let fh = FileHandler()
         let expectedFileSize = test_data.data(using: .utf8)?.count
         if let expectedFileSize {
             // then
@@ -169,7 +169,7 @@ class FileHandlerTest: XCTestCase {
         let fileToCheck = URL(fileURLWithPath: "/does_not_exist")
         
         // when
-        let fh = FileHandler(logger: Log().defaultLogger)
+        let fh = FileHandler()
             
         // then
         XCTAssertThrowsError(try fh.checkFileSize(filePath: fileToCheck.path, fileSize: 42))
@@ -181,7 +181,7 @@ class FileHandlerTest: XCTestCase {
         let fileToCheck = createSrcFile()
         
         // when
-        let fh = FileHandler(logger: Log().defaultLogger)
+        let fh = FileHandler()
         let expectedFileSize = test_data.data(using: .utf8)?.count
         if let expectedFileSize {
             let exist = fh.fileExists(filePath: fileToCheck.path, fileSize: expectedFileSize)
@@ -196,7 +196,7 @@ class FileHandlerTest: XCTestCase {
         let fileToCheck = URL(fileURLWithPath: "/does_not_exist")
 
         // when
-        let fh = FileHandler(logger: Log().defaultLogger)
+        let fh = FileHandler()
         let expectedFileSize = test_data.data(using: .utf8)?.count
         if let expectedFileSize {
             let exist = fh.fileExists(filePath: fileToCheck.path, fileSize: expectedFileSize)
@@ -211,7 +211,7 @@ class FileHandlerTest: XCTestCase {
         let newFileName = "test.tmp"
         do {
             //given
-            let fh = FileHandler(logger: Log().defaultLogger)
+            let fh = FileHandler()
             let existing : [String] = try fh.downloadedFiles()
             
             // when
@@ -236,8 +236,7 @@ class FileHandlerTest: XCTestCase {
     func testReadDownloadCacheExists() {
         
         // given
-        let log = Log().defaultLogger
-        let fh  = FileHandler(logger: log)
+        let fh  = FileHandler()
         let fm  = FileManager.default
 
         // copy test file at destination
@@ -267,8 +266,7 @@ class FileHandlerTest: XCTestCase {
     func testReadDownloadCacheDoesNotExist() {
         
         // given
-        let log = Log().defaultLogger
-        let fh  = FileHandler(logger: log)
+        let fh  = FileHandler()
         let fm  = FileManager.default
 
         // delete existing file if any

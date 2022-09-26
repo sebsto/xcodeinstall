@@ -23,13 +23,11 @@ class XcodeInstallBuilderTest: XCTestCase {
         // given
         // when
         let xci = try? XCodeInstallBuilder()
-            .with(verbosityLevel: .debug)
             .withAuthenticator()
             .build()
         
         // then
         XCTAssertNotNil(xci)
-        XCTAssert(xci!.logger.logLevel == .debug)
         XCTAssertNotNil(xci!.authenticator)
         
     }
@@ -39,13 +37,11 @@ class XcodeInstallBuilderTest: XCTestCase {
         // given
         // when
         let xci = try? XCodeInstallBuilder()
-            .with(verbosityLevel: .debug)
             .withDownloader()
             .build()
         
         // then
         XCTAssertNotNil(xci)
-        XCTAssert(xci!.logger.logLevel == .debug)
         XCTAssertNotNil(xci!.downloader)
         
     }
@@ -55,13 +51,11 @@ class XcodeInstallBuilderTest: XCTestCase {
         // given
         // when
         let xci = try? XCodeInstallBuilder()
-            .with(verbosityLevel: .debug)
             .withInstaller()
             .build()
         
         // then
         XCTAssertNotNil(xci)
-        XCTAssert(xci!.logger.logLevel == .debug)
         XCTAssertNotNil(xci!.installer)
         
     }
@@ -71,14 +65,12 @@ class XcodeInstallBuilderTest: XCTestCase {
         // given
         // when
         let xci = try? XCodeInstallBuilder()
-            .with(verbosityLevel: .debug)
             .withAWSSecretsManager(region: "us-east-1")
             .withDownloader()
             .build()
         
         // then
         XCTAssertNotNil(xci)
-        XCTAssert(xci!.logger.logLevel == .debug)
         XCTAssertNotNil(xci!.secretsManager)
         let asm = xci!.secretsManager as? AWSSecretsHandler
         XCTAssertNotNil(asm)
@@ -91,7 +83,6 @@ class XcodeInstallBuilderTest: XCTestCase {
         // when
         do {
             let _ = try XCodeInstallBuilder()
-                .with(verbosityLevel: .debug)
                 .withAWSSecretsManager(region: "xxx")
                 .withDownloader()
                 .build()

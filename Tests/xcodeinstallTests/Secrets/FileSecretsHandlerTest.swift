@@ -17,8 +17,7 @@ class FileSecretsHandlerTest: AsyncTestCase, SecretsHandlerTestProtocol {
     override func asyncSetUpWithError() async throws {
         secretHandlerTest = SecretsHandlerTestBase()
         
-        let log = Log(logLevel: .debug)
-        secretHandlerTest!.secrets = FileSecretsHandler(logger: log.defaultLogger)
+        secretHandlerTest!.secrets = FileSecretsHandler()
         try await secretHandlerTest!.secrets!.clearSecrets()
     }
     

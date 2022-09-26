@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CLIlib
 
 // swiftlint:disable all
 /*
@@ -121,7 +122,7 @@ extension AppleAuthenticator {
         guard let count = mfaType.trustedPhoneNumbers?.count,
               count > 0,
               let securityCodeLength = mfaType.securityCode?.length else {
-            logger.warning("⚠️ No Security code length provided in answer")
+            log.warning("⚠️ No Security code length provided in answer")
             throw AuthenticationError.requires2FATrustedPhoneNumber
         }
 

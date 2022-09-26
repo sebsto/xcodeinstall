@@ -85,7 +85,7 @@ class DownloadListParserTest: XCTestCase {
             XCTAssertNotNil(downloads)
 
             
-            let dlp = DownloadListParser(logger: Log().defaultLogger, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
+            let dlp = DownloadListParser(xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
             let filteredList = try dlp.parse(list: list)
             XCTAssertNotNil(filteredList)
 
@@ -117,7 +117,7 @@ class DownloadListParserTest: XCTestCase {
             XCTAssertNotNil(downloads)
 
             
-            let dlp = DownloadListParser(logger: Log().defaultLogger, xCodeOnly: false, majorVersion: "13", sortMostRecentFirst: true)
+            let dlp = DownloadListParser(xCodeOnly: false, majorVersion: "13", sortMostRecentFirst: true)
             let filteredList = try dlp.parse(list: list)
             XCTAssertNotNil(filteredList)
 
@@ -138,7 +138,7 @@ class DownloadListParserTest: XCTestCase {
     
     private func createTestFile(file: DownloadList.File, fileSize: Int) -> URL {
         let fm = FileManager()
-        let fh = FileHandler(logger: Log(logLevel: .debug).defaultLogger)
+        let fh = FileHandler()
         
         let data = Data(count: fileSize)
         let testFile : URL = fh.downloadFilePath(file: file)
@@ -148,7 +148,7 @@ class DownloadListParserTest: XCTestCase {
     
     private func deleteTestFile(file: DownloadList.File) -> URL {
         let fm = FileManager()
-        let fh = FileHandler(logger: Log(logLevel: .debug).defaultLogger)
+        let fh = FileHandler()
         
         let testFile : URL = fh.downloadFilePath(file: file)
         try? fm.removeItem(at: testFile)
@@ -166,7 +166,7 @@ class DownloadListParserTest: XCTestCase {
         XCTAssertNotNil(downloads)
 
         // filter and sort the list
-        let dlp = DownloadListParser(logger: Log().defaultLogger, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
+        let dlp = DownloadListParser(xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
         let filteredList = try dlp.parse(list: list)
         XCTAssertNotNil(filteredList)
         

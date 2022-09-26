@@ -15,16 +15,14 @@ class URLRequestCurlTest: XCTestCase {
     var agent  : NetworkAgent!
     let session = MockURLSession()
     
-    var log     : Log!
     var secrets : FileSecretsHandler!
     
     override func setUpWithError() throws {
         try super.setUpWithError()
-        self.log     = Log(logLevel: .debug)
-        self.secrets = FileSecretsHandler.init(logger: log.defaultLogger)
+        self.secrets = FileSecretsHandler.init()
         self.subject = HTTPClient(session: session)
-        let fileHandler = FileHandler(logger: self.log.defaultLogger)
-        self.agent   = NetworkAgent(client: subject, secrets: secrets, fileHandler: fileHandler, logger: log.defaultLogger)
+        let fileHandler = FileHandler()
+        self.agent   = NetworkAgent(client: subject, secrets: secrets, fileHandler: fileHandler)
     }
 
     func testRequestToCurl() throws {

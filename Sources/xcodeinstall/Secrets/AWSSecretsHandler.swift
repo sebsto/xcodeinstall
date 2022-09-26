@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Logging
+import CLIlib
 
 // the errors thrown by the SecretsManager class
 enum AWSSecretsHandlerError: Error {
@@ -77,19 +77,17 @@ enum AWSSDK {
 struct AWSSecretsHandler: SecretsHandler {
 
     var awsSDK: AWSSecretsHandlerSDK // var for testability
-    let logger: Logger
 
     // provide a default implementation based on Soto
-    init(region: String, logger: Logger) throws {
-        try self.init(region: region, sdk: .soto, logger: logger)
+    init(region: String) throws {
+        try self.init(region: region, sdk: .soto)
     }
 
     // not private for testability
-    init(region: String, sdk: AWSSDK, logger: Logger) throws {
-        self.logger = logger
+    init(region: String, sdk: AWSSDK) throws {
         switch sdk {
         case .soto:
-            self.awsSDK = try AWSSecretsHandlerSoto(region: region, logger: logger)
+            self.awsSDK = try AWSSecretsHandlerSoto(region: region)
         case .awsSDK:
             fatalError("Not implemented yet")
         }
@@ -131,7 +129,7 @@ struct AWSSecretsHandler: SecretsHandler {
             try await self.awsSDK.updateSecret(secretId: AWSSecretsName.appleSessionToken, newValue: newSession)
 
         } catch {
-            logger.error("⚠️ can not save cookies file in AWS Secret Manager: \(error)")
+            log.error("⚠️ can not save cookies file in AWS Secret Manager: \(error)")
             throw error
         }
 
@@ -146,7 +144,7 @@ struct AWSSecretsHandler: SecretsHandler {
             let result = session.cookies()
             return result
         } catch {
-            logger.error("Error when trying to load session : \(error)")
+            log.error("Error when trying to load session : \(error)")
             throw error
         }
     }
@@ -164,7 +162,7 @@ struct AWSSecretsHandler: SecretsHandler {
 
             try await self.awsSDK.updateSecret(secretId: AWSSecretsName.appleSessionToken, newValue: newSessionSecret)
         } catch {
-            logger.error("Error when trying to save session : \(error)")
+            log.error("Error when trying to save session : \(error)")
             throw error
         }
 
@@ -187,7 +185,7 @@ struct AWSSecretsHandler: SecretsHandler {
             return try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleCredentials)
 
         } catch {
-            logger.error("Error when trying to load session : \(error)")
+            log.error("Error when trying to load session : \(error)")
             throw error
         }
     }
@@ -198,7 +196,7 @@ struct AWSSecretsHandler: SecretsHandler {
             try await self.awsSDK.updateSecret(secretId: AWSSecretsName.appleCredentials, newValue: credentials)
 
         } catch {
-            logger.error("Error when trying to save credentials : \(error)")
+            log.error("Error when trying to save credentials : \(error)")
             throw error
         }
 

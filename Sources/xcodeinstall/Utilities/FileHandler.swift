@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Logging
+import CLIlib
 
 // the methods I want to mock for unit testing
 protocol FileHandlerProtocol {
@@ -35,12 +35,6 @@ struct FileHandler: FileHandlerProtocol {
 
     let fm = FileManager.default // swiftlint:disable:this identifier_name
 
-    let logger: Logger
-
-    init(logger: Logger) {
-        self.logger = logger
-    }
-
     func baseFilePath() -> String {
         return baseFilePath().path
     }
@@ -51,7 +45,7 @@ struct FileHandler: FileHandlerProtocol {
             do {
                 try fm.createDirectory(at: FileHandler.baseDirectory, withIntermediateDirectories: true)
             } catch {
-                logger.error("🛑 Can not create base directory : \(FileHandler.baseDirectory.path)\n\(error)")
+                log.error("🛑 Can not create base directory : \(FileHandler.baseDirectory.path)\n\(error)")
             }
         }
 
@@ -61,7 +55,7 @@ struct FileHandler: FileHandlerProtocol {
     func move(from src: URL, to dst: URL) throws {
         do {
             if fm.fileExists(atPath: dst.path) {
-                self.logger.debug("⚠️ File \(dst) exists, I am overwriting it")
+                log.debug("⚠️ File \(dst) exists, I am overwriting it")
                 try fm.removeItem(atPath: dst.path)
             }
 
@@ -69,7 +63,7 @@ struct FileHandler: FileHandlerProtocol {
             try fm.moveItem(at: src, to: dstUrl)
 
         } catch {
-            self.logger.error("🛑 Can not move file : \(error)")
+            log.error("🛑 Can not move file : \(error)")
             throw error
         }
     }
@@ -84,7 +78,7 @@ struct FileHandler: FileHandlerProtocol {
             do {
                 try fm.createDirectory(at: FileHandler.downloadDirectory, withIntermediateDirectories: true)
             } catch {
-                logger.error("🛑 Can not create base directory : \(FileHandler.downloadDirectory.path)\n\(error)")
+                log.error("🛑 Can not create base directory : \(FileHandler.downloadDirectory.path)\n\(error)")
             }
         }
         return FileHandler.downloadDirectory.appendingPathComponent(file.filename)
@@ -135,7 +129,7 @@ struct FileHandler: FileHandlerProtocol {
         do {
             return try fm.contentsOfDirectory(atPath: FileHandler.downloadDirectory.path)
         } catch {
-            logger.debug("\(error)")
+            log.debug("\(error)")
             throw FileHandlerError.noDownloadedList
         }
     }

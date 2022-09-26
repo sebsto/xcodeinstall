@@ -18,7 +18,7 @@ class CLIStoreSecretsTest: CLITest {
         xci.fileHandler = MockedFileHandler()
         
         // use the real AWS Secrets Handler, but with a mocked SDK
-        var secretHandler = try AWSSecretsHandler(region: "us-east-1", logger: log.defaultLogger)
+        var secretHandler = try AWSSecretsHandler(region: "us-east-1")
         secretHandler.awsSDK = try MockedAWSSecretsHandlerSDK()
         xci.secretsManager = secretHandler
         

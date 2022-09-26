@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Logging
 import CLIlib
 
 protocol InstallerProtocol {
@@ -24,7 +23,6 @@ enum InstallerError: Error {
 
 class ShellInstaller: InstallerProtocol {
 
-    let logger: Logger
     var fileHandler: FileHandlerProtocol
 
     // the shell commands we need to install XCode and its command line tools
@@ -41,8 +39,7 @@ class ShellInstaller: InstallerProtocol {
     // the shell access
     var shell: AsyncShellProtocol?
 
-    init(logger: Logger, fileHandler: FileHandlerProtocol, shell: AsyncShellProtocol? = nil) {
-        self.logger      = logger
+    init(fileHandler: FileHandlerProtocol, shell: AsyncShellProtocol? = nil) {
         self.fileHandler = fileHandler
 
         if let shell {
@@ -70,14 +67,14 @@ class ShellInstaller: InstallerProtocol {
         // verify this is one the files we do support
         let installationType = SupportedInstallation.supported(file.fileName())
         guard installationType != .unsuported else {
-            logger.debug("Unsupported installation type")
+            log.debug("Unsupported installation type")
             throw InstallerError.unsupportedInstallation
         }
 
         // find matching File in DownloadList (if there is one)
         // and compare existing filesize vs expected filesize
         guard fileMatch(filePath: file) else {
-            logger.debug("File does not exist or has incorrect size")
+            log.debug("File does not exist or has incorrect size")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 

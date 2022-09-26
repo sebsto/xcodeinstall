@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CLIlib
 
 extension AppleDownloader {
 
@@ -30,8 +31,8 @@ extension AppleDownloader {
                                                      validResponse: .range(200..<400))
 
             guard response.statusCode == 200 else {
-                logger.error("🛑 Download List response is not 200, something is incorrect")
-                logger.debug("URLResponse = \(response)")
+                log.error("🛑 Download List response is not 200, something is incorrect")
+                log.debug("URLResponse = \(response)")
                 throw DownloadError.invalidResponse
             }
 
@@ -49,8 +50,8 @@ extension AppleDownloader {
                     _ = try await self.secretsHandler.saveCookies(cookies)
                 } else {
                     // swiftlint:disable line_length
-                    logger.error("🛑 Download List response does not contain authentication cookie, something is incorrect")
-                    logger.debug("URLResponse = \(response)")
+                    log.error("🛑 Download List response does not contain authentication cookie, something is incorrect")
+                    log.debug("URLResponse = \(response)")
                     throw DownloadError.invalidResponse
                 }
 

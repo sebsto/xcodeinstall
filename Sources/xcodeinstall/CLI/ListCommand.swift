@@ -27,8 +27,7 @@ extension XCodeInstall {
             let list = try await download.list(force: force)
             display("✅ Done")
 
-            let parser = DownloadListParser(logger: logger,
-                                            xCodeOnly: xCodeOnly,
+            let parser = DownloadListParser(xCodeOnly: xCodeOnly,
                                             majorVersion: majorVersion,
                                             sortMostRecentFirst: sortMostRecentFirst)
             let parsedList = try parser.parse(list: list)

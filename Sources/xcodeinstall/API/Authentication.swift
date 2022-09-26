@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Logging
+import CLIlib
 
 // MARK: - Module Internal structures and data
 
@@ -86,14 +86,14 @@ protocol AppleAuthenticatorProtocol {
 class AppleAuthenticator: NetworkAgent, AppleAuthenticatorProtocol {
 
     // used by testing to inject an HTTPClient that use a mocked URL Session
-    override init(client: HTTPClient, secrets: SecretsHandler, fileHandler: FileHandlerProtocol, logger: Logger) {
-        super.init(client: client, secrets: secrets, fileHandler: fileHandler, logger: logger)
+    override init(client: HTTPClient, secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
+        super.init(client: client, secrets: secrets, fileHandler: fileHandler)
     }
 
     // ensure this class is initialized with a regular URLSession
-    init(logger: Logger, secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
+    init(secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
         let apiClient = HTTPClient(session: URLSession.shared)
-        super.init(client: apiClient, secrets: secrets, fileHandler: fileHandler, logger: logger)
+        super.init(client: apiClient, secrets: secrets, fileHandler: fileHandler)
 
     }
 
@@ -117,7 +117,7 @@ class AppleAuthenticator: NetworkAgent, AppleAuthenticatorProtocol {
                 throw AuthenticationError.unableToRetrieveAppleServiceKey(error: error)
             }
             session.itcServiceKey = appServiceKey
-            logger.debug("Got an Apple Service key : \(String(describing: session.itcServiceKey))")
+            log.debug("Got an Apple Service key : \(String(describing: session.itcServiceKey))")
         }
 
         let (_, response) =
@@ -151,8 +151,8 @@ class AppleAuthenticator: NetworkAgent, AppleAuthenticatorProtocol {
             throw AuthenticationError.requires2FA
 
         default:
-            logger.critical("💣 Unexpected return code : \(response.statusCode)")
-            logger.debug("URLResponse = \(response)")
+            log.critical("💣 Unexpected return code : \(response.statusCode)")
+            log.debug("URLResponse = \(response)")
             throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)
         }
 

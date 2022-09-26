@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Logging
 import CLIlib
 
 // delegate class to receive download progress
@@ -17,14 +16,12 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
     var dstFilePath: URL?
     var totalFileSize: Int?
     var startTime: Date?
-    let logger: Logger
 
     // to notify the main thread when download is finish
     private let sema: DispatchSemaphoreProtocol
-    init(semaphore: DispatchSemaphoreProtocol, fileHandler: FileHandlerProtocol, logger: Logger) {
+    init(semaphore: DispatchSemaphoreProtocol, fileHandler: FileHandlerProtocol) {
         self.sema = semaphore
         self.fileHandler = fileHandler
-        self.logger = logger
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
@@ -36,11 +33,11 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         self.progressUpdate?.complete(success: true)
 
         guard let dst = dstFilePath else {
-            logger.warning("⚠️ No destination specified. I am keeping the file at \(location)")
+            log.warning("⚠️ No destination specified. I am keeping the file at \(location)")
             return
         }
 
-        logger.debug("Finished at \(location)\nMoving to \(dst)")
+        log.debug("Finished at \(location)\nMoving to \(dst)")
 
         // ignore the error here ? It is logged one level down. How to bring it up to the user ?
         try? self.fileHandler.move(from: location, to: dst)
@@ -86,7 +83,7 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
     }
 
     func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        logger.warning("error \(String(describing: error))")
+        log.warning("error \(String(describing: error))")
         _ = self.sema.signal()
     }
 }

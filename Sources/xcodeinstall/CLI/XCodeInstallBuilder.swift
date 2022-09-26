@@ -6,12 +6,9 @@
 //
 
 import Foundation
-import Logging
 import CLIlib
 
 class XCodeInstallBuilder {
-
-    private var verbosity: Logger.Level = .warning
 
     private var authenticatorNeeded: Bool = false
     private var downloaderNeeded: Bool = false
@@ -19,10 +16,6 @@ class XCodeInstallBuilder {
     private var awsSecretsManagerNeeded: Bool = false
     private var awsRegion: String = ""
 
-    func with(verbosityLevel: Logger.Level) -> XCodeInstallBuilder {
-        self.verbosity = verbosityLevel
-        return self
-    }
     func withDownloader() -> XCodeInstallBuilder {
         self.downloaderNeeded = true
         return self
@@ -42,51 +35,46 @@ class XCodeInstallBuilder {
     }
     func build() throws -> XCodeInstall {
 
-        let log = Log(logLevel: self.verbosity)
-        let fileHandler = FileHandler(logger: log.defaultLogger)
+        let fileHandler = FileHandler()
 
         let secretsManager: SecretsHandler
         if self.awsSecretsManagerNeeded {
 
             // try to create a AWS Secrets Manager based Secret Handler.
             // call throws an error when region name is invalid
-            guard let ash = try? AWSSecretsHandler(region: self.awsRegion, logger: log.defaultLogger) else {
+            guard let ash = try? AWSSecretsHandler(region: self.awsRegion) else {
                 throw AWSSecretsHandlerError.invalidRegion(region: self.awsRegion)
             }
             secretsManager = ash
         } else {
-            secretsManager = FileSecretsHandler(logger: log.defaultLogger)
+            secretsManager = FileSecretsHandler()
         }
 
         var result: XCodeInstall?
 
         if authenticatorNeeded {
-            let auth = AppleAuthenticator(logger: log.defaultLogger, secrets: secretsManager, fileHandler: fileHandler)
+            let auth = AppleAuthenticator(secrets: secretsManager, fileHandler: fileHandler)
             result = XCodeInstall(authenticator: auth,
                                   secretsManager: secretsManager,
-                                  logger: log.defaultLogger,
                                   fileHandler: fileHandler)
         }
 
         if downloaderNeeded {
-            let down = AppleDownloader(logger: log.defaultLogger, secrets: secretsManager, fileHandler: fileHandler)
+            let down = AppleDownloader(secrets: secretsManager, fileHandler: fileHandler)
             result = XCodeInstall(downloader: down,
                                   secretsManager: secretsManager,
-                                  logger: log.defaultLogger,
                                   fileHandler: fileHandler)
 }
 
         if installerNeeded {
-            let inst = ShellInstaller(logger: log.defaultLogger, fileHandler: fileHandler, shell: AsyncShell())
+            let inst = ShellInstaller(fileHandler: fileHandler, shell: AsyncShell())
             result = XCodeInstall(installer: inst,
                                   secretsManager: secretsManager,
-                                  logger: log.defaultLogger,
                                   fileHandler: fileHandler)
         }
 
         if result == nil { // no API class needed, this is just to Store Apple Secrets
             result = XCodeInstall(secretsManager: secretsManager,
-                                  logger: log.defaultLogger,
                                   fileHandler: fileHandler)
         }
 

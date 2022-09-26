@@ -13,7 +13,6 @@ import CLIlib
 
 class CLITest: AsyncTestCase {
     
-    var log : Log!
     var secretsHandler : SecretsHandler!
     
     var mockedDisplay : DisplayProtocol!
@@ -21,8 +20,7 @@ class CLITest: AsyncTestCase {
     var fileHandler : FileHandlerProtocol!
     
     override func asyncSetUpWithError() async throws {
-        self.log = Log(logLevel: .debug)
-        self.secretsHandler = FileSecretsHandler(logger: log.defaultLogger)
+        self.secretsHandler = FileSecretsHandler()
 
         try await self.secretsHandler.clearSecrets()
         self.mockedDisplay = MockedDisplay()
@@ -45,12 +43,10 @@ class CLITest: AsyncTestCase {
             result = XCodeInstall(display: mockedDisplay,
                                   input: input,
                                   secretsManager: secretsHandler,
-                                  logger: log.defaultLogger,
                                   fileHandler: self.fileHandler)
         } else {
             result = XCodeInstall(display: mockedDisplay,
                                   secretsManager: secretsHandler,
-                                  logger: log.defaultLogger,
                                   fileHandler: self.fileHandler)
         }
         return result!

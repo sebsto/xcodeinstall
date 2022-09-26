@@ -21,7 +21,7 @@ extension ShellInstaller {
 
         // check if file exists
         guard fileHandler.fileExists(filePath: pkgPath, fileSize: 0) else {
-            logger.error("Package does not exist : \(pkgPath)")
+            log.error("Package does not exist : \(pkgPath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Logging
+import CLIlib
 
 // callers can express expected HTTP Response code either as range, either as specific value
 enum ExpectedResponseCode {
@@ -31,9 +31,6 @@ class NetworkAgent {
         case POST
     }
 
-    // our class wide logger
-    let logger: Logger
-
     // HTTP client implements URLSession protocol
     // it is an absraction layer to allow to inject Mock URLSession when testing
     let httpClient: HTTPClient
@@ -50,11 +47,10 @@ class NetworkAgent {
     var session = AppleSession()
 
     // allows to inject an HTTPClient (test injects a mock)
-    init(client: HTTPClient, secrets: SecretsHandler, fileHandler: FileHandlerProtocol, logger: Logger) {
+    init(client: HTTPClient, secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
         self.httpClient     = client
         self.secretsHandler = secrets
         self.fileHandler    = fileHandler
-        self.logger = logger
     }
 
     // to be shared between apiCall and download methods
@@ -74,7 +70,7 @@ class NetworkAgent {
             self.session = session
 
         } else {
-            logger.debug("⚠️ I could not load session (this is normal the first time you authenticate)")
+            log.debug("⚠️ I could not load session (this is normal the first time you authenticate)")
         }
 
         // populate HTTP request with headers from session (either from self or the one just loaded)
@@ -95,7 +91,7 @@ class NetworkAgent {
             requestHeaders.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
         } else {
             // swiftlint:disable line_length
-            logger.debug("⚠️ I could not load cookies (this is normal the first time you authenticate)")
+            log.debug("⚠️ I could not load cookies (this is normal the first time you authenticate)")
         }
 
         return requestHeaders
@@ -124,18 +120,18 @@ class NetworkAgent {
                                 withBody: body,
                                 withHeaders: requestHeaders)
 
-        log(request: request, to: logger)
+        log(request: request, to: log)
 
         // send request with that session
         let (data, response) = try await httpClient.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
               validResponse.isValid(response: httpResponse.statusCode) else {
-            logger.error("=== HTTP ERROR. Status code \((response as? HTTPURLResponse)!.statusCode) not in range \(validResponse) ===")
-            logger.debug("URLResponse : \(response)")
+            log.error("=== HTTP ERROR. Status code \((response as? HTTPURLResponse)!.statusCode) not in range \(validResponse) ===")
+            log.debug("URLResponse : \(response)")
             throw URLError(.badServerResponse)
         }
 
-        log(response: httpResponse, data: data, error: nil, to: logger)
+        log(response: httpResponse, data: data, error: nil, to: log)
 
         return(data, httpResponse)
     }
@@ -153,13 +149,13 @@ class NetworkAgent {
             // cookies existed, let's add them to our HTTPHeaders
             headers.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
         } else {
-            logger.debug("⚠️ I could not load cookies (this is normal the first time you authenticate)")
+            log.debug("⚠️ I could not load cookies (this is normal the first time you authenticate)")
         }
 
         // build the request
         request  = self.request(for: url, withHeaders: headers)
 
-        log(request: request, to: logger)
+        log(request: request, to: log)
 
         // send request with download session
         // this is asynchronous, monitor progress through delegate

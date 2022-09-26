@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Logging
 import CLIlib
 
 protocol AppleDownloaderProtocol {
@@ -27,18 +26,18 @@ class AppleDownloader: NetworkAgent, AppleDownloaderProtocol {
     var sema: DispatchSemaphoreProtocol = DispatchSemaphore( value: 0 )
 
     // used by testing to inject an HTTPClient that use a mocked URL Session
-    override init(client: HTTPClient, secrets: SecretsHandler, fileHandler: FileHandlerProtocol, logger: Logger) {
-        super.init(client: client, secrets: secrets, fileHandler: fileHandler, logger: logger)
+    override init(client: HTTPClient, secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
+        super.init(client: client, secrets: secrets, fileHandler: fileHandler)
     }
 
     // Ensure this class is initialized with a URLSession with download callbacks
-    init(logger: Logger, secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
-        self.downloadDelegate = DownloadDelegate(semaphore: self.sema, fileHandler: fileHandler, logger: logger)
+    init(secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
+        self.downloadDelegate = DownloadDelegate(semaphore: self.sema, fileHandler: fileHandler)
         let urlSession = URLSession(configuration: .default,
                                     delegate: downloadDelegate,
                                     delegateQueue: nil)
         let downloadClient = HTTPClient(session: urlSession)
-        super.init(client: downloadClient, secrets: secrets, fileHandler: fileHandler, logger: logger)
+        super.init(client: downloadClient, secrets: secrets, fileHandler: fileHandler)
     }
 
     func download(file: DownloadList.File,
@@ -47,7 +46,7 @@ class AppleDownloader: NetworkAgent, AppleDownloaderProtocol {
         guard !file.remotePath.isEmpty,
               !file.filename.isEmpty,
               file.fileSize > 0 else {
-            logger.error("🛑 Invalid file specification : \(file)")
+            log.error("🛑 Invalid file specification : \(file)")
             throw DownloadError.invalidFileSpec
         }
 

@@ -23,7 +23,7 @@ class InstallTest: XCTestCase {
     
     override func setUpWithError() throws {
         let mockedFileHandler = MockedFileHandler()
-        self._installer = ShellInstaller(logger: Log(logLevel: .debug).defaultLogger, fileHandler: mockedFileHandler)
+        self._installer = ShellInstaller(fileHandler: mockedFileHandler)
         self._installer!.shell = MockShell()
         self._installer!.fileHandler = mockedFileHandler
     }

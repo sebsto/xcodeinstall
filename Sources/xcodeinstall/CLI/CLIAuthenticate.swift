@@ -19,7 +19,6 @@ extension MainCommand {
 
         func run() async throws {
             var xcib = XCodeInstallBuilder()
-                            .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
                             .withAuthenticator()
 
             if let region = cloudOption.secretManagerRegion {
@@ -38,7 +37,6 @@ extension MainCommand {
 
         func run() async throws {
             var main = XCodeInstallBuilder()
-                            .with(verbosityLevel: globalOptions.verbose ? .debug : .warning)
                             .withAuthenticator()
 
             if let region = cloudOption.secretManagerRegion {

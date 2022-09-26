@@ -10,17 +10,14 @@ import Logging
 @testable import xcodeinstall
 
 class DownloadDelegateTest: XCTestCase {
-
-    private var log = Log(logLevel: .debug)
     
     func testDownloadDelegateCompleteTransfer() {
         
         // given
         let testData = "test data"
         let sema = MockDispatchSemaphore()
-        let logger = self.log.defaultLogger
-        let fileHandler = FileHandler(logger: logger)
-        let delegate = DownloadDelegate(semaphore: sema, fileHandler: fileHandler, logger: logger)
+        let fileHandler = FileHandler()
+        let delegate = DownloadDelegate(semaphore: sema, fileHandler: fileHandler)
         delegate.progressUpdate = MockedProgressBar()
         
         let fm = FileManager()
@@ -64,9 +61,8 @@ class DownloadDelegateTest: XCTestCase {
         
         // given
         let sema = MockDispatchSemaphore()
-        let logger = self.log.defaultLogger
-        let fileHandler = FileHandler(logger: logger)
-        let delegate = DownloadDelegate(semaphore: sema, fileHandler: fileHandler, logger: logger)
+        let fileHandler = FileHandler()
+        let delegate = DownloadDelegate(semaphore: sema, fileHandler: fileHandler)
         delegate.startTime = Date.init(timeIntervalSinceNow: -60) // one minute ago
         delegate.totalFileSize = 1 * 1024  * 1024 * 1024 // 1 Gb
         delegate.progressUpdate = MockedProgressBar()

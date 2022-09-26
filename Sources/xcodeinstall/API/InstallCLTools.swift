@@ -16,7 +16,7 @@ extension ShellInstaller {
 
         // check if file exists
         guard self.fileHandler.fileExists(filePath: filePath, fileSize: 0) else {
-            logger.error("Command line disk image does not exist : \(filePath)")
+            log.error("Command line disk image does not exist : \(filePath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 
@@ -27,35 +27,35 @@ extension ShellInstaller {
         var resultOptional: ShellOutput?
 
         // first mount the disk image
-        logger.debug("Mounting disk image \(filePath.fileName())")
+        log.debug("Mounting disk image \(filePath.fileName())")
         currentStep += 1
         progress.update(step: currentStep, total: totalSteps, text: "Mounting disk image...")
         resultOptional = try self.mountDMG(atPath: filePath)
         if resultOptional == nil || resultOptional!.code != 0 {
-            logger.error("Can not mount disk image : \(filePath)\n\(String(describing: resultOptional))")
+            log.error("Can not mount disk image : \(filePath)\n\(String(describing: resultOptional))")
             throw InstallerError.CLToolsInstallationError
         }
 
         // second install the package
         // find the name of the package ?
         let pkgPath = "/Volumes/Command Line Developer Tools/Command Line Tools.pkg"
-        logger.debug("Installing pkg \(pkgPath)")
+        log.debug("Installing pkg \(pkgPath)")
         currentStep += 1
         progress.update(step: currentStep, total: totalSteps, text: "Installing package...")
         resultOptional = try self.installPkg(atPath: pkgPath)
         if resultOptional == nil || resultOptional!.code != 0 {
-            logger.error("Can not install package : \(pkgPath)\n\(String(describing: resultOptional))")
+            log.error("Can not install package : \(pkgPath)\n\(String(describing: resultOptional))")
             throw InstallerError.CLToolsInstallationError
         }
 
         // third unmount the disk image
         let mountedDiskImage = "/Volumes/Command Line Developer Tools"
-        logger.debug("Unmounting volume \(mountedDiskImage)")
+        log.debug("Unmounting volume \(mountedDiskImage)")
         currentStep += 1
         progress.update(step: currentStep, total: totalSteps, text: "Unmounting volume...")
         resultOptional = try self.unmountDMG(volume: mountedDiskImage)
         if resultOptional == nil || resultOptional!.code != 0 {
-            logger.error("Can not unmount volume : \(mountedDiskImage)\n\(String(describing: resultOptional))")
+            log.error("Can not unmount volume : \(mountedDiskImage)\n\(String(describing: resultOptional))")
             throw InstallerError.CLToolsInstallationError
         }
     }
@@ -69,7 +69,7 @@ extension ShellInstaller {
 
         // check if file exists
         guard self.fileHandler.fileExists(filePath: dmgPath, fileSize: 0) else {
-            logger.error("Disk Image does not exist : \(dmgPath)")
+            log.error("Disk Image does not exist : \(dmgPath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 

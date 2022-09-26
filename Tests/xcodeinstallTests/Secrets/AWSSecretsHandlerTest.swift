@@ -19,8 +19,7 @@ class AWSSecretsHandlerTest: AsyncTestCase, SecretsHandlerTestProtocol {
         
         let AWS_REGION = "us-east-1"
         
-        let log = Log(logLevel: .debug)
-        secretHandlerTest!.secrets = try AWSSecretsHandler(region: AWS_REGION, logger: log.defaultLogger)
+        secretHandlerTest!.secrets = try AWSSecretsHandler(region: AWS_REGION)
         secretHandlerTest!.secrets?.awsSDK = try MockedAWSSecretsHandlerSDK()
         try await secretHandlerTest!.secrets!.clearSecrets()
     }
