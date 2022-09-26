@@ -1,6 +1,6 @@
 #!/bin/sh -e -x
 #
-# Displays the current version of xcodeinstall.
+# Generate code level version file
 #
 
 if [ ! -f VERSION ]; then 

@@ -46,7 +46,6 @@ struct CLIProgressBar: ProgressUpdateProtocol {
     /// Clear the animation.
     func clear() {
         self.progressAnimation.clear()
-
     }
 
 }
