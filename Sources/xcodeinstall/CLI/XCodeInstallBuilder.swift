@@ -57,9 +57,9 @@ class XCodeInstallBuilder {
         }
 
         if verbosityNeeded {
-            log = Log.verboseLogger()
+            log = Log.verboseLogger(label: "xcodeinstall")
         } else {
-            log = Log.defaultLogger()
+            log = Log.defaultLogger(label: "xcodeinstall")
         }
 
         if authenticatorNeeded {
