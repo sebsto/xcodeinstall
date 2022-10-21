@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "clilib",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sebsto/CLIlib/",
+      "state" : {
+        "branch" : "main",
+        "revision" : "d64c3d2308b44c46f86b680a5452de8e1b0bd08f"
+      }
+    },
+    {
       "identity" : "jmespath.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/adam-fowler/jmespath.swift.git",
