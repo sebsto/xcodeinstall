@@ -12,7 +12,7 @@ This script
 - creates a GitHub release 
 - creates a brew formula with the new release
 
-4. `./scripts/bottles.sh` 
+4. `./scripts/bottle.sh` 
 
 This script
 - creates the brew bottles TAR file and the code to add to the formula 

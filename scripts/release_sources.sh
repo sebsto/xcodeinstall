@@ -5,7 +5,7 @@ set -o pipefail
 echo "Did you increment version number before running this script ?"
 exit -1 
 ######################
-VERSION="0.5"
+VERSION="0.6"
 ######################
 
 echo $VERSION > VERSION
@@ -37,8 +37,9 @@ sed -E -e "s+URL+url \"$URL\"+g"             \
        scripts/xcodeinstall.template > scripts/xcodeinstall.rb
 
 echo "\n🍺 Pushing new formula\n"
-cp scripts/xcodeinstall.rb ../homebrew-macos
 pushd ../homebrew-macos
+git pull 
+cp ../xcodeinstall/scripts/xcodeinstall.rb .
 git add xcodeinstall.rb 
 git commit --quiet -m "update for $TAG"
 git push --quiet > /dev/null 2>&1

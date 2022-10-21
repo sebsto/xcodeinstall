@@ -34,7 +34,7 @@ VERSION=$(cat VERSION)
 OS_NAMES=(arm64_monterey monterey)
 
 # Semantic version number split into a list using  Ugly, bash 3 compatible syntax
-IFS=" " read -r -a CURRENT_OS_VERSION <<<"$(sw_vers -productVersion | sed 's/\./ /g'))"
+IFS=" " read -r -a CURRENT_OS_VERSION <<<"$(sw_vers -productVersion | sed 's/\./ /g')"
 CURRENT_OS_VERSION_MAJOR=${CURRENT_OS_VERSION[0]}
 CURRENT_OS_VERSION_MINOR=${CURRENT_OS_VERSION[1]}
 
