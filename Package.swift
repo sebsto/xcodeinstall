@@ -13,7 +13,6 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.1.4"),
-        .package(url: "https://github.com/soto-project/soto.git", from: "6.1.0"),
         .package(url: "https://github.com/sebsto/CLIlib/", from: "0.1.0")
         //.package(path: "../CLIlib")
     ],
@@ -24,7 +23,6 @@ let package = Package(
             name: "xcodeinstall",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "SotoSecretsManager", package: "soto"),
                 .product(name: "CLIlib", package: "CLIlib")
             ]
         ),

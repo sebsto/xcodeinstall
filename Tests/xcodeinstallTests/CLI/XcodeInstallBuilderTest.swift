@@ -83,39 +83,12 @@ class XcodeInstallBuilderTest: XCTestCase {
         // given
         // when
         let xci = try? XCodeInstallBuilder()
-            .withAWSSecretsManager(region: "us-east-1")
             .withDownloader()
             .build()
         
         // then
         XCTAssertNotNil(xci)
         XCTAssertNotNil(xci!.secretsManager)
-        let asm = xci!.secretsManager as? AWSSecretsHandler
-        XCTAssertNotNil(asm)
-        
     }
-    
-    func testBuildXCodeWithSecretsManagerNotOK() throws {
-        
-        // given
-        // when
-        do {
-            let _ = try XCodeInstallBuilder()
-                .withAWSSecretsManager(region: "xxx")
-                .withDownloader()
-                .build()
-            
-            // then
-            XCTAssert(false, "expected to throw an error")
-        } catch AWSSecretsHandlerError.invalidRegion(let region){
-            //expected
-            XCTAssertEqual(region, "xxx")
-        } catch {
-            // no other error are thrown
-            XCTAssert(false)
-        }
-        
-    }
-    
     
 }

@@ -41,16 +41,11 @@ extension MainCommand {
 
         @OptionGroup var globalOptions: GlobalOptions
         @OptionGroup var downloadListOptions: DownloadListOptions
-        @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-            var xcib = XCodeInstallBuilder()
+            let xcib = XCodeInstallBuilder()
                             .withVerbosity(verbose: globalOptions.verbose)
                             .withDownloader()
-
-            if let region = cloudOption.secretManagerRegion {
-                xcib = xcib.withAWSSecretsManager(region: region)
-            }
 
             _ = try await xcib.build().list(force: downloadListOptions.force,
                                             xCodeOnly: downloadListOptions.onlyXcode,

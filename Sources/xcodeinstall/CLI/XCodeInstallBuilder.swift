@@ -13,7 +13,6 @@ class XCodeInstallBuilder {
     private var authenticatorNeeded: Bool = false
     private var downloaderNeeded: Bool = false
     private var installerNeeded: Bool = false
-    private var awsSecretsManagerNeeded: Bool = false
     private var verbosityNeeded: Bool = false
     private var awsRegion: String = ""
 
@@ -33,28 +32,12 @@ class XCodeInstallBuilder {
         self.installerNeeded = true
         return self
     }
-    func withAWSSecretsManager(region: String) -> XCodeInstallBuilder {
-        self.awsSecretsManagerNeeded = true
-        self.awsRegion = region
-        return self
-    }
     func build() throws -> XCodeInstall {
 
         var result: XCodeInstall?
         let fileHandler = FileHandler()
 
-        let secretsManager: SecretsHandler
-        if self.awsSecretsManagerNeeded {
-
-            // try to create a AWS Secrets Manager based Secret Handler.
-            // call throws an error when region name is invalid
-            guard let ash = try? AWSSecretsHandler(region: self.awsRegion) else {
-                throw AWSSecretsHandlerError.invalidRegion(region: self.awsRegion)
-            }
-            secretsManager = ash
-        } else {
-            secretsManager = FileSecretsHandler()
-        }
+        let secretsManager = FileSecretsHandler()
 
         if verbosityNeeded {
             log = Log.verboseLogger(label: "xcodeinstall")

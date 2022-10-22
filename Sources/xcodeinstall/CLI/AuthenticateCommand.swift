@@ -52,24 +52,9 @@ extension XCodeInstall {
     // either from AWS Secrets Manager, either interactively
     private func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
 
-        var appleCredentials: AppleCredentialsSecret
-        do {
-            // first try on AWS Secrets Manager
-            display("Retrieving Apple Developer Portal credentials...")
-            appleCredentials = try await secretsManager.retrieveAppleCredentials()
+        // we have a file secrets handler, prompt for credentials interactively
+        return try promptForCredentials()
 
-        } catch AWSSecretsHandlerError.invalidOperation {
-
-            // we have a file secrets handler, prompt for credentials interactively
-            appleCredentials = try promptForCredentials()
-
-        } catch {
-
-            // unexpected errors, do not handle here
-            throw error
-        }
-
-        return appleCredentials
     }
 
     // prompt user for apple developer portal credentials interactively
