@@ -57,6 +57,8 @@ protocol SecretsHandler {
 
     func saveSession(_ session: AppleSession) async throws -> AppleSession
     func loadSession() async throws -> AppleSession?
+
+    func retrieveAppleCredentials() async throws -> AppleCredentialsSecret
 }
 
 extension SecretsHandler {
