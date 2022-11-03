@@ -9,6 +9,7 @@ import Foundation
 
 enum AppleAPIError: Error, LocalizedError, Equatable {
     
+    case unknownError
     case invalidPackage(package: Package, urlResponse: HTTPURLResponse)
     case noCookie
     
@@ -20,6 +21,9 @@ enum AppleAPIError: Error, LocalizedError, Equatable {
             Url Error   : \(urlResponse.statusCode)\n
             Url Message : \(urlResponse.description)
 """
+        case .unknownError:
+            return "an unknown error happened"
+
         case .noCookie:
             return "The server response has no cookie, invalid cookie or missing cookie"
         }

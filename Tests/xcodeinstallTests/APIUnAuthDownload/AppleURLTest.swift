@@ -55,6 +55,19 @@ final class AppleURLTest: XCTestCase {
         XCTAssertEqual(expectedResult, request.url?.description)
     }
     
+    func testRequestDownload() {
+        
+        // given
+        let package = Package(download: .xCode, version: "14.0.1")
+        
+        // when
+        let request = URLRequest.appleDownloadURL(for: package)
+        
+        // then
+        let expectedResult = "https://download.developer.apple.com/Developer_Tools/Xcode_14.0.1/Xcode_14.0.1.xip"
+        XCTAssertEqual(expectedResult, request.url?.description)
+    }
+
     func testResponseCookie() {
         
         // given
@@ -88,6 +101,20 @@ final class AppleURLTest: XCTestCase {
             // then
             XCTAssertEqual(error as! AppleAPIError, AppleAPIError.noCookie)
         }
+    }
+    
+    func testRequestAvailableDOwnloads() {
+        
+        // given
+        
+        // when
+        let request = URLRequest.availableDowloads()
+        
+        // then
+        let expectedResult = "https://raw.githubusercontent.com/sebsto/xcodeinstall/main/available-downloads.json"
+        XCTAssertEqual(expectedResult, request.url?.description)
+
+        
     }
 
 }

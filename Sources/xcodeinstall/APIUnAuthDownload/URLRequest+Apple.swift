@@ -13,4 +13,14 @@ extension URLRequest {
         let request = URLRequest(url: .appleAuthenticationUrl(package: package))
         return request
     }
+
+    static func appleDownloadURL(for package: Package) -> URLRequest {
+        
+        let request = URLRequest(url: .appleDownloadUrl(package: package))
+        return request
+    }
+
+    static func availableDowloads() -> URLRequest {
+        return URLRequest(url: .availableDowloadsUrl())
+    }
 }
