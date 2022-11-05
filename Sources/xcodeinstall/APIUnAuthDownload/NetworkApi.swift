@@ -6,38 +6,40 @@
 //
 
 import Foundation
+import CLIlib
 
-struct NetworkAPI {
+protocol NetworkAPIProtocol {
+    func data(for request: URLRequest, delegate: URLSessionTaskDelegate?) async throws -> (Data, URLResponse)
+    func download(for request: URLRequest, delegate: URLSessionDownloadDelegate?) -> URLSessionDownloadTask
+}
+
+// allows to have default values in the protocol
+// https://medium.com/@georgetsifrikas/swift-protocols-with-default-values-b7278d3eef22
+extension NetworkAPIProtocol {
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        return try await data(for: request, delegate: nil)
+    }
+    func download(for request: URLRequest) -> URLSessionDownloadTask {
+        return download(for: request, delegate: nil)
+    }
+}
+    
+struct NetworkAPI : NetworkAPIProtocol {
     
     // MARK: retrieve data from URL
-    
-    // the mockable function as a property
-    // actual implementation calls URLSession
-    var data: (URLRequest, URLSessionTaskDelegate?) async throws -> (Data, URLResponse) = {
-        return try await URLSession.shared.data(for: $0, delegate: $1)
-    }
-    
-    // the actual function to be exposed to client of this class
-    // this function calls the mockable function
     func data(for request: URLRequest, delegate: URLSessionTaskDelegate? = nil) async throws -> (Data, URLResponse) {
-        try await data(request, delegate)
+        log.debug("Downloading data at \(request)")
+        return try await URLSession.shared.data(for: request, delegate: delegate)
     }
     
     // MARK: download file from URL
-    
-    // the mockable function as a property
-    // actual implementation calls URLSession
-    var download: (URLRequest, URLSessionDownloadDelegate?) -> URLSessionDownloadTask = {
-        let session = URLSession(configuration: .default,
-                             delegate: $1,
-                             delegateQueue: nil)
-        return session.downloadTask(with: $0)
-    }
-    
-    // the actual function to be exposed to client of this class
-    // this function calls the mockable function
     func download(for request: URLRequest, delegate: URLSessionDownloadDelegate? = nil) -> URLSessionDownloadTask {
-        return download(request, delegate)
+        log.debug("Downloading file at \(request)")
+        
+        let session = URLSession(configuration: .default,
+                             delegate: delegate,
+                             delegateQueue: nil)
+        return session.downloadTask(with: request)
     }
 
 }

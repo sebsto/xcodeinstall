@@ -12,21 +12,16 @@ import CLIlib
 // generic PKG installation function
 extension ShellInstaller {
 
-    func installPkg(atPath pkgPath: String) throws -> ShellOutput {
-
-        // shell has been injected after having created this class
-        guard let s = shell else { // swiftlint:disable:this identifier_name
-            fatalError("Shell implementation was not injected")
-        }
+    func installPkg(file: URL) throws -> ShellOutput {
 
         // check if file exists
-        guard fileHandler.fileExists(filePath: pkgPath, fileSize: 0) else {
-            log.error("Package does not exist : \(pkgPath)")
+        guard env.fileHandler.fileExists(file: file, fileSize: 0) else {
+            log.error("Package does not exist : \(file.path)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 
-        let cmd = "sudo \(INSTALLERCOMMAND) -pkg \"\(pkgPath)\" -target /"
-        let result = try s.run(cmd)
+        let cmd = "sudo \(INSTALLERCOMMAND) -pkg \"\(file.path)\" -target /"
+        let result = try self.shell.run(cmd)
         return result
     }
 }

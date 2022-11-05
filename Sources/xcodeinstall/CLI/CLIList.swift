@@ -8,6 +8,8 @@
 import Foundation
 import ArgumentParser
 
+import CLIlib
+
 // list implementation
 extension MainCommand {
 
@@ -16,15 +18,8 @@ extension MainCommand {
         static var configuration =
         CommandConfiguration(abstract: "Common options for list and download commands", shouldDisplay: false)
 
-        @Flag(name: .shortAndLong,
-              help: "Force to download the list from Apple Developer Portal, even if we have it in the cache")
-        var force: Bool = false
-
-        @Flag(name: .shortAndLong, help: "Filter on Xcode package only")
-        var onlyXcode: Bool = false
-
         @Option(name: [.customLong("xcode-version"), .short], help: "Filter on provided Xcode version number")
-        var xCodeVersion: String = "13"
+        var xCodeVersion: String = "14"
 
         @Flag(name: .shortAndLong, help: "Sort by most recent releases first")
         var mostRecentFirst: Bool = false
@@ -41,22 +36,18 @@ extension MainCommand {
 
         @OptionGroup var globalOptions: GlobalOptions
         @OptionGroup var downloadListOptions: DownloadListOptions
-        @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-            var xcib = XCodeInstallBuilder()
-                            .withVerbosity(verbose: globalOptions.verbose)
-                            .withDownloader()
-
-            if let region = cloudOption.secretManagerRegion {
-                xcib = xcib.withAWSSecretsManager(region: region)
+            
+            if globalOptions.verbose {
+                log = Log.verboseLogger(label: "xcodeinstall")
+            } else {
+                log = Log.defaultLogger(label: "xcodeinstall")
             }
 
-            _ = try await xcib.build().list(force: downloadListOptions.force,
-                                            xCodeOnly: downloadListOptions.onlyXcode,
-                                            majorVersion: downloadListOptions.xCodeVersion,
-                                            sortMostRecentFirst: downloadListOptions.mostRecentFirst,
-                                            datePublished: downloadListOptions.datePublished)
+            _ = try await XCodeInstall().list(majorVersion: downloadListOptions.xCodeVersion,
+                                              sortMostRecentFirst: downloadListOptions.mostRecentFirst,
+                                              datePublished: downloadListOptions.datePublished)
         }
     }
 }

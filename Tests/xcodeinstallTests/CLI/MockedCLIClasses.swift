@@ -23,32 +23,22 @@ class MockedDisplay: DisplayProtocol {
 }
 
 // mocked read line
-class MockedReadLine : ReadLineProtocol {
-    
-    var input : [String]
-    
-    init(_ input : [String]) {
+class MockedReadLine: ReadLineProtocol {
+
+    var input: [String]?
+
+    public init() {
+    }
+
+    public init(_ input: [String]) {
         self.input = input.reversed()
     }
-    
-    func readLine(prompt: String, silent: Bool = false) -> String? {
+
+    public func readLine(prompt: String, silent: Bool = false) -> String? {
+        guard var input else {
+            return nil
+        }
         return input.popLast()
     }
 }
 
-enum MockError: Error {
-    case invalidMockData
-}
-
-class MockedInstaller: InstallerProtocol {
-    
-    var nextError : Error?
-
-    func install(file: String, progress: ProgressUpdateProtocol) async throws {
-
-        if let nextError {
-            throw nextError
-        }
-        
-    }
-}

@@ -19,7 +19,7 @@ struct Package: Equatable {
         self.download = download
         self.version = version
     }
-    
+        
     var path : String {
         return "/Developer_Tools/\(packageName)/\(fileName)"
     }

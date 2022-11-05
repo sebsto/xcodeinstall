@@ -32,18 +32,19 @@ final class ApplePackageDownloaderTest: XCTestCase {
         
         // given
         let package = Package(download: .xCode, version: "14")
-        let apd = ApplePackageDownloader(package: package)
+        let apd = ApplePackageDownloader()
 
         //
-        NetworkAPI.nextHeader = ["Set-Cookie" : "ADCDownloadAuth=AuthCookieValue;Version=1;Comment=;Domain=apple.com;Path=/;Max-Age=108000;HttpOnly;Expires=Sat, 22 Oct 2032 04:54:51 GMT"]
+        (env.api as! MockedNetworkAPI).nextHeader = ["Set-Cookie" : "ADCDownloadAuth=AuthCookieValue;Version=1;Comment=;Domain=apple.com;Path=/;Max-Age=108000;HttpOnly;Expires=Sat, 22 Oct 2032 04:54:51 GMT"]
 
         // when
         do {
-            let authCookie = try await apd.authenticationCookie()
+            let authCookie = try await apd.authenticationCookie(for: package)
             
             // then
             XCTAssertNotNil(authCookie)
-            XCTAssertEqual(authCookie, "AuthCookieValue") //value hard coded in the mock
+            XCTAssertEqual(authCookie.name, "ADCDownloadAuth") //validate parsing
+            XCTAssertEqual(authCookie.value, "AuthCookieValue") //value hard coded in the mock
         } catch {
             XCTAssert(false, "Error : \(error)")
         }
@@ -54,18 +55,16 @@ final class ApplePackageDownloaderTest: XCTestCase {
         
         // given
         
-        // https://stackoverflow.com/questions/47177036/use-resources-in-unit-tests-with-swift-package-manager
-        let filePath = Bundle.module.path(forResource: "available-downloads", ofType: "json")!
-        let fileURL = URL(fileURLWithPath: filePath)
-        NetworkAPI.nextData = try! Data(contentsOf: fileURL)
+        let availableDownloads = try? loadAvailableDownloadFromTestFile()
+        (env.api as! MockedNetworkAPI).nextData = try! JSONEncoder().encode(availableDownloads?.list)
 
         // when
         do {
-            let list = try await ApplePackageDownloader.listAvailableDownloads()
+            let availableDownloadList = try await env.downloader.listAvailableDownloads()
             
             // then
-            XCTAssertNotNil(list)
-            XCTAssertEqual(list.count, 401)
+            XCTAssertNotNil(availableDownloadList.list)
+            XCTAssertEqual(availableDownloadList.count, 979)
         } catch {
             XCTAssert(false, "Error : \(error)")
         }
@@ -78,24 +77,28 @@ final class ApplePackageDownloaderTest: XCTestCase {
         let delegate = AppleDownloadDelegate()
         
         let package = Package(download: .xCode, version: "14")
-        let apd = ApplePackageDownloader(package: package)
+        let apd = ApplePackageDownloader()
 
         let dst = URL(fileURLWithPath: "/tmp/dummy")
+        
+        // this will be consumed by the Authentication URL call 
+        (env.api as! MockedNetworkAPI).nextHeader = ["Set-Cookie" : "ADCDownloadAuth=AuthCookieValue;Version=1;Comment=;Domain=apple.com;Path=/;Max-Age=108000;HttpOnly;Expires=Sat, 22 Oct 2032 04:54:51 GMT"]
 
         Task {
-            // Delay the task by 0.5 second:
-            try await Task.sleep(nanoseconds: 500_000_000)
+
+            // Delay the task by 1 second:
+            try await Task.sleep(nanoseconds: 1_000_000_000)
                 
             XCTAssertNotNil(delegate.callback)
             delegate.callback!(.success(dst))
         }
                 
         // when
-        let file = try? await apd.download(to: dst, with: delegate)
-        
+        let file = try? await apd.download(package, with: delegate)
+
         // then
         XCTAssertNotNil(file)
-        XCTAssertEqual(dst.absoluteURL, file!.absoluteURL)
+        XCTAssertEqual(dst.absoluteURL, file?.absoluteURL)
 
     }
 

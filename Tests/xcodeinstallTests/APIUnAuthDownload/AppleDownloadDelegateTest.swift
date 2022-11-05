@@ -17,6 +17,7 @@ class AppleDownloadDelegateTest: XCTestCase {
         let dst = URL(fileURLWithPath: "/tmp/dummy")
         
         let delegate = AppleDownloadDelegate()
+        delegate.dstFile = dst
         delegate.progressUpdate = MockedProgressBar()
         delegate.callback = { result in
             

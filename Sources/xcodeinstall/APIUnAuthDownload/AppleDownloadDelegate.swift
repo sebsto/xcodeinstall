@@ -17,6 +17,9 @@ class AppleDownloadDelegate: NSObject, URLSessionDownloadDelegate {
     var progressUpdate: ProgressUpdateProtocol?
     var totalFileSize: Int64?
     var startTime: Date?
+    
+    // the destination of the file
+    var dstFile : URL?
 
     // to notify the main thread when download is finish
     // see https://stackoverflow.com/questions/73664619/how-to-correctly-await-a-swift-callback-closure-result 
@@ -28,15 +31,21 @@ class AppleDownloadDelegate: NSObject, URLSessionDownloadDelegate {
     //
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         guard let progress = self.progressUpdate,
-              let callback = self.callback else {
-            fatalError("Pass a progress update and callback reference to use this class")
+              let callback = self.callback,
+              let dstFile  = self.dstFile else {
+            fatalError("Pass a progress update, callback reference and destination file URL to use this class")
         }
         
+        log.debug("Finished at \(location)\nMoving to \(dstFile)")
+
         // tell the progress bar that we're done
         progress.complete(success: true)
+        
+        // ignore the error here ? It is logged one level down. How to bring it up to the user ?
+        try? env.fileHandler.move(from: location, to: dstFile)
 
         // tell the main thread that we're done
-        callback(.success(location))
+        callback(.success(dstFile))
     }
 
     //MARK: In Progress

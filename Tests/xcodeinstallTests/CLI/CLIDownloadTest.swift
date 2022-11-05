@@ -14,18 +14,11 @@ class CLIDownloadTest: CLITest {
     func testDownload() async throws {
         
         // given
-        
-        let mockedReadline = MockedReadLine(["0"])
-        var xci = xcodeinstall(input: mockedReadline)
-        xci.downloader = MockAppleDownloader()
-        (xci.fileHandler as! MockedFileHandler).nextFileCorrect = true
-        
+        (env.readLine as! MockedReadLine).input = ["0"]
         
         let download = try parse(MainCommand.Download.self, [
             "download",
             "--verbose",
-            "--force",
-            "--only-xcode",
             "--xcode-version",
             "14",
             "--most-recent-first",
@@ -35,8 +28,7 @@ class CLIDownloadTest: CLITest {
         
         // when
         do {
-            // try await download.run() // can not call this as I can not inject all the mocks
-            try await xci.download(fileName: nil, force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: true, datePublished: true)
+            try await download.run() 
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")
@@ -44,8 +36,6 @@ class CLIDownloadTest: CLITest {
         
         // test parsing of commandline arguments
         XCTAssert(download.globalOptions.verbose)
-        XCTAssert(download.downloadListOptions.force)
-        XCTAssert(download.downloadListOptions.onlyXcode)
         XCTAssert(download.downloadListOptions.xCodeVersion == "14")
         XCTAssert(download.downloadListOptions.mostRecentFirst)
         XCTAssert(download.downloadListOptions.datePublished)
@@ -54,31 +44,10 @@ class CLIDownloadTest: CLITest {
         assertDisplay("✅ file downloaded")
     }
     
-    func testDownloadWithError() async throws {
-        
-        // given
-        let xci = xcodeinstall()
-        
-        // when
-        do {
-            try await xci.download(fileName: nil, force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: true, datePublished: true)
-            XCTAssert(false)
-            
-        } catch XCodeInstallError.configurationError {
-            
-            // then
-            XCTAssert(true)
-        }
-    }
-    
     func testDownloadWithCorrectFileName() async throws {
         
         // given
-        
-        var xci = xcodeinstall()
-        xci.downloader = MockAppleDownloader()
-        (xci.fileHandler as! MockedFileHandler).nextFileCorrect = true
-        let fileName = "Xcode 14 beta.xip"
+        let fileName = "Xcode 14.xip"
 
         let download = try parse(MainCommand.Download.self, [
             "download",
@@ -89,9 +58,8 @@ class CLIDownloadTest: CLITest {
         // when
         do {
 
+            try await download.run()
 
-            // try await download.run() // can not call this as I can not inject all the mocks
-            try await xci.download(fileName: fileName, force: false, xCodeOnly: false, majorVersion: "", sortMostRecentFirst: false, datePublished: false)
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")
@@ -100,8 +68,6 @@ class CLIDownloadTest: CLITest {
         // test parsing of commandline arguments
         XCTAssertEqual(download.name, fileName)
         XCTAssertFalse(download.globalOptions.verbose)
-        XCTAssertFalse(download.downloadListOptions.force)
-        XCTAssertFalse(download.downloadListOptions.onlyXcode)
         XCTAssertFalse(download.downloadListOptions.mostRecentFirst)
         XCTAssertFalse(download.downloadListOptions.datePublished)
         
@@ -110,12 +76,8 @@ class CLIDownloadTest: CLITest {
     }
 
     func testDownloadWithIncorrectFileName() async throws {
-        
+
         // given
-        
-        var xci = xcodeinstall()
-        xci.downloader = MockAppleDownloader()
-        (xci.fileHandler as! MockedFileHandler).nextFileCorrect = true
         let fileName = "xxx.xip"
 
         let download = try parse(MainCommand.Download.self, [
@@ -123,28 +85,23 @@ class CLIDownloadTest: CLITest {
             "--name",
             fileName
         ])
-        
+
         // when
         do {
-
-
-            // try await download.run() // can not call this as I can not inject all the mocks
-            try await xci.download(fileName: fileName, force: false, xCodeOnly: false, majorVersion: "", sortMostRecentFirst: false, datePublished: false)
+            try await download.run()
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")
         }
-        
+
         // test parsing of commandline arguments
         XCTAssertEqual(download.name, fileName)
         XCTAssertFalse(download.globalOptions.verbose)
-        XCTAssertFalse(download.downloadListOptions.force)
-        XCTAssertFalse(download.downloadListOptions.onlyXcode)
         XCTAssertFalse(download.downloadListOptions.mostRecentFirst)
         XCTAssertFalse(download.downloadListOptions.datePublished)
-        
+
         // mocked list succeeded
-        assertDisplay("🛑 Unknown file name : xxx.xip")
+        assertDisplay("🛑 Unknown or invalid file name : xxx.xip")
     }
 
 }

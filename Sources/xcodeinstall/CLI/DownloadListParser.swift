@@ -19,14 +19,15 @@ struct DownloadListParser {
         self.sortMostRecentFirst = sortMostRecentFirst
     }
 
-    func parse(list: DownloadList?) throws -> [DownloadList.Download] {
+    func parse(downloadList: AvailableDownloadList?) throws -> [AvailableDownloadList.Download] {
 
-        guard let list = list?.downloads else {
-            throw DownloadError.noDownloadsInDownloadList
+        guard let downloadList,
+              downloadList.count > 0 else {
+            fatalError("Developer passed an empty download list")
         }
 
         // filter on items having Xcode in their name
-        let listOfXcode = list.filter { download in
+        let listOfXcode = downloadList.list.filter { download in
             if xCodeOnly {
                 return download.name.starts(with: "Xcode \(majorVersion)")
             } else {
@@ -64,9 +65,9 @@ struct DownloadListParser {
 
     /// Enrich the list of available downloads.
     /// It adds a flag for each file in the list to indicate if the file is already downloaded and available in cache
-    func enrich(list: [DownloadList.Download]) -> [DownloadList.Download] {
+    func enrich(list: [AvailableDownloadList.Download]) -> [AvailableDownloadList.Download] {
 
-        let fileHandler = FileHandler()
+        let fileHandler = env.fileHandler
 
         return list.map { download in
 
@@ -74,8 +75,8 @@ struct DownloadListParser {
             var d = download
             var file = download.files[0]
 
-            let downloadFilePath: String = fileHandler.downloadFilePath(file: file)
-            let exists = fileHandler.fileExists(filePath: downloadFilePath, fileSize: file.fileSize)
+            let downloadedFileURL = fileHandler.downloadedFileURL(file: file)
+            let exists = fileHandler.fileExists(file: downloadedFileURL, fileSize: file.fileSize)
 
             file.existInCache = exists
             d.files = [file]
@@ -85,7 +86,7 @@ struct DownloadListParser {
         }
     }
 
-    func prettyPrint(list: [DownloadList.Download], withDate: Bool = true) -> String {
+    func prettyPrint(list: [AvailableDownloadList.Download], withDate: Bool = true) -> String {
 
         // var result = ""
 

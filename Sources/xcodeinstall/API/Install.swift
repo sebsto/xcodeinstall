@@ -8,10 +8,6 @@
 import Foundation
 import CLIlib
 
-protocol InstallerProtocol {
-    func install(file: String, progress: ProgressUpdateProtocol) async throws
-}
-
 enum InstallerError: Error {
     case unsupportedInstallation
     case fileDoesNotExistOrIncorrect
@@ -21,10 +17,8 @@ enum InstallerError: Error {
     case CLToolsInstallationError
 }
 
-class ShellInstaller: InstallerProtocol {
-
-    var fileHandler: FileHandlerProtocol
-
+class ShellInstaller {
+    
     // the shell commands we need to install XCode and its command line tools
     let XIPCOMMAND = "/usr/bin/xip"
     let HDIUTILCOMMAND = "/usr/bin/hdiutil"
@@ -37,15 +31,7 @@ class ShellInstaller: InstallerProtocol {
                         "MobileDeviceDevelopment.pkg"]
 
     // the shell access
-    var shell: AsyncShellProtocol?
-
-    init(fileHandler: FileHandlerProtocol, shell: AsyncShellProtocol? = nil) {
-        self.fileHandler = fileHandler
-
-        if let shell {
-            self.shell = shell
-        }
-    }
+    var shell: AsyncShellProtocol = env.shell
 
     /// Install Xcode or Xcode Command Line Tools
     ///  At this stage, we do support only these two installation.
@@ -62,10 +48,10 @@ class ShellInstaller: InstallerProtocol {
     ///   **Command_Line_Tools_for_Xcode** is provided as a DMG file. The installation procedure is as follow:
     ///   - the DMG file is mounted
     ///   - Package `/Volumes/Command\ Line\ Developer\ Tools/Command\ Line\ Tools.pkg` is installed.
-    func install(file: String, progress: ProgressUpdateProtocol) async throws {
-
+    func install(file: URL, progress: ProgressUpdateProtocol) async throws {
+        
         // verify this is one the files we do support
-        let installationType = SupportedInstallation.supported(file.fileName())
+        let installationType = SupportedInstallation.supported(file.lastPathComponent)
         guard installationType != .unsuported else {
             log.debug("Unsupported installation type")
             throw InstallerError.unsupportedInstallation
@@ -73,7 +59,7 @@ class ShellInstaller: InstallerProtocol {
 
         // find matching File in DownloadList (if there is one)
         // and compare existing filesize vs expected filesize
-        guard fileMatch(filePath: file) else {
+        guard fileMatch(file: file) else {
             log.debug("File does not exist or has incorrect size")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
@@ -81,9 +67,9 @@ class ShellInstaller: InstallerProtocol {
         // Dispatch installation between DMG and XIP
         switch installationType {
         case .xCode:
-            try self.installXcode(atPath: file, progress: progress)
+            try self.installXcode(file: file, progress: progress)
         case .xCodeCommandLineTools:
-            try self.installCommandLineTools(atPath: file, progress: progress)
+            try self.installCommandLineTools(file: file, progress: progress)
         case .unsuported:
             throw InstallerError.unsupportedInstallation
         }
@@ -100,7 +86,7 @@ class ShellInstaller: InstallerProtocol {
     ///     - true when file exists and, when download list cache exists too, if file size matches the one mentioned in the cached download list
     ///
     // swiftlint:enable line_length
-    func fileMatch(filePath: String) -> Bool {
+    func fileMatch(file: URL) -> Bool {
 
         // File exist on disk ?
         // no => return FALSE
@@ -108,17 +94,17 @@ class ShellInstaller: InstallerProtocol {
         //    if there is a download list cache AND file is present in list AND size DOES NOT match => False
         // all other cases return true (we can try to install even if their is no cached download list)
 
-        var match = self.fileHandler.fileExists(filePath: filePath, fileSize: 0)
+        var match = env.fileHandler.fileExists(file: file, fileSize: 0)
 
         if !match {
             return false
         }
 
         // find file in downloadlist (if the cached download list exists)
-        if let dll = try? self.fileHandler.loadDownloadList() {
-            if let dlFile = dll.find(fileName: filePath.fileName()) {
+        if let dll = try? env.fileHandler.loadDownloadList() {
+            if let dlFile = dll.find(fileName: file.lastPathComponent) {
                 // compare download list cached sized with actual size
-                match = self.fileHandler.fileExists(filePath: filePath, fileSize: dlFile.fileSize)
+                match = env.fileHandler.fileExists(file: file, fileSize: dlFile.fileSize)
             }
         }
         return match

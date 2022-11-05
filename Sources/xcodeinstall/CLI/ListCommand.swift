@@ -8,49 +8,38 @@
 import Foundation
 
 extension XCodeInstall {
+    
 
-    func list(force: Bool,
-              xCodeOnly: Bool,
-              majorVersion: String,
+    func list(majorVersion: String,
               sortMostRecentFirst: Bool,
-              datePublished: Bool) async throws -> [DownloadList.Download] {
+              datePublished: Bool) async throws -> [AvailableDownloadList.Download] {
 
-        guard let download = downloader else {
-            throw XCodeInstallError.configurationError(msg: "Developer forgot to inject a downloader object. " +
-                                                             "Use XCodeInstallBuilder to correctly initialize this class") // swiftlint:disable:this line_length
-        }
-
-        display("Loading list of available downloads ", terminator: "")
-        display("\(force ? "forced download from Apple Developer Portal" : "fetched from cache in \(self.fileHandler.baseFilePath())")") // swiftlint:disable:this line_length
+        display("Loading list of available downloads...")
 
         do {
-            let list = try await download.list(force: force)
+            let fileHandler = env.fileHandler
+            let downloader = env.downloader
+            
+            let list = try await downloader.listAvailableDownloads()
             display("✅ Done")
 
-            let parser = DownloadListParser(xCodeOnly: xCodeOnly,
+            let parser = DownloadListParser(xCodeOnly: false,
                                             majorVersion: majorVersion,
                                             sortMostRecentFirst: sortMostRecentFirst)
-            let parsedList = try parser.parse(list: list)
+            let parsedList = try parser.parse(downloadList: list)
 
             // enrich the list to flag files already downloaded
             let enrichedList = parser.enrich(list: parsedList)
 
             display("")
             display("👉 Here is the list of available downloads:")
-            display("Files marked with (*) are already downloaded in \(self.fileHandler.baseFilePath()) ")
+            display("Files marked with (*) are already downloaded in \(fileHandler.baseFilePath()) ")
             display("")
             let string = parser.prettyPrint(list: enrichedList, withDate: datePublished)
             display(string)
             display("\(enrichedList.count) items")
 
             return enrichedList
-
-        } catch DownloadError.authenticationRequired {
-            display("🛑 Session expired, you neeed to re-authenticate.")
-            display("You can authenticate with the command: xcodeinstall authenticate")
-
-            // todo launch authentifictaion automatically ?
-            throw DownloadError.authenticationRequired
 
         } catch {
             display("🛑 Unexpected error : \(error)")

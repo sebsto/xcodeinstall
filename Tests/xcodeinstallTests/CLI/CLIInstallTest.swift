@@ -10,45 +10,133 @@ import XCTest
 
 class CLIInstallTest: CLITest {
     
-    func testInstall() async throws {
+    func testInstallUnsupportedFile() async throws {
         
         // given
-        var xci = xcodeinstall()
-        xci.installer = MockedInstaller()
+        let fileName = "test.xip"
 
-        let inst = try parse(MainCommand.Install.self, [
+        let installer = try parse(MainCommand.Install.self, [
                             "install",
                             "--verbose",
                             "--name",
-                            "test.xip"
+                            fileName
         ])
         
         // when
         do {
-            try await xci.install(file: "test.xip")
+            try await installer.run()
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")
         }
 
         // test parsing of commandline arguments
-        XCTAssert(inst.globalOptions.verbose)
-        XCTAssertEqual(inst.name, "test.xip")
+        XCTAssert(installer.globalOptions.verbose)
+        XCTAssertEqual(installer.name, "test.xip")
+        
+        assertDisplay("🛑 Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)")
     }
     
-    func testPromptForFile() {
+    func testInstallFileDoesNotExist() async throws {
         
         // given
-        let mockedReadline = MockedReadLine(["0"])
-        var xci = xcodeinstall(input: mockedReadline)
-        xci.installer = MockedInstaller()
-        xci.fileHandler = MockedFileHandler()
+        let fileName = "Xcode 14.xip"
+        (env.fileHandler as! MockedFileHandler).nextFileExist = false
 
+
+        let installer = try parse(MainCommand.Install.self, [
+                            "install",
+                            "--verbose",
+                            "--name",
+                            fileName
+        ])
         
         // when
         do {
-            let result = try xci.promptForFile()
+            try await installer.run()
             
+        } catch {
+            // then
+            XCTAssert(false, "Expected exception : \(error)")
+        }
+
+        // test parsing of commandline arguments
+        XCTAssert(installer.globalOptions.verbose)
+        XCTAssertEqual(installer.name, fileName)
+
+        assertDisplay("⚠️ There is no downloaded file to be installed")
+    }
+
+    func testInstallXIP() async throws {
+        
+        // given
+        let fileName = "Xcode 14.xip"
+        (env.fileHandler as! MockedFileHandler).nextFileExist = true
+
+
+        let installer = try parse(MainCommand.Install.self, [
+                            "install",
+                            "--verbose",
+                            "--name",
+                            fileName
+        ])
+        
+        // when
+        do {
+            try await installer.run()
+            
+        } catch {
+            // then
+            XCTAssert(false, "Expected exception : \(error)")
+        }
+
+        // test parsing of commandline arguments
+        XCTAssert(installer.globalOptions.verbose)
+        XCTAssertEqual(installer.name, fileName)
+
+        assertDisplayStartsWith("✅ /Users")
+    }
+
+    func testInstallDMG() async throws {
+        
+        // given
+        let fileName = "Command Line Tools for Xcode 14.dmg"
+        (env.fileHandler as! MockedFileHandler).nextFileExist = true
+
+
+        let installer = try parse(MainCommand.Install.self, [
+                            "install",
+                            "--verbose",
+                            "--name",
+                            fileName
+        ])
+        
+        // when
+        do {
+            try await installer.run()
+            
+        } catch {
+            // then
+            XCTAssert(false, "Expected exception : \(error)")
+        }
+
+        // test parsing of commandline arguments
+        XCTAssert(installer.globalOptions.verbose)
+        XCTAssertEqual(installer.name, fileName)
+
+        assertDisplayStartsWith("✅ /Users")
+    }
+
+    
+    func testPromptForFile() {
+
+        // given
+        (env.readLine as! MockedReadLine).input = ["0"]
+
+        // when
+        do {
+            let result = try XCodeInstall().promptForFile()
+
             // then
             XCTAssertTrue(result.hasSuffix("name.dmg"))
 

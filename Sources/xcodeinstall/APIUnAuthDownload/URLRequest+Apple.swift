@@ -8,15 +8,17 @@
 import Foundation
 
 extension URLRequest {
-    static func appleAuthenticationCookie(for package: Package) -> URLRequest {
+    static func appleAuthenticationRequest(for package: Package) -> URLRequest {
         
         let request = URLRequest(url: .appleAuthenticationUrl(package: package))
         return request
     }
 
-    static func appleDownloadURL(for package: Package) -> URLRequest {
+    static func appleDownloadRequest(for package: Package, with cookie: HTTPCookie) -> URLRequest {
         
-        let request = URLRequest(url: .appleDownloadUrl(package: package))
+        var request = URLRequest(url: .appleDownloadUrl(package: package))
+        request.setValue(cookie.value, forHTTPHeaderField: cookie.name)
+        
         return request
     }
 

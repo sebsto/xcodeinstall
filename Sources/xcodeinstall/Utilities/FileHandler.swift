@@ -11,12 +11,13 @@ import CLIlib
 // the methods I want to mock for unit testing
 protocol FileHandlerProtocol {
     func move(from src: URL, to dst: URL) throws
-    func fileExists(filePath: String, fileSize: Int) -> Bool
-    func checkFileSize(filePath: String, fileSize: Int) throws -> Bool
+    func fileExists(file: URL, fileSize: Int) -> Bool
+    func checkFileSize(file: URL, fileSize: Int) throws -> Bool
     func downloadedFiles() throws -> [String]
-    func downloadFilePath(file: DownloadList.File) -> String
-    func saveDownloadList(list: DownloadList) throws -> DownloadList
-    func loadDownloadList() throws -> DownloadList
+    func downloadedFilePath(file: AvailableDownloadList.Download.File) -> String
+    func downloadedFileURL(file: AvailableDownloadList.Download.File) -> URL
+    func saveDownloadList(downloadList: AvailableDownloadList) throws ->  AvailableDownloadList
+    func loadDownloadList() throws -> AvailableDownloadList
     func baseFilePath() -> URL
     func baseFilePath() -> String
 }
@@ -68,10 +69,10 @@ struct FileHandler: FileHandlerProtocol {
         }
     }
 
-    func downloadFilePath(file: DownloadList.File) -> String {
-        return downloadFilePath(file: file).path
+    func downloadedFilePath(file: AvailableDownloadList.Download.File) -> String {
+        return downloadedFileURL(file: file).path
     }
-    func downloadFilePath(file: DownloadList.File) -> URL {
+    func downloadedFileURL(file: AvailableDownloadList.Download.File) -> URL {
 
         // if download directory does not exist, create it
         if !fm.fileExists(atPath: FileHandler.downloadDirectory.path) {
@@ -86,13 +87,15 @@ struct FileHandler: FileHandlerProtocol {
 
     /// Check if file exists and has correct size
     ///  - Parameters:
-    ///     - filePath the path of the file to verify
+    ///     - file the URl of the file to verify
     ///     - fileSize the expected size of the file (in bytes).
     ///  - Returns : true when the file exists and has the given size, false otherwise
     ///  - Throws:
     ///     - FileHandlerError.FileDoesNotExistswhen the file does not exists
-    func checkFileSize(filePath: String, fileSize: Int) throws -> Bool {
+    func checkFileSize(file: URL, fileSize: Int) throws -> Bool {
 
+        let filePath = file.path
+        
         // file exists ?
         let exists = fm.fileExists(atPath: filePath)
         if !exists { throw  FileHandlerError.fileDoesNotExist }
@@ -107,10 +110,12 @@ struct FileHandler: FileHandlerProtocol {
 
     /// Check if file exists and has correct size
     /// - Parameters:
-    ///     - filePath the path of the file to verify
+    ///     - file the URL of the file to verify
     ///     - fileSize the expected size of the file (in bytes).
     ///       when omited, file size is not checked
-    func fileExists(filePath: String, fileSize: Int = 0) -> Bool {
+    func fileExists(file: URL, fileSize: Int = 0) -> Bool {
+
+        let filePath = file.path
 
         let fileExists = fm.fileExists(atPath: filePath)
         // does the file exists ?
@@ -120,7 +125,7 @@ struct FileHandler: FileHandlerProtocol {
 
         // is the file complete ?
         // use try! because I verified if file exists already
-        let fileComplete = try? self.checkFileSize(filePath: filePath, fileSize: fileSize)
+        let fileComplete = try? self.checkFileSize(file: file, fileSize: fileSize)
 
         return (fileSize > 0 ? fileComplete ?? false : fileExists)
     }
@@ -134,21 +139,19 @@ struct FileHandler: FileHandlerProtocol {
         }
     }
 
-    func saveDownloadList(list: DownloadList) throws -> DownloadList {
+    func saveDownloadList(downloadList: AvailableDownloadList) throws -> AvailableDownloadList {
 
         // save list
-        let data = try JSONEncoder().encode(list)
+        let data = try JSONEncoder().encode(downloadList.list)
         try data.write(to: FileHandler.downloadListPath)
 
-        return list
+        return downloadList
 
     }
 
-    func loadDownloadList() throws -> DownloadList {
+    func loadDownloadList() throws -> AvailableDownloadList {
 
         // read the raw file saved on disk
-        let listData = try Data(contentsOf: FileHandler.downloadListPath)
-
-        return try JSONDecoder().decode(DownloadList.self, from: listData)
+        return try AvailableDownloadList(withFileURL: FileHandler.downloadListPath)
     }
 }

@@ -6,12 +6,13 @@
 //
 
 import Foundation
+import CLIlib
 
 /**
  
  Implement xcode download without authentication
  
- curl -v "https://developerservices2.apple.com/services/download?path=/Developer_Tools/Xcode_14.0.1/Xcode_14.0.1.xip"
+ curl -v "https://developerservices2.apple.com/services/download?path=/Developer_Tools/Xcode_14.1/Xcode_14.1.xip"
  < HTTP/1.1 200 OK
  < Server: Apple
  < Date: Thu, 13 Oct 2022 05:24:27 GMT
@@ -33,21 +34,23 @@ import Foundation
  < wwdr-vip-rqId: c5366d52047751f4eb7ef5bb59056b73
  
  
- curl -vL0 --cookie ADCDownloadAuth=ILyY%2FDe2y2gp7a6PONIbwDHrBK3WAWTyiE6H7hEjyHCrlqHNnes4CBSPob0S35%2Fe1gV4TvlISZLn%0D%0AY9%2FlkRd9m2%2BInEISwAo5Qmr1hzHVyWUJ6cawQzJbar7aG%2FlYjC%2F%2FCDUjHzhYLytb8eM8rmG53Hlf%0D%0AeMcVnDdbbjzK5PAz9mt2%2BKZg%0D%0A --output Xcode_14.0.1.xip "https://download.developer.apple.com/Developer_Tools/Xcode_14.1_beta_3/Xcode_14.1_beta_3.xip"
+ curl -vL0 --cookie ADCDownloadAuth=ILyY%2FDe2y2gp7a6PONIbwDHrBK3WAWTyiE6H7hEjyHCrlqHNnes4CBSPob0S35%2Fe1gV4TvlISZLn%0D%0AY9%2FlkRd9m2%2BInEISwAo5Qmr1hzHVyWUJ6cawQzJbar7aG%2FlYjC%2F%2FCDUjHzhYLytb8eM8rmG53Hlf%0D%0AeMcVnDdbbjzK5PAz9mt2%2BKZg%0D%0A --output Xcode_14.1.xip "https://download.developer.apple.com/Developer_Tools/Xcode_14.1/Xcode_14.1.xip"
  
  
  */
 
-struct ApplePackageDownloader {
-    
-    let package: Package
-    init(package: Package) {
-        self.package = package
-    }
-    
-    static func listAvailableDownloads() async throws -> [AppleAvailableDownloads] {
+protocol ApplePackageDownloaderProtocol {
+    func listAvailableDownloads() async throws -> AvailableDownloadList
+    func download(_ package: Package, with delegate: AppleDownloadDelegate) async throws -> URL
+}
+
+struct ApplePackageDownloader: ApplePackageDownloaderProtocol {
+
+    let appleAuthCookieName = "ADCDownloadAuth"
+
+    func listAvailableDownloads() async throws -> AvailableDownloadList {
         
-        var result: [AppleAvailableDownloads] = []
+        var result : AvailableDownloadList
         
         // download available files list
         let (data, urlResponse) = try await env.api.data(for: .availableDowloads())
@@ -60,30 +63,29 @@ struct ApplePackageDownloader {
             throw AppleAvailableDownloadsError.invalidHTTPResponse
         }
         
-        do {
-            // parse file
-            let list = try JSONDecoder().decode([AppleAvailableDownloads].self, from: data)
-            
-            // filter out entries that are relevant to Xcode only
-            // this should be anything with Xcode in the name
-            result = list.filter { download in
-                return download.name.contains("Xcode")
-            }
-            
-        } catch {
-            throw AppleAvailableDownloadsError.parsingError(error: error)
-        }
+        // parse file
+        result = try AvailableDownloadList(withData: data)
         
+        // filter out entries that are relevant to Xcode only
+        // this should be anything with Xcode in the name
+        result.list = result.list.filter { download in
+            return download.name.contains("Xcode")
+        }
+            
         return result
     }
 
     // this function replaces the AppleDownloader Class
     // the download delegate does not use a Semaphore anymore. It uses callbacks instead
     // see https://stackoverflow.com/questions/73664619/how-to-correctly-await-a-swift-callback-closure-result
-    func download(to file: URL, with delegate: AppleDownloadDelegate) async throws -> URL {
+    func download(_ package: Package, with delegate: AppleDownloadDelegate) async throws -> URL {
 
+        log.debug("Requesting authentication cookie")
+        let cookie = try await self.authenticationCookie(for: package)
+        
         // call our API
-        let task = env.api.download(for: .appleDownloadURL(for: package), delegate: delegate)
+        log.debug("Starting the download")
+        let task = env.api.download(for: .appleDownloadRequest(for: package, with: cookie), delegate: delegate)
         task.resume()
         
         return try await withCheckedThrowingContinuation { continuation in
@@ -104,9 +106,13 @@ struct ApplePackageDownloader {
 
     }
         
-    func authenticationCookie() async throws -> String {
+    //MARK: private functions
+    
+    // separate function for easier unit testing
+    // func is not private for unit testing
+    func authenticationCookie(for package: Package) async throws -> HTTPCookie {
         
-        let (_, urlResponse) = try await env.api.data(for: .appleAuthenticationCookie(for: package))
+        let (_, urlResponse) = try await env.api.data(for: .appleAuthenticationRequest(for: package))
         
         guard let httpResponse = urlResponse as? HTTPURLResponse else {
             fatalError("API call did not return an HTTP Response")
@@ -115,6 +121,31 @@ struct ApplePackageDownloader {
             throw AppleAPIError.invalidPackage(package: package, urlResponse: httpResponse)
         }
         
-        return try httpResponse.appleAuthCookie()
+        // delegate cookie extraction for easier unit testing
+        return try self.appleAuthCookie(from: httpResponse)
     }
+
+    // separate function for easier unit testing
+    // func is not private for unit testing
+    func appleAuthCookie(from response: HTTPURLResponse) throws -> HTTPCookie {
+                
+        guard let cookie = response.value(forHTTPHeaderField: "Set-Cookie") else {
+            throw AppleAPIError.noCookie
+        }
+        
+        // do not pass httpResponse.allheadersFields because HTTPCookie.cookies() expects [String:String]
+        let fakeHeader = ["Set-Cookie": cookie]
+        let cookies = HTTPCookie.cookies(withResponseHeaderFields: fakeHeader,
+                                         for: URL(string: "https://apple.com")!)
+        
+        // extract ADCDownloadAuth cookie
+        let authCookie = cookies.filter { cookie in cookie.name == appleAuthCookieName }
+        
+        guard authCookie.count == 1 else {
+            throw AppleAPIError.noCookie
+        }
+        
+        return authCookie[0]
+    }
+
 }
