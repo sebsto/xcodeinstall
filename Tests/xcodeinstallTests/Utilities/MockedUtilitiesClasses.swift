@@ -13,6 +13,7 @@ func loadAvailableDownloadFromTestFile() throws -> AvailableDownloadList {
     // load list from file
     // https://stackoverflow.com/questions/47177036/use-resources-in-unit-tests-with-swift-package-manager
     let filePath = Bundle.module.path(forResource: "available-downloads", ofType: "json")!
+//    let filePath = MyBundle.module.path(forResource: "available-downloads", ofType: "json")!
     let fileURL = URL(fileURLWithPath: filePath)
     return try AvailableDownloadList(withFileURL: fileURL)
     

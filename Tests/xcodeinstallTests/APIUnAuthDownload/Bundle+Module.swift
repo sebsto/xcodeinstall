@@ -10,6 +10,7 @@ import Foundation
 // https://stackoverflow.com/questions/47177036/use-resources-in-unit-tests-with-swift-package-manager
 
 #if XCODE_BUILD
+//struct MyBundle {
 extension Foundation.Bundle {
     
     /// Returns resource bundle as a `Bundle`.

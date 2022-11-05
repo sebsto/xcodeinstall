@@ -26,11 +26,12 @@ class MockedNetworkAPI : NetworkAPIProtocol {
 }
 
 class MockedApplePackageDownloader : ApplePackageDownloaderProtocol {
-    func listAvailableDownloads() async throws -> xcodeinstall.AvailableDownloadList {
+    func listAvailableDownloads() async throws -> AvailableDownloadList {
         return try loadAvailableDownloadFromTestFile()
     }
     
-    func download(_ package: xcodeinstall.Package, with delegate: xcodeinstall.AppleDownloadDelegate) async throws -> URL {
+    func download(_ package: Package, with delegate: AppleDownloadDelegate) async throws -> URL {
         return URL(fileURLWithPath: "/tmp/dummy")
     }
+    
 }
