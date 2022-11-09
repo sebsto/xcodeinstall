@@ -11,12 +11,8 @@ import CLIlib
 extension XCodeInstall {
 
     func install(file: String?) async throws {
-
-        // pre-requisistes
-        guard let inst = installer else {
-            throw XCodeInstallError.configurationError(msg: "Developer forgot to inject an installer object. " +
-                       "Use XCodeInstallBuilder to correctly initialize this class")
-        }
+        
+        let installer = ShellInstaller()
 
         // progress bar to report progress feedback
         let progress = CLIProgressBar(animationType: .countingProgressAnimationMultiLine,
@@ -31,13 +27,16 @@ extension XCodeInstall {
             }
             log.debug("Going to attemp to install \(fileToInstall)")
 
-            try await inst.install(file: fileToInstall, progress: progress)
+            try await installer.install(file: URL(fileURLWithPath: fileToInstall), progress: progress)
             progress.complete(success: true)
             display("✅ \(fileToInstall) installed")
         } catch CLIError.invalidInput {
             display("🛑 Invalid input")
             progress.complete(success: false)
         } catch FileHandlerError.noDownloadedList {
+            display("⚠️ There is no downloaded file to be installed")
+            progress.complete(success: false)
+        } catch InstallerError.fileDoesNotExistOrIncorrect {
             display("⚠️ There is no downloaded file to be installed")
             progress.complete(success: false)
         } catch InstallerError.xCodeXIPInstallationError {
@@ -62,7 +61,7 @@ extension XCodeInstall {
     func promptForFile() throws -> String {
 
         // list files ready to install
-        let installableFiles = try self.fileHandler.downloadedFiles().filter({ fileName in
+        let installableFiles = try env.fileHandler.downloadedFiles().filter({ fileName in
             return fileName.hasSuffix(".xip") || fileName.hasSuffix(".dmg")
         })
 

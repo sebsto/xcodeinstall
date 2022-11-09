@@ -9,9 +9,20 @@ import Foundation
 import CLIlib
 @testable import xcodeinstall
 
+func loadAvailableDownloadFromTestFile() throws -> AvailableDownloadList {
+    // load list from file
+    // https://stackoverflow.com/questions/47177036/use-resources-in-unit-tests-with-swift-package-manager
+    let filePath = Bundle.module.path(forResource: "available-downloads", ofType: "json")!
+//    let filePath = MyBundle.module.path(forResource: "available-downloads", ofType: "json")!
+    let fileURL = URL(fileURLWithPath: filePath)
+    return try AvailableDownloadList(withFileURL: fileURL)
+    
+}
+
+
 // used to test Installer component (see InstallerTest)
 class MockedFileHandler: FileHandlerProtocol {
-            
+
     var moveSrc: URL? = nil
     var moveDst: URL? = nil
     var nextFileExist: Bool? = nil
@@ -21,7 +32,7 @@ class MockedFileHandler: FileHandlerProtocol {
         moveSrc = src
         moveDst = dst
     }
-    func fileExists(filePath: String, fileSize: Int) -> Bool {
+    func fileExists(file: URL, fileSize: Int) -> Bool {
         if let nextFileExist {
             return nextFileExist
         } else {
@@ -29,10 +40,10 @@ class MockedFileHandler: FileHandlerProtocol {
         }
     }
     func downloadedFiles() throws -> [String] {
-        return ["name.pkg", "name.dmg"]
+        return ["name.pkg", "name.dmg", "name.app"]
     }
 
-    func checkFileSize(filePath: String, fileSize: Int) throws -> Bool {
+    func checkFileSize(file: URL, fileSize: Int) throws -> Bool {
         if let nextFileCorrect {
             return nextFileCorrect
         } else {
@@ -40,20 +51,20 @@ class MockedFileHandler: FileHandlerProtocol {
         }
     }
     
-    func downloadFilePath(file: DownloadList.File) -> String {
+    func downloadedFilePath(file: AvailableDownloadList.Download.File) -> String {
         return "/download/\(file.filename)"
     }
     
-    func saveDownloadList(list: DownloadList) throws -> DownloadList {
-        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-        let listData = try Data(contentsOf: filePath)
-        return try JSONDecoder().decode(DownloadList.self, from: listData)
+    func downloadedFileURL(file: AvailableDownloadList.Download.File) -> URL {
+        return URL(fileURLWithPath: "/download/\(file.filename)")
+    }
+
+    func saveDownloadList(downloadList: AvailableDownloadList) throws -> AvailableDownloadList {
+        return try loadAvailableDownloadFromTestFile()
     }
     
-    func loadDownloadList() throws -> DownloadList {
-        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-        let listData = try Data(contentsOf: filePath)
-        return try JSONDecoder().decode(DownloadList.self, from: listData)
+    func loadDownloadList() throws -> AvailableDownloadList {
+        return try loadAvailableDownloadFromTestFile()
     }
     
     func baseFilePath() -> URL {
@@ -101,6 +112,7 @@ class MockShell: AsyncShellProtocol {
 class MockedProgressBar: ProgressUpdateProtocol {
 
     var isComplete = false
+    var isSuccess  = false
     var isClear    = false
     var step  = 0
     var total = 0
@@ -113,7 +125,8 @@ class MockedProgressBar: ProgressUpdateProtocol {
     }
 
     func complete(success: Bool) {
-        isComplete = success
+        isSuccess = success
+        isComplete = true
     }
 
     func clear() {

@@ -12,7 +12,7 @@ import CLIlib
 // XCode installation functions
 extension ShellInstaller {
 
-    func installXcode(atPath srcFile: String, progress: ProgressUpdateProtocol) throws {
+    func installXcode(file: URL, progress: ProgressUpdateProtocol) throws {
 
         // unXIP, mv, 4 PKG to install
         let totalSteps = 2 + PKGTOINSTALL.count
@@ -25,7 +25,7 @@ extension ShellInstaller {
         // run synchronously as there is no output for this operation
         currentStep += 1
         progress.update(step: currentStep, total: totalSteps, text: "Expanding Xcode xip (this might take a while)")
-        resultOptional = try self.uncompressXIP(atPath: srcFile)
+        resultOptional = try self.uncompressXIP(file: file)
         if resultOptional == nil || resultOptional!.code != 0 {
             log.error("Can not unXip file : \(resultOptional!)")
             throw InstallerError.xCodeXIPInstallationError
@@ -36,7 +36,7 @@ extension ShellInstaller {
         currentStep += 1
         progress.update(step: currentStep, total: totalSteps, text: "Moving Xcode to /Applications")
         // find .app file
-        let appFile = try self.fileHandler.downloadedFiles().filter({ fileName in
+        let appFile = try env.fileHandler.downloadedFiles().filter({ fileName in
             return fileName.hasSuffix(".app")
         })
         if appFile.count != 1 {
@@ -45,7 +45,7 @@ extension ShellInstaller {
         }
 
         let installedFile =
-            try self.moveApp(atPath: FileHandler.downloadDirectory.appendingPathComponent(appFile[0]).path)
+            try self.moveApp(from: FileHandler.downloadDirectory.appendingPathComponent(appFile[0]))
 
         // /Applications/Xcode.app/Contents/Resources/Packages/
 
@@ -54,7 +54,7 @@ extension ShellInstaller {
             log.debug("Installing package \(pkg)")
             currentStep += 1
             progress.update(step: currentStep, total: totalSteps, text: "Installing additional packages... \(pkg)")
-            resultOptional = try self.installPkg(atPath: "\(installedFile)/Contents/resources/Packages/\(pkg)")
+            resultOptional = try self.installPkg(file: URL(fileURLWithPath: "\(installedFile)/Contents/resources/Packages/\(pkg)"))
             if resultOptional == nil || resultOptional!.code != 0 {
                 log.error("Can not install pkg at : \(pkg)\n\(resultOptional!)")
                 throw InstallerError.xCodePKGInstallationError
@@ -66,15 +66,12 @@ extension ShellInstaller {
     // expand a XIP file.  There is no way to create XIP file.
     // This code can not be tested without a valid, signed,  Xcode archive
     // https://en.wikipedia.org/wiki/.XIP
-    func uncompressXIP(atPath filePath: String) throws -> ShellOutput {
+    func uncompressXIP(file: URL) throws -> ShellOutput {
 
-        // shell has been injected after having created this class
-        guard let s = shell else { // swiftlint:disable:this identifier_name
-            fatalError("Shell implementation was not injected")
-        }
-
+        let filePath = file.path
+        
         // not necessary, file existence has been checked before
-        guard fileHandler.fileExists(filePath: filePath, fileSize: 0) else {
+        guard env.fileHandler.fileExists(file: file, fileSize: 0) else {
             log.error("File to unXip does not exist : \(filePath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
@@ -83,23 +80,22 @@ extension ShellInstaller {
         let cmd = "pushd \"\(FileHandler.downloadDirectory.path)\" && " +
         "\(XIPCOMMAND) --expand \"\(filePath)\" && " +
         "popd"
-        let result = try s.run(cmd)
+        let result = try shell.run(cmd)
 
         return result
     }
 
-    func moveApp(atPath srcFile: String) throws -> String {
+    func moveApp(from file: URL) throws -> String {
 
         // extract file name
-        let fileName = srcFile.fileName()
+        let fileName = file.lastPathComponent
 
-        // create source and destination URL
-        let fileURL = URL(fileURLWithPath: srcFile)
+        // create destination URL
         let appURL = URL(fileURLWithPath: "/Applications/\(fileName)")
 
-        log.debug("Going to move \n \(fileURL) to \n \(appURL)")
+        log.debug("Going to move \n \(file.path) to \n \(appURL)")
         // move synchronously
-        try fileHandler.move(from: fileURL, to: appURL)
+        try env.fileHandler.move(from: file, to: appURL)
 
         return appURL.path
     }

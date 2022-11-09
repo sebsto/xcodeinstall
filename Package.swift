@@ -1,4 +1,4 @@
-// swift-tools-version: 5.6
+// swift-tools-version: 5.7
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -24,12 +24,14 @@ let package = Package(
             name: "xcodeinstall",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "SotoSecretsManager", package: "soto"),
                 .product(name: "CLIlib", package: "CLIlib")
             ]
         ),
         .testTarget(
             name: "xcodeinstallTests",
-            dependencies: ["xcodeinstall"]),
+            dependencies: ["xcodeinstall"],
+            // https://stackoverflow.com/questions/47177036/use-resources-in-unit-tests-with-swift-package-manager
+            resources: [.process("Data/available-downloads.json")]
+        )
     ]
 )

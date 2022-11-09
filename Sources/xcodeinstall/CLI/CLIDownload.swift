@@ -8,6 +8,8 @@
 import Foundation
 import ArgumentParser
 
+import CLIlib
+
 // download implementation
 extension MainCommand {
 
@@ -16,26 +18,23 @@ extension MainCommand {
 
         @OptionGroup var globalOptions: GlobalOptions
         @OptionGroup var downloadListOptions: DownloadListOptions
-        @OptionGroup var cloudOption: CloudOptions
 
         @Option(name: .shortAndLong, help: "The exact package name to downloads. When omited, it asks interactively")
         var name: String?
 
         func run() async throws {
-            var xcib = XCodeInstallBuilder()
-                            .withVerbosity(verbose: globalOptions.verbose)
-                            .withDownloader()
-
-            if let region = cloudOption.secretManagerRegion {
-                xcib = xcib.withAWSSecretsManager(region: region)
+            
+            if globalOptions.verbose {
+                log = Log.verboseLogger(label: "xcodeinstall")
+            } else {
+                log = Log.defaultLogger(label: "xcodeinstall")
             }
 
-            try await xcib.build().download(fileName: name,
-                                            force: downloadListOptions.force,
-                                            xCodeOnly: downloadListOptions.onlyXcode,
-                                            majorVersion: downloadListOptions.xCodeVersion,
-                                            sortMostRecentFirst: downloadListOptions.mostRecentFirst,
-                                            datePublished: downloadListOptions.datePublished)
+            _ = try await XCodeInstall().download(fileName: name,
+                                                  majorVersion: downloadListOptions.xCodeVersion,
+                                                  sortMostRecentFirst: downloadListOptions.mostRecentFirst,
+                                                  datePublished: downloadListOptions.datePublished)
+
         }
     }
 
