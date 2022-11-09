@@ -8,7 +8,7 @@
 ![platform](https://img.shields.io/badge/platform-macOS-green)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-This is a command line utility to download and install Xcode in headless mode (from a Terminal only).
+This is a command line utility to download and install Xcode in headless mode (from a Terminal only). No Apple ID is required to download Xcode.
 
 ## TL;DR
 
@@ -17,7 +17,7 @@ This is a command line utility to download and install Xcode in headless mode (f
 
 ## What is it
 
-`xcodeinstall` is a command line utility to download and install Xcode from the terminal only. It may work interactively or unattended. 
+`xcodeinstall` is a command line utility to download and install Xcode from the terminal only. It may work interactively or unattended. There is no need to authenticate on Apple Developer Portal to initiate an Xcode download. 
 
 **No Apple Developer Account is required to download and install Xcode with this tool**
 
