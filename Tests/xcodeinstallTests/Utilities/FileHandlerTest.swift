@@ -15,7 +15,17 @@ class FileHandlerTest: XCTestCase {
     let test_data : String = "test data éèà€ 🎧"
     
     override func setUpWithError() throws {
-        self.fileManager = FileManager()
+        self.fileManager = FileManager.default
+
+        // if download directory does not exist, create it
+        if !self.fileManager!.fileExists(atPath: FileHandler.downloadDirectory.path) {
+            do {
+                try self.fileManager!.createDirectory(at: FileHandler.downloadDirectory, withIntermediateDirectories: true)
+            } catch {
+                XCTAssert(false, "Can not create base directory : \(FileHandler.downloadDirectory.path)\n\(error)")
+            }
+        }
+
     }
     
     override func tearDownWithError() throws {
@@ -208,7 +218,7 @@ class FileHandlerTest: XCTestCase {
     
     func testDownloadedFiles() {
         
-        let newFileName = "test.tmp"
+        let newFileName = "test-download.tmp"
         do {
             //given
             let fh = FileHandler()
@@ -229,7 +239,7 @@ class FileHandlerTest: XCTestCase {
             // cleanup
             try fileManager!.removeItem(at: newFile)
         } catch {
-            XCTAssert(false, "Unexpected error during tetsing \(error)")
+            XCTAssert(false, "Unexpected error during testing \(error)")
         }
     }
     
