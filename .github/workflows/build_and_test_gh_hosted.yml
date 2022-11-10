@@ -1,3 +1,6 @@
+# https://gist.github.com/fabianfett/fd811d7921eb856bb100c5c15565077f
+# https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md
+
 name: Build And Test on GitHub
 
 on:
@@ -7,7 +10,7 @@ on:
     branches: [ "main" ]
 
 env:
-  DEVELOPER_DIR: /Applications/Xcode_14.0.app/Contents/Developer
+  DEVELOPER_DIR: /Applications/Xcode_14.1.app/Contents/Developer
 
 jobs:
   build:
