@@ -28,7 +28,7 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
     func completeTransfer(from location: URL) {
         // tell the progress bar that we're done
-        env.progressBar?.complete(success: true)
+        env.progressBar.complete(success: true)
 
         guard let dst = dstFilePath else {
             log.warning("⚠️ No destination specified. I am keeping the file at \(location)")
@@ -67,7 +67,7 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
             text += String(format: " / %.2f MBs", bandwidth)
         }
-        env.progressBar?.update(step: Int(totalBytesWritten/1024),
+        env.progressBar.update(step: Int(totalBytesWritten/1024),
                                 total: Int(tfs/1024),
                                 text: text)
 

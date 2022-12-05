@@ -31,7 +31,7 @@ extension ShellInstaller {
         // first mount the disk image
         log.debug("Mounting disk image \(file.lastPathComponent)")
         currentStep += 1
-        env.progressBar?.update(step: currentStep, total: totalSteps, text: "Mounting disk image...")
+        env.progressBar.update(step: currentStep, total: totalSteps, text: "Mounting disk image...")
         resultOptional = try self.mountDMG(atURL: file)
         if resultOptional == nil || resultOptional!.code != 0 {
             log.error("Can not mount disk image : \(filePath)\n\(String(describing: resultOptional))")
@@ -44,7 +44,7 @@ extension ShellInstaller {
         let pkgPath = pkg.path
         log.debug("Installing pkg \(pkgPath)")
         currentStep += 1
-        env.progressBar?.update(step: currentStep, total: totalSteps, text: "Installing package...")
+        env.progressBar.update(step: currentStep, total: totalSteps, text: "Installing package...")
         resultOptional = try self.installPkg(atURL: pkg)
         if resultOptional == nil || resultOptional!.code != 0 {
             log.error("Can not install package : \(pkgPath)\n\(String(describing: resultOptional))")
@@ -55,7 +55,7 @@ extension ShellInstaller {
         let mountedDiskImage = URL(fileURLWithPath: "/Volumes/Command Line Developer Tools")
         log.debug("Unmounting volume \(mountedDiskImage)")
         currentStep += 1
-        env.progressBar?.update(step: currentStep, total: totalSteps, text: "Unmounting volume...")
+        env.progressBar.update(step: currentStep, total: totalSteps, text: "Unmounting volume...")
         resultOptional = try self.unmountDMG(volume: mountedDiskImage)
         if resultOptional == nil || resultOptional!.code != 0 {
             log.error("Can not unmount volume : \(mountedDiskImage)\n\(String(describing: resultOptional))")

@@ -48,6 +48,13 @@ class CLIDownloadTest: CLITest {
         XCTAssert(download.downloadListOptions.xCodeVersion == "14")
         XCTAssert(download.downloadListOptions.mostRecentFirst)
         XCTAssert(download.downloadListOptions.datePublished)
+
+        // verify if progressbar define() was called
+        if let progress = env.progressBar as? MockedProgressBar {
+            XCTAssert(progress.defineCalled())
+        } else {
+            XCTAssert(false, "Error in test implementation, the env.progressBar must be a MockedProgressBar")
+        }
         
         // mocked list succeeded
         assertDisplay("✅ file downloaded")

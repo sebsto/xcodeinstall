@@ -24,8 +24,8 @@ struct Environment {
     var display     : DisplayProtocol    = Display()
     var readLine    : ReadLineProtocol   = ReadLine()
     
-    // progress bar - will be overwritten by CLI
-    var progressBar : ProgressUpdateProtocol?
+    // progress bar 
+    var progressBar : CLIProgressBarProtocol = CLIProgressBar()
     
     // Secrets - will be overwritten by CLI when using AWS Secrets Manager
     var secrets     : SecretsHandlerProtocol = FileSecretsHandler()

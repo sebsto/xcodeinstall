@@ -24,7 +24,7 @@ extension ShellInstaller {
         log.debug("Decompressing files")
         // run synchronously as there is no output for this operation
         currentStep += 1
-        env.progressBar?.update(step: currentStep, total: totalSteps, text: "Expanding Xcode xip (this might take a while)")
+        env.progressBar.update(step: currentStep, total: totalSteps, text: "Expanding Xcode xip (this might take a while)")
         resultOptional = try self.uncompressXIP(atURL: src)
         if resultOptional == nil || resultOptional!.code != 0 {
             log.error("Can not unXip file : \(resultOptional!)")
@@ -34,7 +34,7 @@ extension ShellInstaller {
         // second move file to /Applications
         log.debug("Moving app to destination")
         currentStep += 1
-        env.progressBar?.update(step: currentStep, total: totalSteps, text: "Moving Xcode to /Applications")
+        env.progressBar.update(step: currentStep, total: totalSteps, text: "Moving Xcode to /Applications")
         // find .app file
         let appFile = try env.fileHandler.downloadedFiles().filter({ fileName in
             return fileName.hasSuffix(".app")
@@ -53,7 +53,7 @@ extension ShellInstaller {
         for pkg in PKGTOINSTALL {
             log.debug("Installing package \(pkg)")
             currentStep += 1
-            env.progressBar?.update(step: currentStep, total: totalSteps, text: "Installing additional packages... \(pkg)")
+            env.progressBar.update(step: currentStep, total: totalSteps, text: "Installing additional packages... \(pkg)")
             resultOptional = try self.installPkg(atURL: URL(fileURLWithPath:"\(installedFile)/Contents/resources/Packages/\(pkg)"))
             if resultOptional == nil || resultOptional!.code != 0 {
                 log.error("Can not install pkg at : \(pkg)\n\(resultOptional!)")

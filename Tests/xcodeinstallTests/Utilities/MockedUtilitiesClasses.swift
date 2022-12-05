@@ -100,13 +100,23 @@ class MockShell: AsyncShellProtocol {
 
 }
 
-class MockedProgressBar: ProgressUpdateProtocol {
-
+class MockedProgressBar: CLIProgressBarProtocol {
+    
     var isComplete = false
     var isClear    = false
     var step  = 0
     var total = 0
     var text  = ""
+    private var _defineCalled = false
+    
+    func define(animationType: CLIlib.ProgressBarType, message: String) {
+        _defineCalled = true
+    }
+    func defineCalled() -> Bool {
+        let called = _defineCalled
+        _defineCalled = false
+        return called
+    }
 
     func update(step: Int, total: Int, text: String) {
         self.step  = step

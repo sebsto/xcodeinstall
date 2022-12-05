@@ -16,13 +16,17 @@
 import Foundation
 import CLIlib
 
-struct CLIProgressBar: ProgressUpdateProtocol {
+protocol CLIProgressBarProtocol : ProgressUpdateProtocol {
+    func define(animationType: ProgressBarType, message: String)
+}
 
-    private let progressAnimation: ProgressUpdateProtocol
+class CLIProgressBar: CLIProgressBarProtocol {
+
+    private var progressAnimation: ProgressUpdateProtocol?
+    private var message: String?
     private let stream: OutputBuffer = FileHandle.standardOutput
-    private let message: String
 
-    init(animationType: ProgressBarType, message: String) {
+    func define(animationType: ProgressBarType, message: String) {
         self.message = message
         self.progressAnimation = ProgressBar(output: stream, progressBarType: animationType, title: self.message)
     }
@@ -33,19 +37,19 @@ struct CLIProgressBar: ProgressUpdateProtocol {
     ///   - total: The total number of steps before the operation is complete.
     ///   - text: The description of the current step.
     func update(step: Int, total: Int, text: String) {
-        self.progressAnimation.update(step: step, total: total, text: text)
+        self.progressAnimation?.update(step: step, total: total, text: text)
     }
 
     /// Complete the animation.
     /// - Parameters:
     ///   - success: Defines if the operation the animation represents was succesful.
     func complete(success: Bool) {
-        self.progressAnimation.complete(success: success)
+        self.progressAnimation?.complete(success: success)
     }
 
     /// Clear the animation.
     func clear() {
-        self.progressAnimation.clear()
+        self.progressAnimation?.clear()
     }
 
 }

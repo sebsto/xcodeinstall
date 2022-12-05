@@ -46,7 +46,7 @@ class DownloadDelegateTest: XCTestCase {
         XCTAssert(fileHandler.fileExists(file: dstUrl, fileSize: 0))
                 
         // semaphore is calles
-        XCTAssert(sema.wasSignalCalled)
+        XCTAssert(sema.wasSignalCalled())
         
         // progress completed
         XCTAssertTrue((env.progressBar as! MockedProgressBar).isComplete)

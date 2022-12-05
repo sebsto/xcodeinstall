@@ -121,12 +121,26 @@ struct MockedAppleDownloader : AppleDownloaderProtocol {
 }
 
 class MockedDispatchSemaphore: DispatchSemaphoreProtocol {
-    var wasWaitCalled = false
-    var wasSignalCalled = false
+    var _wasWaitCalled = false
+    var _wasSignalCalled = false
+    
+    // reset flag when called
+    func wasWaitCalled() -> Bool {
+        let wwc = _wasWaitCalled
+        _wasWaitCalled = false
+        return wwc
+    }
 
-    func wait() { wasWaitCalled = true }
+    // reset flag when called
+    func wasSignalCalled() -> Bool {
+        let wsc = _wasSignalCalled
+        _wasSignalCalled = false
+        return wsc
+    }
+
+    func wait() { _wasWaitCalled = true }
     func signal() -> Int {
-        wasSignalCalled = true
+        _wasSignalCalled = true
         return 0
     }
 }

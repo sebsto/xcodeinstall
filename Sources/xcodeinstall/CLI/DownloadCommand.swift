@@ -44,9 +44,9 @@ extension XCodeInstall {
             }
 
             // now we have a filename, let's proceed with download
-            // FIXME: do not overwrite env?
-            env.progressBar = CLIProgressBar(animationType: .percentProgressAnimation,
-                                             message: "Downloading \(fileToDownload.displayName)")
+            let progressBar = env.progressBar
+            progressBar.define(animationType: .percentProgressAnimation,
+                               message: "Downloading \(fileToDownload.displayName)")
 
             _ = try await download.download(file: fileToDownload)
 

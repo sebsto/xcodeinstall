@@ -15,9 +15,10 @@ extension XCodeInstall {
         let installer = ShellInstaller()
 
         // progress bar to report progress feedback
-        // FIXME: do not overwrite env?
-        env.progressBar = CLIProgressBar(animationType: .countingProgressAnimationMultiLine,
-                                      message: "Installing...")
+        let progressBar = env.progressBar
+        progressBar.define(animationType: .countingProgressAnimationMultiLine,
+                           message: "Installing...")
+        
         var fileToInstall: URL?
         do {
             // when no file is specified, prompt user to select one
@@ -29,30 +30,30 @@ extension XCodeInstall {
             log.debug("Going to attemp to install \(fileToInstall!.path)")
 
             try await installer.install(file: fileToInstall!)
-            env.progressBar?.complete(success: true)
+            env.progressBar.complete(success: true)
             display("✅ \(fileToInstall!) installed")
         } catch CLIError.invalidInput {
             display("🛑 Invalid input")
-            env.progressBar?.complete(success: false)
+            env.progressBar.complete(success: false)
         } catch FileHandlerError.noDownloadedList {
             display("⚠️ There is no downloaded file to be installed")
-            env.progressBar?.complete(success: false)
+            env.progressBar.complete(success: false)
         } catch InstallerError.xCodeXIPInstallationError {
             display("🛑 Can not expand XIP file. Is there enough space on / ? (16GiB required)")
-            env.progressBar?.complete(success: false)
+            env.progressBar.complete(success: false)
         } catch InstallerError.xCodeMoveInstallationError {
             display("🛑 Can not move Xcode to /Applications")
-            env.progressBar?.complete(success: false)
+            env.progressBar.complete(success: false)
         } catch InstallerError.xCodePKGInstallationError {
             display("🛑 Can not install additional packages. Be sure to run this command as root (sudo xcodinstall).")
-            env.progressBar?.complete(success: false)
+            env.progressBar.complete(success: false)
         } catch InstallerError.unsupportedInstallation {
             display("🛑 Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)")
-            env.progressBar?.complete(success: false)
+            env.progressBar.complete(success: false)
         } catch {
             display("🛑 Error while installing \(String(describing: fileToInstall!))")
             log.debug("\(error)")
-            env.progressBar?.complete(success: false)
+            env.progressBar.complete(success: false)
         }
     }
 

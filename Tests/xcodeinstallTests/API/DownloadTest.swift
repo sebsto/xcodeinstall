@@ -38,18 +38,18 @@ class DownloadTest: HTTPClientTestCase {
             // then
             XCTAssertNotNil(result)
             
-            // verify is resume was called
+            // verify if resume was called
             if let task = result as? MockedURLSessionDownloadTask {
                 XCTAssert(task.wasResumeCalled)
             } else {
                 XCTAssert(false, "Error in test implementation, the return value must be a MockURLSessionDownloadTask")
             }
             
-            // verify is semaphore wait() was called
+            // verify if semaphore wait() was called
             if let sema = env.urlSessionDownload.downloadDelegate()?.sema as? MockedDispatchSemaphore {
-                XCTAssert(sema.wasWaitCalled)
+                XCTAssert(sema.wasWaitCalled())
             } else {
-                XCTAssert(false, "Error in test implementation, the ad.sema must be a MockDispatchSemaphore")
+                XCTAssert(false, "Error in test implementation, the  download delegate sema must be a MockDispatchSemaphore")
             }
 
         } catch let error as DownloadError {
@@ -62,7 +62,7 @@ class DownloadTest: HTTPClientTestCase {
 
     }
 
-    func testDownloadInavlidFile1() async throws {
+    func testDownloadInvalidFile1() async throws {
         
         do {
             
@@ -90,7 +90,7 @@ class DownloadTest: HTTPClientTestCase {
 
     }
 
-    func testDownloadInavlidFile2() async throws {
+    func testDownloadInvalidFile2() async throws {
         
         do {
             
