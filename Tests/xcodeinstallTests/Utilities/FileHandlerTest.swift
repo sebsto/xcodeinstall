@@ -237,14 +237,9 @@ class FileHandlerTest: XCTestCase {
         
         // given
         let fh  = FileHandler()
-        let fm  = FileManager.default
 
         // copy test file at destination
-        if fm.fileExists(atPath: FileHandler.downloadListPath.path) {
-            XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
-        }
-        let testFilePath = testDataDirectory().appendingPathComponent("Download List.json");
-        XCTAssertNoThrow(try fm.copyItem(at: testFilePath, to: FileHandler.downloadListPath))
+        createDownloadList()
 
         // when
         do {
@@ -258,7 +253,7 @@ class FileHandlerTest: XCTestCase {
         }
         
         // cleanup
-        XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
+        deleteDownloadList()
 
         
     }

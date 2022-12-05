@@ -94,8 +94,7 @@ struct MockedAppleDownloader : AppleDownloaderProtocol {
     var downloadDelegate: DownloadDelegate?
 
     func list(force: Bool) async throws -> DownloadList {
-        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-        let listData = try Data(contentsOf: filePath)
+        let listData = try loadTestData(file: .downloadList)
         let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
         
         guard let _ = list.downloads else {

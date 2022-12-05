@@ -29,7 +29,7 @@ class ListTest: HTTPClientTestCase {
         do {
             
             // given
-            let (listData, urlResponse) = try prepareResponse(withDataFile: "Download List.json")
+            let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadList)
             self.session.nextData       = listData
             self.session.nextResponse   = urlResponse
 
@@ -83,7 +83,7 @@ class ListTest: HTTPClientTestCase {
         do {
             
             // given
-            let (listData, urlResponse) = try prepareResponse(withDataFile: "Download Error.json")
+            let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadError)
             self.session.nextData       = listData
             self.session.nextResponse   = urlResponse
 
@@ -110,7 +110,7 @@ class ListTest: HTTPClientTestCase {
         do {
             
             // given
-            let (listData, urlResponse) = try prepareResponse(withDataFile: "Download Unknown Error.json")
+            let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadUnknownError)
             self.session.nextData       = listData
             self.session.nextResponse   = urlResponse
 
@@ -136,7 +136,7 @@ class ListTest: HTTPClientTestCase {
         do {
             
             // given
-            let (listData, urlResponse) = try prepareResponse(withDataFile: "Download Unknown Error.json", statusCode: 302)
+            let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadUnknownError, statusCode: 302)
             self.session.nextData       = listData
             self.session.nextResponse   = urlResponse
 
@@ -163,7 +163,7 @@ class ListTest: HTTPClientTestCase {
         do {
             
             // given
-            let (listData, urlResponse) = try prepareResponse(withDataFile: "Download List.json", statusCode: 200, noCookies: true)
+            let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadList, statusCode: 200, noCookies: true)
             self.session.nextData       = listData
             self.session.nextResponse   = urlResponse
 
@@ -184,13 +184,12 @@ class ListTest: HTTPClientTestCase {
         }
     }
     
-    func prepareResponse(withDataFile dataFilePath: String? = nil, statusCode : Int = 200, noCookies: Bool = false) throws -> (Data, HTTPURLResponse?) {
+    func prepareResponse(withDataFile dataFile: TestData? = nil, statusCode : Int = 200, noCookies: Bool = false) throws -> (Data, HTTPURLResponse?) {
         
         // load list form file
         let listData : Data
-        if let dfp = dataFilePath {
-            let filePath = testDataDirectory().appendingPathComponent(dfp);
-            listData = try Data(contentsOf: filePath)
+        if let df = dataFile {
+            listData = try loadTestData(file: df)
         } else {
             listData = Data()
         }

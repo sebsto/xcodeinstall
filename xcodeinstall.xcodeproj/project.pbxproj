@@ -47,6 +47,8 @@
 		001E2E8328C15293009C1545 /* CLIStoreSecrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001E2E8128C15293009C1545 /* CLIStoreSecrets.swift */; };
 		001E2E8528C15829009C1545 /* SotoSecretsManager in Frameworks */ = {isa = PBXBuildFile; productRef = 001E2E8428C15829009C1545 /* SotoSecretsManager */; };
 		002AB53B293CFB0B0021BBA5 /* download-list.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 007585D0289C07130094D2DC /* download-list.json */; };
+		002AB53F293DC6EF0021BBA5 /* download-error.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 002AB53E293DC6CD0021BBA5 /* download-error.json */; };
+		002AB541293DC74A0021BBA5 /* download-unknown-error.json in CopyFiles */ = {isa = PBXBuildFile; fileRef = 002AB540293DC7160021BBA5 /* download-unknown-error.json */; };
 		002E65A628E1A9FB00C13BBB /* CLIlib in Frameworks */ = {isa = PBXBuildFile; productRef = 002E65A528E1A9FB00C13BBB /* CLIlib */; };
 		0041064728BD25410033A3A2 /* InstallPkg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064628BD25410033A3A2 /* InstallPkg.swift */; };
 		0041064828BD25410033A3A2 /* InstallPkg.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0041064628BD25410033A3A2 /* InstallPkg.swift */; };
@@ -141,6 +143,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
+				002AB541293DC74A0021BBA5 /* download-unknown-error.json in CopyFiles */,
+				002AB53F293DC6EF0021BBA5 /* download-error.json in CopyFiles */,
 				002AB53B293CFB0B0021BBA5 /* download-list.json in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -193,6 +197,8 @@
 		001E2E7E28C13C13009C1545 /* AWSSecretsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AWSSecretsHandler.swift; sourceTree = "<group>"; };
 		001E2E8128C15293009C1545 /* CLIStoreSecrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIStoreSecrets.swift; sourceTree = "<group>"; };
 		002AB53D293D29B20021BBA5 /* Download List.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "Download List.json"; path = "Tests/Data/Download List.json"; sourceTree = SOURCE_ROOT; };
+		002AB53E293DC6CD0021BBA5 /* download-error.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "download-error.json"; sourceTree = "<group>"; };
+		002AB540293DC7160021BBA5 /* download-unknown-error.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "download-unknown-error.json"; sourceTree = "<group>"; };
 		0041064628BD25410033A3A2 /* InstallPkg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallPkg.swift; sourceTree = "<group>"; };
 		0041064928BD25810033A3A2 /* InstallXcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallXcode.swift; sourceTree = "<group>"; };
 		0041064C28BD25A90033A3A2 /* InstallCLTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallCLTools.swift; sourceTree = "<group>"; };
@@ -276,6 +282,8 @@
 			isa = PBXGroup;
 			children = (
 				007585D0289C07130094D2DC /* download-list.json */,
+				002AB53E293DC6CD0021BBA5 /* download-error.json */,
+				002AB540293DC7160021BBA5 /* download-unknown-error.json */,
 			);
 			path = data;
 			sourceTree = "<group>";

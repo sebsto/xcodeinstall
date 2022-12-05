@@ -26,9 +26,8 @@ class DownloadListParserTest: XCTestCase {
             // given
             
             // load list from file
-            let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-            let listData = try Data(contentsOf: filePath)
- 
+            let listData = try loadTestData(file: .downloadList)
+
             // when
             let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
             let downloads = list.downloads
@@ -77,9 +76,8 @@ class DownloadListParserTest: XCTestCase {
             // given
             
             // load list from file
-            let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-            let listData = try Data(contentsOf: filePath)
- 
+            let listData = try loadTestData(file: .downloadList)
+
             // when
             let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
             let downloads = list.downloads
@@ -109,9 +107,8 @@ class DownloadListParserTest: XCTestCase {
             // given
             
             // load list from file
-            let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-            let listData = try Data(contentsOf: filePath)
- 
+            let listData = try loadTestData(file: .downloadList)
+
             // when
             let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
             let downloads = list.downloads
@@ -158,8 +155,7 @@ class DownloadListParserTest: XCTestCase {
 
     func prepareFilteredList() throws -> ([DownloadList.Download], DownloadListParser) {
         // load list from file
-        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-        let listData = try Data(contentsOf: filePath)
+        let listData = try loadTestData(file: .downloadList)
 
         // decode the JSON
         let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)

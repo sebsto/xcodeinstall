@@ -26,16 +26,15 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "SotoSecretsManager", package: "soto"),
                 .product(name: "CLIlib", package: "CLIlib")
-            ],
-            swiftSettings: [
-                .define("SWIFTPM_COMPILATION")
             ]
         ),
         .testTarget(
             name: "xcodeinstallTests",
             dependencies: ["xcodeinstall"],
             // https://stackoverflow.com/questions/47177036/use-resources-in-unit-tests-with-swift-package-manager
-            resources: [.process("data/download-list.json")],
+            resources: [.process("data/download-list.json"),
+                        .process("data/download-error.json"),
+                        .process("data/download-unknown-error.json")],
             swiftSettings: [
                 .define("SWIFTPM_COMPILATION")
             ]

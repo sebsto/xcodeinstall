@@ -167,10 +167,7 @@ class InstallTest: XCTestCase {
     private func loadDownloadListFromFile() -> DownloadList {
         
         // load list from test file
-//        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-//        let listData = try? Data(contentsOf: filePath)
-        let listData = try? loadAvailableDownloadFromTestFile()
-
+        let listData = try? loadTestData(file: .downloadList)
         XCTAssertNotNil(listData)
 
         // decode the JSON
@@ -240,32 +237,6 @@ class InstallTest: XCTestCase {
     
         // then
         XCTAssertTrue(fileExists)
-    }
-    
-    private func createDownloadList() {
-
-        let fm  = FileManager.default
-
-        // copy test file at destination
-        
-        // first remove it if it exists
-        if fm.fileExists(atPath: FileHandler.downloadListPath.path) {
-            XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
-        }
-        // then copy
-        let testFilePath = testDataDirectory().appendingPathComponent("Download List.json");
-        XCTAssertNoThrow(try fm.copyItem(at: testFilePath, to: FileHandler.downloadListPath))
-
-    }
-    
-    private func deleteDownloadList() {
-
-        let fm  = FileManager.default
-
-        // remove test file from destination
-        if fm.fileExists(atPath: FileHandler.downloadListPath.path) {
-            XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
-        }
     }
     
     func testInstallXcode() async {

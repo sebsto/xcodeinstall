@@ -49,14 +49,12 @@ class MockedFileHandler: FileHandlerProtocol {
     }
     
     func saveDownloadList(list: DownloadList) throws -> DownloadList {
-        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-        let listData = try Data(contentsOf: filePath)
+        let listData = try loadTestData(file: .downloadList)
         return try JSONDecoder().decode(DownloadList.self, from: listData)
     }
     
     func loadDownloadList() throws -> DownloadList {
-        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-        let listData = try Data(contentsOf: filePath)
+        let listData = try loadTestData(file: .downloadList)
         return try JSONDecoder().decode(DownloadList.self, from: listData)
     }
     
