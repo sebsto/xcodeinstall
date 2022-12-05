@@ -8,6 +8,44 @@
 import Foundation
 @testable import xcodeinstall
 
+class MockedSecretHandler : SecretsHandlerProtocol {
+    
+    var nextError : AWSSecretsHandlerError?
+    
+    func clearSecrets() async throws {
+        
+    }
+    
+    func saveCookies(_ cookies: String?) async throws -> String? {
+        return ""
+    }
+    
+    func loadCookies() async throws -> [HTTPCookie] {
+        return []
+    }
+    
+    func saveSession(_ session: AppleSession) async throws -> AppleSession {
+        return session
+    }
+
+    func loadSession() async throws -> AppleSession? {
+        return nil
+    }
+
+    func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
+        if let nextError {
+            throw nextError
+        }
+        guard let rl = env.readLine as? MockedReadLine else {
+            fatalError("Invalid Mocked Environment")
+        }
+        
+        return AppleCredentialsSecret(username: rl.readLine(prompt: "")!, password: rl.readLine(prompt: "")!)
+    }
+    
+    
+}
+
 class MockedAWSSecretsHandlerSDK : AWSSecretsHandlerSDK {
     
     var appleSession : AppleSessionSecret

@@ -7,6 +7,7 @@
 
 import Foundation
 import ArgumentParser
+import CLIlib
 
 // Install implementation
 extension MainCommand {
@@ -22,11 +23,15 @@ extension MainCommand {
         var name: String?
 
         func run() async throws {
-            let main = try XCodeInstallBuilder()
-                            .withVerbosity(verbose: globalOptions.verbose)
-                            .withInstaller()
-                            .build()
-            _ = try await main.install(file: name)
+
+            if globalOptions.verbose {
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            } else {
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
+            }
+
+            let xci = XCodeInstall()
+            _ = try await xci.install(file: name)
         }
     }
 }

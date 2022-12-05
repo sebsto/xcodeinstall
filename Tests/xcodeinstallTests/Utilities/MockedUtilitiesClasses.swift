@@ -21,7 +21,7 @@ class MockedFileHandler: FileHandlerProtocol {
         moveSrc = src
         moveDst = dst
     }
-    func fileExists(filePath: String, fileSize: Int) -> Bool {
+    func fileExists(file: URL, fileSize: Int) -> Bool {
         if let nextFileExist {
             return nextFileExist
         } else {
@@ -32,7 +32,7 @@ class MockedFileHandler: FileHandlerProtocol {
         return ["name.pkg", "name.dmg"]
     }
 
-    func checkFileSize(filePath: String, fileSize: Int) throws -> Bool {
+    func checkFileSize(file: URL, fileSize: Int) throws -> Bool {
         if let nextFileCorrect {
             return nextFileCorrect
         } else {
@@ -40,6 +40,10 @@ class MockedFileHandler: FileHandlerProtocol {
         }
     }
     
+    func downloadFileURL(file: DownloadList.File) -> URL {
+        return URL(fileURLWithPath: downloadFilePath(file: file))
+    }
+
     func downloadFilePath(file: DownloadList.File) -> String {
         return "/download/\(file.filename)"
     }
@@ -57,11 +61,11 @@ class MockedFileHandler: FileHandlerProtocol {
     }
     
     func baseFilePath() -> URL {
-        return URL(string: "file:///not_implemented.tmp")!
+        return URL(string: "file:///tmp")!
     }
     
     func baseFilePath() -> String {
-        return "not_implemented.tmp"
+        return "/tmp"
     }
 }
 

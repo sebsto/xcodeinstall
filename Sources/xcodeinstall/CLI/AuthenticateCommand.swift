@@ -10,17 +10,13 @@ import Foundation
 extension XCodeInstall {
 
     func authenticate() async throws {
-
-        guard let auth = authenticator else {
-            throw XCodeInstallError.configurationError(msg: "Developer forgot to inject an authenticator object. " +
-                                                             "Use XCodeInstallBuilder to correctly initialize this class") // swiftlint:disable:this line_length
-        }
-
+        
+        let auth = env.authenticator
+        
         do {
 
             // delete previous session, if any
-            try await secretsManager.clearSecrets()
-
+            try await env.secrets.clearSecrets()
             let appleCredentials = try await retrieveAppleCredentials()
 
             display("Authenticating...")
@@ -56,7 +52,7 @@ extension XCodeInstall {
         do {
             // first try on AWS Secrets Manager
             display("Retrieving Apple Developer Portal credentials...")
-            appleCredentials = try await secretsManager.retrieveAppleCredentials()
+            appleCredentials = try await env.secrets.retrieveAppleCredentials()
 
         } catch AWSSecretsHandlerError.invalidOperation {
 
@@ -81,11 +77,11 @@ These values are not stored anywhere. They are used to get an Apple session ID. 
 Alternatively, you may store your credentials on AWS Secrets Manager
 """)
 
-        guard let username = input.readLine(prompt: "⌨️  Enter your Apple ID username: ", silent: false) else {
+        guard let username = env.readLine.readLine(prompt: "⌨️  Enter your Apple ID username: ", silent: false) else {
             throw CLIError.invalidInput
         }
 
-        guard let password = input.readLine(prompt: "⌨️  Enter your Apple ID password: ", silent: true) else {
+        guard let password = env.readLine.readLine(prompt: "⌨️  Enter your Apple ID password: ", silent: true) else {
             throw CLIError.invalidInput
         }
 
@@ -94,9 +90,8 @@ Alternatively, you may store your credentials on AWS Secrets Manager
 
     // manage the MFA authentication sequence
     private func startMFAFlow() async throws {
-        guard let auth = authenticator else {
-            return
-        }
+
+        let auth = env.authenticator
 
         do {
 
@@ -104,7 +99,7 @@ Alternatively, you may store your credentials on AWS Secrets Manager
             assert(codeLength > 0)
 
             let prompt = "🔐 Two factors authentication is enabled, enter your 2FA code: "
-            guard let pinCode = input.readLine(prompt: prompt, silent: false) else {
+            guard let pinCode = env.readLine.readLine(prompt: prompt, silent: false) else {
                 throw CLIError.invalidInput
             }
             try await auth.twoFactorAuthentication(pin: pinCode)

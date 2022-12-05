@@ -9,7 +9,7 @@ import Foundation
 import CLIlib
 
 // store secrets on files in $HOME/.xcodeinstaller
-struct FileSecretsHandler: SecretsHandler {
+struct FileSecretsHandler: SecretsHandlerProtocol {
 
     private let fileManager: FileManager
     private var baseDirectory: URL
@@ -22,8 +22,7 @@ struct FileSecretsHandler: SecretsHandler {
 
         fileManager = FileManager()
 
-        let fileHandler = FileHandler()
-        baseDirectory = fileHandler.baseFilePath()
+        baseDirectory = FileHandler.baseFilePath()
 
         cookiesPath = baseDirectory.appendingPathComponent("cookies")
         sessionPath = baseDirectory.appendingPathComponent("session")

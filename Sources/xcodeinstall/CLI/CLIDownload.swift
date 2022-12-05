@@ -7,6 +7,7 @@
 
 import Foundation
 import ArgumentParser
+import CLIlib
 
 // download implementation
 extension MainCommand {
@@ -22,20 +23,24 @@ extension MainCommand {
         var name: String?
 
         func run() async throws {
-            var xcib = XCodeInstallBuilder()
-                            .withVerbosity(verbose: globalOptions.verbose)
-                            .withDownloader()
 
-            if let region = cloudOption.secretManagerRegion {
-                xcib = xcib.withAWSSecretsManager(region: region)
+            if globalOptions.verbose {
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            } else {
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
             }
 
-            try await xcib.build().download(fileName: name,
-                                            force: downloadListOptions.force,
-                                            xCodeOnly: downloadListOptions.onlyXcode,
-                                            majorVersion: downloadListOptions.xCodeVersion,
-                                            sortMostRecentFirst: downloadListOptions.mostRecentFirst,
-                                            datePublished: downloadListOptions.datePublished)
+            if let region = cloudOption.secretManagerRegion {
+                env.secrets = try AWSSecretsHandler(region: region)
+            }
+
+            let xci = XCodeInstall()
+            try await xci.download(fileName: name,
+                                   force: downloadListOptions.force,
+                                   xCodeOnly: downloadListOptions.onlyXcode,
+                                   majorVersion: downloadListOptions.xCodeVersion,
+                                   sortMostRecentFirst: downloadListOptions.mostRecentFirst,
+                                   datePublished: downloadListOptions.datePublished)
         }
     }
 

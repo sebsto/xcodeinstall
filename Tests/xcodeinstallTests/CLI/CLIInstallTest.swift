@@ -13,9 +13,6 @@ class CLIInstallTest: CLITest {
     func testInstall() async throws {
         
         // given
-        var xci = xcodeinstall()
-        xci.installer = MockedInstaller()
-
         let inst = try parse(MainCommand.Install.self, [
                             "install",
                             "--verbose",
@@ -25,7 +22,7 @@ class CLIInstallTest: CLITest {
         
         // when
         do {
-            try await xci.install(file: "test.xip")
+            try await inst.run()
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")
@@ -39,10 +36,8 @@ class CLIInstallTest: CLITest {
     func testPromptForFile() {
         
         // given
-        let mockedReadline = MockedReadLine(["0"])
-        var xci = xcodeinstall(input: mockedReadline)
-        xci.installer = MockedInstaller()
-        xci.fileHandler = MockedFileHandler()
+        env.readLine = MockedReadLine(["0"])
+        let xci = XCodeInstall()
 
         
         // when
@@ -50,7 +45,7 @@ class CLIInstallTest: CLITest {
             let result = try xci.promptForFile()
             
             // then
-            XCTAssertTrue(result.hasSuffix("name.dmg"))
+            XCTAssertTrue(result.lastPathComponent.hasSuffix("name.dmg"))
 
         } catch {
             // then

@@ -11,7 +11,7 @@ import CLIlib
 
 
 // mocked URLSessionDownloadTask
-class MockURLSessionDownloadTask: URLSessionDownloadTaskProtocol {
+class MockedURLSessionDownloadTask: URLSessionDownloadTaskProtocol {
     
     var wasResumeCalled = false
     
@@ -21,7 +21,7 @@ class MockURLSessionDownloadTask: URLSessionDownloadTaskProtocol {
 }
 
 // mocked URLSession to be used during test
-class MockURLSession: URLSessionProtocol {
+class MockedURLSession: URLSessionProtocol {
     
     private (set) var lastURL: URL?
     private (set) var lastRequest: URLRequest?
@@ -66,10 +66,11 @@ class MockURLSession: URLSessionProtocol {
     }
 }
 
-struct MockAppleAuthentication: AppleAuthenticatorProtocol {
+class MockedAppleAuthentication: AppleAuthenticatorProtocol {
     
     var nextError : AuthenticationError?
     var nextMFAError : AuthenticationError?
+    var session : AppleSession?
     
     func startAuthentication(username: String, password: String) async throws {
         
@@ -88,7 +89,10 @@ struct MockAppleAuthentication: AppleAuthenticatorProtocol {
     func twoFactorAuthentication(pin: String) async throws {}
 }
 
-struct MockAppleDownloader : AppleDownloaderProtocol {
+struct MockedAppleDownloader : AppleDownloaderProtocol {
+    var sema: DispatchSemaphoreProtocol = MockedDispatchSemaphore()
+    var downloadDelegate: DownloadDelegate?
+
     func list(force: Bool) async throws -> DownloadList {
         let filePath = testDataDirectory().appendingPathComponent("Download List.json");
         let listData = try Data(contentsOf: filePath)
@@ -99,13 +103,14 @@ struct MockAppleDownloader : AppleDownloaderProtocol {
         }
         return list
     }
-    func download(file: DownloadList.File, progressReport: ProgressUpdateProtocol) async throws -> URLSessionDownloadTaskProtocol? {
+    func download(file: DownloadList.File) async throws -> URLSessionDownloadTaskProtocol? {
         // should create a file with matching size
-        return MockURLSessionDownloadTask()
+        let dlt = MockedURLSessionDownloadTask()
+        return dlt
     }
 }
 
-class MockDispatchSemaphore: DispatchSemaphoreProtocol {
+class MockedDispatchSemaphore: DispatchSemaphoreProtocol {
     var wasWaitCalled = false
     var wasSignalCalled = false
 

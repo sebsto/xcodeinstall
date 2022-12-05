@@ -66,7 +66,7 @@ struct DownloadListParser {
     /// It adds a flag for each file in the list to indicate if the file is already downloaded and available in cache
     func enrich(list: [DownloadList.Download]) -> [DownloadList.Download] {
 
-        let fileHandler = FileHandler()
+        let fileHandler = env.fileHandler
 
         return list.map { download in
 
@@ -74,8 +74,8 @@ struct DownloadListParser {
             var d = download
             var file = download.files[0]
 
-            let downloadFilePath: String = fileHandler.downloadFilePath(file: file)
-            let exists = fileHandler.fileExists(filePath: downloadFilePath, fileSize: file.fileSize)
+            let downloadFile: URL = fileHandler.downloadFileURL(file: file)
+            let exists = fileHandler.fileExists(file: downloadFile, fileSize: file.fileSize)
 
             file.existInCache = exists
             d.files = [file]

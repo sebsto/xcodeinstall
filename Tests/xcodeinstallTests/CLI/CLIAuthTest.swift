@@ -15,8 +15,7 @@ class CLIAUthTest: CLITest {
     func testSignout() async throws {
         
         // given
-        var xci = xcodeinstall()
-        xci.authenticator = MockAppleAuthentication()
+        let xci = XCodeInstall()
         
         // when
         do {
@@ -34,34 +33,22 @@ class CLIAUthTest: CLITest {
         assertDisplay("✅ Signed out.")
     }
 
-    func testSignoutWithError() async throws {
-        
-        // given
-        let xci = xcodeinstall()
-        
-        // when
-        do {
-            try await xci.signout()
-            XCTAssert(false)
-
-        } catch XCodeInstallError.configurationError {
-
-            // then
-            XCTAssert(true)
-        }
-    }
-
     func testAuthenticate() async throws {
         
         // given
-        let mockedReadline = MockedReadLine(["username", "password"])
-        var xci = xcodeinstall(input: mockedReadline)
-        xci.authenticator = MockAppleAuthentication()
+        env.readLine = MockedReadLine(["username", "password"])
+        
+        let authenticator = (env.authenticator as! MockedAppleAuthentication)
+        authenticator.nextError = nil
+
+        let session = (env.urlSession as! MockedURLSession)
+        let headers = [ "X-Apple-ID-Session-Id" : "dummySessionID", "scnt" : "dummySCNT"]
+        session.nextResponse = HTTPURLResponse(url: URL(string: "https://dummy")!, statusCode: 200, httpVersion: nil, headerFields: headers)
 
         // when
         do {
-            _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
-            try await xci.authenticate()
+            let auth = try parse(MainCommand.Authenticate.self, ["authenticate"])
+            try await auth.run()
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")
@@ -71,34 +58,17 @@ class CLIAUthTest: CLITest {
         assertDisplay("✅ Authenticated.")
         
         // two prompts have been proposed
-        //print(mockedReadline.input)
-        XCTAssert(mockedReadline.input.count == 0)
+        print((env.readLine as! MockedReadLine).input)
+        XCTAssert((env.readLine as! MockedReadLine).input.count == 0)
 
-    }
-    
-    func testAuthenticateWithError() async throws {
-        
-        // given
-        let xci = xcodeinstall()
-        
-        // when
-        do {
-            try await xci.authenticate()
-            XCTAssert(false)
-            
-        } catch XCodeInstallError.configurationError {
-
-            // then
-            XCTAssert(true)
-        }
     }
     
     func testAuthenticateInvalidUserOrpassword() async throws {
         
         // given
-        let mockedReadline = MockedReadLine(["username", "password"])
-        var xci = xcodeinstall(input: mockedReadline)
-        xci.authenticator = MockAppleAuthentication(nextError: AuthenticationError.invalidUsernamePassword)
+        env.readLine = MockedReadLine(["username", "password"])
+        let xci = XCodeInstall()
+        (env.authenticator as! MockedAppleAuthentication).nextError = AuthenticationError.invalidUsernamePassword
 
         // when
         do {
@@ -136,18 +106,26 @@ class CLIAUthTest: CLITest {
 //
 //    }
     
+    func getAppleSession() -> AppleSession {
+        AppleSession(itcServiceKey:  AppleServiceKey(authServiceUrl: "url", authServiceKey: "key"),
+                     xAppleIdSessionId: "x_apple_id_session_id",
+                     scnt:                  "scnt")
+    }
     func testAuthenticateMFATrustedPhoneNumber() async throws {
         
         // given
-        let mockedReadline = MockedReadLine(["username", "password", "1234"])
-//        let xci = xcodeinstall(input: mockedReadline,
-//                               nextError: AuthenticationError.requires2FA,
-//                               nextMFAError: AuthenticationError.requires2FATrustedPhoneNumber)
-        var xci = xcodeinstall(input: mockedReadline)
-        xci.authenticator = MockAppleAuthentication(nextError: AuthenticationError.requires2FA)
+        env.readLine = MockedReadLine(["username", "password", "1234"])
+        let authenticator = (env.authenticator as! MockedAppleAuthentication)
+        authenticator.nextError = AuthenticationError.requires2FA
+        (self.secretsHandler as! MockedSecretHandler).nextError = AWSSecretsHandlerError.invalidOperation
+        let session = (env.urlSession as! MockedURLSession)
+        session.nextData = getMFATypeOK().data(using: .utf8)
+        let headers = [ "X-Apple-ID-Session-Id" : "dummySessionID", "scnt" : "dummySCNT"]
+        session.nextResponse = HTTPURLResponse(url: URL(string: "https://dummy")!, statusCode: 200, httpVersion: nil, headerFields: headers)
 
         // when
         do {
+            let xci = XCodeInstall()
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
             try await xci.authenticate()
             
@@ -157,10 +135,58 @@ class CLIAUthTest: CLITest {
         }
         
         // all inputs have been consumed
-        XCTAssert(mockedReadline.input.count == 0)
+        XCTAssert((env.readLine as! MockedReadLine).input.count == 0)
         
         assertDisplay("✅ Authenticated with MFA.")
 
     }
+    
+    private func getMFATypeOK() -> String {
+            return """
+ {
+   "trustedPhoneNumbers" : [ {
+     "numberWithDialCode" : "+33 •• •• •• •• 88",
+     "pushMode" : "sms",
+     "obfuscatedNumber" : "•• •• •• •• 88",
+     "lastTwoDigits" : "88",
+     "id" : 2
+   } ],
+   "securityCode" : {
+     "length" : 6,
+     "tooManyCodesSent" : false,
+     "tooManyCodesValidated" : false,
+     "securityCodeLocked" : false,
+     "securityCodeCooldown" : false
+   },
+   "authenticationType" : "hsa2",
+   "recoveryUrl" : "https://iforgot.apple.com/phone/add?prs_account_nm=sebsto%40mac.com&autoSubmitAccount=true&appId=142",
+   "cantUsePhoneNumberUrl" : "https://iforgot.apple.com/iforgot/phone/add?context=cantuse&prs_account_nm=sebsto%40mac.com&autoSubmitAccount=true&appId=142",
+   "recoveryWebUrl" : "https://iforgot.apple.com/password/verify/appleid?prs_account_nm=sebsto%40mac.com&autoSubmitAccount=true&appId=142",
+   "repairPhoneNumberUrl" : "https://gsa.apple.com/appleid/account/manage/repair/verify/phone",
+   "repairPhoneNumberWebUrl" : "https://appleid.apple.com/widget/account/repair?#!repair",
+   "aboutTwoFactorAuthenticationUrl" : "https://support.apple.com/kb/HT204921",
+   "twoFactorVerificationSupportUrl" : "https://support.apple.com/HT208072",
+   "hasRecoveryKey" : true,
+   "supportsRecoveryKey" : false,
+   "autoVerified" : false,
+   "showAutoVerificationUI" : false,
+   "supportsCustodianRecovery" : false,
+   "hideSendSMSCodeOption" : false,
+   "supervisedChangePasswordFlow" : false,
+   "supportsRecovery" : true,
+   "trustedPhoneNumber" : {
+     "numberWithDialCode" : "+33 •• •• •• •• 88",
+     "pushMode" : "sms",
+     "obfuscatedNumber" : "•• •• •• •• 88",
+     "lastTwoDigits" : "88",
+     "id" : 2
+   },
+   "hsa2Account" : true,
+   "restrictedAccount" : false,
+   "managedAccount" : false
+ }
+"""
+    }
+
 
 }

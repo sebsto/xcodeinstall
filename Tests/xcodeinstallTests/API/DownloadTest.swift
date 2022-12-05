@@ -8,7 +8,7 @@
 import XCTest
 @testable import xcodeinstall
  
-class DownloadTest: NetworkAgentTestCase {
+class DownloadTest: HTTPClientTestCase {
 
 
     func testHasDownloadDelegate() {
@@ -28,29 +28,25 @@ class DownloadTest: NetworkAgentTestCase {
         do {
             
             // given
-            self.session.nextURLSessionDownloadTask = MockURLSessionDownloadTask()
+            self.session.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
 
             // when
             let file : DownloadList.File = DownloadList.File(filename: "file.test", displayName: "File Test", remotePath: "/file.test", fileSize: 100, sortOrder: 1, dateCreated: "31/01/2022", dateModified: "30/03/2022", fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"), existInCache: false)
-            let ad = getAppleDownloader()
-
-            ad.sema = MockDispatchSemaphore()
-            
-            let progressBar = MockedProgressBar()
-            let result = try await ad.download(file: file, progressReport: progressBar)
+            let ad = getAppleDownloader()            
+            let result = try await ad.download(file: file)
 
             // then
             XCTAssertNotNil(result)
             
             // verify is resume was called
-            if let task = result as? MockURLSessionDownloadTask {
+            if let task = result as? MockedURLSessionDownloadTask {
                 XCTAssert(task.wasResumeCalled)
             } else {
                 XCTAssert(false, "Error in test implementation, the return value must be a MockURLSessionDownloadTask")
             }
             
             // verify is semaphore wait() was called
-            if let sema = ad.sema as? MockDispatchSemaphore {
+            if let sema = ad.downloadDelegate?.sema as? MockedDispatchSemaphore {
                 XCTAssert(sema.wasWaitCalled)
             } else {
                 XCTAssert(false, "Error in test implementation, the ad.sema must be a MockDispatchSemaphore")
@@ -71,16 +67,13 @@ class DownloadTest: NetworkAgentTestCase {
         do {
             
             // given
-            self.session.nextURLSessionDownloadTask = MockURLSessionDownloadTask()
+            self.session.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
 
             // when
             let file : DownloadList.File = DownloadList.File(filename: "file.test", displayName: "File Test", remotePath: "", fileSize: 100, sortOrder: 1, dateCreated: "31/01/2022", dateModified: "30/03/2022", fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"), existInCache: false)
             let ad = getAppleDownloader()
-
-            ad.sema = MockDispatchSemaphore()
             
-            let progressBar = MockedProgressBar()
-            _ = try await ad.download(file: file, progressReport: progressBar)
+            _ = try await ad.download(file: file)
 
             // then
             // an exception must be thrown
@@ -102,16 +95,13 @@ class DownloadTest: NetworkAgentTestCase {
         do {
             
             // given
-            self.session.nextURLSessionDownloadTask = MockURLSessionDownloadTask()
+            self.session.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
 
             // when
             let file : DownloadList.File = DownloadList.File(filename: "", displayName: "File Test", remotePath: "/file.test", fileSize: 100, sortOrder: 1, dateCreated: "31/01/2022", dateModified: "30/03/2022", fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"), existInCache: false)
             let ad = getAppleDownloader()
 
-            ad.sema = MockDispatchSemaphore()
-            
-            let progressBar = MockedProgressBar()
-            _ = try await ad.download(file: file, progressReport: progressBar)
+            _ = try await ad.download(file: file)
 
             // then
             // an exception must be thrown

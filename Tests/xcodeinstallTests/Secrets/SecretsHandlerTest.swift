@@ -16,7 +16,7 @@ protocol SecretsHandlerTestProtocol {
     func testLoadSessionNoExist() async
 }
 
-class SecretsHandlerTestBase<T: SecretsHandler> : XCTestCase {
+class SecretsHandlerTestBase<T: SecretsHandlerProtocol> : XCTestCase {
     
     var secrets : T?
     

@@ -17,11 +17,7 @@ extension XCodeInstall {
                   sortMostRecentFirst: Bool,
                   datePublished: Bool) async throws {
 
-        guard let download = downloader else {
-
-            throw XCodeInstallError.configurationError(msg: "Developer forgot to inject a downloader object. " +
-                                                       "Use XCodeInstallBuilder to correctly initialize this class") // swiftlint:disable:this line_length
-        }
+        let download = env.downloader
 
         var fileToDownload: DownloadList.File
         do {
@@ -47,15 +43,16 @@ extension XCodeInstall {
                                                         datePublished: datePublished)
             }
 
-            // now we have a filename, let's proceed with download 
-            let progressBar = CLIProgressBar(animationType: .percentProgressAnimation,
+            // now we have a filename, let's proceed with download
+            // FIXME: do not overwrite env?
+            env.progressBar = CLIProgressBar(animationType: .percentProgressAnimation,
                                              message: "Downloading \(fileToDownload.displayName)")
 
-            _ = try await download.download(file: fileToDownload, progressReport: progressBar)
+            _ = try await download.download(file: fileToDownload)
 
             // check if the downloaded file is complete
-            let filePath: String = self.fileHandler.downloadFilePath(file: fileToDownload)
-            let complete = try? self.fileHandler.checkFileSize(filePath: filePath, fileSize: fileToDownload.fileSize)
+            let file: URL = env.fileHandler.downloadFileURL(file: fileToDownload)
+            let complete = try? env.fileHandler.checkFileSize(file: file, fileSize: fileToDownload.fileSize)
             if  !(complete ?? false) {
                 display("🛑 Downloaded file has incorrect size, it might be incomplete or corrupted")
             }
@@ -89,7 +86,7 @@ extension XCodeInstall {
                                              sortMostRecentFirst: sortMostRecentFirst,
                                              datePublished: datePublished)
 
-        let response: String? = input.readLine(prompt: "⌨️  Which one do you want to download? ", silent: false)
+        let response: String? = env.readLine.readLine(prompt: "⌨️  Which one do you want to download? ", silent: false)
         guard let number = response,
               let num = Int(number) else {
 

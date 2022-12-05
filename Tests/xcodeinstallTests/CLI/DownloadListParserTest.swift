@@ -12,6 +12,7 @@ class DownloadListParserTest: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        env = Environment.mock
     }
 
     override func tearDownWithError() throws {
@@ -138,19 +139,19 @@ class DownloadListParserTest: XCTestCase {
     
     private func createTestFile(file: DownloadList.File, fileSize: Int) -> URL {
         let fm = FileManager()
-        let fh = FileHandler()
+        let fh = env.fileHandler
         
         let data = Data(count: fileSize)
-        let testFile : URL = fh.downloadFilePath(file: file)
+        let testFile : URL = fh.downloadFileURL(file: file)
         fm.createFile(atPath: testFile.path, contents: data)
         return testFile
     }
     
     private func deleteTestFile(file: DownloadList.File) -> URL {
         let fm = FileManager()
-        let fh = FileHandler()
+        let fh = env.fileHandler
         
-        let testFile : URL = fh.downloadFilePath(file: file)
+        let testFile : URL = fh.downloadFileURL(file: file)
         try? fm.removeItem(at: testFile)
         return testFile
     }
@@ -179,6 +180,7 @@ class DownloadListParserTest: XCTestCase {
             
             // given
             let (filteredList, dlp) = try prepareFilteredList()
+            (env.fileHandler as! MockedFileHandler).nextFileExist = true
 
 
             // modify the list to add a fake file in position [0]
@@ -212,6 +214,7 @@ class DownloadListParserTest: XCTestCase {
             
             // given
             let (filteredList, dlp) = try prepareFilteredList()
+            (env.fileHandler as! MockedFileHandler).nextFileExist = false
 
 
             // modify the list to add a fake file in position [0]

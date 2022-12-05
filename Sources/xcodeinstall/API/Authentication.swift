@@ -83,28 +83,16 @@ protocol AppleAuthenticatorProtocol {
     func twoFactorAuthentication(pin: String) async throws
 }
 
-class AppleAuthenticator: NetworkAgent, AppleAuthenticatorProtocol {
-
-    // used by testing to inject an HTTPClient that use a mocked URL Session
-    override init(client: HTTPClient, secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
-        super.init(client: client, secrets: secrets, fileHandler: fileHandler)
-    }
-
-    // ensure this class is initialized with a regular URLSession
-    init(secrets: SecretsHandler, fileHandler: FileHandlerProtocol) {
-        let apiClient = HTTPClient(session: URLSession.shared)
-        super.init(client: apiClient, secrets: secrets, fileHandler: fileHandler)
-
-    }
-
+class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
+    
     func saveSession(response: HTTPURLResponse, session: AppleSession) async throws {
         guard let cookies = response.value(forHTTPHeaderField: "Set-Cookie") else {
             return
         }
 
         // save session data to reuse in future invocation
-        _ = try await secretsHandler.saveCookies(cookies)
-        _ = try await secretsHandler.saveSession(session)
+        _ = try await env.secrets.saveCookies(cookies)
+        _ = try await env.secrets.saveSession(session)
     }
 
     func startAuthentication(username: String, password: String) async throws {
@@ -164,7 +152,7 @@ class AppleAuthenticator: NetworkAgent, AppleAuthenticatorProtocol {
         let (_, _) = try await apiCall(url: "https://idmsa.apple.com/appleauth/signout",
                                        validResponse: .range(0..<500))
 
-        try await secretsHandler.clearSecrets()
+        try await env.secrets.clearSecrets()
 
     }
 

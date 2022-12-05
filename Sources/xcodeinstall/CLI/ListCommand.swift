@@ -14,14 +14,11 @@ extension XCodeInstall {
               majorVersion: String,
               sortMostRecentFirst: Bool,
               datePublished: Bool) async throws -> [DownloadList.Download] {
-
-        guard let download = downloader else {
-            throw XCodeInstallError.configurationError(msg: "Developer forgot to inject a downloader object. " +
-                                                             "Use XCodeInstallBuilder to correctly initialize this class") // swiftlint:disable:this line_length
-        }
+        
+        let download = env.downloader
 
         display("Loading list of available downloads ", terminator: "")
-        display("\(force ? "forced download from Apple Developer Portal" : "fetched from cache in \(self.fileHandler.baseFilePath())")") // swiftlint:disable:this line_length
+        display("\(force ? "forced download from Apple Developer Portal" : "fetched from cache in \(FileHandler.baseFilePath())")") // swiftlint:disable:this line_length
 
         do {
             let list = try await download.list(force: force)
@@ -37,7 +34,7 @@ extension XCodeInstall {
 
             display("")
             display("👉 Here is the list of available downloads:")
-            display("Files marked with (*) are already downloaded in \(self.fileHandler.baseFilePath()) ")
+            display("Files marked with (*) are already downloaded in \(FileHandler.baseFilePath()) ")
             display("")
             let string = parser.prettyPrint(list: enrichedList, withDate: datePublished)
             display(string)

@@ -11,37 +11,17 @@ import CLIlib
 
 class InstallTest: XCTestCase {
     
-    private var _installer: ShellInstaller?
-    
-    private func installer() -> ShellInstaller {
-        return self._installer!
-    }
+    private var installer = ShellInstaller()
     
     private func mockedShell() -> MockShell {
-        return self._installer!.shell as! MockShell
+        return (env.shell as! MockShell)
     }
-    
+        
     override func setUpWithError() throws {
-        let mockedFileHandler = MockedFileHandler()
-        self._installer = ShellInstaller(fileHandler: mockedFileHandler)
-        self._installer!.shell = MockShell()
-        self._installer!.fileHandler = mockedFileHandler
-    }
+        env = Environment.mock
 
-    override func tearDownWithError() throws {
-        self._installer = nil
-    }
-
-    func testInstallInit() async throws {
-        
-        // given
-        
-        // when
-        let ms2 = installer().shell
-        
-        // then
-        XCTAssertNotNil(ms2)
-        
+        let mockedShell = (env.shell as! MockShell)
+        mockedShell.command = ""
     }
 
     func testInstallUnsupportedFile() async throws {
@@ -85,13 +65,13 @@ class InstallTest: XCTestCase {
     func testXIP() {
         
         // given
-        let mfh = installer().fileHandler as! MockedFileHandler
+        let mfh = env.fileHandler as! MockedFileHandler
         mfh.nextFileExist = true
         
         let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
         
         // when
-        XCTAssertNoThrow(try installer().uncompressXIP(atPath: srcFile.path))
+        XCTAssertNoThrow(try installer.uncompressXIP(atURL: srcFile))
         
         // then
         XCTAssertTrue(mockedShell().command.contains("/usr/bin/xip --expand \"\(srcFile.path)\""))
@@ -103,14 +83,14 @@ class InstallTest: XCTestCase {
     func testXIPNoFile() {
         
         // given
-        let mfh = installer().fileHandler as! MockedFileHandler
-        mfh.nextFileExist = false
+        (env.fileHandler as! MockedFileHandler).nextFileExist = false
+
         
         let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
 
         // when
         // (give a file name that exists, otherwise, it throws an exception)
-        XCTAssertThrowsError(try installer().uncompressXIP(atPath: srcFile.path))
+        XCTAssertThrowsError(try installer.uncompressXIP(atURL: srcFile))
         
         // then
         XCTAssertEqual(mockedShell().command,  "")
@@ -118,16 +98,16 @@ class InstallTest: XCTestCase {
     
     func testMoveApp() {
         // given
-        let srcFile = "/Users/stormacq/.xcodeinstall/Downloads/Xcode 14 beta 5.app"
-        let dstFile = "/Applications/Xcode 14 beta 5.app"
+        let src = URL(fileURLWithPath: "/Users/stormacq/.xcodeinstall/Downloads/Xcode 14 beta 5.app")
+        let dst = URL(fileURLWithPath: "/Applications/Xcode 14 beta 5.app")
         
         // when
-        XCTAssertNoThrow(try installer().moveApp(atPath: srcFile))
+        XCTAssertNoThrow(try installer.moveApp(at: src))
         
         // then
-        let mfh = installer().fileHandler as! MockedFileHandler
-        XCTAssertEqual(mfh.moveSrc?.path, URL(fileURLWithPath: srcFile).path)
-        XCTAssertEqual(mfh.moveDst?.path, URL(fileURLWithPath: dstFile).path)
+        let mfh = env.fileHandler as! MockedFileHandler
+        XCTAssertEqual(mfh.moveSrc?.path, src.path)
+        XCTAssertEqual(mfh.moveDst?.path, dst.path)
 
     }
     
@@ -187,8 +167,10 @@ class InstallTest: XCTestCase {
     private func loadDownloadListFromFile() -> DownloadList {
         
         // load list from test file
-        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
-        let listData = try? Data(contentsOf: filePath)
+//        let filePath = testDataDirectory().appendingPathComponent("Download List.json");
+//        let listData = try? Data(contentsOf: filePath)
+        let listData = try? loadAvailableDownloadFromTestFile()
+
         XCTAssertNotNil(listData)
 
         // decode the JSON
@@ -216,14 +198,13 @@ class InstallTest: XCTestCase {
         
         // given
         createDownloadList()
-        let fileName = "/test/Xcode 14 beta.xip"
+        let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
         
-        let installer = installer()
-        let mfh = installer.fileHandler as! MockedFileHandler
+        let mfh = env.fileHandler as! MockedFileHandler
         mfh.nextFileExist = true
 
         // when
-        let existAndCorrect = installer.fileMatch(filePath: fileName)
+        let existAndCorrect = installer.fileMatch(file: file)
     
         // then
         XCTAssertTrue(existAndCorrect)
@@ -233,14 +214,13 @@ class InstallTest: XCTestCase {
         
         //given
         createDownloadList()
-        let fileName = "/test/xxx.xip"
+        let file = URL(fileURLWithPath: "/test/xxx.xip")
         
-        let installer = installer()
-        let mfh = installer.fileHandler as! MockedFileHandler
+        let mfh = env.fileHandler as! MockedFileHandler
         mfh.nextFileExist = false
 
         // when
-        let fileExists = installer.fileMatch(filePath: fileName)
+        let fileExists = installer.fileMatch(file: file)
     
         // then
         XCTAssertFalse(fileExists)
@@ -250,14 +230,13 @@ class InstallTest: XCTestCase {
         
         //given
         deleteDownloadList()
-        let fileName = "/test/Xcode 14 beta.xip"
+        let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
 
-        let installer = installer()
-        let mfh = installer.fileHandler as! MockedFileHandler
+        let mfh = env.fileHandler as! MockedFileHandler
         mfh.nextFileExist = true
 
         // when
-        let fileExists = installer.fileMatch(filePath: fileName)
+        let fileExists = installer.fileMatch(file: file)
     
         // then
         XCTAssertTrue(fileExists)
@@ -292,12 +271,12 @@ class InstallTest: XCTestCase {
     func testInstallXcode() async {
         
         // given
-        let file = "/test/Xcode 14 beta.xip"
+        let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
         
         // when
         do {
 
-            try await installer().install(file: file, progress: MockedProgressBar())
+            try await installer.install(file: file)
             XCTAssert(false)
         } catch InstallerError.xCodeMoveInstallationError {
             //expected
@@ -313,11 +292,11 @@ class InstallTest: XCTestCase {
     func testInstallCommandLineTools() async {
         
         // given
-        let file = "/test/Command Line Tools for Xcode 14 beta 5.dmg"
+        let file = URL(fileURLWithPath: "/test/Command Line Tools for Xcode 14 beta 5.dmg")
         
         // when
         do {
-            try await installer().install(file: file, progress: MockedProgressBar())
+            try await installer.install(file: file)
         } catch {
             // check no error is thrown
             print("\(error)")
@@ -329,15 +308,15 @@ class InstallTest: XCTestCase {
 
     func testInstallFileDoesNotExist() async {
         
-        let mfh = installer().fileHandler as! MockedFileHandler
+        let mfh = env.fileHandler as! MockedFileHandler
         mfh.nextFileExist = false
         
         // given
-        let file = "/test/Command Line Tools for Xcode 14 beta 5.dmg"
+        let file = URL(fileURLWithPath: "/test/Command Line Tools for Xcode 14 beta 5.dmg")
         
         // when
         do {
-            try await installer().install(file: file, progress: MockedProgressBar())
+            try await installer.install(file: file)
 
             // then
             XCTAssert(false, "This method must throw an error")
@@ -354,15 +333,15 @@ class InstallTest: XCTestCase {
 
     func testInstallFileUnsuported() async {
         
-        let mfh = installer().fileHandler as! MockedFileHandler
+        let mfh = env.fileHandler as! MockedFileHandler
         mfh.nextFileExist = true
         
         // given
-        let file = "/test/test.zip"
+        let file = URL(fileURLWithPath: "/test/test.zip")
         
         // when
         do {
-            try await installer().install(file: file, progress: MockedProgressBar())
+            try await installer.install(file: file)
 
             // then
             XCTAssert(false, "This method must throw an error")

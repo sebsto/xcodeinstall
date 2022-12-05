@@ -13,9 +13,6 @@ class CLIListTest: CLITest {
     func testList() async throws {
         
         // given
-        var xci = xcodeinstall()
-        xci.downloader = MockAppleDownloader()
-
         let list = try parse(MainCommand.List.self, [
                 "list",
                 "--verbose",
@@ -29,7 +26,8 @@ class CLIListTest: CLITest {
         
         // when
         do {
-            _ = try await xci.list(force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: true, datePublished: true)
+            //_ = try await xci.list(force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: true, datePublished: true)
+            try await list.run()
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")

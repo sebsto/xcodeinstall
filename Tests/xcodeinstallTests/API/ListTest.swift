@@ -8,7 +8,7 @@
 import XCTest
 @testable import xcodeinstall
 
-class ListTest: NetworkAgentTestCase {
+class ListTest: HTTPClientTestCase {
 
     func testListNoForce() async throws {
         

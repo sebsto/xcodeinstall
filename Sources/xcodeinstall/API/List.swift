@@ -21,7 +21,7 @@ extension AppleDownloader {
 
         if !force {
             // load the list from file if we have it
-            downloadList = try? self.fileHandler.loadDownloadList()
+            downloadList = try? env.fileHandler.loadDownloadList()
         }
 
         if downloadList == nil {
@@ -47,7 +47,7 @@ extension AppleDownloader {
                 // grab authentication cookie for later download
                 if let cookies = response.value(forHTTPHeaderField: "Set-Cookie") {
                     // save the new cookies we received (ADCDownloadAuth)
-                    _ = try await self.secretsHandler.saveCookies(cookies)
+                    _ = try await env.secrets.saveCookies(cookies)
                 } else {
                     // swiftlint:disable line_length
                     log.error("🛑 Download List response does not contain authentication cookie, something is incorrect")
@@ -56,7 +56,7 @@ extension AppleDownloader {
                 }
 
                 // success, save the list for reuse
-                _ = try self.fileHandler.saveDownloadList(list: downloadList!)
+                _ = try env.fileHandler.saveDownloadList(list: downloadList!)
 
             } else {
 

@@ -11,18 +11,14 @@ import XCTest
 
 class URLRequestCurlTest: XCTestCase {
     
-    var subject: HTTPClient!
-    var agent  : NetworkAgent!
-    let session = MockURLSession()
-    
-    var secrets : FileSecretsHandler!
-    
+    var agent  : HTTPClient!
+        
     override func setUpWithError() throws {
+        
+        env = Environment.mock
+        
         try super.setUpWithError()
-        self.secrets = FileSecretsHandler.init()
-        self.subject = HTTPClient(session: session)
-        let fileHandler = FileHandler()
-        self.agent   = NetworkAgent(client: subject, secrets: secrets, fileHandler: fileHandler)
+        self.agent   = HTTPClient()
     }
 
     func testRequestToCurl() throws {

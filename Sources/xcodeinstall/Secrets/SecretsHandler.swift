@@ -45,7 +45,7 @@ struct AppleCredentialsSecret: Codable, Secrets {
 
 }
 
-protocol SecretsHandler {
+protocol SecretsHandlerProtocol {
 
     func clearSecrets() async throws
 
@@ -61,7 +61,7 @@ protocol SecretsHandler {
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret
 }
 
-extension SecretsHandler {
+extension SecretsHandlerProtocol {
 
     ///
     /// Merge given cookies with the one stored already

@@ -8,7 +8,7 @@
 import XCTest
 @testable import xcodeinstall
 
-class HTTPClientTest: NetworkAgentTestCase {
+class HTTPClientTest: HTTPClientTestCase {
     
     func testRequest() async throws {
         
@@ -73,7 +73,7 @@ class HTTPClientTest: NetworkAgentTestCase {
         
         // when
         let request = agent.request(for: url)
-        _ = try await subject.data(for: request, delegate: nil)
+        _ = try await self.session.data(for: request, delegate: nil)
         
         // then
         XCTAssertEqual(self.session.lastURL?.debugDescription, url)

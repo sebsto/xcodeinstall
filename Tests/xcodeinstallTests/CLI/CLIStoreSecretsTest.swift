@@ -13,15 +13,13 @@ class CLIStoreSecretsTest: CLITest {
     func testStoreSecrets() async throws {
         
         // given
-        let mockedReadline = MockedReadLine(["username", "password"])
-        var xci = xcodeinstall(input: mockedReadline)
-        xci.fileHandler = MockedFileHandler()
-        
+        env.readLine = MockedReadLine(["username", "password"])
+
         // use the real AWS Secrets Handler, but with a mocked SDK
-        var secretHandler = try AWSSecretsHandler(region: "us-east-1")
-        secretHandler.awsSDK = try MockedAWSSecretsHandlerSDK()
-        xci.secretsManager = secretHandler
-        
+        var secretsHandler = try AWSSecretsHandler(region: "us-east-1")
+        secretsHandler.awsSDK = try MockedAWSSecretsHandlerSDK()
+        env.secrets = secretsHandler
+
         let inst = try parse(MainCommand.StoreSecrets.self, [
                             "storesecrets",
                             "-s", "us-east-1",
@@ -30,7 +28,7 @@ class CLIStoreSecretsTest: CLITest {
         
         // when
         do {
-            try await xci.storeSecrets()
+            try await inst.run()
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")
@@ -43,11 +41,9 @@ class CLIStoreSecretsTest: CLITest {
     func testPromptForCredentials() {
         
         // given
-        let mockedReadline = MockedReadLine(["username", "password"])
-        var xci = xcodeinstall(input: mockedReadline)
-        xci.fileHandler = MockedFileHandler()
+        env.readLine = MockedReadLine(["username", "password"])
+        let xci = XCodeInstall()
 
-        
         // when
         do {
             let result = try xci.promptForCredentials()

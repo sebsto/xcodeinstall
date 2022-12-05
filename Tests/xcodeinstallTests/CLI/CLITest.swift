@@ -13,19 +13,15 @@ import CLIlib
 
 class CLITest: AsyncTestCase {
     
-    var secretsHandler : SecretsHandler!
-    
-    var mockedDisplay : DisplayProtocol!
-    var mockedAuth : AppleAuthenticatorProtocol!
-    var fileHandler : FileHandlerProtocol!
+    var secretsHandler : SecretsHandlerProtocol!
     
     override func asyncSetUpWithError() async throws {
-        self.secretsHandler = FileSecretsHandler()
-
-        try await self.secretsHandler.clearSecrets()
-        self.mockedDisplay = MockedDisplay()
         
-        self.fileHandler = MockedFileHandler()
+        env = Environment.mock
+        
+        self.secretsHandler = MockedSecretHandler()
+        try await self.secretsHandler.clearSecrets()
+        
     }
 
     override func asyncTearDownWithError() async throws {
@@ -35,29 +31,13 @@ class CLITest: AsyncTestCase {
     func parse<A>(_ type: A.Type, _ arguments: [String]) throws -> A where A: AsyncParsableCommand {
         return try XCTUnwrap(MainCommand.parseAsRoot(arguments) as? A)
     }
-
-    func xcodeinstall(input : ReadLineProtocol? = nil) -> XCodeInstall {
-
-        let result : XCodeInstall?
-        if let input {
-            result = XCodeInstall(display: mockedDisplay,
-                                  input: input,
-                                  secretsManager: secretsHandler,
-                                  fileHandler: self.fileHandler)
-        } else {
-            result = XCodeInstall(display: mockedDisplay,
-                                  secretsManager: secretsHandler,
-                                  fileHandler: self.fileHandler)
-        }
-        return result!
-    }
         
     func assertDisplay(_ msg: String) {
-        let actual = (self.mockedDisplay as! MockedDisplay).string
+        let actual = (env.display as! MockedDisplay).string
         XCTAssert(actual == "\(msg)\n")
     }
     func assertDisplayStartsWith(_ msg: String) {
-        let actual = (self.mockedDisplay as! MockedDisplay).string
+        let actual = (env.display as! MockedDisplay).string
         XCTAssert(actual.starts(with: msg))
     }
 }

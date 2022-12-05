@@ -11,14 +11,15 @@ import CLIlib
 // the methods I want to mock for unit testing
 protocol FileHandlerProtocol {
     func move(from src: URL, to dst: URL) throws
-    func fileExists(filePath: String, fileSize: Int) -> Bool
-    func checkFileSize(filePath: String, fileSize: Int) throws -> Bool
+    func fileExists(file: URL, fileSize: Int) -> Bool
+    func checkFileSize(file: URL, fileSize: Int) throws -> Bool
     func downloadedFiles() throws -> [String]
     func downloadFilePath(file: DownloadList.File) -> String
+    func downloadFileURL(file: DownloadList.File) -> URL
     func saveDownloadList(list: DownloadList) throws -> DownloadList
     func loadDownloadList() throws -> DownloadList
-    func baseFilePath() -> URL
-    func baseFilePath() -> String
+//    func baseFilePath() -> URL
+//    func baseFilePath() -> String
 }
 
 enum FileHandlerError: Error {
@@ -35,12 +36,13 @@ struct FileHandler: FileHandlerProtocol {
 
     let fm = FileManager.default // swiftlint:disable:this identifier_name
 
-    func baseFilePath() -> String {
+    static func baseFilePath() -> String {
         return baseFilePath().path
     }
-    func baseFilePath() -> URL {
+    static func baseFilePath() -> URL {
 
         // if base directory does not exist, create it
+        let fm = FileManager.default // swiftlint:disable:this identifier_name
         if !fm.fileExists(atPath: FileHandler.baseDirectory.path) {
             do {
                 try fm.createDirectory(at: FileHandler.baseDirectory, withIntermediateDirectories: true)
@@ -69,10 +71,10 @@ struct FileHandler: FileHandlerProtocol {
     }
 
     func downloadFilePath(file: DownloadList.File) -> String {
-        return downloadFilePath(file: file).path
+        return downloadFileURL(file: file).path
     }
-    func downloadFilePath(file: DownloadList.File) -> URL {
-
+    func downloadFileURL(file: DownloadList.File) -> URL {
+        
         // if download directory does not exist, create it
         if !fm.fileExists(atPath: FileHandler.downloadDirectory.path) {
             do {
@@ -82,7 +84,9 @@ struct FileHandler: FileHandlerProtocol {
             }
         }
         return FileHandler.downloadDirectory.appendingPathComponent(file.filename)
+        
     }
+
 
     /// Check if file exists and has correct size
     ///  - Parameters:
@@ -91,8 +95,10 @@ struct FileHandler: FileHandlerProtocol {
     ///  - Returns : true when the file exists and has the given size, false otherwise
     ///  - Throws:
     ///     - FileHandlerError.FileDoesNotExistswhen the file does not exists
-    func checkFileSize(filePath: String, fileSize: Int) throws -> Bool {
+    func checkFileSize(file: URL, fileSize: Int) throws -> Bool {
 
+        let filePath = file.path
+        
         // file exists ?
         let exists = fm.fileExists(atPath: filePath)
         if !exists { throw  FileHandlerError.fileDoesNotExist }
@@ -110,7 +116,9 @@ struct FileHandler: FileHandlerProtocol {
     ///     - filePath the path of the file to verify
     ///     - fileSize the expected size of the file (in bytes).
     ///       when omited, file size is not checked
-    func fileExists(filePath: String, fileSize: Int = 0) -> Bool {
+    func fileExists(file: URL, fileSize: Int = 0) -> Bool {
+
+        let filePath = file.path
 
         let fileExists = fm.fileExists(atPath: filePath)
         // does the file exists ?
@@ -120,7 +128,7 @@ struct FileHandler: FileHandlerProtocol {
 
         // is the file complete ?
         // use try! because I verified if file exists already
-        let fileComplete = try? self.checkFileSize(filePath: filePath, fileSize: fileSize)
+        let fileComplete = try? self.checkFileSize(file: file, fileSize: fileSize)
 
         return (fileSize > 0 ? fileComplete ?? false : fileExists)
     }

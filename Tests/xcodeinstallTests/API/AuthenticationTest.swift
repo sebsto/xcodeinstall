@@ -9,7 +9,7 @@ import XCTest
 @testable import xcodeinstall
 
 
-class AuthenticationTest: NetworkAgentTestCase {
+class AuthenticationTest: HTTPClientTestCase {
     
     // test get apple service key
     func testAppleServiceKey() async {

@@ -74,7 +74,7 @@ enum AWSSDK {
 // secretsmanager:GetSecretValue
 // secretsmanager:PutSecretValue
 
-struct AWSSecretsHandler: SecretsHandler {
+struct AWSSecretsHandler: SecretsHandlerProtocol {
 
     var awsSDK: AWSSecretsHandlerSDK // var for testability
 

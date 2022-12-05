@@ -11,19 +11,22 @@ import Logging
 
 class DownloadDelegateTest: XCTestCase {
     
+    override func setUpWithError() throws {
+        env = Environment.mock
+    }
+    
     func testDownloadDelegateCompleteTransfer() {
         
         // given
         let testData = "test data"
-        let sema = MockDispatchSemaphore()
-        let fileHandler = FileHandler()
-        let delegate = DownloadDelegate(semaphore: sema, fileHandler: fileHandler)
-        delegate.progressUpdate = MockedProgressBar()
+        let sema = MockedDispatchSemaphore()
+        let fileHandler = env.fileHandler
+        (fileHandler as! MockedFileHandler).nextFileExist = true
+        let delegate = DownloadDelegate(semaphore: sema)
         
-        let fm = FileManager()
-        var srcUrl = fm.temporaryDirectory
+        var srcUrl : URL = FileHandler.baseFilePath()
         srcUrl.appendPathComponent("xcodeinstall.source.test")
-        var dstUrl = fm.temporaryDirectory
+        var dstUrl : URL = FileHandler.baseFilePath()
         dstUrl.appendPathComponent("xcodeinstall.destination.test")
 
         do {
@@ -34,44 +37,35 @@ class DownloadDelegateTest: XCTestCase {
             delegate.completeTransfer(from: srcUrl)
             
         } catch {
-            XCTAssert(false, "Unexpecetd error : \(error)")
+            XCTAssert(false, "Unexpected error : \(error)")
         }
         
         // then
         
         // destination file exists
-        XCTAssert(fm.fileExists(atPath: dstUrl.path))
-        
-        // destination file has correct content
-        let data = try? String(contentsOf: dstUrl)
-        XCTAssert(testData == data)
-        
+        XCTAssert(fileHandler.fileExists(file: dstUrl, fileSize: 0))
+                
         // semaphore is calles
         XCTAssert(sema.wasSignalCalled)
         
         // progress completed
-        XCTAssertTrue((delegate.progressUpdate as! MockedProgressBar).isComplete)
-        
-        // cleanup
-        try? fm.removeItem(at: dstUrl)
+        XCTAssertTrue((env.progressBar as! MockedProgressBar).isComplete)
         
     }
 
     func testDownloadDelegateUpdate() {
         
         // given
-        let sema = MockDispatchSemaphore()
-        let fileHandler = FileHandler()
-        let delegate = DownloadDelegate(semaphore: sema, fileHandler: fileHandler)
+        let sema = MockedDispatchSemaphore()
+        let delegate = DownloadDelegate(semaphore: sema)
         delegate.startTime = Date.init(timeIntervalSinceNow: -60) // one minute ago
         delegate.totalFileSize = 1 * 1024  * 1024 * 1024 // 1 Gb
-        delegate.progressUpdate = MockedProgressBar()
 
         // when
         delegate.updateTransfer(totalBytesWritten: 500 * 1024 * 1024) // 500 MB downloaded
             
         // then
-        let mockedProgressBar = delegate.progressUpdate as! MockedProgressBar
+        let mockedProgressBar = env.progressBar as! MockedProgressBar
         XCTAssertEqual("500 MB / 8.33 MBs",mockedProgressBar.text)
     }
 

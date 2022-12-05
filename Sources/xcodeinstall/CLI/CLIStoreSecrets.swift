@@ -7,6 +7,7 @@
 
 import Foundation
 import ArgumentParser
+import CLIlib
 
 extension MainCommand {
 
@@ -23,11 +24,17 @@ extension MainCommand {
         var secretManagerRegion: String
 
         func run() async throws {
-            let xcib = XCodeInstallBuilder()
-                            .withVerbosity(verbose: globalOptions.verbose)
-                            .withAWSSecretsManager(region: secretManagerRegion)
+            
+            if globalOptions.verbose {
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            } else {
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
+            }
 
-            _ = try await xcib.build().storeSecrets()
+            env.secrets = try AWSSecretsHandler(region: secretManagerRegion)
+
+            let xci = XCodeInstall()
+            _ = try await xci.storeSecrets()
         }
     }
 

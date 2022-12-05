@@ -15,6 +15,8 @@ class FileSecretsHandlerTest: AsyncTestCase, SecretsHandlerTestProtocol {
     
     
     override func asyncSetUpWithError() async throws {
+        env = Environment.mock
+        
         secretHandlerTest = SecretsHandlerTestBase()
         
         secretHandlerTest!.secrets = FileSecretsHandler()

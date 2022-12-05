@@ -7,6 +7,7 @@
 
 import Foundation
 import ArgumentParser
+import CLIlib
 
 extension MainCommand {
 
@@ -18,15 +19,19 @@ extension MainCommand {
         @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-            var xcib = XCodeInstallBuilder()
-                            .withVerbosity(verbose: globalOptions.verbose)
-                            .withAuthenticator()
-
-            if let region = cloudOption.secretManagerRegion {
-                xcib = xcib.withAWSSecretsManager(region: region)
+            
+            if globalOptions.verbose {
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            } else {
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
             }
 
-            try await xcib.build().authenticate()
+            if let region = cloudOption.secretManagerRegion {
+                env.secrets = try AWSSecretsHandler(region: region)
+            }
+
+            let xci = XCodeInstall()
+            try await xci.authenticate()
         }
     }
 
@@ -37,15 +42,19 @@ extension MainCommand {
         @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-            var main = XCodeInstallBuilder()
-                            .withVerbosity(verbose: globalOptions.verbose)
-                            .withAuthenticator()
-
-            if let region = cloudOption.secretManagerRegion {
-                main = main.withAWSSecretsManager(region: region)
+            
+            if globalOptions.verbose {
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            } else {
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
             }
-
-            try await main.build().signout()
+            
+            if let region = cloudOption.secretManagerRegion {
+                env.secrets = try AWSSecretsHandler(region: region)
+            }
+            
+            let xci = XCodeInstall()
+            try await xci.signout()
         }
     }
 

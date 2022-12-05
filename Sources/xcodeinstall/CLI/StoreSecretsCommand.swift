@@ -11,7 +11,7 @@ extension XCodeInstall {
 
     func storeSecrets() async throws {
 
-        guard let secretsHandler = self.secretsManager as? AWSSecretsHandler else {
+        guard let secretsHandler = env.secrets as? AWSSecretsHandler else {
             fatalError("This function requires a AWSSecretsManager")
         }
 
@@ -38,11 +38,11 @@ It allows this command to authenticate automatically, as long as no MFA is promp
 
 """)
 
-        guard let username = input.readLine(prompt: "⌨️  Enter your Apple ID username: ", silent: false) else {
+        guard let username = env.readLine.readLine(prompt: "⌨️  Enter your Apple ID username: ", silent: false) else {
             throw CLIError.invalidInput
         }
 
-        guard let password = input.readLine(prompt: "⌨️  Enter your Apple ID password: ", silent: true) else {
+        guard let password = env.readLine.readLine(prompt: "⌨️  Enter your Apple ID password: ", silent: true) else {
             throw CLIError.invalidInput
         }
 

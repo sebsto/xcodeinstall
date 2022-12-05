@@ -12,10 +12,12 @@ import CLIlib
 // Command Line Tools installation functions
 extension ShellInstaller {
 
-    func installCommandLineTools(atPath filePath: String, progress: ProgressUpdateProtocol) throws {
+    func installCommandLineTools(atPath file: URL) throws {
+
+        let filePath = file.path
 
         // check if file exists
-        guard self.fileHandler.fileExists(filePath: filePath, fileSize: 0) else {
+        guard env.fileHandler.fileExists(file: file, fileSize: 0) else {
             log.error("Command line disk image does not exist : \(filePath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
@@ -27,10 +29,10 @@ extension ShellInstaller {
         var resultOptional: ShellOutput?
 
         // first mount the disk image
-        log.debug("Mounting disk image \(filePath.fileName())")
+        log.debug("Mounting disk image \(file.lastPathComponent)")
         currentStep += 1
-        progress.update(step: currentStep, total: totalSteps, text: "Mounting disk image...")
-        resultOptional = try self.mountDMG(atPath: filePath)
+        env.progressBar?.update(step: currentStep, total: totalSteps, text: "Mounting disk image...")
+        resultOptional = try self.mountDMG(atURL: file)
         if resultOptional == nil || resultOptional!.code != 0 {
             log.error("Can not mount disk image : \(filePath)\n\(String(describing: resultOptional))")
             throw InstallerError.CLToolsInstallationError
@@ -38,21 +40,22 @@ extension ShellInstaller {
 
         // second install the package
         // find the name of the package ?
-        let pkgPath = "/Volumes/Command Line Developer Tools/Command Line Tools.pkg"
+        let pkg = URL(fileURLWithPath: "/Volumes/Command Line Developer Tools/Command Line Tools.pkg")
+        let pkgPath = pkg.path
         log.debug("Installing pkg \(pkgPath)")
         currentStep += 1
-        progress.update(step: currentStep, total: totalSteps, text: "Installing package...")
-        resultOptional = try self.installPkg(atPath: pkgPath)
+        env.progressBar?.update(step: currentStep, total: totalSteps, text: "Installing package...")
+        resultOptional = try self.installPkg(atURL: pkg)
         if resultOptional == nil || resultOptional!.code != 0 {
             log.error("Can not install package : \(pkgPath)\n\(String(describing: resultOptional))")
             throw InstallerError.CLToolsInstallationError
         }
 
         // third unmount the disk image
-        let mountedDiskImage = "/Volumes/Command Line Developer Tools"
+        let mountedDiskImage = URL(fileURLWithPath: "/Volumes/Command Line Developer Tools")
         log.debug("Unmounting volume \(mountedDiskImage)")
         currentStep += 1
-        progress.update(step: currentStep, total: totalSteps, text: "Unmounting volume...")
+        env.progressBar?.update(step: currentStep, total: totalSteps, text: "Unmounting volume...")
         resultOptional = try self.unmountDMG(volume: mountedDiskImage)
         if resultOptional == nil || resultOptional!.code != 0 {
             log.error("Can not unmount volume : \(mountedDiskImage)\n\(String(describing: resultOptional))")
@@ -60,37 +63,29 @@ extension ShellInstaller {
         }
     }
 
-    private func mountDMG(atPath dmgPath: String) throws -> ShellOutput {
-
-        // shell has been injected after having created this class
-        guard let s = shell else { // swiftlint:disable:this identifier_name
-            fatalError("Shell implementation was not injected")
-        }
+    private func mountDMG(atURL dmg: URL) throws -> ShellOutput {
+        
+        let dmgPath = dmg.path
 
         // check if file exists
-        guard self.fileHandler.fileExists(filePath: dmgPath, fileSize: 0) else {
+        guard env.fileHandler.fileExists(file: dmg, fileSize: 0) else {
             log.error("Disk Image does not exist : \(dmgPath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 
         // hdiutil mount ./xcode-cli.dmg
         let cmd = "\(HDIUTILCOMMAND) mount \"\(dmgPath)\""
-        let result = try s.run(cmd)
+        let result = try env.shell.run(cmd)
 
         return result
     }
 
-    private func unmountDMG(volume volumePath: String) throws -> ShellOutput {
-
-        // shell has been injected after having created this class
-        guard let s = shell else { // swiftlint:disable:this identifier_name
-            fatalError("Shell implementation was not injected")
-        }
+    private func unmountDMG(volume volumePath: URL) throws -> ShellOutput {
 
         // hdiutil unmount /Volumes/Command\ Line\ Developer\ Tools/
         let cmd = "\(HDIUTILCOMMAND) unmount \"\(volumePath)\""
-        let result = try s.run(cmd)
-
+        let result = try env.shell.run(cmd)
+        
         return result
     }
 }

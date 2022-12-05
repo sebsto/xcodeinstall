@@ -11,17 +11,15 @@ import CLIlib
 // delegate class to receive download progress
 class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
-    var fileHandler: FileHandlerProtocol
-    var progressUpdate: ProgressUpdateProtocol?
     var dstFilePath: URL?
     var totalFileSize: Int?
     var startTime: Date?
 
     // to notify the main thread when download is finish
-    private let sema: DispatchSemaphoreProtocol
-    init(semaphore: DispatchSemaphoreProtocol, fileHandler: FileHandlerProtocol) {
+    let sema: DispatchSemaphoreProtocol
+    
+    init(semaphore: DispatchSemaphoreProtocol) {
         self.sema = semaphore
-        self.fileHandler = fileHandler
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
@@ -30,7 +28,7 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
     func completeTransfer(from location: URL) {
         // tell the progress bar that we're done
-        self.progressUpdate?.complete(success: true)
+        env.progressBar?.complete(success: true)
 
         guard let dst = dstFilePath else {
             log.warning("⚠️ No destination specified. I am keeping the file at \(location)")
@@ -40,7 +38,7 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         log.debug("Finished at \(location)\nMoving to \(dst)")
 
         // ignore the error here ? It is logged one level down. How to bring it up to the user ?
-        try? self.fileHandler.move(from: location, to: dst)
+        try? env.fileHandler.move(from: location, to: dst)
 
         // tell the main thread that we're done
         _ = self.sema.signal()
@@ -69,9 +67,9 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
             text += String(format: " / %.2f MBs", bandwidth)
         }
-        self.progressUpdate?.update(step: Int(totalBytesWritten/1024),
-                                    total: Int(tfs/1024),
-                                    text: text)
+        env.progressBar?.update(step: Int(totalBytesWritten/1024),
+                                total: Int(tfs/1024),
+                                text: text)
 
     }
 
