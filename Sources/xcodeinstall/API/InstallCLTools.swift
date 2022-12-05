@@ -80,10 +80,10 @@ extension ShellInstaller {
         return result
     }
 
-    private func unmountDMG(volume volumePath: URL) throws -> ShellOutput {
+    private func unmountDMG(volume: URL) throws -> ShellOutput {
 
         // hdiutil unmount /Volumes/Command\ Line\ Developer\ Tools/
-        let cmd = "\(HDIUTILCOMMAND) unmount \"\(volumePath)\""
+        let cmd = "\(HDIUTILCOMMAND) unmount \"\(volume.path)\""
         let result = try env.shell.run(cmd)
         
         return result

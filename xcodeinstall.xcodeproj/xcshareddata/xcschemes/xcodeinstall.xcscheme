@@ -86,11 +86,11 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "download --verbose -s us-east-1 -x 14 -m"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "install"
-            isEnabled = "NO">
+            argument = "install -v -n &quot;Command Line Tools for Xcode 14.1.dmg&quot;"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "authenticate --verbose"
