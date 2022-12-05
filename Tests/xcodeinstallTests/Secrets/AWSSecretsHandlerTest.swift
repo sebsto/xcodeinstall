@@ -15,12 +15,14 @@ class AWSSecretsHandlerTest: AsyncTestCase, SecretsHandlerTestProtocol {
     
     
     override func asyncSetUpWithError() async throws {
+        
+        env = Environment.mock
+        
         secretHandlerTest = SecretsHandlerTestBase()
         
         let AWS_REGION = "us-east-1"
         
         secretHandlerTest!.secrets = try AWSSecretsHandler(region: AWS_REGION)
-        secretHandlerTest!.secrets?.awsSDK = try MockedAWSSecretsHandlerSDK()
         try await secretHandlerTest!.secrets!.clearSecrets()
     }
     

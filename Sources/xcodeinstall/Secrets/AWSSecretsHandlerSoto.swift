@@ -10,14 +10,14 @@ import SotoSecretsManager
 import CLIlib
 
 // use a class to have a chance to call client.shutdown() at deinit
-class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
+class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
 
     let maxRetries = 3
 
-    var awsClient: AWSClient // var for injection
-    var smClient: SecretsManager // var for injection 
+    var awsClient: AWSClient? // var for injection
+    var smClient: SecretsManager? // var for injection
 
-    init(region: String) throws {
+    func setRegion(region: String) throws {
 
         guard let awsRegion = Region(awsRegionName: region) else {
             throw AWSSecretsHandlerError.invalidRegion(region: region)
@@ -27,12 +27,12 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
             credentialProvider: .selector(.environment, .ec2, .configFile()),
             retryPolicy: .jitter(),
             httpClientProvider: .createNew)
-        self.smClient = SecretsManager(client: awsClient,
+        self.smClient = SecretsManager(client: awsClient!,
                                        region: awsRegion)
     }
 
     deinit {
-        try? self.awsClient.syncShutdown()
+        try? self.awsClient?.syncShutdown()
     }
 
     // MARK: private functions - AWS SecretsManager Call using Soto SDK
@@ -57,7 +57,7 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
             let createSecretRequest = SecretsManager.CreateSecretRequest(description: "xcodeinstall secret",
                                                                          name: secretId,
                                                                          secretString: secretString)
-            _ = try await smClient.createSecret(createSecretRequest)
+            _ = try await smClient?.createSecret(createSecretRequest)
         } catch {
             log.error("Can not create secret \(secretId) : \(error)")
             throw error
@@ -137,8 +137,8 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
                                                                             secretString: secretString)
 
                 log.debug("Updating secret \(secretId) with \(newValue)")
-                let putSecretResponse = try await smClient.putSecretValue(putSecretRequest)
-                log.debug("\(putSecretResponse.name ?? "") has version \(putSecretResponse.versionId ?? "")")
+                let putSecretResponse = try await smClient?.putSecretValue(putSecretRequest)
+                log.debug("\(putSecretResponse?.name ?? "") has version \(putSecretResponse?.versionId ?? "")")
             })
 
         } catch {
@@ -153,10 +153,10 @@ class AWSSecretsHandlerSoto: AWSSecretsHandlerSDK {
         do {
             let getSecretRequest = SecretsManager.GetSecretValueRequest(secretId: secretId.rawValue)
             log.debug("Retrieving secret \(secretId)")
-            let getSecretResponse = try await smClient.getSecretValue(getSecretRequest)
-            log.debug("Secret \(getSecretResponse.name ?? "nil") retrieved")
+            let getSecretResponse = try await smClient?.getSecretValue(getSecretRequest)
+            log.debug("Secret \(getSecretResponse?.name ?? "nil") retrieved")
 
-            guard let secret = getSecretResponse.secretString else {
+            guard let secret = getSecretResponse?.secretString else {
                 log.error("⚠️ no value returned by AWS Secrets Manager secret \(secretId)")
                 return secretId == .appleCredentials ? AppleCredentialsSecret() as! T : AppleSessionSecret() as! T
             }

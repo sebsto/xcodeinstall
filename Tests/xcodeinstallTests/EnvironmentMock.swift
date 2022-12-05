@@ -22,6 +22,7 @@ extension Environment {
         progressBar: MockedProgressBar(),
         
         secrets: MockedSecretHandler(),
+        awsSDK: MockedAWSSecretsHandlerSDK(),
                 
         authenticator: MockedAppleAuthentication(),
         downloader: MockedAppleDownloader(),

@@ -28,7 +28,8 @@ struct Environment {
     var progressBar : CLIProgressBarProtocol = CLIProgressBar()
     
     // Secrets - will be overwritten by CLI when using AWS Secrets Manager
-    var secrets     : SecretsHandlerProtocol = FileSecretsHandler()
+    var secrets     : SecretsHandlerProtocol       = FileSecretsHandler()
+    var awsSDK      : AWSSecretsHandlerSDKProtocol = AWSSecretsHandlerSoto()
         
     // Commands
     var authenticator : AppleAuthenticatorProtocol = AppleAuthenticator()

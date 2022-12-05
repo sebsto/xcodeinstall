@@ -46,16 +46,27 @@ class MockedSecretHandler : SecretsHandlerProtocol {
     
 }
 
-class MockedAWSSecretsHandlerSDK : AWSSecretsHandlerSDK {
+class MockedAWSSecretsHandlerSDK : AWSSecretsHandlerSDKProtocol {
     
+
+    var _setRegion : Bool = false
     var appleSession : AppleSessionSecret
     var appleCredentials : AppleCredentialsSecret
     
-    init() throws {
-        appleSession = try AppleSessionSecret(fromString: "{}")
+    init() {
+        appleSession = try! AppleSessionSecret(fromString: "{}")
         appleCredentials = AppleCredentialsSecret(username: "", password: "")
     }
     
+    func regionSet() -> Bool {
+        let rs = _setRegion
+        _setRegion = false
+        return rs
+    }
+    func setRegion(region: String) throws {
+        _setRegion = true
+    }
+
     func updateSecret<T>(secretId: AWSSecretsName, newValue: T) async throws where T : Secrets {
         switch secretId {
         case .appleCredentials:

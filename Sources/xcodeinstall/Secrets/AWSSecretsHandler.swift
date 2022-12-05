@@ -58,14 +58,10 @@ struct AppleSessionSecret: Codable, Secrets {
 }
 
 // the methods that must be implemented by the class encapsulating the SDK we are using
-protocol AWSSecretsHandlerSDK {
+protocol AWSSecretsHandlerSDKProtocol {
+    func setRegion(region: String) throws
     func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws
     func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T
-}
-
-enum AWSSDK {
-    case awsSDK
-    case soto
 }
 
 // permissions needed
@@ -76,22 +72,11 @@ enum AWSSDK {
 
 struct AWSSecretsHandler: SecretsHandlerProtocol {
 
-    var awsSDK: AWSSecretsHandlerSDK // var for testability
-
     // provide a default implementation based on Soto
+    let awsSDK: AWSSecretsHandlerSDKProtocol = env.awsSDK
+
     init(region: String) throws {
-        try self.init(region: region, sdk: .soto)
-    }
-
-    // not private for testability
-    init(region: String, sdk: AWSSDK) throws {
-        switch sdk {
-        case .soto:
-            self.awsSDK = try AWSSecretsHandlerSoto(region: region)
-        case .awsSDK:
-            fatalError("Not implemented yet")
-        }
-
+        try self.awsSDK.setRegion(region: region)
     }
 
 // MARK: protocol implementation
