@@ -20,22 +20,24 @@ struct Environment {
     var fileHandler : FileHandlerProtocol = FileHandler()
 
     // CLI related classes
-    var shell       : AsyncShellProtocol  = AsyncShell()
-    var display     : DisplayProtocol     = Display()
-    var readLine    : ReadLineProtocol    = ReadLine()
+    var shell       : AsyncShellProtocol = AsyncShell()
+    var display     : DisplayProtocol    = Display()
+    var readLine    : ReadLineProtocol   = ReadLine()
+    
+    // progress bar - will be overwritten by CLI
     var progressBar : ProgressUpdateProtocol?
     
-    // Secrets
+    // Secrets - will be overwritten by CLI when using AWS Secrets Manager
     var secrets     : SecretsHandlerProtocol = FileSecretsHandler()
-    
-    // Network
-    //var urlSession : URLSessionProtocol = URLSession.shared
-    var urlSession : URLSessionProtocol = URLSession(configuration: .default,
-                                                     delegate: DownloadDelegate(semaphore:  DispatchSemaphore( value: 0 )),
-                                                     delegateQueue: nil)
-    
+        
     // Commands
     var authenticator : AppleAuthenticatorProtocol = AppleAuthenticator()
-    var downloader : AppleDownloaderProtocol = AppleDownloader()
+    var downloader    : AppleDownloaderProtocol    = AppleDownloader()
     
+    // Network
+    var urlSessionData     : URLSessionProtocol = URLSession.shared
+    var urlSessionDownload : URLSessionProtocol = URLSession(configuration: .default,
+                                                             delegate: DownloadDelegate(semaphore: DispatchSemaphore(value: 0)),
+                                                             delegateQueue: nil)    
+
 }

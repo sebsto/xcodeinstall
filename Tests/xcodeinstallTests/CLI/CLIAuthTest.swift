@@ -41,7 +41,7 @@ class CLIAUthTest: CLITest {
         let authenticator = (env.authenticator as! MockedAppleAuthentication)
         authenticator.nextError = nil
 
-        let session = (env.urlSession as! MockedURLSession)
+        let session : MockedURLSession = env.urlSessionData as! MockedURLSession
         let headers = [ "X-Apple-ID-Session-Id" : "dummySessionID", "scnt" : "dummySCNT"]
         session.nextResponse = HTTPURLResponse(url: URL(string: "https://dummy")!, statusCode: 200, httpVersion: nil, headerFields: headers)
 
@@ -118,7 +118,7 @@ class CLIAUthTest: CLITest {
         let authenticator = (env.authenticator as! MockedAppleAuthentication)
         authenticator.nextError = AuthenticationError.requires2FA
         (self.secretsHandler as! MockedSecretHandler).nextError = AWSSecretsHandlerError.invalidOperation
-        let session = (env.urlSession as! MockedURLSession)
+        let session : MockedURLSession = env.urlSessionData as! MockedURLSession
         session.nextData = getMFATypeOK().data(using: .utf8)
         let headers = [ "X-Apple-ID-Session-Id" : "dummySessionID", "scnt" : "dummySCNT"]
         session.nextResponse = HTTPURLResponse(url: URL(string: "https://dummy")!, statusCode: 200, httpVersion: nil, headerFields: headers)

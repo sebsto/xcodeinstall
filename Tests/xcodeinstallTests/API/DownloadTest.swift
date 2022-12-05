@@ -13,10 +13,10 @@ class DownloadTest: HTTPClientTestCase {
 
     func testHasDownloadDelegate() {
         // given
-        let ad = getAppleDownloader()
+        let sessionDownload = env.urlSessionDownload
 
         //when
-        let delegate = ad.downloadDelegate
+        let delegate = sessionDownload.downloadDelegate()
         
         //then
         XCTAssertNotNil(delegate)
@@ -28,7 +28,7 @@ class DownloadTest: HTTPClientTestCase {
         do {
             
             // given
-            self.session.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
+            self.sessionDownload.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
 
             // when
             let file : DownloadList.File = DownloadList.File(filename: "file.test", displayName: "File Test", remotePath: "/file.test", fileSize: 100, sortOrder: 1, dateCreated: "31/01/2022", dateModified: "30/03/2022", fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"), existInCache: false)
@@ -46,7 +46,7 @@ class DownloadTest: HTTPClientTestCase {
             }
             
             // verify is semaphore wait() was called
-            if let sema = ad.downloadDelegate?.sema as? MockedDispatchSemaphore {
+            if let sema = env.urlSessionDownload.downloadDelegate()?.sema as? MockedDispatchSemaphore {
                 XCTAssert(sema.wasWaitCalled)
             } else {
                 XCTAssert(false, "Error in test implementation, the ad.sema must be a MockDispatchSemaphore")
@@ -67,7 +67,7 @@ class DownloadTest: HTTPClientTestCase {
         do {
             
             // given
-            self.session.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
+            self.sessionDownload.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
 
             // when
             let file : DownloadList.File = DownloadList.File(filename: "file.test", displayName: "File Test", remotePath: "", fileSize: 100, sortOrder: 1, dateCreated: "31/01/2022", dateModified: "30/03/2022", fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"), existInCache: false)
@@ -95,7 +95,7 @@ class DownloadTest: HTTPClientTestCase {
         do {
             
             // given
-            self.session.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
+            self.sessionDownload.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
 
             // when
             let file : DownloadList.File = DownloadList.File(filename: "", displayName: "File Test", remotePath: "/file.test", fileSize: 100, sortOrder: 1, dateCreated: "31/01/2022", dateModified: "30/03/2022", fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"), existInCache: false)

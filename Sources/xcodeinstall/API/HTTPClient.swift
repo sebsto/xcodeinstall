@@ -19,12 +19,16 @@ import CLIlib
 protocol URLSessionProtocol {
     func data(for request: URLRequest, delegate: URLSessionTaskDelegate?) async throws -> (Data, URLResponse)
     func downloadTask(with request: URLRequest) throws -> URLSessionDownloadTaskProtocol
+    func downloadDelegate() -> DownloadDelegate?
 }
 
 // make the real URLSession implements our new protocol to make the compiler happy
 extension URLSession: URLSessionProtocol {
     func downloadTask(with request: URLRequest) throws -> URLSessionDownloadTaskProtocol {
         return downloadTask(with: request) as URLSessionDownloadTask
+    }
+    func downloadDelegate() -> DownloadDelegate? {
+        return self.delegate as? DownloadDelegate
     }
 }
 
@@ -132,7 +136,7 @@ class HTTPClient {
         log(request: request, to: log)
 
         // send request with that session
-        let (data, response) = try await env.urlSession.data(for: request, delegate: nil)
+        let (data, response) = try await env.urlSessionData.data(for: request, delegate: nil)
         guard let httpResponse = response as? HTTPURLResponse,
               validResponse.isValid(response: httpResponse.statusCode) else {
             log.error("=== HTTP ERROR. Status code \((response as? HTTPURLResponse)!.statusCode) not in range \(validResponse) ===")
@@ -168,7 +172,7 @@ class HTTPClient {
 
         // send request with download session
         // this is asynchronous, monitor progress through delegate
-        return try  env.urlSession.downloadTask(with: request)
+        return try  env.urlSessionDownload.downloadTask(with: request)
     }
 
     // prepare an URLRequest for a given url, method, body, and headers

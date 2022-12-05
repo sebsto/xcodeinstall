@@ -196,7 +196,6 @@
 		00152380293CCF1700FAAB2F /* DownloadDelegateTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadDelegateTest.swift; sourceTree = "<group>"; };
 		001E2E7E28C13C13009C1545 /* AWSSecretsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AWSSecretsHandler.swift; sourceTree = "<group>"; };
 		001E2E8128C15293009C1545 /* CLIStoreSecrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIStoreSecrets.swift; sourceTree = "<group>"; };
-		002AB53D293D29B20021BBA5 /* Download List.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "Download List.json"; path = "Tests/Data/Download List.json"; sourceTree = SOURCE_ROOT; };
 		002AB53E293DC6CD0021BBA5 /* download-error.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "download-error.json"; sourceTree = "<group>"; };
 		002AB540293DC7160021BBA5 /* download-unknown-error.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "download-unknown-error.json"; sourceTree = "<group>"; };
 		0041064628BD25410033A3A2 /* InstallPkg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallPkg.swift; sourceTree = "<group>"; };
@@ -209,9 +208,6 @@
 		0057C21628D440CB004A5BEC /* AWSSecretsHandlerSotoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AWSSecretsHandlerSotoTest.swift; sourceTree = "<group>"; };
 		0057C21828D440FE004A5BEC /* SotoTestEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SotoTestEnvironment.swift; sourceTree = "<group>"; };
 		007585D0289C07130094D2DC /* download-list.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "download-list.json"; path = "Tests/xcodeinstallTests/data/download-list.json"; sourceTree = SOURCE_ROOT; };
-		007585D1289C07130094D2DC /* curl.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = curl.txt; path = Tests/Data/curl.txt; sourceTree = SOURCE_ROOT; };
-		007585D2289C07130094D2DC /* Download Error.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "Download Error.json"; path = "Tests/Data/Download Error.json"; sourceTree = SOURCE_ROOT; };
-		007585D5289C16850094D2DC /* Download Unknown Error.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "Download Unknown Error.json"; path = "Tests/Data/Download Unknown Error.json"; sourceTree = SOURCE_ROOT; };
 		007585D6289C17670094D2DC /* DownloadListParserTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadListParserTest.swift; sourceTree = "<group>"; };
 		007585DA289C1E1E0094D2DC /* TestHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestHelper.swift; sourceTree = "<group>"; };
 		007585DE289D6DE00094D2DC /* FileSecretsHandlerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSecretsHandlerTest.swift; sourceTree = "<group>"; };
@@ -286,17 +282,6 @@
 				002AB540293DC7160021BBA5 /* download-unknown-error.json */,
 			);
 			path = data;
-			sourceTree = "<group>";
-		};
-		007585CF289C059E0094D2DC /* Data */ = {
-			isa = PBXGroup;
-			children = (
-				007585D5289C16850094D2DC /* Download Unknown Error.json */,
-				007585D1289C07130094D2DC /* curl.txt */,
-				002AB53D293D29B20021BBA5 /* Download List.json */,
-				007585D2289C07130094D2DC /* Download Error.json */,
-			);
-			path = Data;
 			sourceTree = "<group>";
 		};
 		009A9138288C2C3F003C0DF4 /* Frameworks */ = {
@@ -430,7 +415,6 @@
 		OBJ_12 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				007585CF289C059E0094D2DC /* Data */,
 				OBJ_13 /* xcodeinstallTests */,
 			);
 			name = Tests;
@@ -439,8 +423,8 @@
 		OBJ_13 /* xcodeinstallTests */ = {
 			isa = PBXGroup;
 			children = (
-				002AB53C293D296A0021BBA5 /* data */,
 				00152352293A90C100FAAB2F /* EnvironmentMock.swift */,
+				002AB53C293D296A0021BBA5 /* data */,
 				00CECC9B28B24BB600120779 /* API */,
 				00CECC9A28B24B9900120779 /* CLI */,
 				00CECC9C28B24BD000120779 /* Utilities */,

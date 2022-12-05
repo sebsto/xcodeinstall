@@ -30,8 +30,8 @@ class ListTest: HTTPClientTestCase {
             
             // given
             let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadList)
-            self.session.nextData       = listData
-            self.session.nextResponse   = urlResponse
+            self.sessionData.nextData       = listData
+            self.sessionData.nextResponse   = urlResponse
 
             // when
             let ad = getAppleDownloader()
@@ -58,8 +58,8 @@ class ListTest: HTTPClientTestCase {
             
             // given
             let (listData, urlResponse) = try prepareResponse()
-            self.session.nextData       = listData
-            self.session.nextResponse   = urlResponse
+            self.sessionData.nextData       = listData
+            self.sessionData.nextResponse   = urlResponse
 
             // when
             let ad = getAppleDownloader()
@@ -84,8 +84,8 @@ class ListTest: HTTPClientTestCase {
             
             // given
             let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadError)
-            self.session.nextData       = listData
-            self.session.nextResponse   = urlResponse
+            self.sessionData.nextData       = listData
+            self.sessionData.nextResponse   = urlResponse
 
             
             // when
@@ -111,8 +111,8 @@ class ListTest: HTTPClientTestCase {
             
             // given
             let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadUnknownError)
-            self.session.nextData       = listData
-            self.session.nextResponse   = urlResponse
+            self.sessionData.nextData       = listData
+            self.sessionData.nextResponse   = urlResponse
 
             // when
             let ad = getAppleDownloader()
@@ -137,8 +137,8 @@ class ListTest: HTTPClientTestCase {
             
             // given
             let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadUnknownError, statusCode: 302)
-            self.session.nextData       = listData
-            self.session.nextResponse   = urlResponse
+            self.sessionData.nextData       = listData
+            self.sessionData.nextResponse   = urlResponse
 
             // when
             let ad = getAppleDownloader()
@@ -164,8 +164,8 @@ class ListTest: HTTPClientTestCase {
             
             // given
             let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadList, statusCode: 200, noCookies: true)
-            self.session.nextData       = listData
-            self.session.nextResponse   = urlResponse
+            self.sessionData.nextData       = listData
+            self.sessionData.nextResponse   = urlResponse
 
             // when
             let ad = getAppleDownloader()

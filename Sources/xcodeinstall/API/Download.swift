@@ -14,15 +14,14 @@ protocol AppleDownloaderProtocol {
 }
 
 class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
-
+    
     // control the progress of the download
     // not private for testability
     var downloadTask: URLSessionDownloadTaskProtocol?
-    var downloadDelegate: DownloadDelegate?
 
     func download(file: DownloadList.File) async throws -> URLSessionDownloadTaskProtocol? {
 
-        guard let downloadDelegate = self.downloadDelegate else {
+        guard let downloadDelegate = env.urlSessionDownload.downloadDelegate() else {
             fatalError("This method requires an injected download delegate")
         }
         

@@ -19,10 +19,10 @@ class HTTPClientTest: HTTPClientTestCase {
         let headers  = [ "header1" : "value1",
                          "header2" : "value2"]
         let body = try JSONEncoder().encode(User(accountName: username, password: password))
-        let request  = agent.request(for: url,
-                                     method: .POST,
-                                     withBody: body,
-                                     withHeaders: headers)
+        let request  = client.request(for: url,
+                                      method: .POST,
+                                      withBody: body,
+                                      withHeaders: headers)
         
         // test URL
         XCTAssertEqual(request.url?.debugDescription, url)
@@ -68,15 +68,15 @@ class HTTPClientTest: HTTPClientTestCase {
         // given
         let url = "http://dummy"
         
-        self.session.nextData     = Data()
-        self.session.nextResponse = URLResponse()
+        self.sessionData.nextData     = Data()
+        self.sessionData.nextResponse = URLResponse()
         
         // when
-        let request = agent.request(for: url)
-        _ = try await self.session.data(for: request, delegate: nil)
+        let request = client.request(for: url)
+        _ = try await self.sessionData.data(for: request, delegate: nil)
         
         // then
-        XCTAssertEqual(self.session.lastURL?.debugDescription, url)
+        XCTAssertEqual(self.sessionData.lastURL?.debugDescription, url)
         
     }
     

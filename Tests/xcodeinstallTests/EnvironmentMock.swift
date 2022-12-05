@@ -22,10 +22,11 @@ extension Environment {
         progressBar: MockedProgressBar(),
         
         secrets: MockedSecretHandler(),
-        
-        urlSession: MockedURLSession(),
-        
+                
         authenticator: MockedAppleAuthentication(),
-        downloader: MockedAppleDownloader()
+        downloader: MockedAppleDownloader(),
+                
+        urlSessionData: MockedURLSession(),
+        urlSessionDownload: MockedURLSession()
     )
 }

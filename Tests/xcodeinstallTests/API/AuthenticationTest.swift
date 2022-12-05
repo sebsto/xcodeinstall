@@ -16,8 +16,8 @@ class AuthenticationTest: HTTPClientTestCase {
 
         do {
             let url = "https://dummy"
-            session.nextData     = try JSONEncoder().encode(AppleServiceKey(authServiceUrl: "url", authServiceKey: "key"))
-            session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
+            self.sessionData.nextData     = try JSONEncoder().encode(AppleServiceKey(authServiceUrl: "url", authServiceKey: "key"))
+            self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
 
             let authenticator = getAppleAuthenticator()
             let serviceKey = try await authenticator.getAppleServicekey()
@@ -27,7 +27,7 @@ class AuthenticationTest: HTTPClientTestCase {
         } catch AuthenticationError.unableToRetrieveAppleServiceKey {
             XCTAssert(false, "unableToRetrieveAppleServiceKey")
         } catch {
-            XCTAssert(false, "Invalid exception thrown")
+            XCTAssert(false, "Invalid exception thrown \(error)")
         }
 
     }
@@ -37,8 +37,8 @@ class AuthenticationTest: HTTPClientTestCase {
 
         do {
             let url = "https://dummy"
-            session.nextData     = try JSONEncoder().encode(AppleServiceKey(authServiceUrl: "url", authServiceKey: "key"))
-            session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 500, httpVersion: nil, headerFields: nil)
+            self.sessionData.nextData     = try JSONEncoder().encode(AppleServiceKey(authServiceUrl: "url", authServiceKey: "key"))
+            self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 500, httpVersion: nil, headerFields: nil)
 
             let authenticator = getAppleAuthenticator()
             _ = try await authenticator.getAppleServicekey()
@@ -48,7 +48,7 @@ class AuthenticationTest: HTTPClientTestCase {
         } catch URLError.badServerResponse {
             
         } catch {
-            XCTAssert(false, "Invalid exception thrown")
+            XCTAssert(false, "Invalid exception thrown \(error)")
         }
 
     }
@@ -59,8 +59,8 @@ class AuthenticationTest: HTTPClientTestCase {
 
         let url = "https://dummy"
 
-        session.nextData     = Data()
-        session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 401, httpVersion: nil, headerFields: nil)
+        self.sessionData.nextData     = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 401, httpVersion: nil, headerFields: nil)
 
         do {
             let authenticator     = getAppleAuthenticator()
@@ -72,7 +72,7 @@ class AuthenticationTest: HTTPClientTestCase {
         } catch AuthenticationError.invalidUsernamePassword {
             
         } catch {
-            XCTAssert(false, "Invalid exception thrown")
+            XCTAssert(false, "Invalid exception thrown \(error)")
         }
     }
 
@@ -85,8 +85,8 @@ class AuthenticationTest: HTTPClientTestCase {
         header["X-Apple-ID-Session-Id"] = "x-apple-id"
         header["scnt"]                  = "scnt"
 
-        session.nextData     = Data()
-        session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: header)
+        self.sessionData.nextData     = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: header)
 
         do {
             let authenticator     = getAppleAuthenticator()
@@ -119,8 +119,8 @@ class AuthenticationTest: HTTPClientTestCase {
         header["X-Apple-ID-Session-Id"] = "x-apple-id"
         header["scnt"]                  = "scnt"
 
-        session.nextData     = Data()
-        session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: header)
+        self.sessionData.nextData     = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: header)
 
         do {
             let authenticator = getAppleAuthenticator()
@@ -143,8 +143,8 @@ class AuthenticationTest: HTTPClientTestCase {
     func testAuthenticationWithError() async  {
         let url = "https://dummy"
 
-        session.nextData     = Data()
-        session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 500, httpVersion: nil, headerFields: nil)
+        self.sessionData.nextData     = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 500, httpVersion: nil, headerFields: nil)
 
         do {
             let authenticator     = getAppleAuthenticator()
@@ -168,8 +168,8 @@ class AuthenticationTest: HTTPClientTestCase {
 
         let url = "https://dummy"
 
-        session.nextData     = Data()
-        session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 403, httpVersion: nil, headerFields: nil)
+        self.sessionData.nextData     = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 403, httpVersion: nil, headerFields: nil)
 
         do {
             let authenticator     = getAppleAuthenticator()
@@ -181,7 +181,7 @@ class AuthenticationTest: HTTPClientTestCase {
         } catch AuthenticationError.invalidUsernamePassword {
             
         } catch {
-            XCTAssert(false, "Invalid exception thrown")
+            XCTAssert(false, "Invalid exception thrown \(error)")
         }
     
     }
@@ -191,8 +191,8 @@ class AuthenticationTest: HTTPClientTestCase {
 
         let url = "https://dummy"
 
-        session.nextData     = Data()
-        session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 100, httpVersion: nil, headerFields: nil)
+        self.sessionData.nextData     = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 100, httpVersion: nil, headerFields: nil)
 
         do {
             let authenticator     = getAppleAuthenticator()
@@ -204,7 +204,7 @@ class AuthenticationTest: HTTPClientTestCase {
         } catch AuthenticationError.unexpectedHTTPReturnCode(let code) {
             XCTAssertEqual(code, 100)
         } catch {
-            XCTAssert(false, "Invalid exception thrown")
+            XCTAssert(false, "Invalid exception thrown \(error)")
         }
     
     }
@@ -212,8 +212,8 @@ class AuthenticationTest: HTTPClientTestCase {
     // test signout
     func testSignout() async  {
         let url = "https://dummy"
-        session.nextData     = Data()
-        session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
+        self.sessionData.nextData     = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
 
         do {
             let authenticator     = getAppleAuthenticator()
@@ -223,7 +223,7 @@ class AuthenticationTest: HTTPClientTestCase {
             
 
         } catch {
-            XCTAssert(false, "Exception thrown")
+            XCTAssert(false, "Exception thrown \(error)")
         }
     }
 

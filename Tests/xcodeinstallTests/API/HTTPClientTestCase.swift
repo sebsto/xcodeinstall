@@ -11,16 +11,18 @@ import XCTest
 // common initilaisation code for all network agents
 class HTTPClientTestCase : AsyncTestCase {
     
-    var session : MockedURLSession!
-    var agent   : HTTPClient!
-    var delegate : DownloadDelegate!
+    var sessionData     : MockedURLSession!
+    var sessionDownload : MockedURLSession!
+    var client          : HTTPClient!
+    var delegate        : DownloadDelegate!
 
     override func asyncSetUpWithError() async throws {
         
         env = Environment.mock
         
-        self.session = (env.urlSession as! MockedURLSession)
-        self.agent   = HTTPClient()
+        self.sessionData     = env.urlSessionData as? MockedURLSession
+        self.sessionDownload = env.urlSessionDownload as? MockedURLSession
+        self.client           = HTTPClient()
         
         try await env.secrets.clearSecrets()
     }
@@ -32,10 +34,7 @@ class HTTPClientTestCase : AsyncTestCase {
     }
     
     func getAppleDownloader() -> AppleDownloader {
-
-        let downloader = AppleDownloader()
-        downloader.downloadDelegate = DownloadDelegate(semaphore: MockedDispatchSemaphore())
-        return downloader
+        return AppleDownloader()
     }
     
     func getAppleAuthenticator() -> AppleAuthenticator {

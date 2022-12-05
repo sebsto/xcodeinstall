@@ -16,8 +16,8 @@ class MFAuthenticationTest: HTTPClientTestCase {
 
         let url = "https://dummy"
 
-        self.session.nextData     = Data() //invalid data returned
-        self.session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
+        self.sessionData.nextData     = Data() //invalid data returned
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
 
         do {
             let authenticator     = getAppleAuthenticator()
@@ -38,8 +38,8 @@ class MFAuthenticationTest: HTTPClientTestCase {
 
         let url = "https://dummy"
 
-        self.session.nextData     = Data() //invalid data returned
-        self.session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 500, httpVersion: nil, headerFields: nil)
+        self.sessionData.nextData     = Data() //invalid data returned
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 500, httpVersion: nil, headerFields: nil)
 
         do {
             let authenticator     = getAppleAuthenticator()
@@ -60,8 +60,8 @@ class MFAuthenticationTest: HTTPClientTestCase {
 
         let url = "https://dummy"
 
-        self.session.nextData     = getMFATypeOK().data(using: .utf8)
-        self.session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
+        self.sessionData.nextData     = getMFATypeOK().data(using: .utf8)
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
 
         do {
             let authenticator     = getAppleAuthenticator()
@@ -82,8 +82,8 @@ class MFAuthenticationTest: HTTPClientTestCase {
 
         let url = "https://dummy"
 
-        self.session.nextData     = getMFATypeNoSecurityCode().data(using: .utf8)
-        self.session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
+        self.sessionData.nextData     = getMFATypeNoSecurityCode().data(using: .utf8)
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
 
         do {
             let authenticator     = getAppleAuthenticator()
@@ -105,8 +105,8 @@ class MFAuthenticationTest: HTTPClientTestCase {
 
         let url = "https://dummy"
 
-        session.nextData     = Data()
-        session.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
+        self.sessionData.nextData     = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(url: URL(string: url)!, statusCode: 200, httpVersion: nil, headerFields: nil)
 
         do {
             let authenticator     = getAppleAuthenticator()

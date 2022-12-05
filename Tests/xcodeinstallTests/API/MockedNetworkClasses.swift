@@ -64,6 +64,14 @@ class MockedURLSession: URLSessionProtocol {
         
         return downloadTask
     }
+    
+    var delegate : DownloadDelegate?
+    func downloadDelegate() -> DownloadDelegate? {
+        if delegate == nil {
+            delegate = DownloadDelegate(semaphore: MockedDispatchSemaphore())
+        }
+        return delegate
+    }
 }
 
 class MockedAppleAuthentication: AppleAuthenticatorProtocol {
@@ -93,6 +101,9 @@ struct MockedAppleDownloader : AppleDownloaderProtocol {
     var sema: DispatchSemaphoreProtocol = MockedDispatchSemaphore()
     var downloadDelegate: DownloadDelegate?
 
+    func delegate() -> DownloadDelegate {
+        self.downloadDelegate!
+    }
     func list(force: Bool) async throws -> DownloadList {
         let listData = try loadTestData(file: .downloadList)
         let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
