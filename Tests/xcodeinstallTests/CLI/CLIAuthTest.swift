@@ -15,16 +15,14 @@ class CLIAUthTest: CLITest {
     func testSignout() async throws {
         
         // given
-        let xci = XCodeInstall()
         
         // when
         do {
             
-            // verify no expectption is thrown
-            let _ = try parse(MainCommand.Signout.self, ["signout"])
+            // verify no exception is thrown
+            let signout = try parse(MainCommand.Signout.self, ["signout"])
+            try await signout.run()
             
-            //try await signoutCommand.run()
-            try await xci.signout()
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")

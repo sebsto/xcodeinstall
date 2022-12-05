@@ -206,6 +206,8 @@ class FileHandlerTest: XCTestCase {
         }
     }
     
+    
+    // FIXME: fail on GitHub runner 
     func testDownloadedFiles() {
         
         let newFileName = "test.tmp"
@@ -229,7 +231,7 @@ class FileHandlerTest: XCTestCase {
             // cleanup
             try fileManager!.removeItem(at: newFile)
         } catch {
-            XCTAssert(false, "Unexpected error during tetsing \(error)")
+            XCTAssert(false, "Unexpected error during testing \(error)")  // FIXME: "fnfErr: File not found"
         }
     }
     

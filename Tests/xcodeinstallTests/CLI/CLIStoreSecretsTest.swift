@@ -17,25 +17,26 @@ class CLIStoreSecretsTest: CLITest {
 
         // use the real AWS Secrets Handler, but with a mocked SDK
         var secretsHandler = try AWSSecretsHandler(region: "us-east-1")
+        // FIXME: test error on GitHub runner
         secretsHandler.awsSDK = try MockedAWSSecretsHandlerSDK()
         env.secrets = secretsHandler
 
-        let inst = try parse(MainCommand.StoreSecrets.self, [
-                            "storesecrets",
-                            "-s", "us-east-1",
-                            "--verbose"
+        let storeSecrets = try parse(MainCommand.StoreSecrets.self, [
+                                        "storesecrets",
+                                        "-s", "us-east-1",
+                                        "--verbose"
         ])
         
         // when
         do {
-            try await inst.run()
+            try await storeSecrets.run()
         } catch {
             // then
-            XCTAssert(false, "unexpected exception : \(error)")
+            XCTAssert(false, "unexpected exception : \(error)") // FIXME:  "No credential provider found"
         }
 
         // test parsing of commandline arguments
-        XCTAssert(inst.globalOptions.verbose)
+        XCTAssert(storeSecrets.globalOptions.verbose)
     }
     
     func testPromptForCredentials() {
