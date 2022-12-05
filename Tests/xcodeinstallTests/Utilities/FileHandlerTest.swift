@@ -206,13 +206,12 @@ class FileHandlerTest: XCTestCase {
         }
     }
     
-    
-    // FIXME: fail on GitHub runner 
     func testDownloadedFiles() {
         
         let newFileName = "test.tmp"
         do {
             //given
+            let _ : URL = FileHandler.baseFilePath() // ensure directory exists
             let fh = FileHandler()
             let existing : [String] = try fh.downloadedFiles()
             
@@ -231,7 +230,7 @@ class FileHandlerTest: XCTestCase {
             // cleanup
             try fileManager!.removeItem(at: newFile)
         } catch {
-            XCTAssert(false, "Unexpected error during testing \(error)")  // FIXME: "fnfErr: File not found"
+            XCTAssert(false, "Unexpected error during testing \(error)")  
         }
     }
     
@@ -251,7 +250,7 @@ class FileHandlerTest: XCTestCase {
             XCTAssertNotNil(list)
             XCTAssertEqual(list.downloads?.count, 953)
         } catch {
-            XCTAssert(false, "Method should not throw an error")
+            XCTAssert(false, "Method should not throw an error \(error)")
         }
         
         // cleanup

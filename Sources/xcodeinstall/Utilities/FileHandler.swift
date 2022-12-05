@@ -29,7 +29,7 @@ enum FileHandlerError: Error {
 
 struct FileHandler: FileHandlerProtocol {
 
-    static let baseDirectory
+    private static let baseDirectory
            = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".xcodeinstall")
     static let downloadDirectory = baseDirectory.appendingPathComponent("download")
     static let downloadListPath = baseDirectory.appendingPathComponent("downloadList")
@@ -45,7 +45,7 @@ struct FileHandler: FileHandlerProtocol {
         let fm = FileManager.default // swiftlint:disable:this identifier_name
         if !fm.fileExists(atPath: FileHandler.baseDirectory.path) {
             do {
-                try fm.createDirectory(at: FileHandler.baseDirectory, withIntermediateDirectories: true)
+                try fm.createDirectory(at: FileHandler.downloadDirectory, withIntermediateDirectories: true)
             } catch {
                 log.error("🛑 Can not create base directory : \(FileHandler.baseDirectory.path)\n\(error)")
             }
