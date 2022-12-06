@@ -42,15 +42,27 @@ extension XCodeInstall {
 
             return enrichedList
 
-        } catch DownloadError.authenticationRequired {
-            display("🛑 Session expired, you neeed to re-authenticate.")
-            display("You can authenticate with the command: xcodeinstall authenticate")
-
-            // todo launch authentifictaion automatically ?
-            throw DownloadError.authenticationRequired
-
+        } catch let error as DownloadError {
+            switch error {
+            case .authenticationRequired:
+                display("🛑 Session expired, you neeed to re-authenticate.")
+                display("You can authenticate with the command: xcodeinstall authenticate")
+                throw error
+            case .accountneedUpgrade(let code, let message):
+                display("🛑 \(message) (Apple Portal error code : \(code))")
+                throw error
+            case .unknownError(let code, let message):
+                display("🛑 \(message) (Unhandled download error : \(code))")
+                display("Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title=")
+                throw error
+            default:
+                display("🛑 Unknown download error : \(error)")
+                display("Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title=")
+                throw error
+            }
         } catch {
             display("🛑 Unexpected error : \(error)")
+            display("Please file an error repor at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title=")
             throw error
         }
 

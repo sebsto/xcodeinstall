@@ -9,13 +9,14 @@ import Foundation
 
 enum DownloadError: Error {
     case authenticationRequired
-    case unknownError(errorCode: Int)
+    case unknownError(errorCode: Int, errorMessage: String)
     case parsingError(error: Error)
     case noDownloadsInDownloadList
     case invalidFileSpec
     case invalidResponse
     case zeroOrMoreThanOneFileToDownload(count: Int)
     case unknownFile(file: String)
+    case accountneedUpgrade(errorCode: Int, errorMessage: String)
 }
 
 struct DownloadList: Codable {

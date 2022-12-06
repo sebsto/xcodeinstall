@@ -60,11 +60,17 @@ extension AppleDownloader {
 
             } else {
 
-                if downloadList!.resultCode == 1100 { // authentication expired
+                switch downloadList!.resultCode {
+                case 1100: // authentication expired
                     throw DownloadError.authenticationRequired
-                } else {
+                case 2170: // accounts need upgrade
+                    log.error("Error \(downloadList!.resultCode) : \(downloadList!.userString ?? "no user string")")
+                    throw DownloadError.accountneedUpgrade(errorCode: downloadList!.resultCode,
+                                                           errorMessage: downloadList!.userString ?? "Your developer account needs to be updated")
+                default:
                     // is there other error cases that I need to handle explicitly ?
-                    throw DownloadError.unknownError(errorCode: downloadList!.resultCode)
+                    throw DownloadError.unknownError(errorCode: downloadList!.resultCode,
+                                                     errorMessage: downloadList!.userString ?? "Unknwon error")
                 }
             }
         }

@@ -121,7 +121,7 @@ class ListTest: HTTPClientTestCase {
             // then
             XCTAssert(false) //an exception must be thrown
 
-        } catch DownloadError.unknownError(let errorCode) {
+        } catch DownloadError.unknownError(let errorCode, _) {
 
             XCTAssert(errorCode == 9999)
 
@@ -184,6 +184,43 @@ class ListTest: HTTPClientTestCase {
         }
     }
     
+    func testAccountNeedsUpgrade() async {
+        
+        do {
+            // given
+            let response =
+    """
+    {"responseId":"4a09c41c-f010-4ef0-ae03-66787439f918","resultCode":2170,"resultString":"Your developer account needs to be updated.  Please visit Apple Developer Registration.","userString":"Your developer account needs to be updated.  Please visit Apple Developer Registration.","creationTimestamp":"2022-11-29T23:50:58Z","protocolVersion":"QH65B2","userLocale":"en_US","requestUrl":"https://developer.apple.com/services-account/QH65B2/downloadws/listDownloads.action","httpCode":200}
+    """
+            
+            let (_, urlResponse) = try prepareResponse(withDataFile: nil, statusCode: 200, noCookies: true)
+            self.sessionData.nextData       = response.data(using: .utf8)
+            self.sessionData.nextResponse   = urlResponse
+        
+            // when
+            let ad = getAppleDownloader()
+            let _ = try await ad.list(force: true)
+
+            // then
+            XCTAssert(false) //an exception must be thrown
+
+        } catch DownloadError.accountneedUpgrade(let code, _){
+            
+            // an exception should be thrown
+            XCTAssert(true)
+            XCTAssertEqual(code, 2170)
+            
+        } catch {
+        
+            // an exception should be thrown
+            XCTAssert(false)
+            print("\(error)")
+            
+        }
+
+    }
+
+    
     func prepareResponse(withDataFile dataFile: TestData? = nil, statusCode : Int = 200, noCookies: Bool = false) throws -> (Data, HTTPURLResponse?) {
         
         // load list form file
@@ -205,4 +242,5 @@ class ListTest: HTTPClientTestCase {
         }
         return (listData, urlresponse)
     }
+    
 }
