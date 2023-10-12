@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>actions.runner.sebsto-xcodeinstall.xcodeinstall</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/Users/ec2-user/actions-runner-xcodeinstall/runsvc.sh</string>
+    </array>
+    <key>UserName</key>
+    <string>ec2-user</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/ec2-user/actions-runner-xcodeinstall</string>
+    <key>RunAtLoad</key>
+    <true/>    
+    <key>StandardOutPath</key>
+    <string>/Users/ec2-user/Library/Logs/actions.runner.sebsto-xcodeinstall.xcodeinstall/stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/ec2-user/Library/Logs/actions.runner.sebsto-xcodeinstall.xcodeinstall/stderr.log</string>
+    <key>EnvironmentVariables</key>
+    <dict> 
+      <key>ACTIONS_RUNNER_SVC</key>
+      <string>1</string>
+    </dict>
+<!--
+    <key>ProcessType</key>
+    <string>Interactive</string>
+-->
+    <key>SessionCreate</key>
+    <true/>
+  </dict>
+</plist>
