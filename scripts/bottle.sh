@@ -31,7 +31,7 @@ fi
 VERSION=$(cat VERSION)
 
 # Supports macOS 12 (Monterey) and later
-OS_NAMES=(arm64_monterey monterey)
+OS_NAMES=(arm64_monterey monterey arm64_ventura ventura arm64_sonoma sonoma)
 
 # Semantic version number split into a list using  Ugly, bash 3 compatible syntax
 IFS=" " read -r -a CURRENT_OS_VERSION <<<"$(sw_vers -productVersion | sed 's/\./ /g')"
@@ -46,6 +46,18 @@ if [[ ${CURRENT_OS_VERSION_MAJOR} == "12" ]]; then
     CURRENT_PLATFORM=monterey
   else
     CURRENT_PLATFORM=arm64_monterey
+  fi
+elif [[ ${CURRENT_OS_VERSION_MAJOR} == "13" ]]; then
+  if [[ "x86_64" == "$(uname -m)" ]]; then
+    CURRENT_PLATFORM=ventura
+  else
+    CURRENT_PLATFORM=arm64_ventura
+  fi
+elif [[ ${CURRENT_OS_VERSION_MAJOR} == "14" ]]; then
+  if [[ "x86_64" == "$(uname -m)" ]]; then
+    CURRENT_PLATFORM=sonoma
+  else
+    CURRENT_PLATFORM=arm64_sonoma
   fi
 else
   echo "Unsupported macOS version. This script requires Monterey or better."
