@@ -25,7 +25,7 @@ extension MainCommand {
         var onlyXcode: Bool = false
 
         @Option(name: [.customLong("xcode-version"), .short], help: "Filter on provided Xcode version number")
-        var xCodeVersion: String = "13"
+        var xCodeVersion: String = "15"
 
         @Flag(name: .shortAndLong, help: "Sort by most recent releases first")
         var mostRecentFirst: Bool = false
