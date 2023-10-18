@@ -1,3 +1,10 @@
+## TODO 
+
+Consider using a github action for this 
+https://github.com/Homebrew/actions
+https://github.com/ipatch/homebrew-freecad-pg13/blob/main/.github/workflows/publish.yml
+https://github.com/marketplace/actions/homebrew-bump-cask
+
 ## To release a new version.
 
 1. Commit all other changes and push them
