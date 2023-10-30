@@ -63,6 +63,8 @@ extension AppleDownloader {
                 switch downloadList!.resultCode {
                 case 1100: // authentication expired
                     throw DownloadError.authenticationRequired
+                case 2100: // needs to accept ToC
+                    throw DownloadError.needToAcceptTermsAndCondition
                 case 2170: // accounts need upgrade
                     log.error("Error \(downloadList!.resultCode) : \(downloadList!.userString ?? "no user string")")
                     throw DownloadError.accountneedUpgrade(errorCode: downloadList!.resultCode,

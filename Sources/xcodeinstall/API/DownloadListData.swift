@@ -16,6 +16,7 @@ enum DownloadError: Error {
     case invalidResponse
     case zeroOrMoreThanOneFileToDownload(count: Int)
     case unknownFile(file: String)
+    case needToAcceptTermsAndCondition
     case accountneedUpgrade(errorCode: Int, errorMessage: String)
 }
 

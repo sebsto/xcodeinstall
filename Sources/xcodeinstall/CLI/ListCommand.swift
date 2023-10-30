@@ -51,6 +51,13 @@ extension XCodeInstall {
             case .accountneedUpgrade(let code, let message):
                 display("🛑 \(message) (Apple Portal error code : \(code))")
                 throw error
+            case .needToAcceptTermsAndCondition:
+                display("""
+🛑 This is a new Apple account, you need first to accept the developer terms of service.
+Open a session at https://developer.apple.com/register/agree/
+Read and accept the ToS and try again.
+""")
+                throw error
             case .unknownError(let code, let message):
                 display("🛑 \(message) (Unhandled download error : \(code))")
                 display("Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title=")
