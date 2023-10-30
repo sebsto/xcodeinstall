@@ -30,9 +30,9 @@ extension DownloadList {
             return comparison(element)
         }
         // then remove all nil values
-        .filter { file in
-            return file != nil
-        }
+//        .filter { file in
+//            return file != nil
+//        }
 
         // we should have 0 or 1 element
         if result.count > 0 {
