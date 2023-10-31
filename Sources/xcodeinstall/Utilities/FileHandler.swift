@@ -74,7 +74,7 @@ struct FileHandler: FileHandlerProtocol {
         return downloadFileURL(file: file).path
     }
     func downloadFileURL(file: DownloadList.File) -> URL {
-        
+
         // if download directory does not exist, create it
         if !fm.fileExists(atPath: FileHandler.downloadDirectory.path) {
             do {
@@ -84,9 +84,8 @@ struct FileHandler: FileHandlerProtocol {
             }
         }
         return FileHandler.downloadDirectory.appendingPathComponent(file.filename)
-        
-    }
 
+    }
 
     /// Check if file exists and has correct size
     ///  - Parameters:
@@ -98,7 +97,7 @@ struct FileHandler: FileHandlerProtocol {
     func checkFileSize(file: URL, fileSize: Int) throws -> Bool {
 
         let filePath = file.path
-        
+
         // file exists ?
         let exists = fm.fileExists(atPath: filePath)
         if !exists { throw  FileHandlerError.fileDoesNotExist }

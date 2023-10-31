@@ -14,7 +14,7 @@ extension XCodeInstall {
               majorVersion: String,
               sortMostRecentFirst: Bool,
               datePublished: Bool) async throws -> [DownloadList.Download] {
-        
+
         let download = env.downloader
 
         display("Loading list of available downloads ", terminator: "")

@@ -64,7 +64,7 @@ extension ShellInstaller {
     }
 
     private func mountDMG(atURL dmg: URL) throws -> ShellOutput {
-        
+
         let dmgPath = dmg.path
 
         // check if file exists
@@ -85,7 +85,7 @@ extension ShellInstaller {
         // hdiutil unmount /Volumes/Command\ Line\ Developer\ Tools/
         let cmd = "\(HDIUTILCOMMAND) unmount \"\(volume.path)\""
         let result = try env.shell.run(cmd)
-        
+
         return result
     }
 }

@@ -10,12 +10,12 @@ import CLIlib
 
 protocol InstallerProtocol {
     func install(file: URL) async throws
-    func installCommandLineTools(atPath file: URL) throws 
-    func installPkg(atURL pkg: URL) throws -> ShellOutput 
+    func installCommandLineTools(atPath file: URL) throws
+    func installPkg(atURL pkg: URL) throws -> ShellOutput
     func installXcode(at src: URL) throws
     func uncompressXIP(atURL file: URL) throws -> ShellOutput
     func moveApp(at src: URL) throws -> String
-    func fileMatch(file: URL) -> Bool 
+    func fileMatch(file: URL) -> Bool
 }
 
 enum InstallerError: Error {
@@ -39,8 +39,6 @@ class ShellInstaller: InstallerProtocol {
                         "CoreTypes.pkg",
                         "MobileDevice.pkg",
                         "MobileDeviceDevelopment.pkg"]
-
-
 
     /// Install Xcode or Xcode Command Line Tools
     ///  At this stage, we do support only these two installation.

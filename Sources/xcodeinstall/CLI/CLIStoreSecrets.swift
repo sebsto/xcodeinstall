@@ -24,7 +24,7 @@ extension MainCommand {
         var secretManagerRegion: String
 
         func run() async throws {
-            
+
             if globalOptions.verbose {
                 log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
             } else {

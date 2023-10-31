@@ -11,14 +11,14 @@ import CLIlib
 extension XCodeInstall {
 
     func install(file: String?) async throws {
-        
+
         let installer = ShellInstaller()
 
         // progress bar to report progress feedback
         let progressBar = env.progressBar
         progressBar.define(animationType: .countingProgressAnimationMultiLine,
                            message: "Installing...")
-        
+
         var fileToInstall: URL?
         do {
             // when no file is specified, prompt user to select one

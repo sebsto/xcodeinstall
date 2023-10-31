@@ -54,7 +54,7 @@ extension ShellInstaller {
             log.debug("Installing package \(pkg)")
             currentStep += 1
             env.progressBar.update(step: currentStep, total: totalSteps, text: "Installing additional packages... \(pkg)")
-            resultOptional = try self.installPkg(atURL: URL(fileURLWithPath:"\(installedFile)/Contents/resources/Packages/\(pkg)"))
+            resultOptional = try self.installPkg(atURL: URL(fileURLWithPath: "\(installedFile)/Contents/resources/Packages/\(pkg)"))
             if resultOptional == nil || resultOptional!.code != 0 {
                 log.error("Can not install pkg at : \(pkg)\n\(resultOptional!)")
                 throw InstallerError.xCodePKGInstallationError
@@ -69,7 +69,7 @@ extension ShellInstaller {
     func uncompressXIP(atURL file: URL) throws -> ShellOutput {
 
         let filePath = file.path
-        
+
         // not necessary, file existence has been checked before
         guard env.fileHandler.fileExists(file: file, fileSize: 0) else {
             log.error("File to unXip does not exist : \(filePath)")

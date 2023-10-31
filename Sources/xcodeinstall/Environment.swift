@@ -17,28 +17,28 @@ var env = Environment()
 struct Environment {
 
     // Utilities classes
-    var fileHandler : FileHandlerProtocol = FileHandler()
+    var fileHandler: FileHandlerProtocol = FileHandler()
 
     // CLI related classes
-    var shell       : AsyncShellProtocol = AsyncShell()
-    var display     : DisplayProtocol    = Display()
-    var readLine    : ReadLineProtocol   = ReadLine()
-    
+    var shell: AsyncShellProtocol = AsyncShell()
+    var display: DisplayProtocol    = Display()
+    var readLine: ReadLineProtocol   = ReadLine()
+
     // progress bar 
-    var progressBar : CLIProgressBarProtocol = CLIProgressBar()
-    
+    var progressBar: CLIProgressBarProtocol = CLIProgressBar()
+
     // Secrets - will be overwritten by CLI when using AWS Secrets Manager
-    var secrets     : SecretsHandlerProtocol       = FileSecretsHandler()
-    var awsSDK      : AWSSecretsHandlerSDKProtocol = AWSSecretsHandlerSoto()
-        
+    var secrets: SecretsHandlerProtocol       = FileSecretsHandler()
+    var awsSDK: AWSSecretsHandlerSDKProtocol = AWSSecretsHandlerSoto()
+
     // Commands
-    var authenticator : AppleAuthenticatorProtocol = AppleAuthenticator()
-    var downloader    : AppleDownloaderProtocol    = AppleDownloader()
-    
+    var authenticator: AppleAuthenticatorProtocol = AppleAuthenticator()
+    var downloader: AppleDownloaderProtocol    = AppleDownloader()
+
     // Network
-    var urlSessionData     : URLSessionProtocol = URLSession.shared
-    var urlSessionDownload : URLSessionProtocol = URLSession(configuration: .default,
+    var urlSessionData: URLSessionProtocol = URLSession.shared
+    var urlSessionDownload: URLSessionProtocol = URLSession(configuration: .default,
                                                              delegate: DownloadDelegate(semaphore: DispatchSemaphore(value: 0)),
-                                                             delegateQueue: nil)    
+                                                             delegateQueue: nil)
 
 }

@@ -16,7 +16,7 @@
 import Foundation
 import CLIlib
 
-protocol CLIProgressBarProtocol : ProgressUpdateProtocol {
+protocol CLIProgressBarProtocol: ProgressUpdateProtocol {
     func define(animationType: ProgressBarType, message: String)
 }
 

@@ -10,9 +10,9 @@ import Foundation
 extension XCodeInstall {
 
     func authenticate() async throws {
-        
+
         let auth = env.authenticator
-        
+
         do {
 
             // delete previous session, if any

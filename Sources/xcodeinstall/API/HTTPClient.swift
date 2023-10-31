@@ -65,7 +65,7 @@ class HTTPClient {
 
     // some ID returned by Apple API to authenticate us
     var session = AppleSession()
-    
+
     // to be shared between apiCall and download methods
     // prepare headers with correct cookies and X- value for Apple authentication
     func prepareAuthenticationHeaders() async -> [String: String] {
@@ -205,6 +205,3 @@ class HTTPClient {
         return request
     }
 }
-
-
-

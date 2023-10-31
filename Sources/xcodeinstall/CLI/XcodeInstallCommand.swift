@@ -15,5 +15,5 @@ struct XCodeInstall {
     func display(_ msg: String, terminator: String = "\n") {
         env.display.display(msg, terminator: terminator)
     }
-        
+
 }

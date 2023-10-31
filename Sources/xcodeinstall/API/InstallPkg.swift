@@ -15,7 +15,7 @@ extension ShellInstaller {
     func installPkg(atURL pkg: URL) throws -> ShellOutput {
 
         let pkgPath = pkg.path
-        
+
         // check if file exists
         guard env.fileHandler.fileExists(file: pkg, fileSize: 0) else {
             log.error("Package does not exist : \(pkgPath)")

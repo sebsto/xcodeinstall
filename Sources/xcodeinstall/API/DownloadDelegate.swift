@@ -17,7 +17,7 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
     // to notify the main thread when download is finish
     let sema: DispatchSemaphoreProtocol
-    
+
     init(semaphore: DispatchSemaphoreProtocol) {
         self.sema = semaphore
     }

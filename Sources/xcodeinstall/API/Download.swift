@@ -14,7 +14,7 @@ protocol AppleDownloaderProtocol {
 }
 
 class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
-    
+
     // control the progress of the download
     // not private for testability
     var downloadTask: URLSessionDownloadTaskProtocol?
@@ -24,7 +24,7 @@ class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
         guard let downloadDelegate = env.urlSessionDownload.downloadDelegate() else {
             fatalError("This method requires an injected download delegate")
         }
-        
+
         guard !file.remotePath.isEmpty,
               !file.filename.isEmpty,
               file.fileSize > 0 else {
