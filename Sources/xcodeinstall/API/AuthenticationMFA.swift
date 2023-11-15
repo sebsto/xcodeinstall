@@ -147,14 +147,30 @@ extension AppleAuthenticator {
                                       method: .POST,
                                       body: try JSONEncoder().encode(body),
                                       headers: requestHeader,
-                                      validResponse: .range(200..<404))
+                                      validResponse: .range(200..<413))
 
-        if response.statusCode == 400 {
+        switch response.statusCode {
+        case 400:
+            // authentication failed
             throw AuthenticationError.invalidPinCode
-        } else if response.statusCode == 403 {
-            throw AuthenticationError.unexpectedHTTPReturnCode(code: 403)
-        } else {
+
+        case 412:
+            // upgrade account and repair with repair token
+            // see https://my.diffend.io/gems/fastlane/2.170.0/2.175.0/page/9#d2h-629314-4781
+            if let location = response.value(forHTTPHeaderField: "Location") {
+                throw AuthenticationError.accountNeedsRepair(location: location, repairToken: "secret") // X-Apple-Repair-Session-Token
+            } else {
+                throw AuthenticationError.accountNeedsRepair(location: "no location HTTP header", repairToken: "secret") // X-Apple-Repair-Session-Token
+            }
+
+        case 200, 204:
+            // success
             try await self.saveSession(response: response, session: session)
+
+        default:
+            // unknown error, fail gracefully
+            throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)
+
         }
 
         // should we save additional cookies ?

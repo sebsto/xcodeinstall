@@ -24,6 +24,7 @@ enum AuthenticationError: Error {
     case invalidPinCode
     case unableToRetrieveAppleServiceKey(error: Error)
     case canNotReadMFATypes
+    case accountNeedsRepair(location: String, repairToken: String)
     case unexpectedHTTPReturnCode(code: Int)
     case other(error: Error)
 }
@@ -84,7 +85,7 @@ protocol AppleAuthenticatorProtocol {
 }
 
 class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
-    
+
     func saveSession(response: HTTPURLResponse, session: AppleSession) async throws {
         guard let cookies = response.value(forHTTPHeaderField: "Set-Cookie") else {
             return
