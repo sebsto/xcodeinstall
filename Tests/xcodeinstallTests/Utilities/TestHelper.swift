@@ -10,7 +10,8 @@ import XCTest
 @testable import xcodeinstall
 
 enum TestData : String {
-    case downloadList = "download-list"
+    case downloadList = "download-list-20231115"
+    // case downloadList = "download-list"
     case downloadError = "download-error"
     case downloadUnknownError = "download-unknown-error"
 }

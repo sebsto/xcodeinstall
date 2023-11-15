@@ -42,6 +42,6 @@ class CLIListTest: CLITest {
         XCTAssert(list.downloadListOptions.datePublished)
 
         // mocked list succeeded
-        assertDisplay("3 items")
+        assertDisplay("16 items")
     }
 }

@@ -40,7 +40,7 @@ class ListTest: HTTPClientTestCase {
             // then
             XCTAssertNotNil(result)
             XCTAssertNotNil(result.downloads)
-            XCTAssert(result.downloads!.count == 953)
+            XCTAssert(result.downloads!.count == 1127)
 
         } catch let error as DownloadError {
 

@@ -64,7 +64,7 @@ class CLIDownloadTest: CLITest {
         
         // given
         (env.fileHandler as! MockedFileHandler).nextFileCorrect = true
-        let fileName = "Xcode 14 beta.xip"
+        let fileName = "Xcode 14.xip"
 
         let download = try parse(MainCommand.Download.self, [
             "download",

@@ -141,7 +141,7 @@ class InstallTest: XCTestCase {
     func testFindInDownloadWithrealListFileExists() {
         // given
         let dl = loadDownloadListFromFile()
-        let fileName = "Xcode 14 beta.xip"
+        let fileName = "Xcode 14.xip"
         
         // when
         let file = dl.find(fileName: fileName)
@@ -186,9 +186,9 @@ class InstallTest: XCTestCase {
         let file4 = DownloadList.File(filename: "test2.zip", displayName: "", remotePath: "", fileSize: 1, sortOrder: 0, dateCreated: "", dateModified: "", fileFormat: DownloadList.FileFormat(fileExtension: "zip", description: "zip"))
         let file5 = DownloadList.File(filename: "readme2.txt", displayName: "", remotePath: "", fileSize: 1, sortOrder: 0, dateCreated: "", dateModified: "", fileFormat: DownloadList.FileFormat(fileExtension: "zip", description: "zip"))
         let file6 = DownloadList.File(filename: "doc2.pdf", displayName: "", remotePath: "", fileSize: 1, sortOrder: 0, dateCreated: "", dateModified: "", fileFormat: DownloadList.FileFormat(fileExtension: "zip", description: "zip"))
-        let download1 = DownloadList.Download(name: "", description: "", isReleased: 0, datePublished: "", dateCreated: "", dateModified: "", categories: [DownloadList.DownloadCategory(id: 0, name: "", sortOrder: 0)], files: [file1, file2, file3])
-        let download2 = DownloadList.Download(name: "", description: "", isReleased: 0, datePublished: "", dateCreated: "", dateModified: "", categories: [DownloadList.DownloadCategory(id: 0, name: "", sortOrder: 0)], files: [file4, file5, file6])
-        return DownloadList(creationTimestamp: "", resultCode: 0, resultString: "", userString: "", userLocale: "", protocolVersion: "", requestUrl: "", responseId: "", httpCode: 0, httpResponseHeaders: ["header" : "value"], downloads: [download1, download2])
+        let download1 = DownloadList.Download(id: "01", name: "", description: "", isReleased: 0, datePublished: "", dateCreated: "", dateModified: "", categories: [DownloadList.DownloadCategory(id: 0, name: "", sortOrder: 0)], files: [file1, file2, file3], isRelatedSeed: false)
+        let download2 = DownloadList.Download(id: "02", name: "", description: "", isReleased: 0, datePublished: "", dateCreated: "", dateModified: "", categories: [DownloadList.DownloadCategory(id: 0, name: "", sortOrder: 0)], files: [file4, file5, file6], isRelatedSeed: false)
+        return DownloadList(creationTimestamp: "", resultCode: 0, resultString: "", userString: "", userLocale: "", protocolVersion: "", requestUrl: "", responseId: "", httpCode: 0, httpResponseHeaders: ["header" : "value"], downloadHost: "", downloads: [download1, download2])
     }
     
     func testFileMatchDownloadListExistsAndFileExists() {

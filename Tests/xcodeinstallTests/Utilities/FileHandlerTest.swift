@@ -248,7 +248,7 @@ class FileHandlerTest: XCTestCase {
          
             // then
             XCTAssertNotNil(list)
-            XCTAssertEqual(list.downloads?.count, 953)
+            XCTAssertEqual(list.downloads?.count, 1127)
         } catch {
             XCTAssert(false, "Method should not throw an error \(error)")
         }

@@ -46,7 +46,7 @@ extension XCodeInstall {
             // now we have a filename, let's proceed with download
             let progressBar = env.progressBar
             progressBar.define(animationType: .percentProgressAnimation,
-                               message: "Downloading \(fileToDownload.displayName)")
+                               message: "Downloading \(fileToDownload.displayName ?? fileToDownload.filename)")
 
             _ = try await download.download(file: fileToDownload)
 

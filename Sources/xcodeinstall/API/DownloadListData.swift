@@ -44,7 +44,7 @@ struct DownloadList: Codable {
 
     struct File: Codable {
         let filename: String
-        let displayName: String
+        let displayName: String?
         let remotePath: String
         let fileSize: Int
         let sortOrder: Int
@@ -55,6 +55,7 @@ struct DownloadList: Codable {
     }
 
     struct Download: Codable {
+        let id: String
         let name: String
         let description: String
         let isReleased: Int
@@ -63,6 +64,7 @@ struct DownloadList: Codable {
         let dateModified: String
         let categories: [DownloadCategory]
         var files: [File]
+        let isRelatedSeed: Bool
     }
 
     let creationTimestamp: String
@@ -75,6 +77,7 @@ struct DownloadList: Codable {
     let responseId: String
     let httpCode: Int?
     let httpResponseHeaders: [String: String]?
+    let downloadHost: String?
     let downloads: [Download]?
 
 }

@@ -35,7 +35,7 @@ class DownloadListParserTest: XCTestCase {
             // then
             XCTAssertNotNil(list)
             XCTAssertNotNil(downloads)
-            XCTAssert(downloads?.count == 953)
+            XCTAssert(downloads?.count == 1127)
 
         } catch {
             XCTAssert(false, "Unexpected exception thrown : \(error)")
@@ -120,7 +120,7 @@ class DownloadListParserTest: XCTestCase {
             XCTAssertNotNil(filteredList)
 
             // then
-            XCTAssert(filteredList.count == 55)
+            XCTAssert(filteredList.count == 56)
             for item in filteredList {
                 XCTAssert(item.name.contains("Xcode 13"))
             }
