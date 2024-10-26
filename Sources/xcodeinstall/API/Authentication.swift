@@ -95,9 +95,8 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         _ = try await env.secrets.saveCookies(cookies)
         _ = try await env.secrets.saveSession(session)
     }
-
-    func startAuthentication(username: String, password: String) async throws {
-
+    
+    private func checkServiceKey() async throws {
         if session.itcServiceKey == nil {
             var appServiceKey: AppleServiceKey
             do {
@@ -108,6 +107,10 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             session.itcServiceKey = appServiceKey
             log.debug("Got an Apple Service key : \(String(describing: session.itcServiceKey))")
         }
+    }
+
+    func startAuthentication(username: String, password: String) async throws {
+        try await checkServiceKey()
 
         let (_, response) =
         try await apiCall(url: "https://idmsa.apple.com/appleauth/auth/signin",

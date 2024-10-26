@@ -23,8 +23,8 @@ class MockedURLSessionDownloadTask: URLSessionDownloadTaskProtocol {
 // mocked URLSession to be used during test
 class MockedURLSession: URLSessionProtocol {
     
-    private (set) var lastURL: URL?
-    private (set) var lastRequest: URLRequest?
+    private(set) var lastURL: URL?
+    private(set) var lastRequest: URLRequest?
     
     var nextData: Data?
     var nextError: Error?
