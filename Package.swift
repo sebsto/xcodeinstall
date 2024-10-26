@@ -14,7 +14,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
         .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"),
-        .package(url: "https://github.com/sebsto/CLIlib/", from: "0.1.1")
+        .package(url: "https://github.com/sebsto/CLIlib/", from: "0.1.2")
         //.package(path: "../CLIlib")
     ],
     targets: [
