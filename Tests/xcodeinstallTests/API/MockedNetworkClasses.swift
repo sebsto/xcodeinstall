@@ -80,7 +80,7 @@ class MockedAppleAuthentication: AppleAuthenticatorProtocol {
     var nextMFAError : AuthenticationError?
     var session : AppleSession?
     
-    func startAuthentication(username: String, password: String) async throws {
+    func startAuthentication(with authenticationMethod: AuthenticationMethod, username: String, password: String) async throws {
         
         if let nextError {
             throw nextError

@@ -17,6 +17,9 @@ extension MainCommand {
 
         @OptionGroup var globalOptions: GlobalOptions
         @OptionGroup var cloudOption: CloudOptions
+        
+        @Option(name: .long, help: "Use SRP authentication")
+        var srp = true
 
         func run() async throws {
 
@@ -31,7 +34,7 @@ extension MainCommand {
             }
 
             let xci = XCodeInstall()
-            try await xci.authenticate()
+            try await xci.authenticate(with: AuthenticationMethod.withSRP(srp))
         }
     }
 

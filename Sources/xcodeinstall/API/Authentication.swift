@@ -10,6 +10,13 @@ import CLIlib
 
 // MARK: - Module Internal structures and data
 
+enum AuthenticationMethod {
+    case usernamePassword
+    case srp
+    
+    static func withSRP(_ srp: Bool) -> AuthenticationMethod { srp ? .srp : .usernamePassword }
+}
+
 struct User: Codable {
     var accountName: String
     var password: String
@@ -25,6 +32,8 @@ enum AuthenticationError: Error {
     case unableToRetrieveAppleServiceKey(error: Error)
     case canNotReadMFATypes
     case accountNeedsRepair(location: String, repairToken: String)
+    case serviceUnavailable //503
+    case notImplemented(featureName: String) // temporray while I'm working on a feature
     case unexpectedHTTPReturnCode(code: Int)
     case other(error: Error)
 }
@@ -76,7 +85,7 @@ struct AppleSession: Codable, Equatable {
 protocol AppleAuthenticatorProtocol {
 
     // standard authentication methods
-    func startAuthentication(username: String, password: String) async throws
+    func startAuthentication(with: AuthenticationMethod, username: String, password: String) async throws
     func signout() async throws
 
     // multi-factor authentication
@@ -85,6 +94,14 @@ protocol AppleAuthenticatorProtocol {
 }
 
 class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
+    func startAuthentication(with authenticationMethod: AuthenticationMethod, username: String, password: String) async throws {
+        guard authenticationMethod == .usernamePassword else {
+            throw AuthenticationError.notImplemented(featureName: "SRP Authentication")
+        }
+        try await checkServiceKey()
+        try await self.startAuthentication(username: username, password: password)
+    }
+    
 
     func saveSession(response: HTTPURLResponse, session: AppleSession) async throws {
         guard let cookies = response.value(forHTTPHeaderField: "Set-Cookie") else {
@@ -109,14 +126,13 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         }
     }
 
-    func startAuthentication(username: String, password: String) async throws {
-        try await checkServiceKey()
+    private func startAuthentication(username: String, password: String) async throws {
 
         let (_, response) =
         try await apiCall(url: "https://idmsa.apple.com/appleauth/auth/signin",
                           method: .POST,
                           body: try JSONEncoder().encode(User(accountName: username, password: password)),
-                          validResponse: .range(0..<500))
+                          validResponse: .range(0..<506))
 
         // store the response to keep cookies and HTTP headers
         session.xAppleIdSessionId  = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id")
@@ -141,6 +157,10 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         case 409:
             // requires two-factors authentication
             throw AuthenticationError.requires2FA
+
+        case 503:
+            // service unavailable. Most probably teh requested Authentication method is not supported
+            throw AuthenticationError.serviceUnavailable
 
         default:
             log.critical("💣 Unexpected return code : \(response.statusCode)")

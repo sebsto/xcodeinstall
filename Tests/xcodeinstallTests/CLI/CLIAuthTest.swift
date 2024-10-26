@@ -71,7 +71,7 @@ class CLIAUthTest: CLITest {
         // when
         do {
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
-            try await xci.authenticate()
+            try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
         } catch {
             // then
             XCTAssert(false, "unexpected exception : \(error)")
@@ -125,7 +125,12 @@ class CLIAUthTest: CLITest {
         do {
             let xci = XCodeInstall()
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
-            try await xci.authenticate()
+            try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
+            
+        } catch AuthenticationError.unexpectedHTTPReturnCode(let code) {
+            
+            // this is the normal case for this test
+            XCTAssert(code == 500, "Unexpected HTTP return code : \(code)")
             
         } catch {
             // then

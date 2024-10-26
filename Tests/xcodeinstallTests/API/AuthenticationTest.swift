@@ -66,7 +66,7 @@ class AuthenticationTest: HTTPClientTestCase {
             let authenticator     = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
-            _ = try await authenticator.startAuthentication(username: "username", password: "password")
+            _ = try await authenticator.startAuthentication(with: .usernamePassword, username: "username", password: "password")
             XCTAssert(false, "No exception thrown")
 
         } catch AuthenticationError.invalidUsernamePassword {
@@ -92,7 +92,7 @@ class AuthenticationTest: HTTPClientTestCase {
             let authenticator     = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
-            try await authenticator.startAuthentication(username: "username", password: "password")
+            try await authenticator.startAuthentication(with: .usernamePassword, username: "username", password: "password")
             
             XCTAssertNotNil(authenticator.session)
             //XCTAssertNotNil(authenticator.cookies)
@@ -127,7 +127,7 @@ class AuthenticationTest: HTTPClientTestCase {
             authenticator.session = getAppleSession()
             authenticator.session.itcServiceKey = nil 
 
-            try await authenticator.startAuthentication(username: "username", password: "password")
+            try await authenticator.startAuthentication(with: .usernamePassword, username: "username", password: "password")
             
             XCTAssert(false, "An exception must be thrown)")
             
@@ -150,14 +150,20 @@ class AuthenticationTest: HTTPClientTestCase {
             let authenticator     = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
-            _ = try await authenticator.startAuthentication(username: "username", password: "password")
+            _ = try await authenticator.startAuthentication(with: .usernamePassword, username: "username", password: "password")
             XCTAssert(false, "No exception thrown")
 
         } catch let error as URLError {
+            
             // verify it returns an error code
             XCTAssertNotNil(error)
             XCTAssert(error.code == URLError.badServerResponse)
             
+        } catch AuthenticationError.unexpectedHTTPReturnCode(let code) {
+            
+            // this is the normal case for this test 
+            XCTAssertEqual(code, 500)
+
         } catch {
             XCTAssert(false, "Invalid exception thrown : \(error)")
         }
@@ -175,7 +181,7 @@ class AuthenticationTest: HTTPClientTestCase {
             let authenticator     = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
-            _ = try await authenticator.startAuthentication(username: "username", password: "password")
+            _ = try await authenticator.startAuthentication(with: .usernamePassword, username: "username", password: "password")
             XCTAssert(false, "No exception thrown")
 
         } catch AuthenticationError.invalidUsernamePassword {
@@ -198,7 +204,7 @@ class AuthenticationTest: HTTPClientTestCase {
             let authenticator     = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
-            _ = try await authenticator.startAuthentication(username: "username", password: "password")
+            _ = try await authenticator.startAuthentication(with: .usernamePassword, username: "username", password: "password")
             XCTAssert(false, "No exception thrown")
 
         } catch AuthenticationError.unexpectedHTTPReturnCode(let code) {

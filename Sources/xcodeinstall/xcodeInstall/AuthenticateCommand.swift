@@ -9,7 +9,7 @@ import Foundation
 
 extension XCodeInstall {
 
-    func authenticate() async throws {
+    func authenticate(with authenticationMethod: AuthenticationMethod) async throws {
 
         let auth = env.authenticator
 
@@ -19,8 +19,13 @@ extension XCodeInstall {
             try await env.secrets.clearSecrets()
             let appleCredentials = try await retrieveAppleCredentials()
 
-            display("Authenticating...")
-            try await auth.startAuthentication(username: appleCredentials.username,
+            if authenticationMethod == .usernamePassword {
+                display("Authenticating with username and password (likely to fail) ...")
+            } else {
+                display("Authenticating...")
+            }
+            try await auth.startAuthentication(with: authenticationMethod,
+                                               username: appleCredentials.username,
                                                password: appleCredentials.password)
             display("✅ Authenticated.")
 
@@ -34,10 +39,20 @@ extension XCodeInstall {
             // handle two factors authentication
             try await startMFAFlow()
 
+        } catch AuthenticationError.serviceUnavailable {
+
+            // service unavailable means that the authentication method requested is not available
+            display("🛑 Requested authentication method is not available. Try with SRP.")
+
         } catch AuthenticationError.unableToRetrieveAppleServiceKey(let error) {
 
             // handle connection errors
             display("🛑 Can not connect to Apple Developer Portal.\nOriginal error : \(error.localizedDescription)")
+
+        } catch AuthenticationError.notImplemented(let feature) {
+
+            // handle not yet implemented errors
+            display("🛑 \(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available.")
 
         } catch {
             display("🛑 Unexpected Error : \(error)")
