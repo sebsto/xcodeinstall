@@ -6,7 +6,9 @@
 //
 
 import CLIlib
+import Crypto
 import Foundation
+import SRP
 
 // MARK: - Module Internal structures and data
 
@@ -104,11 +106,14 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         username: String,
         password: String
     ) async throws {
-        guard authenticationMethod == .usernamePassword else {
-            throw AuthenticationError.notImplemented(featureName: "SRP Authentication")
-        }
         try await checkServiceKey()
-        try await self.startAuthentication(username: username, password: password)
+
+        switch authenticationMethod {
+        case .usernamePassword:
+            try await self.startAuthentication(username: username, password: password)
+        case .srp:
+            try await self.startSRPAuthentication(username: username, password: password)
+        }
     }
 
     // this is mainly for functional testing, it invalidates the session and force a full re-auth aftewards
@@ -163,6 +168,64 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
     //
     //class UsernamePasswordAuthentication: HTTPClient {
     func startSRPAuthentication(username: String, password: String) async throws {
+        
+        // signification of variables : https://blog.uniauth.com/what-is-secure-remote-password
+        
+        let configuration = SRPConfiguration<SHA256>(.N2048)
+        let client = SRPClient(configuration: configuration)
+        let clientKeys = client.generateKeys()
+        
+        let a = clientKeys.private
+                
+        let (data, response) =
+            try await apiCall(
+                url: "https://idmsa.apple.com/appleauth/auth/signin/init",
+                method: .POST,
+                body: try JSONEncoder().encode(AppleSRPInitRequest(a: a.base64, accountName: username)),
+                validResponse: .range(0..<506)
+            )
+        
+        //TODO: throw error when statusCode is not 200
+        let srpResponse = try JSONDecoder().decode(AppleSRPInitResponse.self, from: data)
+        
+        let key_length = 32
+        let iterations = srpResponse.iteration
+        let salt = srpResponse.saltBytes()
+        let B = srpResponse.b
+        let c = srpResponse.c
+        
+        let serverPublicKey = SRPKey(base64: B)!
+        
+        let derivedPassword: [UInt8] = [1,2,3] // pbkdf2(password, salt, iterations, key_length)
+        let derivedPasswordBase64: String = "ABC="
+        
+        let clientSharedSecret = try client.calculateSharedSecret(
+            username: username,
+            password: derivedPasswordBase64,
+            salt: salt,
+            clientKeys: clientKeys,
+            serverPublicKey: serverPublicKey
+        )
+        let clientProof = client.calculateClientProof(
+            username: username,
+            salt: salt,
+            clientPublicKey: clientKeys.public,
+            serverPublicKey: serverPublicKey,
+            sharedSecret: clientSharedSecret
+        )
+        
+        let m1 = clientSharedSecret
+        let m2 = clientProof
+        
+        let (data2, response2) =
+            try await apiCall(
+                url: "https://idmsa.apple.com/appleauth/auth/signin/complete?isRememberMeEnabled=false",
+                method: .POST,
+                body: try JSONEncoder().encode(AppleSRPCompleteRequest(accountName: username, c: c, m1: m1.base64, m2: m2.base64)),
+                validResponse: .range(0..<506)
+            )
+
+
     }
 
     func startAuthentication(username: String, password: String) async throws {
@@ -221,4 +284,64 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         _ = try await env.secrets.saveSession(session)
     }
 
+}
+
+/*
+ {
+   "protocols": [
+     "s2k",
+     "s2k_fo"
+   ],
+   "a": "5DiL4KfAjhfeVN5dkrPD0Ykc9rhOvbSUlJel9miq8fI=",
+   "accountName": "xxx@me.com"
+ }
+ */
+struct AppleSRPInitRequest: Encodable {
+    let a: String
+    let accountName: String
+    let protocols: [String] = ["s2k", "s2k_fo"]
+}
+
+/*
+ {
+   "iteration" : 1160,
+   "salt" : "iVGSz0+eXAe5jzBsuSH9Gg==",
+   "protocol" : "s2k_fo",
+   "b" : "feF9PcfeU6pKeZb27kxM080eOPvg0wZurW6sGglwhIi63VPyQE1FfU1NKdU5bRHpGYcz23AKetaZWX6EqlIUYsmguN7peY9OU74+V16kvPaMFtSvS4LUrl8W+unt2BTlwRoINTYVgoIiLwXFKAowH6dA9HGaOy8TffKw/FskGK1rPqf8TZJ3IKWk6LA8AAvNhQhaH2/rdtdysJpV+T7eLpoMlcILWCOVL1mzAeTr3lMO4UdcnPokjWIoHIEJXDF8XekRbqSeCZvMlZBP1qSeRFwPuxz//doEk0AS2wU2sZFinPmfz4OV2ESQ4j9lfxE+NvapT+fPAmEUysUL61piMw==",
+   "c" : "d-74e-7f288e09-93e6-11ef-9a9c-278293010698:PRN"
+ }
+ */
+struct AppleSRPInitResponse: Decodable {
+    let iteration: Int
+    let salt: String
+    let `protocol`: String
+    let b: String
+    let c: String
+    func saltBytes() -> [UInt8] { return Array(Data(base64Encoded: salt)!) }
+    func bBytes() -> Data? { return Data(base64Encoded: b) }
+}
+
+struct AppleSRPCompleteRequest: Encodable {
+    let accountName: String
+    let c: String
+    let m1: String
+    let m2: String
+    let rememberMe: Bool = false
+}
+
+extension SRPKey {
+    public var base64: String {
+        let data = Data(self.bytes)
+        return data.base64EncodedString()
+    }
+    public init?(base64: String) {
+        guard let data = Data(base64Encoded: base64) else { return nil }
+        self.init(Array(data))
+    }
+}
+
+extension Array where Element == UInt8 {
+    public var base64: String {
+        Data(self).base64EncodedString()
+    }
 }
