@@ -6,29 +6,31 @@
 //
 
 import XCTest
+
 @testable import xcodeinstall
 
-
 class URLRequestCurlTest: XCTestCase {
-    
-    var agent  : HTTPClient!
-        
+
+    var agent: HTTPClient!
+
     override func setUpWithError() throws {
-        
+
         env = Environment.mock
-        
+
         try super.setUpWithError()
-        self.agent   = HTTPClient()
+        self.agent = HTTPClient()
     }
 
     func testRequestToCurl() throws {
-        
+
         //given
         let url = "https://dummy.com"
-        var headers  = [ "header1" : "value1",
-                         "header2" : "value2"]
+        var headers = [
+            "header1": "value1",
+            "header2": "value2",
+        ]
         let data = "test data".data(using: .utf8)
-        let cookie = HTTPCookie(properties: [.name : "cookieName", .value: "cookieValue", .path: "/", .originURL: url])
+        let cookie = HTTPCookie(properties: [.name: "cookieName", .value: "cookieValue", .path: "/", .originURL: url])
         if let cookie {
             headers.merge(HTTPCookie.requestHeaderFields(with: [cookie])) { (current, _) in current }
         }
@@ -36,7 +38,7 @@ class URLRequestCurlTest: XCTestCase {
         // when
         let request = agent.request(for: url, method: .GET, withBody: data, withHeaders: headers)
         let curl = request.cURL(pretty: false)
-        
+
         // then
         XCTAssertNotNil(curl)
         XCTAssert(curl.starts(with: "curl "))
@@ -47,15 +49,17 @@ class URLRequestCurlTest: XCTestCase {
         XCTAssert(curl.contains("--data 'test data'"))
 
     }
-    
+
     func testRequestToCurlPrettyPrint() throws {
-        
+
         //given
         let url = "https://dummy.com"
-        var headers  = [ "header1" : "value1",
-                         "header2" : "value2"]
+        var headers = [
+            "header1": "value1",
+            "header2": "value2",
+        ]
         let data = "test data".data(using: .utf8)
-        let cookie = HTTPCookie(properties: [.name : "cookieName", .value: "cookieValue", .path: "/", .originURL: url])
+        let cookie = HTTPCookie(properties: [.name: "cookieName", .value: "cookieValue", .path: "/", .originURL: url])
         if let cookie {
             headers.merge(HTTPCookie.requestHeaderFields(with: [cookie])) { (current, _) in current }
         }
@@ -63,7 +67,7 @@ class URLRequestCurlTest: XCTestCase {
         // when
         let request = agent.request(for: url, method: .GET, withBody: data, withHeaders: headers)
         let curl = request.cURL(pretty: true)
-        
+
         // then
         XCTAssertNotNil(curl)
         XCTAssert(curl.starts(with: "curl "))

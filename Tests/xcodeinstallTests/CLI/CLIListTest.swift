@@ -6,14 +6,17 @@
 //
 
 import XCTest
+
 @testable import xcodeinstall
 
 class CLIListTest: CLITest {
-    
+
     func testList() async throws {
-        
+
         // given
-        let list = try parse(MainCommand.List.self, [
+        let list = try parse(
+            MainCommand.List.self,
+            [
                 "list",
                 "--verbose",
                 "--force",
@@ -22,8 +25,9 @@ class CLIListTest: CLITest {
                 "14",
                 "--most-recent-first",
                 "--date-published",
-        ])
-        
+            ]
+        )
+
         // when
         do {
             //_ = try await xci.list(force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: true, datePublished: true)

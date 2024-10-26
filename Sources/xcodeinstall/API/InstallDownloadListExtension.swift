@@ -21,7 +21,11 @@ extension DownloadList {
     /// - Returns
     ///     a File struct if a file matches, nil otherwise
 
-    private func _find<T: Sequence>(fileName: String, inList list: T, comparison: (T.Element) -> File?) -> File? {
+    private func _find<T: Sequence>(
+        fileName: String,
+        inList list: T,
+        comparison: (T.Element) -> File?
+    ) -> File? {
 
         // first returns an array of File? with nil when filename does not match
         // or file otherwise.
@@ -30,9 +34,9 @@ extension DownloadList {
             return comparison(element)
         }
         // then remove all nil values
-//        .filter { file in
-//            return file != nil
-//        }
+        //        .filter { file in
+        //            return file != nil
+        //        }
 
         // we should have 0 or 1 element
         if result.count > 0 {
@@ -55,19 +59,27 @@ extension DownloadList {
             return nil
         }
 
-        return _find(fileName: fileName, inList: listOfDownloads, comparison: { element in
-            let download = element as Download
-            return find(fileName: fileName, inDownload: download)
-        })
+        return _find(
+            fileName: fileName,
+            inList: listOfDownloads,
+            comparison: { element in
+                let download = element as Download
+                return find(fileName: fileName, inDownload: download)
+            }
+        )
     }
 
     // search the list of files ([File]) for an individual file match
     func find(fileName: String, inDownload download: Download) -> File? {
 
-        return _find(fileName: fileName, inList: download.files, comparison: { element in
-            let file = element as File
-            return file.filename == fileName ? file : nil
-        })
+        _find(
+            fileName: fileName,
+            inList: download.files,
+            comparison: { element in
+                let file = element as File
+                return file.filename == fileName ? file : nil
+            }
+        )
 
     }
 }

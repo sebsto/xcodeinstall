@@ -13,8 +13,8 @@
 // https://github.com/nsscreencast/469-swift-command-line-progress-bar
 // https://github.com/jkandzi/Progress.swift/blob/master/Sources/Progress.swift
 
-import Foundation
 import CLIlib
+import Foundation
 
 protocol CLIProgressBarProtocol: ProgressUpdateProtocol {
     func define(animationType: ProgressBarType, message: String)
@@ -28,7 +28,11 @@ class CLIProgressBar: CLIProgressBarProtocol {
 
     func define(animationType: ProgressBarType, message: String) {
         self.message = message
-        self.progressAnimation = ProgressBar(output: stream, progressBarType: animationType, title: self.message)
+        self.progressAnimation = ProgressBar(
+            output: stream,
+            progressBarType: animationType,
+            title: self.message
+        )
     }
 
     /// Update the animation with a new step.

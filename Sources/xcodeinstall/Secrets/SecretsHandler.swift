@@ -19,11 +19,11 @@ struct AppleCredentialsSecret: Codable, Secrets {
     let password: String
 
     func data() throws -> Data {
-        return try JSONEncoder().encode(self)
+        try JSONEncoder().encode(self)
     }
 
     func string() throws -> String? {
-        return String(data: try self.data(), encoding: .utf8)
+        String(data: try self.data(), encoding: .utf8)
     }
 
     init(fromData data: Data) throws {
@@ -49,8 +49,8 @@ protocol SecretsHandlerProtocol {
 
     func clearSecrets() async throws
 
-//    func clearSecrets(preserve: Bool)
-//    func restoreSecrets()
+    //    func clearSecrets(preserve: Bool)
+    //    func restoreSecrets()
 
     func saveCookies(_ cookies: String?) async throws -> String?
     func loadCookies() async throws -> [HTTPCookie]
@@ -68,7 +68,7 @@ extension SecretsHandlerProtocol {
     ///
     /// - Parameters
     ///     - cookies : the new cookies to store (or to append)
-    ///     
+    ///
     /// - Returns : the new string with all cookies
     ///
     func mergeCookies(existingCookies: [HTTPCookie], newCookies: String?) async throws -> String? {
@@ -88,7 +88,7 @@ extension SecretsHandlerProtocol {
         for newCookie in newCookies {
 
             // if a newCookie match an existing one
-            if ( existingCookies.contains { cookie in cookie.name == newCookie.name }) {
+            if (existingCookies.contains { cookie in cookie.name == newCookie.name }) {
 
                 // replace old with new
                 // assuming there is only one !!
@@ -113,8 +113,10 @@ extension String {
         var fakeHttpHeader = [String: String]()
         fakeHttpHeader["Set-Cookie"] = self
         // only cookies from this domain or subdomains are going to be created
-        return HTTPCookie.cookies(withResponseHeaderFields: fakeHttpHeader,
-                                  for: URL(string: "https://apple.com")!)
+        return HTTPCookie.cookies(
+            withResponseHeaderFields: fakeHttpHeader,
+            for: URL(string: "https://apple.com")!
+        )
 
     }
 
@@ -134,7 +136,7 @@ extension Array where Element == HTTPCookie {
                 // return all properties as an array of strings with key=value
                 var cookieAsString = props.map { (key: HTTPCookiePropertyKey, value: Any) -> String in
                     switch key.rawValue {
-                        // boolean values are handled separately
+                    // boolean values are handled separately
                     case "Secure": return "Secure"
                     case "HttpOnly": return "HttpOnly"
                     case "Discard": return ""
@@ -157,8 +159,9 @@ extension Array where Element == HTTPCookie {
                 }
 
                 // add name=value
-                if let name  = props[HTTPCookiePropertyKey.name] as? String,
-                   let value = props[HTTPCookiePropertyKey.value] as? String {
+                if let name = props[HTTPCookiePropertyKey.name] as? String,
+                    let value = props[HTTPCookiePropertyKey.value] as? String
+                {
                     cookieString += "\(name)=\(value); "
                 } else {
                     fatalError("Cookie string has no name or value values")

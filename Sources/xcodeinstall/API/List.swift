@@ -5,8 +5,8 @@
 //  Created by Stormacq, Sebastien on 21/08/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
 
 extension AppleDownloader {
 
@@ -25,10 +25,13 @@ extension AppleDownloader {
         }
 
         if downloadList == nil {
-            let url = "https://developer.apple.com/services-account/QH65B2/downloadws/listDownloads.action"
-            let (data, response) = try await apiCall(url: url,
-                                                     method: .POST,
-                                                     validResponse: .range(200..<400))
+            let url =
+                "https://developer.apple.com/services-account/QH65B2/downloadws/listDownloads.action"
+            let (data, response) = try await apiCall(
+                url: url,
+                method: .POST,
+                validResponse: .range(200..<400)
+            )
 
             guard response.statusCode == 200 else {
                 log.error("🛑 Download List response is not 200, something is incorrect")
@@ -50,7 +53,9 @@ extension AppleDownloader {
                     _ = try await env.secrets.saveCookies(cookies)
                 } else {
                     // swiftlint:disable line_length
-                    log.error("🛑 Download List response does not contain authentication cookie, something is incorrect")
+                    log.error(
+                        "🛑 Download List response does not contain authentication cookie, something is incorrect"
+                    )
                     log.debug("URLResponse = \(response)")
                     throw DownloadError.invalidResponse
                 }
@@ -61,18 +66,24 @@ extension AppleDownloader {
             } else {
 
                 switch downloadList!.resultCode {
-                case 1100: // authentication expired
+                case 1100:  // authentication expired
                     throw DownloadError.authenticationRequired
-                case 2100: // needs to accept ToC
+                case 2100:  // needs to accept ToC
                     throw DownloadError.needToAcceptTermsAndCondition
-                case 2170: // accounts need upgrade
-                    log.error("Error \(downloadList!.resultCode) : \(downloadList!.userString ?? "no user string")")
-                    throw DownloadError.accountneedUpgrade(errorCode: downloadList!.resultCode,
-                                                           errorMessage: downloadList!.userString ?? "Your developer account needs to be updated")
+                case 2170:  // accounts need upgrade
+                    log.error(
+                        "Error \(downloadList!.resultCode) : \(downloadList!.userString ?? "no user string")"
+                    )
+                    throw DownloadError.accountneedUpgrade(
+                        errorCode: downloadList!.resultCode,
+                        errorMessage: downloadList!.userString ?? "Your developer account needs to be updated"
+                    )
                 default:
                     // is there other error cases that I need to handle explicitly ?
-                    throw DownloadError.unknownError(errorCode: downloadList!.resultCode,
-                                                     errorMessage: downloadList!.userString ?? "Unknwon error")
+                    throw DownloadError.unknownError(
+                        errorCode: downloadList!.resultCode,
+                        errorMessage: downloadList!.userString ?? "Unknwon error"
+                    )
                 }
             }
         }

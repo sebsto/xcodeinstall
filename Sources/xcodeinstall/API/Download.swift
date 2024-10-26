@@ -5,8 +5,8 @@
 //  Created by Stormacq, Sebastien on 19/07/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
 
 protocol AppleDownloaderProtocol {
     func list(force: Bool) async throws -> DownloadList
@@ -26,8 +26,9 @@ class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
         }
 
         guard !file.remotePath.isEmpty,
-              !file.filename.isEmpty,
-              file.fileSize > 0 else {
+            !file.filename.isEmpty,
+            file.fileSize > 0
+        else {
             log.error("🛑 Invalid file specification : \(file)")
             throw DownloadError.invalidFileSpec
         }
@@ -36,7 +37,9 @@ class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
 
         // pass a progress update client to the download delegate to receive progress updates
         downloadDelegate.totalFileSize = file.fileSize
-        downloadDelegate.dstFilePath = URL(fileURLWithPath: env.fileHandler.downloadFilePath(file: file))
+        downloadDelegate.dstFilePath = URL(
+            fileURLWithPath: env.fileHandler.downloadFilePath(file: file)
+        )
         downloadDelegate.startTime = Date.now
 
         // make a call to start the download

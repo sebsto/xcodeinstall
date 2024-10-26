@@ -5,14 +5,18 @@
 //  Created by Stormacq, Sebastien on 18/07/2022.
 //
 
+import CLIlib
 import Foundation
 import Logging
-import CLIlib
 
 // FIXME consider using Swift 5.7 regexp
 // https://github.com/apple/swift-evolution/blob/main/proposals/0350-regex-type-overview.md
 func filterPassword(_ input: String) -> String {
-    return input.replacingOccurrences(of: "(\"password\":\").*(\"[,}])", with: "$1*****$2", options: .regularExpression)
+    input.replacingOccurrences(
+        of: "(\"password\":\").*(\"[,}])",
+        with: "$1*****$2",
+        options: .regularExpression
+    )
 }
 
 func log(request: URLRequest, to logger: Logger) {
@@ -26,10 +30,10 @@ func log(request: URLRequest, to logger: Logger) {
     let query = "\(urlComponents?.query ?? "")"
     let host = "\(urlComponents?.host ?? "")"
     var output = """
-   \(urlAsString) \n\n
-   \(method) \(path)?\(query) HTTP/1.1 \n
-   HOST: \(host)\n
-   """
+        \(urlAsString) \n\n
+        \(method) \(path)?\(query) HTTP/1.1 \n
+        HOST: \(host)\n
+        """
 
     for (key, value) in request.allHTTPHeaderFields ?? [:] {
         output += "\(key): \(value)\n"
@@ -38,7 +42,7 @@ func log(request: URLRequest, to logger: Logger) {
 
     if let body = request.httpBody {
         output += "\n \(String(data: body, encoding: .utf8) ?? "")"
-   }
+    }
     logger.debug("\(filterPassword(output))")
 }
 
@@ -55,7 +59,7 @@ func log(response: HTTPURLResponse?, data: Data?, error: Error?, to logger: Logg
         output += "\(urlString)"
         output += "\n\n"
     }
-    if let statusCode =  response?.statusCode {
+    if let statusCode = response?.statusCode {
         output += "HTTP \(statusCode) \(path)?\(query)\n"
     }
     if let host = components?.host {

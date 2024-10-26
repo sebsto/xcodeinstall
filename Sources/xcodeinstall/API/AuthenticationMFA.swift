@@ -5,8 +5,8 @@
 //  Created by Stormacq, Sebastien on 22/07/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
 
 // swiftlint:disable all
 /*
@@ -108,20 +108,22 @@ extension AppleAuthenticator {
     func handleTwoFactorAuthentication() async throws -> Int {
 
         guard let data = try? await getMFAType(),
-              let mfaType = try? JSONDecoder().decode(MFAType?.self, from: data) else {
+            let mfaType = try? JSONDecoder().decode(MFAType?.self, from: data)
+        else {
             throw AuthenticationError.canNotReadMFATypes
         }
 
         // FIXME: - add support for SMS fallback in case there is no trusted device
 
-        // I should first understand and handle case where there is a 'trustedDevices' in the answer according to 
+        // I should first understand and handle case where there is a 'trustedDevices' in the answer according to
         // https://github.com/fastlane/fastlane/blob/master/spaceship/lib/spaceship/two_step_or_factor_client.rb#L18
         // when there is no 'trustedDevices', we are supposed to fallback to SMS to a phone number
         // but for my account, the API return no 'trustedDevices' but I still receive the code on my mac and iphone
 
         guard let count = mfaType.trustedPhoneNumbers?.count,
-              count > 0,
-              let securityCodeLength = mfaType.securityCode?.length else {
+            count > 0,
+            let securityCodeLength = mfaType.securityCode?.length
+        else {
             log.warning("⚠️ No Security code length provided in answer")
             throw AuthenticationError.requires2FATrustedPhoneNumber
         }
@@ -140,14 +142,16 @@ extension AppleAuthenticator {
         }
 
         let codeType = "trusteddevice"
-        let body     = TFABody(securityCode: TFACode(code: pin))
+        let body = TFABody(securityCode: TFACode(code: pin))
         let requestHeader = ["X-Apple-Id-Session-Id": session.xAppleIdSessionId!]
 
-        let (_, response) = try await apiCall(url: "https://idmsa.apple.com/appleauth/auth/verify/\(codeType)/securitycode", // swiftlint:disable:this line_length
-                                      method: .POST,
-                                      body: try JSONEncoder().encode(body),
-                                      headers: requestHeader,
-                                      validResponse: .range(200..<413))
+        let (_, response) = try await apiCall(
+            url: "https://idmsa.apple.com/appleauth/auth/verify/\(codeType)/securitycode",  // swiftlint:disable:this line_length
+            method: .POST,
+            body: try JSONEncoder().encode(body),
+            headers: requestHeader,
+            validResponse: .range(200..<413)
+        )
 
         switch response.statusCode {
         case 400:
@@ -158,9 +162,12 @@ extension AppleAuthenticator {
             // upgrade account and repair with repair token
             // see https://my.diffend.io/gems/fastlane/2.170.0/2.175.0/page/9#d2h-629314-4781
             if let location = response.value(forHTTPHeaderField: "Location") {
-                throw AuthenticationError.accountNeedsRepair(location: location, repairToken: "secret") // X-Apple-Repair-Session-Token
+                throw AuthenticationError.accountNeedsRepair(location: location, repairToken: "secret")  // X-Apple-Repair-Session-Token
             } else {
-                throw AuthenticationError.accountNeedsRepair(location: "no location HTTP header", repairToken: "secret") // X-Apple-Repair-Session-Token
+                throw AuthenticationError.accountNeedsRepair(
+                    location: "no location HTTP header",
+                    repairToken: "secret"
+                )  // X-Apple-Repair-Session-Token
             }
 
         case 200, 204:
@@ -181,14 +188,16 @@ extension AppleAuthenticator {
     // by OOP design it should be private.  Make it internal (default) for testing
     func getMFAType() async throws -> Data? {
 
-        let (data, _) = try await apiCall(url: "https://idmsa.apple.com/appleauth/auth",
-                                          validResponse: .range(200..<400))
+        let (data, _) = try await apiCall(
+            url: "https://idmsa.apple.com/appleauth/auth",
+            validResponse: .range(200..<400)
+        )
 
         return data
 
     }
 
-// swiftlint:disable all
+    // swiftlint:disable all
     /*
      Tell iTC that we are trustworthy (obviously)
      This will update our local cookies to something new
@@ -230,5 +239,5 @@ extension AppleAuthenticator {
     //            exit(-1)
     //        }
     //    }
-// swiftlint:enable all
+    // swiftlint:enable all
 }

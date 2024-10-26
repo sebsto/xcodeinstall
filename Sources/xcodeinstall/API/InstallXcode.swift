@@ -5,8 +5,8 @@
 //  Created by Stormacq, Sebastien on 29/08/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
 
 // MARK: XCODE
 // XCode installation functions
@@ -24,7 +24,11 @@ extension ShellInstaller {
         log.debug("Decompressing files")
         // run synchronously as there is no output for this operation
         currentStep += 1
-        env.progressBar.update(step: currentStep, total: totalSteps, text: "Expanding Xcode xip (this might take a while)")
+        env.progressBar.update(
+            step: currentStep,
+            total: totalSteps,
+            text: "Expanding Xcode xip (this might take a while)"
+        )
         resultOptional = try self.uncompressXIP(atURL: src)
         if resultOptional == nil || resultOptional!.code != 0 {
             log.error("Can not unXip file : \(resultOptional!)")
@@ -34,13 +38,19 @@ extension ShellInstaller {
         // second move file to /Applications
         log.debug("Moving app to destination")
         currentStep += 1
-        env.progressBar.update(step: currentStep, total: totalSteps, text: "Moving Xcode to /Applications")
+        env.progressBar.update(
+            step: currentStep,
+            total: totalSteps,
+            text: "Moving Xcode to /Applications"
+        )
         // find .app file
         let appFile = try env.fileHandler.downloadedFiles().filter({ fileName in
             return fileName.hasSuffix(".app")
         })
         if appFile.count != 1 {
-            log.error("Zero or several app file to install in \(appFile), not sure which one is the correct one")
+            log.error(
+                "Zero or several app file to install in \(appFile), not sure which one is the correct one"
+            )
             throw InstallerError.xCodeMoveInstallationError
         }
 
@@ -53,8 +63,14 @@ extension ShellInstaller {
         for pkg in PKGTOINSTALL {
             log.debug("Installing package \(pkg)")
             currentStep += 1
-            env.progressBar.update(step: currentStep, total: totalSteps, text: "Installing additional packages... \(pkg)")
-            resultOptional = try self.installPkg(atURL: URL(fileURLWithPath: "\(installedFile)/Contents/resources/Packages/\(pkg)"))
+            env.progressBar.update(
+                step: currentStep,
+                total: totalSteps,
+                text: "Installing additional packages... \(pkg)"
+            )
+            resultOptional = try self.installPkg(
+                atURL: URL(fileURLWithPath: "\(installedFile)/Contents/resources/Packages/\(pkg)")
+            )
             if resultOptional == nil || resultOptional!.code != 0 {
                 log.error("Can not install pkg at : \(pkg)\n\(resultOptional!)")
                 throw InstallerError.xCodePKGInstallationError
@@ -77,9 +93,9 @@ extension ShellInstaller {
         }
 
         // synchronously uncompress in the download directory
-        let cmd = "pushd \"\(FileHandler.downloadDirectory.path)\" && " +
-        "\(XIPCOMMAND) --expand \"\(filePath)\" && " +
-        "popd"
+        let cmd =
+            "pushd \"\(FileHandler.downloadDirectory.path)\" && "
+            + "\(XIPCOMMAND) --expand \"\(filePath)\" && " + "popd"
         let result = try env.shell.run(cmd)
 
         return result

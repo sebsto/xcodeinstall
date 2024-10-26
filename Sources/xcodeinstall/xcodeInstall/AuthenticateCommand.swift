@@ -24,9 +24,11 @@ extension XCodeInstall {
             } else {
                 display("Authenticating...")
             }
-            try await auth.startAuthentication(with: authenticationMethod,
-                                               username: appleCredentials.username,
-                                               password: appleCredentials.password)
+            try await auth.startAuthentication(
+                with: authenticationMethod,
+                username: appleCredentials.username,
+                password: appleCredentials.password
+            )
             display("✅ Authenticated.")
 
         } catch AuthenticationError.invalidUsernamePassword {
@@ -47,12 +49,16 @@ extension XCodeInstall {
         } catch AuthenticationError.unableToRetrieveAppleServiceKey(let error) {
 
             // handle connection errors
-            display("🛑 Can not connect to Apple Developer Portal.\nOriginal error : \(error.localizedDescription)")
+            display(
+                "🛑 Can not connect to Apple Developer Portal.\nOriginal error : \(error.localizedDescription)"
+            )
 
         } catch AuthenticationError.notImplemented(let feature) {
 
             // handle not yet implemented errors
-            display("🛑 \(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available.")
+            display(
+                "🛑 \(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available."
+            )
 
         } catch {
             display("🛑 Unexpected Error : \(error)")
@@ -85,18 +91,30 @@ extension XCodeInstall {
 
     // prompt user for apple developer portal credentials interactively
     private func promptForCredentials() throws -> AppleCredentialsSecret {
-        display("""
-⚠️⚠️ We prompt you for your Apple ID username, password, and two factors authentication code.
-These values are not stored anywhere. They are used to get an Apple session ID. ⚠️⚠️
+        display(
+            """
+            ⚠️⚠️ We prompt you for your Apple ID username, password, and two factors authentication code.
+            These values are not stored anywhere. They are used to get an Apple session ID. ⚠️⚠️
 
-Alternatively, you may store your credentials on AWS Secrets Manager
-""")
+            Alternatively, you may store your credentials on AWS Secrets Manager
+            """
+        )
 
-        guard let username = env.readLine.readLine(prompt: "⌨️  Enter your Apple ID username: ", silent: false) else {
+        guard
+            let username = env.readLine.readLine(
+                prompt: "⌨️  Enter your Apple ID username: ",
+                silent: false
+            )
+        else {
             throw CLIError.invalidInput
         }
 
-        guard let password = env.readLine.readLine(prompt: "⌨️  Enter your Apple ID password: ", silent: true) else {
+        guard
+            let password = env.readLine.readLine(
+                prompt: "⌨️  Enter your Apple ID password: ",
+                silent: true
+            )
+        else {
             throw CLIError.invalidInput
         }
 
@@ -122,11 +140,13 @@ Alternatively, you may store your credentials on AWS Secrets Manager
 
         } catch AuthenticationError.requires2FATrustedPhoneNumber {
 
-            display("""
-            🔐 Two factors authentication is enabled, with 4 digits code and trusted phone numbers.
-            This tool does not support SMS MFA at the moment. Please enable 2 factors authentication
-            with trusted devices as described here: https://support.apple.com/en-us/HT204915
-            """)
+            display(
+                """
+                🔐 Two factors authentication is enabled, with 4 digits code and trusted phone numbers.
+                This tool does not support SMS MFA at the moment. Please enable 2 factors authentication
+                with trusted devices as described here: https://support.apple.com/en-us/HT204915
+                """
+            )
 
         }
     }

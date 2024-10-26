@@ -5,8 +5,8 @@
 //  Created by Stormacq, Sebastien on 20/08/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
 
 // the methods I want to mock for unit testing
 protocol FileHandlerProtocol {
@@ -18,8 +18,8 @@ protocol FileHandlerProtocol {
     func downloadFileURL(file: DownloadList.File) -> URL
     func saveDownloadList(list: DownloadList) throws -> DownloadList
     func loadDownloadList() throws -> DownloadList
-//    func baseFilePath() -> URL
-//    func baseFilePath() -> String
+    //    func baseFilePath() -> URL
+    //    func baseFilePath() -> String
 }
 
 enum FileHandlerError: Error {
@@ -29,20 +29,20 @@ enum FileHandlerError: Error {
 
 struct FileHandler: FileHandlerProtocol {
 
-    private static let baseDirectory
-           = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".xcodeinstall")
+    private static let baseDirectory = FileManager.default.homeDirectoryForCurrentUser
+        .appendingPathComponent(".xcodeinstall")
     static let downloadDirectory = baseDirectory.appendingPathComponent("download")
     static let downloadListPath = baseDirectory.appendingPathComponent("downloadList")
 
-    let fm = FileManager.default // swiftlint:disable:this identifier_name
+    let fm = FileManager.default  // swiftlint:disable:this identifier_name
 
     static func baseFilePath() -> String {
-        return baseFilePath().path
+        baseFilePath().path
     }
     static func baseFilePath() -> URL {
 
         // if base directory does not exist, create it
-        let fm = FileManager.default // swiftlint:disable:this identifier_name
+        let fm = FileManager.default  // swiftlint:disable:this identifier_name
         if !fm.fileExists(atPath: FileHandler.baseDirectory.path) {
             do {
                 try fm.createDirectory(at: FileHandler.downloadDirectory, withIntermediateDirectories: true)
@@ -71,7 +71,7 @@ struct FileHandler: FileHandlerProtocol {
     }
 
     func downloadFilePath(file: DownloadList.File) -> String {
-        return downloadFileURL(file: file).path
+        downloadFileURL(file: file).path
     }
     func downloadFileURL(file: DownloadList.File) -> URL {
 
@@ -80,7 +80,9 @@ struct FileHandler: FileHandlerProtocol {
             do {
                 try fm.createDirectory(at: FileHandler.downloadDirectory, withIntermediateDirectories: true)
             } catch {
-                log.error("🛑 Can not create base directory : \(FileHandler.downloadDirectory.path)\n\(error)")
+                log.error(
+                    "🛑 Can not create base directory : \(FileHandler.downloadDirectory.path)\n\(error)"
+                )
             }
         }
         return FileHandler.downloadDirectory.appendingPathComponent(file.filename)
@@ -100,7 +102,7 @@ struct FileHandler: FileHandlerProtocol {
 
         // file exists ?
         let exists = fm.fileExists(atPath: filePath)
-        if !exists { throw  FileHandlerError.fileDoesNotExist }
+        if !exists { throw FileHandlerError.fileDoesNotExist }
 
         // file size ?
         let attributes = try? fm.attributesOfItem(atPath: filePath)

@@ -5,19 +5,19 @@
 //  Created by Stormacq, Sebastien on 23/07/2022.
 //
 
-import Foundation
 import ArgumentParser
 import CLIlib
+import Foundation
 
 extension MainCommand {
 
     struct Authenticate: AsyncParsableCommand {
         static var configuration =
-               CommandConfiguration(abstract: "Authenticate yourself against Apple Developer Portal")
+            CommandConfiguration(abstract: "Authenticate yourself against Apple Developer Portal")
 
         @OptionGroup var globalOptions: GlobalOptions
         @OptionGroup var cloudOption: CloudOptions
-        
+
         @Option(name: .long, help: "Use SRP authentication")
         var srp = true
 

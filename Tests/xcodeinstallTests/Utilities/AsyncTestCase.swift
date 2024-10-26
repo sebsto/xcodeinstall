@@ -11,22 +11,22 @@ class AsyncTestCase: XCTestCase {
 
     func asyncSetUpWithError() async throws {
     }
-    
+
     func asyncTearDownWithError() async throws {
     }
-    
+
     override func setUpWithError() throws {
         wait {
             try await self.asyncSetUpWithError()
         }
     }
-    
+
     override func tearDownWithError() throws {
         wait {
             try await self.asyncTearDownWithError()
         }
     }
-    
+
     func wait(asyncBlock: @escaping (() async throws -> Void)) {
         let semaphore = DispatchSemaphore(value: 0)
         Task.init {

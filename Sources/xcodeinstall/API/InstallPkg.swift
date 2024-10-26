@@ -5,8 +5,8 @@
 //  Created by Stormacq, Sebastien on 29/08/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
 
 // MARK: PKG
 // generic PKG installation function

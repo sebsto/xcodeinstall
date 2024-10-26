@@ -5,18 +5,19 @@
 //  Created by Stormacq, Sebastien on 27/08/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
+
 @testable import xcodeinstall
 
 // used to test Installer component (see InstallerTest)
 class MockedFileHandler: FileHandlerProtocol {
-            
+
     var moveSrc: URL? = nil
     var moveDst: URL? = nil
     var nextFileExist: Bool? = nil
     var nextFileCorrect: Bool? = nil
-    
+
     func move(from src: URL, to dst: URL) throws {
         moveSrc = src
         moveDst = dst
@@ -29,7 +30,7 @@ class MockedFileHandler: FileHandlerProtocol {
         }
     }
     func downloadedFiles() throws -> [String] {
-        return ["name.pkg", "name.dmg"]
+        ["name.pkg", "name.dmg"]
     }
 
     func checkFileSize(file: URL, fileSize: Int) throws -> Bool {
@@ -39,31 +40,31 @@ class MockedFileHandler: FileHandlerProtocol {
             return true
         }
     }
-    
+
     func downloadFileURL(file: DownloadList.File) -> URL {
-        return URL(fileURLWithPath: downloadFilePath(file: file))
+        URL(fileURLWithPath: downloadFilePath(file: file))
     }
 
     func downloadFilePath(file: DownloadList.File) -> String {
-        return "/download/\(file.filename)"
+        "/download/\(file.filename)"
     }
-    
+
     func saveDownloadList(list: DownloadList) throws -> DownloadList {
         let listData = try loadTestData(file: .downloadList)
         return try JSONDecoder().decode(DownloadList.self, from: listData)
     }
-    
+
     func loadDownloadList() throws -> DownloadList {
         let listData = try loadTestData(file: .downloadList)
         return try JSONDecoder().decode(DownloadList.self, from: listData)
     }
-    
+
     func baseFilePath() -> URL {
-        return URL(string: "file:///tmp")!
+        URL(string: "file:///tmp")!
     }
-    
+
     func baseFilePath() -> String {
-        return "/tmp"
+        "/tmp"
     }
 }
 
@@ -71,10 +72,12 @@ class MockShell: AsyncShellProtocol {
 
     var command: String = ""
 
-    func run(_ command: String,
-             onCompletion: ((Process) -> Void)?,
-             onOutput: ((String) -> Void)?,
-             onError: ((String) -> Void)?) throws -> Process {
+    func run(
+        _ command: String,
+        onCompletion: ((Process) -> Void)?,
+        onOutput: ((String) -> Void)?,
+        onError: ((String) -> Void)?
+    ) throws -> Process {
 
         self.command = command
 
@@ -101,14 +104,14 @@ class MockShell: AsyncShellProtocol {
 }
 
 class MockedProgressBar: CLIProgressBarProtocol {
-    
+
     var isComplete = false
-    var isClear    = false
-    var step  = 0
+    var isClear = false
+    var step = 0
     var total = 0
-    var text  = ""
+    var text = ""
     private var _defineCalled = false
-    
+
     func define(animationType: CLIlib.ProgressBarType, message: String) {
         _defineCalled = true
     }
@@ -119,9 +122,9 @@ class MockedProgressBar: CLIProgressBarProtocol {
     }
 
     func update(step: Int, total: Int, text: String) {
-        self.step  = step
+        self.step = step
         self.total = total
-        self.text  = text
+        self.text = text
     }
 
     func complete(success: Bool) {

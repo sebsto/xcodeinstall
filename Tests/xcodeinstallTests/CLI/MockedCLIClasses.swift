@@ -5,8 +5,9 @@
 //  Created by Stormacq, Sebastien on 15/08/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
+
 @testable import xcodeinstall
 
 //
@@ -15,23 +16,23 @@ import CLIlib
 
 // mocked display (use class because string is mutating)
 class MockedDisplay: DisplayProtocol {
-    var string : String = ""
-    
+    var string: String = ""
+
     func display(_ msg: String, terminator: String) {
         self.string = msg + terminator
     }
 }
 
 // mocked read line
-class MockedReadLine : ReadLineProtocol {
-    
-    var input : [String] = []
-    
+class MockedReadLine: ReadLineProtocol {
+
+    var input: [String] = []
+
     init() {}
-    init(_ input : [String]) {
+    init(_ input: [String]) {
         self.input = input.reversed()
     }
-    
+
     func readLine(prompt: String, silent: Bool = false) -> String? {
         guard input.count > 0 else {
             fatalError("mocked not correctly initialized")

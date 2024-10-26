@@ -5,8 +5,8 @@
 //  Created by Stormacq, Sebastien on 29/08/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
 
 // MARK: Command Line Tools
 // Command Line Tools installation functions
@@ -58,7 +58,9 @@ extension ShellInstaller {
         env.progressBar.update(step: currentStep, total: totalSteps, text: "Unmounting volume...")
         resultOptional = try self.unmountDMG(volume: mountedDiskImage)
         if resultOptional == nil || resultOptional!.code != 0 {
-            log.error("Can not unmount volume : \(mountedDiskImage)\n\(String(describing: resultOptional))")
+            log.error(
+                "Can not unmount volume : \(mountedDiskImage)\n\(String(describing: resultOptional))"
+            )
             throw InstallerError.CLToolsInstallationError
         }
     }

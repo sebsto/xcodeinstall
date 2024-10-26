@@ -5,8 +5,8 @@
 //  Created by Stormacq, Sebastien on 22/08/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
 
 protocol InstallerProtocol {
     func install(file: URL) async throws
@@ -35,10 +35,12 @@ class ShellInstaller: InstallerProtocol {
     let INSTALLERCOMMAND = "/usr/sbin/installer"
 
     // the pkg provided by Xcode to install
-    let PKGTOINSTALL = ["XcodeSystemResources.pkg",
-                        "CoreTypes.pkg",
-                        "MobileDevice.pkg",
-                        "MobileDeviceDevelopment.pkg"]
+    let PKGTOINSTALL = [
+        "XcodeSystemResources.pkg",
+        "CoreTypes.pkg",
+        "MobileDevice.pkg",
+        "MobileDeviceDevelopment.pkg",
+    ]
 
     /// Install Xcode or Xcode Command Line Tools
     ///  At this stage, we do support only these two installation.

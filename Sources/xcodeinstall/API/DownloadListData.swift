@@ -36,7 +36,7 @@ struct DownloadList: Codable {
         // but this is a Swift reserved keyword
         // this allows to map internal name with JSON name
 
-        enum CodingKeys: String, CodingKey { // swiftlint:disable:this nesting
+        enum CodingKeys: String, CodingKey {  // swiftlint:disable:this nesting
             case fileExtension = "extension"
             case description
         }

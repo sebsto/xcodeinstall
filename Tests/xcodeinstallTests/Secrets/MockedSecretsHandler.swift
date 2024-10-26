@@ -6,30 +6,31 @@
 //
 
 import Foundation
+
 @testable import xcodeinstall
 
-class MockedSecretHandler : SecretsHandlerProtocol {
-    
-    var nextError : AWSSecretsHandlerError?
-    
+class MockedSecretHandler: SecretsHandlerProtocol {
+
+    var nextError: AWSSecretsHandlerError?
+
     func clearSecrets() async throws {
-        
+
     }
-    
+
     func saveCookies(_ cookies: String?) async throws -> String? {
-        return ""
+        ""
     }
-    
+
     func loadCookies() async throws -> [HTTPCookie] {
-        return []
+        []
     }
-    
+
     func saveSession(_ session: AppleSession) async throws -> AppleSession {
-        return session
+        session
     }
 
     func loadSession() async throws -> AppleSession? {
-        return nil
+        nil
     }
 
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
@@ -39,25 +40,23 @@ class MockedSecretHandler : SecretsHandlerProtocol {
         guard let rl = env.readLine as? MockedReadLine else {
             fatalError("Invalid Mocked Environment")
         }
-        
+
         return AppleCredentialsSecret(username: rl.readLine(prompt: "")!, password: rl.readLine(prompt: "")!)
     }
-    
-    
+
 }
 
-class MockedAWSSecretsHandlerSDK : AWSSecretsHandlerSDKProtocol {
-    
+class MockedAWSSecretsHandlerSDK: AWSSecretsHandlerSDKProtocol {
 
-    var _setRegion : Bool = false
-    var appleSession : AppleSessionSecret
-    var appleCredentials : AppleCredentialsSecret
-    
+    var _setRegion: Bool = false
+    var appleSession: AppleSessionSecret
+    var appleCredentials: AppleCredentialsSecret
+
     init() {
         appleSession = try! AppleSessionSecret(fromString: "{}")
         appleCredentials = AppleCredentialsSecret(username: "", password: "")
     }
-    
+
     func regionSet() -> Bool {
         let rs = _setRegion
         _setRegion = false
@@ -67,7 +66,7 @@ class MockedAWSSecretsHandlerSDK : AWSSecretsHandlerSDKProtocol {
         _setRegion = true
     }
 
-    func updateSecret<T>(secretId: AWSSecretsName, newValue: T) async throws where T : Secrets {
+    func updateSecret<T>(secretId: AWSSecretsName, newValue: T) async throws where T: Secrets {
         switch secretId {
         case .appleCredentials:
             appleCredentials = newValue as! AppleCredentialsSecret
@@ -75,8 +74,8 @@ class MockedAWSSecretsHandlerSDK : AWSSecretsHandlerSDKProtocol {
             appleSession = newValue as! AppleSessionSecret
         }
     }
-    
-    func retrieveSecret<T>(secretId: AWSSecretsName) async throws -> T where T : Secrets {
+
+    func retrieveSecret<T>(secretId: AWSSecretsName) async throws -> T where T: Secrets {
         switch secretId {
         case .appleCredentials:
             return appleCredentials as! T

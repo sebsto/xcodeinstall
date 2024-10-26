@@ -37,11 +37,13 @@ struct DownloadListParser {
         // sort by date (most recent last)
         let sortedList = listOfXcode.sorted { (downloadA, downloadB) in
 
-            var dateA, dateB: String
+            var dateA: String
+            var dateB: String
 
             // select a non nil-date, either Published or Created.
             if let pubDateA = downloadA.datePublished,
-               let pubDateB = downloadB.datePublished {
+                let pubDateB = downloadB.datePublished
+            {
                 dateA = pubDateA
                 dateB = pubDateB
             } else {
@@ -51,7 +53,8 @@ struct DownloadListParser {
 
             // parse the string and return a date
             if let aAsDate = dateA.toDate(),
-               let bAsDate = dateB.toDate() {
+                let bAsDate = dateB.toDate()
+            {
                 return self.sortMostRecentFirst ? aAsDate > bAsDate : aAsDate < bAsDate
             } else {
                 // I don't know what to do when we can not parse the date
@@ -95,10 +98,11 @@ struct DownloadListParser {
             let file = download.files[0]
 
             // swiftlint:disable line_length
-            line += "[\(String(format: "%02d", index))] \(download.name) (\(file.fileSize/1024/1024) Mb) \(file.existInCache ?? false ? "(*)" : "")"
+            line +=
+                "[\(String(format: "%02d", index))] \(download.name) (\(file.fileSize/1024/1024) Mb) \(file.existInCache ?? false ? "(*)" : "")"
 
             if withDate {
-                if  let date = download.datePublished {
+                if let date = download.datePublished {
                     let das = date.toDate()
                     line += " (published on \(das?.formatted(date: .numeric, time: .omitted) ?? ""))"
                 } else {
@@ -109,7 +113,7 @@ struct DownloadListParser {
             return line
         }
         // join all strings in [] with a \n
-            .joined(separator: "\n")
+        .joined(separator: "\n")
 
         return result
     }

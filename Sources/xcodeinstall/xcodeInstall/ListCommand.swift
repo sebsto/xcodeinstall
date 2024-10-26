@@ -9,24 +9,30 @@ import Foundation
 
 extension XCodeInstall {
 
-    func list(force: Bool,
-              xCodeOnly: Bool,
-              majorVersion: String,
-              sortMostRecentFirst: Bool,
-              datePublished: Bool) async throws -> [DownloadList.Download] {
+    func list(
+        force: Bool,
+        xCodeOnly: Bool,
+        majorVersion: String,
+        sortMostRecentFirst: Bool,
+        datePublished: Bool
+    ) async throws -> [DownloadList.Download] {
 
         let download = env.downloader
 
         display("Loading list of available downloads ", terminator: "")
-        display("\(force ? "forced download from Apple Developer Portal" : "fetched from cache in \(FileHandler.baseFilePath())")") // swiftlint:disable:this line_length
+        display(
+            "\(force ? "forced download from Apple Developer Portal" : "fetched from cache in \(FileHandler.baseFilePath())")"
+        )  // swiftlint:disable:this line_length
 
         do {
             let list = try await download.list(force: force)
             display("✅ Done")
 
-            let parser = DownloadListParser(xCodeOnly: xCodeOnly,
-                                            majorVersion: majorVersion,
-                                            sortMostRecentFirst: sortMostRecentFirst)
+            let parser = DownloadListParser(
+                xCodeOnly: xCodeOnly,
+                majorVersion: majorVersion,
+                sortMostRecentFirst: sortMostRecentFirst
+            )
             let parsedList = try parser.parse(list: list)
 
             // enrich the list to flag files already downloaded
@@ -52,24 +58,32 @@ extension XCodeInstall {
                 display("🛑 \(message) (Apple Portal error code : \(code))")
                 throw error
             case .needToAcceptTermsAndCondition:
-                display("""
-🛑 This is a new Apple account, you need first to accept the developer terms of service.
-Open a session at https://developer.apple.com/register/agree/
-Read and accept the ToS and try again.
-""")
+                display(
+                    """
+                    🛑 This is a new Apple account, you need first to accept the developer terms of service.
+                    Open a session at https://developer.apple.com/register/agree/
+                    Read and accept the ToS and try again.
+                    """
+                )
                 throw error
             case .unknownError(let code, let message):
                 display("🛑 \(message) (Unhandled download error : \(code))")
-                display("Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title=")
+                display(
+                    "Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title="
+                )
                 throw error
             default:
                 display("🛑 Unknown download error : \(error)")
-                display("Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title=")
+                display(
+                    "Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title="
+                )
                 throw error
             }
         } catch {
             display("🛑 Unexpected error : \(error)")
-            display("Please file an error repor at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title=")
+            display(
+                "Please file an error repor at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title="
+            )
             throw error
         }
 

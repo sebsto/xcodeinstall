@@ -6,10 +6,10 @@
 //
 
 import XCTest
-@testable import xcodeinstall
- 
-class DownloadTest: HTTPClientTestCase {
 
+@testable import xcodeinstall
+
+class DownloadTest: HTTPClientTestCase {
 
     func testHasDownloadDelegate() {
         // given
@@ -17,39 +17,52 @@ class DownloadTest: HTTPClientTestCase {
 
         //when
         let delegate = sessionDownload.downloadDelegate()
-        
+
         //then
         XCTAssertNotNil(delegate)
-        
+
     }
-    
+
     func testDownload() async throws {
-        
+
         do {
-            
+
             // given
             self.sessionDownload.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
 
             // when
-            let file : DownloadList.File = DownloadList.File(filename: "file.test", displayName: "File Test", remotePath: "/file.test", fileSize: 100, sortOrder: 1, dateCreated: "31/01/2022", dateModified: "30/03/2022", fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"), existInCache: false)
-            let ad = getAppleDownloader()            
+            let file: DownloadList.File = DownloadList.File(
+                filename: "file.test",
+                displayName: "File Test",
+                remotePath: "/file.test",
+                fileSize: 100,
+                sortOrder: 1,
+                dateCreated: "31/01/2022",
+                dateModified: "30/03/2022",
+                fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"),
+                existInCache: false
+            )
+            let ad = getAppleDownloader()
             let result = try await ad.download(file: file)
 
             // then
             XCTAssertNotNil(result)
-            
+
             // verify if resume was called
             if let task = result as? MockedURLSessionDownloadTask {
                 XCTAssert(task.wasResumeCalled)
             } else {
                 XCTAssert(false, "Error in test implementation, the return value must be a MockURLSessionDownloadTask")
             }
-            
+
             // verify if semaphore wait() was called
             if let sema = env.urlSessionDownload.downloadDelegate()?.sema as? MockedDispatchSemaphore {
                 XCTAssert(sema.wasWaitCalled())
             } else {
-                XCTAssert(false, "Error in test implementation, the  download delegate sema must be a MockDispatchSemaphore")
+                XCTAssert(
+                    false,
+                    "Error in test implementation, the  download delegate sema must be a MockDispatchSemaphore"
+                )
             }
 
         } catch let error as DownloadError {
@@ -63,22 +76,32 @@ class DownloadTest: HTTPClientTestCase {
     }
 
     func testDownloadInvalidFile1() async throws {
-        
+
         do {
-            
+
             // given
             self.sessionDownload.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
 
             // when
-            let file : DownloadList.File = DownloadList.File(filename: "file.test", displayName: "File Test", remotePath: "", fileSize: 100, sortOrder: 1, dateCreated: "31/01/2022", dateModified: "30/03/2022", fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"), existInCache: false)
+            let file: DownloadList.File = DownloadList.File(
+                filename: "file.test",
+                displayName: "File Test",
+                remotePath: "",
+                fileSize: 100,
+                sortOrder: 1,
+                dateCreated: "31/01/2022",
+                dateModified: "30/03/2022",
+                fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"),
+                existInCache: false
+            )
             let ad = getAppleDownloader()
-            
+
             _ = try await ad.download(file: file)
 
             // then
             // an exception must be thrown
             XCTAssert(false)
-            
+
         } catch DownloadError.invalidFileSpec {
 
             // expected behaviour
@@ -91,14 +114,24 @@ class DownloadTest: HTTPClientTestCase {
     }
 
     func testDownloadInvalidFile2() async throws {
-        
+
         do {
-            
+
             // given
             self.sessionDownload.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
 
             // when
-            let file : DownloadList.File = DownloadList.File(filename: "", displayName: "File Test", remotePath: "/file.test", fileSize: 100, sortOrder: 1, dateCreated: "31/01/2022", dateModified: "30/03/2022", fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"), existInCache: false)
+            let file: DownloadList.File = DownloadList.File(
+                filename: "",
+                displayName: "File Test",
+                remotePath: "/file.test",
+                fileSize: 100,
+                sortOrder: 1,
+                dateCreated: "31/01/2022",
+                dateModified: "30/03/2022",
+                fileFormat: DownloadList.FileFormat(fileExtension: "xip", description: "xip encryption"),
+                existInCache: false
+            )
             let ad = getAppleDownloader()
 
             _ = try await ad.download(file: file)
@@ -106,7 +139,7 @@ class DownloadTest: HTTPClientTestCase {
             // then
             // an exception must be thrown
             XCTAssert(false)
-            
+
         } catch DownloadError.invalidFileSpec {
 
             // expected behaviour
@@ -117,7 +150,5 @@ class DownloadTest: HTTPClientTestCase {
         }
 
     }
-    
+
 }
-
-

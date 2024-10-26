@@ -5,8 +5,8 @@
 //  Created by Stormacq, Sebastien on 14/08/2022.
 //
 
-import Foundation
 import CLIlib
+import Foundation
 
 // store secrets on files in $HOME/.xcodeinstaller
 struct FileSecretsHandler: SecretsHandlerProtocol {
@@ -32,36 +32,36 @@ struct FileSecretsHandler: SecretsHandlerProtocol {
     }
 
     // used when testing to start from a clean place
-//    func restoreSecrets() {
-//
-//        // remove file
-//        try? fileManager.removeItem(at: sessionPath)
-//
-//        // copy backup to file
-//        try? fileManager.copyItem(at: newSessionPath, to: sessionPath)
-//
-//        // remove backup
-//        try? fileManager.removeItem(at: newSessionPath)
-//
-//        // do it again with cookies file
-//
-//        try? fileManager.removeItem(at: cookiesPath)
-//        try? fileManager.copyItem(at: newCookiesPath, to: cookiesPath)
-//        try? fileManager.removeItem(at: newCookiesPath)
-//
-//    }
+    //    func restoreSecrets() {
+    //
+    //        // remove file
+    //        try? fileManager.removeItem(at: sessionPath)
+    //
+    //        // copy backup to file
+    //        try? fileManager.copyItem(at: newSessionPath, to: sessionPath)
+    //
+    //        // remove backup
+    //        try? fileManager.removeItem(at: newSessionPath)
+    //
+    //        // do it again with cookies file
+    //
+    //        try? fileManager.removeItem(at: cookiesPath)
+    //        try? fileManager.copyItem(at: newCookiesPath, to: cookiesPath)
+    //        try? fileManager.removeItem(at: newCookiesPath)
+    //
+    //    }
 
     // used when testing to start from a clean place
-//    func clearSecrets(preserve: Bool = false) {
+    //    func clearSecrets(preserve: Bool = false) {
     func clearSecrets() async throws {
 
-//        if preserve {
-//
-//            // move files instead of deleting them (if they exist)
-//            try? fileManager.copyItem(at: cookiesPath, to: newCookiesPath)
-//            try? fileManager.copyItem(at: sessionPath, to: newSessionPath)
-//
-//        }
+        //        if preserve {
+        //
+        //            // move files instead of deleting them (if they exist)
+        //            try? fileManager.copyItem(at: cookiesPath, to: newCookiesPath)
+        //            try? fileManager.copyItem(at: sessionPath, to: newSessionPath)
+        //
+        //        }
 
         try? fileManager.removeItem(at: cookiesPath)
         try? fileManager.removeItem(at: sessionPath)
@@ -124,7 +124,7 @@ struct FileSecretsHandler: SecretsHandlerProtocol {
     }
 
     // load Apple Session from JSON
-    // returns nil when can not read file 
+    // returns nil when can not read file
     func loadSession() async throws -> AppleSession? {
 
         // read the raw file saved on disk

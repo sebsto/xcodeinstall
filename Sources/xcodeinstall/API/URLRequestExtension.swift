@@ -22,7 +22,9 @@ extension URLRequest {
             }
         }
 
-        if let bodyData = self.httpBody, let bodyString = String(data: bodyData, encoding: .utf8), !bodyString.isEmpty {
+        if let bodyData = self.httpBody, let bodyString = String(data: bodyData, encoding: .utf8),
+            !bodyString.isEmpty
+        {
             data = "--data '\(bodyString)'"
         }
 

@@ -5,9 +5,9 @@
 //  Created by Stormacq, Sebastien on 22/08/2022.
 //
 
-import Foundation
 import ArgumentParser
 import CLIlib
+import Foundation
 
 // Install implementation
 extension MainCommand {
@@ -15,11 +15,14 @@ extension MainCommand {
     struct Install: AsyncParsableCommand {
 
         static var configuration =
-        CommandConfiguration(abstract: "Install a specific XCode version or addon package")
+            CommandConfiguration(abstract: "Install a specific XCode version or addon package")
 
         @OptionGroup var globalOptions: GlobalOptions
 
-        @Option(name: .shortAndLong, help: "The exact package name to install. When omited, it asks interactively")
+        @Option(
+            name: .shortAndLong,
+            help: "The exact package name to install. When omited, it asks interactively"
+        )
         var name: String?
 
         func run() async throws {

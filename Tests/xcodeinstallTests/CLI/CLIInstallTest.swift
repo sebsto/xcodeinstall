@@ -6,20 +6,24 @@
 //
 
 import XCTest
+
 @testable import xcodeinstall
 
 class CLIInstallTest: CLITest {
-    
+
     func testInstall() async throws {
-        
+
         // given
-        let inst = try parse(MainCommand.Install.self, [
-                            "install",
-                            "--verbose",
-                            "--name",
-                            "test.xip"
-        ])
-        
+        let inst = try parse(
+            MainCommand.Install.self,
+            [
+                "install",
+                "--verbose",
+                "--name",
+                "test.xip",
+            ]
+        )
+
         // when
         do {
             try await inst.run()
@@ -31,7 +35,7 @@ class CLIInstallTest: CLITest {
         // test parsing of commandline arguments
         XCTAssert(inst.globalOptions.verbose)
         XCTAssertEqual(inst.name, "test.xip")
-        
+
         // verify if progressbar define() was called
         if let progress = env.progressBar as? MockedProgressBar {
             XCTAssert(progress.defineCalled())
@@ -39,18 +43,17 @@ class CLIInstallTest: CLITest {
             XCTAssert(false, "Error in test implementation, the env.progressBar must be a MockedProgressBar")
         }
     }
-    
+
     func testPromptForFile() {
-        
+
         // given
         env.readLine = MockedReadLine(["0"])
         let xci = XCodeInstall()
 
-        
         // when
         do {
             let result = try xci.promptForFile()
-            
+
             // then
             XCTAssertTrue(result.lastPathComponent.hasSuffix("name.dmg"))
 

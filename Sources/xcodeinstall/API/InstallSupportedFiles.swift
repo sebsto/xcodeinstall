@@ -34,7 +34,8 @@ enum SupportedInstallation {
         }
 
         // first return a [SupportedInstallation] with either unsupported or installation type
-        let tempResult: [SupportedInstallation] = SupportedFiles.enumerated().compactMap { (index, filePrefix) in
+        let tempResult: [SupportedInstallation] = SupportedFiles.enumerated().compactMap {
+            (index, filePrefix) in
             if file.hasPrefix(filePrefix) && file.hasSuffix(SupportedFiles.extensions[index]) {
                 return SupportedFiles.values[index]
             } else {
@@ -53,14 +54,14 @@ enum SupportedInstallation {
 
         // non generic method to test the file type
 
-//        if file.hasPrefix("Command Line Tools for Xcode") && file.hasSuffix(".dmg") {
-//            result = .xCodeCommandLineTools
-//        } else if file.hasPrefix("Xcode") && file.hasSuffix(".xip") {
-//            result = .xCode
-//        } else {
-//            result = .unsuported
-//        }
+        //        if file.hasPrefix("Command Line Tools for Xcode") && file.hasSuffix(".dmg") {
+        //            result = .xCodeCommandLineTools
+        //        } else if file.hasPrefix("Xcode") && file.hasSuffix(".xip") {
+        //            result = .xCode
+        //        } else {
+        //            result = .unsuported
+        //        }
 
-//        return result
+        //        return result
     }
 }
