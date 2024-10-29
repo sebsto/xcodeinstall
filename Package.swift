@@ -15,8 +15,10 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
         .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"),
         .package(url: "https://github.com/sebsto/CLIlib/", from: "0.1.2"),
-        .package(url: "https://github.com/adam-fowler/swift-srp", from: "1.0.0"),
-        .package(url: "https://github.com/swiftlang/swift-testing", from: "0.1.0")
+        .package(url: "https://github.com/adam-fowler/swift-srp", branch: "padding"),
+        // .package(url: "https://github.com/apple/swift-crypto.git", from: "3.9.0"),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "1.8.3")
+        
         //.package(path: "../CLIlib")
     ],
     targets: [
@@ -28,7 +30,9 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "SotoSecretsManager", package: "soto"),
                 .product(name: "SRP", package: "swift-srp"),
-                .product(name: "CLIlib", package: "CLIlib")
+                .product(name: "CLIlib", package: "CLIlib"),
+                .product(name: "CryptoSwift", package: "CryptoSwift")
+//                .product(name: "_CryptoExtras", package: "swift-crypto")
             ]
         ),
         .testTarget(
@@ -38,10 +42,10 @@ let package = Package(
             resources: [.process("data/download-list-20220723.json"),
                         .process("data/download-list-20231115.json"),
                         .process("data/download-error.json"),
-                        .process("data/download-unknown-error.json")],
-            swiftSettings: [
-                .define("SWIFTPM_COMPILATION")
-            ]
+                        .process("data/download-unknown-error.json")] //,
+            // swiftSettings: [
+            //     .define("SWIFTPM_COMPILATION")
+            // ]
         )
     ],
     swiftLanguageModes: [.v5]
