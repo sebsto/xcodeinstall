@@ -10,13 +10,22 @@ on:
 #   DEVELOPER_DIR: /Applications/Xcode_15.1.app/Contents/Developer
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
     container: swift:6.0-noble
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
     - name: Build
-      run: swift build -v
+      run: swift build
+
+  test:
+    runs-on: ubuntu-latest
+    container: swift:6.0-noble
+
+    steps:
+    - uses: actions/checkout@v4
     - name: Run tests
-      run: swift test -v
+      run: swift test
