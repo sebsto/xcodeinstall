@@ -54,15 +54,15 @@ struct SRPKeysTestCase {
     }
 
     @Test func hashcash2() async throws {
-            // given
-            let hcBits = 10
-            let hcChallenge = "bb63edf88d2f9c39f23eb4d6f0281158"
+        // given
+        let hcBits = 10
+        let hcChallenge = "bb63edf88d2f9c39f23eb4d6f0281158"
 
-            // when
-            let hashcash = Hashcash.make(bits: hcBits, challenge: hcChallenge, date: "20230224001754")
+        // when
+        let hashcash = Hashcash.make(bits: hcBits, challenge: hcChallenge, date: "20230224001754")
 
-            // then
-            #expect(hashcash == "1:10:20230224001754:bb63edf88d2f9c39f23eb4d6f0281158::866")
+        // then
+        #expect(hashcash == "1:10:20230224001754:bb63edf88d2f9c39f23eb4d6f0281158::866")
     }
 
     @Test func sha1() {
@@ -77,32 +77,37 @@ struct SRPKeysTestCase {
         #expect(sha1.hexdigest() == "001CC13831C63CA2E739DBCF47BDD4597535265F".lowercased())
 
     }
-    
+
     @Test func pbkdf2() throws {
-        
+
         // given
         let password = "password"
         let salt = "pLG+B7bChHWevylEQapMfQ=="
         let iterations = 20136
         let keyLength = 32
-        
+
         // convert salt from base64 to [UInt8]
         let saltData = Data(base64Encoded: salt)!
-        
+
         //given
-        let derivedKey = try PBKDF2.pbkdf2(password: password, salt: saltData.bytes, iterations: iterations, keyLength: keyLength)
+        let derivedKey = try PBKDF2.pbkdf2(
+            password: password,
+            salt: saltData.bytes,
+            iterations: iterations,
+            keyLength: keyLength
+        )
         // print(derivedKey.hexdigest().lowercased())
-        
+
         // then
         let fastlaneHexResult = "d7ff78163a0183db1e635ba5beaf4a45f7984b00aafec95e6a044fda331bbd45"
-        #expect(derivedKey.hexdigest().lowercased() == fastlaneHexResult) 
+        #expect(derivedKey.hexdigest().lowercased() == fastlaneHexResult)
     }
-    
+
     @Test func hexString() {
         let bytes: [UInt8] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-        
-        let hexString = bytes.hexdigest() //hexdigest provided by Swift-SRP
-        
+
+        let hexString = bytes.hexdigest()  //hexdigest provided by Swift-SRP
+
         #expect(hexString.uppercased() == "000102030405060708090A0B0C0D0E0F")
     }
 }
