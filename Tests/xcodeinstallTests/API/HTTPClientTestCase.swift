@@ -32,7 +32,8 @@ class HTTPClientTestCase: AsyncTestCase {
         AppleSession(
             itcServiceKey: AppleServiceKey(authServiceUrl: "url", authServiceKey: "key"),
             xAppleIdSessionId: "x_apple_id_session_id",
-            scnt: "scnt"
+            scnt: "scnt",
+            hashcash: "hashcash"
         )
     }
 

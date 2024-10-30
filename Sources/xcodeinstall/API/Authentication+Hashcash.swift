@@ -35,7 +35,7 @@ extension AppleAuthenticator {
     }
 
     // by OOP design it should be private.  Make it internal (default) for testing
-    func getAppleHashcash(itServiceKey: String) async throws -> String {
+    func getAppleHashcash(itServiceKey: String, date: String? = nil) async throws -> String {
 
         /*
          ➜  ~ curl https://idmsa.apple.com/appleauth/auth/signin?widgetKey=e0b80c3bf78523bfe80974d320935bfa30add02e1bff88ec2166c6bd5a706c42
@@ -65,7 +65,13 @@ extension AppleAuthenticator {
         }
 
         log.debug("Computing hashcash")
-        return Hashcash.make(bits: hcBits, challenge: hcChallenge)
+        
+        if date == nil {
+            return Hashcash.make(bits: hcBits, challenge: hcChallenge)
+        } else {
+            // just used for unit tests
+            return Hashcash.make(bits: hcBits, challenge: hcChallenge, date: date)
+        }
     }
 }
 

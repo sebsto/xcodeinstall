@@ -10,6 +10,13 @@ import XCTest
 @testable import xcodeinstall
 
 class AuthenticationTest: HTTPClientTestCase {
+    
+    func getHashcashHeaders() -> [String: String] {
+        return [
+            "X-Apple-HC-Bits" : "11",
+            "X-Apple-HC-Challenge": "4d74fb15eb23f465f1f6fcbf534e5877"
+        ]
+    }
 
     // test get apple service key
     func testAppleServiceKey() async {
@@ -66,6 +73,58 @@ class AuthenticationTest: HTTPClientTestCase {
         }
 
     }
+    
+    // test get hashcash
+    func testAppleHashcash() async {
+
+        do {
+            let url = "https://dummy"
+            self.sessionData.nextData = Data()
+            self.sessionData.nextResponse = HTTPURLResponse(
+                url: URL(string: url)!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: getHashcashHeaders()
+            )
+
+            let authenticator = getAppleAuthenticator()
+            let hashcash = try await authenticator.getAppleHashcash(itServiceKey: "dummy", date: "20230223170600")
+
+            XCTAssertEqual(hashcash, "1:11:20230223170600:4d74fb15eb23f465f1f6fcbf534e5877::6373")
+
+        } catch AuthenticationError.missingHTTPHeaders {
+            XCTAssert(false, "unableToRetrieveAppleHashcash")
+        } catch {
+            XCTAssert(false, "Invalid exception thrown \(error)")
+        }
+
+    }
+
+    // test get apple hashcash
+    func testAppleHashcashWithError() async {
+
+        do {
+            let url = "https://dummy"
+            self.sessionData.nextData = Data()
+            self.sessionData.nextResponse = HTTPURLResponse(
+                url: URL(string: url)!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )
+
+            let authenticator = getAppleAuthenticator()
+            _ = try await authenticator.getAppleHashcash(itServiceKey: "dummy")
+
+            XCTAssert(false, "No exception thrown")
+
+        } catch AuthenticationError.missingHTTPHeaders {
+            // correct
+        } catch {
+            XCTAssert(false, "Invalid exception thrown \(error)")
+        }
+
+    }
 
     // test authentication returns 401
     func testAuthenticationInvalidUsernamePassword401() async {
@@ -77,7 +136,7 @@ class AuthenticationTest: HTTPClientTestCase {
             url: URL(string: url)!,
             statusCode: 401,
             httpVersion: nil,
-            headerFields: nil
+            headerFields: getHashcashHeaders()
         )
 
         do {
