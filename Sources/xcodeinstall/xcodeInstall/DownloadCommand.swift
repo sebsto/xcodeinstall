@@ -107,7 +107,7 @@ extension XCodeInstall {
         else {
 
             if (response ?? "") == "" {
-                Darwin.exit(0)
+                exit(0)
             }
             throw CLIError.invalidInput
         }
