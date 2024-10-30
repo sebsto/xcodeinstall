@@ -7,6 +7,9 @@
 
 import CLIlib
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 // delegate class to receive download progress
 class DownloadDelegate: NSObject, URLSessionDownloadDelegate {

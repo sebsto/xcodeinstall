@@ -6,6 +6,9 @@
 //
 
 import XCTest
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 @testable import xcodeinstall
 
@@ -17,7 +20,7 @@ protocol SecretsHandlerTestProtocol {
     func testLoadSessionNoExist() async
 }
 
-class SecretsHandlerTestBase<T: SecretsHandlerProtocol>: XCTestCase {
+class SecretsHandlerTestBase<T: SecretsHandlerProtocol>: AsyncTestCase {
 
     var secrets: T?
 
@@ -32,11 +35,12 @@ class SecretsHandlerTestBase<T: SecretsHandlerProtocol>: XCTestCase {
     // 1 cookie : dslang  conflict with string one
     private let cookieStringConflict = "dslang=FR-FR; Domain=apple.com; Path=/; Secure; HttpOnly"
 
-    class override var defaultTestSuite: XCTestSuite {
-        get {
-            XCTestSuite(name: "InterfaceTests Excluded")
-        }
-    }
+    // class override var defaultTestSuite: XCTestSuite {
+    //     get {
+    //         XCTestSuite(name: "InterfaceTests Excluded")
+    //     }
+    // }
+    // override init() { super.init() }
 
     func testMergeCookiesNoConflict() async throws {
 

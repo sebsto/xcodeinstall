@@ -9,6 +9,10 @@ import CLIlib
 import Foundation
 import Logging
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 // FIXME consider using Swift 5.7 regexp
 // https://github.com/apple/swift-evolution/blob/main/proposals/0350-regex-type-overview.md
 func filterPassword(_ input: String) -> String {

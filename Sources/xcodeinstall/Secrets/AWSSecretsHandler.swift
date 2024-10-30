@@ -7,6 +7,9 @@
 
 import CLIlib
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 // the errors thrown by the SecretsManager class
 enum AWSSecretsHandlerError: Error {

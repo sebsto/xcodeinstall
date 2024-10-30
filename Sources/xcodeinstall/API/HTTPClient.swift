@@ -7,6 +7,9 @@
 
 import CLIlib
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /*
     This fil contains code to make our APICall testable.

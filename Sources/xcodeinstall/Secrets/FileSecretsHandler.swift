@@ -7,6 +7,9 @@
 
 import CLIlib
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 // store secrets on files in $HOME/.xcodeinstaller
 struct FileSecretsHandler: SecretsHandlerProtocol {
