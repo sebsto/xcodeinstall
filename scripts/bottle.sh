@@ -30,8 +30,8 @@ if [ ! -f VERSION ]; then
 fi
 VERSION=$(cat VERSION)
 
-# Supports macOS 12 (Monterey) and later
-OS_NAMES=(arm64_monterey monterey arm64_ventura ventura arm64_sonoma sonoma)
+# Supports macOS 13 (Ventura) and later
+OS_NAMES=(arm64_ventura ventura arm64_sonoma sonoma arm64_sequoia sequoia)
 
 # Semantic version number split into a list using  Ugly, bash 3 compatible syntax
 IFS=" " read -r -a CURRENT_OS_VERSION <<<"$(sw_vers -productVersion | sed 's/\./ /g')"
@@ -58,6 +58,12 @@ elif [[ ${CURRENT_OS_VERSION_MAJOR} == "14" ]]; then
     CURRENT_PLATFORM=sonoma
   else
     CURRENT_PLATFORM=arm64_sonoma
+  fi
+elif [[ ${CURRENT_OS_VERSION_MAJOR} == "15" ]]; then
+  if [[ "x86_64" == "$(uname -m)" ]]; then
+    CURRENT_PLATFORM=sequoia
+  else
+    CURRENT_PLATFORM=arm64_sequoia
   fi
 else
   echo "Unsupported macOS version. This script requires Monterey or better."
@@ -121,6 +127,7 @@ EOF
 
 # Fix filename
 for os in "${OS_NAMES[@]}"; do
+  echo "📂 Copying xcodeinstall ${VERSION} for: ${os}"
   new_filename="xcodeinstall-${VERSION}.${os}.bottle.tar.gz"
   cp -v "${FILENAME}" "${BOTTLE_DIR}/${new_filename}"
 
