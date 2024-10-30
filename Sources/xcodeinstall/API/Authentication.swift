@@ -233,128 +233,128 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         return Hashcash.make(bits: hcBits, challenge: hcChallenge)
     }
     
-        func startSRPAuthenticationMOCKED(username: String, password: String) async throws {
-    
-            // signification of variables : https://blog.uniauth.com/what-is-secure-remote-password
-    
-            let configuration = SRPConfiguration<SHA256>(.N2048)
-            let client = SRPClient(configuration: configuration)
-            //        let clientKeys = client.generateKeys()
-    
-            let A = SRPKey(
-                hex:
-                    "5b9a6977c0a4599ee5cfd614475ae3d67b79b39a021ae6bf59329cb762e0f5c34f401bfe536bda193e6d943b31f18536933fd0d0ab7f0df10dbedefd2d4fa1880abaac23b0a016eafba4db5a636ffb811f4b6dcf0078676196f5792167dd4394f6017bb813d765c90ac767b16ecaff639a67d0279de749113409df57291945d9bd081e0cf30c356ab51a49e65e565aa89c54371fc7fff4e73141ca2416f8196e628256577845d85a9b20aac0e933ac66ca4d51be02ca22f353f7f9820f15c856a9e7967c31c5155255cc00e164750355769f8a6c2ad427eb925d33a8ca8535ae3053452a6affdea2483c181989052a59c8d284ef4503c07153fa1271258012d0"
-            )!
-            let a = SRPKey(
-                hex:
-                    "a464cf1153eff8ebda3bf9b4f1cd9369f4401da59863547be1d39c9f1800bc79a6bca7ee5891dd7f816a0cd3e79863d4ca449d9c1f33f7ad4f1861cd9334d68706af2e43a1232954d9f040484e995454b0aa99151f5b74e38c157b811a55b9d9e7a393e470a8cced59225ffa0e047d96400ffd84492b2da992d4656f50fed1e91eab76285d154d96e255855174dc886c850017c36db53373fbe57e0cdd99a59faed18d17dfa9e201f0f657904355933e84f7a5b470ca8b3dd401d2974c6f3135cf6dcd859d23bf4c1cc9873c57b1fbe4e71c2eb8b59a4d60cb3eff51bcef1675853a2727cbf382a0cdbd7d2a1180e0aab504aee2debc04182e147c416cd8b3ce"
-            )!
-            let clientKeys = SRPKeyPair(public: A, private: a)
-    
-            let ABase64 = "W5ppd8CkWZ7lz9YUR1rj1nt5s5oCGua/WTKct2Lg9cNPQBv+U2vaGT5tlDsx8YU2kz/Q0Kt/DfENvt79LU+hiAq6rCOwoBbq+6TbWmNv+4EfS23PAHhnYZb1eSFn3UOU9gF7uBPXZckKx2exbsr/Y5pn0Ced50kRNAnfVykZRdm9CB4M8ww1arUaSeZeVlqonFQ3H8f/9OcxQcokFvgZbmKCVld4RdhamyCqwOkzrGbKTVG+Asoi81P3+YIPFchWqeeWfDHFFVJVzADhZHUDVXafimwq1Cfrkl0zqMqFNa4wU0Uqav/eokg8GBmJBSpZyNKE70UDwHFT+hJxJYAS0A=="
-    
-    
-            guard ABase64 == A.base64 else {
-                fatalError()
-            }
-    
-            /* FASTLANE
-             {
-             "User-Agent"=>"Spaceship 2.225.0",
-             "X-csrf-itc"=>"itc",
-             "Content-Type"=>"application/json",
-             "X-Requested-With"=>"XMLHttpRequest",
-             "X-Apple-Widget-Key"=>"e0b80c3bf78523bfe80974d320935bfa30add02e1bff88ec2166c6bd5a706c42",
-             "Accept"=>"application/json, text/javascript"}
-             */
-            /* Xcodeinstall
-             User-Agent: curl/7.79.1
-             Content-Type: application/json
-             X-Requested-With: XMLHttpRequest
-             X-Apple-Widget-Key: e0b80c3bf78523bfe80974d320935bfa30add02e1bff88ec2166c6bd5a706c42
-             Accept: application/json, text/javascript
-             */
-            let (data, response) =
-                try await apiCall(
-                    url: "https://idmsa.apple.com/appleauth/auth/signin/init",
-                    method: .POST,
-                    body: try JSONEncoder().encode(AppleSRPInitRequest(a: A.base64, accountName: username)),
-                    headers: ["X-csrf-itc": "itc"],
-                    validResponse: .value(200)
-                )
-    
-            //TODO: throw error when statusCode is not 200
-    //        let srpResponse = try JSONDecoder().decode(AppleSRPInitResponse.self, from: data)
-    
-            /* FASTLANE */
-            let fastlaneSRIPResponse1 = """
-    {
-    "iteration": 20136,
-    "salt": "pLG+B7bChHWevylEQapMfQ==",
-    "protocol": "s2k",
-    "b": "PhhcTzC9tokn188jSrgs2OttTsstXwxiG4VQDkJ74V/HfOaXurELnCT7pWdEOnDGwG7oDBbrcf3coy/Ye5I+D7gicqDIwCGdHtGgwP0FbLFMIz7PAuQUtxriRZHbgmjU9fop0+dHR87dBkHBBoGUnqPcMgXNUWnkVW/9elbAWkOrSitL42r1yq4J96IwuXISCjdDBCwxebvIccfdvyh0/dGKLk8W2bN2j3yrwqVJdTM72twA6E7Qcw1nW/HUDMa0a0f+gIEx8NCKv1nXxG5u9az986dG+Q0hnNtunlz6VTxMFAgrTgRhRpDIQg8Ua0d+Z1XzSlcOyNOVBUHKj3WZtg==",
-    "c":"d-74e-df50ec54-947d-11ef-b119-9f0a113ef0df:PRN"
-    }
-    """
-            let srpResponse = try JSONDecoder().decode(AppleSRPInitResponse.self, from: fastlaneSRIPResponse1.data(using: .utf8)!)
-    
-            let keyLength = 32
-            let iterations = srpResponse.iteration
-            let salt = srpResponse.saltBytes()
-            let B = srpResponse.b  // server public key in base64
-            let c = srpResponse.c  //what is c ?
-    
-            let serverPublicKey = SRPKey(base64: B)!  //TODO: remove the explicit unwrap (!)
-    
-    
-            let derivedPassword: [UInt8] = try PBKDF2.pbkdf2(
-                password: password,
-                salt: salt,
-                iterations: iterations,
-                keyLength: keyLength
-            )
-            let derivedPasswordBase64: String = derivedPassword.base64
-            let derivedPasswordHex = derivedPassword.map{ String(format:"%02X", $0) }.joined(separator: "")
-    
-    
-            let sharedSecret = try client.calculateSharedSecret(
-                username: username,
-                password: derivedPasswordBase64,
-                salt: salt,
-                clientKeys: clientKeys,
-                serverPublicKey: serverPublicKey
-            )
-            let clientProof = client.calculateClientProof(
-                username: username,
-                salt: salt,
-                clientPublicKey: clientKeys.public,
-                serverPublicKey: serverPublicKey,
-                sharedSecret: sharedSecret
-            )
-    
-            let m1 = clientProof
-            let m2: [UInt8] = client.calculateServerProof(
-                clientPublicKey: clientKeys.public,
-                clientProof: m1,
-                sharedSecret: sharedSecret
-            )
-    
-            //TODO: I must verify the server proof at some point
-            //try client.verifyServerProof(serverProof: ??, clientProof: m1, clientKeys: clientKeys, sharedSecret: sharedSecret)
-    
-            let hashcash = try await self.checkHashcash()
-    
-            let (data2, response2) =
-                try await apiCall(
-                    url: "https://idmsa.apple.com/appleauth/auth/signin/complete?isRememberMeEnabled=false",
-                    method: .POST,
-                    body: try JSONEncoder().encode(
-                        AppleSRPCompleteRequest(accountName: username, c: c, m1: m1.base64, m2: m2.base64)
-                    ),
-                    headers: ["X-Apple-HC": hashcash],
-                    validResponse: .range(0..<506)
-                )
-        }
+//        func startSRPAuthenticationMOCKED(username: String, password: String) async throws {
+//    
+//            // signification of variables : https://blog.uniauth.com/what-is-secure-remote-password
+//    
+//            let configuration = SRPConfiguration<SHA256>(.N2048)
+//            let client = SRPClient(configuration: configuration)
+//            //        let clientKeys = client.generateKeys()
+//    
+//            let A = SRPKey(
+//                hex:
+//                    "5b9a6977c0a4599ee5cfd614475ae3d67b79b39a021ae6bf59329cb762e0f5c34f401bfe536bda193e6d943b31f18536933fd0d0ab7f0df10dbedefd2d4fa1880abaac23b0a016eafba4db5a636ffb811f4b6dcf0078676196f5792167dd4394f6017bb813d765c90ac767b16ecaff639a67d0279de749113409df57291945d9bd081e0cf30c356ab51a49e65e565aa89c54371fc7fff4e73141ca2416f8196e628256577845d85a9b20aac0e933ac66ca4d51be02ca22f353f7f9820f15c856a9e7967c31c5155255cc00e164750355769f8a6c2ad427eb925d33a8ca8535ae3053452a6affdea2483c181989052a59c8d284ef4503c07153fa1271258012d0"
+//            )!
+//            let a = SRPKey(
+//                hex:
+//                    "a464cf1153eff8ebda3bf9b4f1cd9369f4401da59863547be1d39c9f1800bc79a6bca7ee5891dd7f816a0cd3e79863d4ca449d9c1f33f7ad4f1861cd9334d68706af2e43a1232954d9f040484e995454b0aa99151f5b74e38c157b811a55b9d9e7a393e470a8cced59225ffa0e047d96400ffd84492b2da992d4656f50fed1e91eab76285d154d96e255855174dc886c850017c36db53373fbe57e0cdd99a59faed18d17dfa9e201f0f657904355933e84f7a5b470ca8b3dd401d2974c6f3135cf6dcd859d23bf4c1cc9873c57b1fbe4e71c2eb8b59a4d60cb3eff51bcef1675853a2727cbf382a0cdbd7d2a1180e0aab504aee2debc04182e147c416cd8b3ce"
+//            )!
+//            let clientKeys = SRPKeyPair(public: A, private: a)
+//    
+//            let ABase64 = "W5ppd8CkWZ7lz9YUR1rj1nt5s5oCGua/WTKct2Lg9cNPQBv+U2vaGT5tlDsx8YU2kz/Q0Kt/DfENvt79LU+hiAq6rCOwoBbq+6TbWmNv+4EfS23PAHhnYZb1eSFn3UOU9gF7uBPXZckKx2exbsr/Y5pn0Ced50kRNAnfVykZRdm9CB4M8ww1arUaSeZeVlqonFQ3H8f/9OcxQcokFvgZbmKCVld4RdhamyCqwOkzrGbKTVG+Asoi81P3+YIPFchWqeeWfDHFFVJVzADhZHUDVXafimwq1Cfrkl0zqMqFNa4wU0Uqav/eokg8GBmJBSpZyNKE70UDwHFT+hJxJYAS0A=="
+//    
+//    
+//            guard ABase64 == A.base64 else {
+//                fatalError()
+//            }
+//    
+//            /* FASTLANE
+//             {
+//             "User-Agent"=>"Spaceship 2.225.0",
+//             "X-csrf-itc"=>"itc",
+//             "Content-Type"=>"application/json",
+//             "X-Requested-With"=>"XMLHttpRequest",
+//             "X-Apple-Widget-Key"=>"e0b80c3bf78523bfe80974d320935bfa30add02e1bff88ec2166c6bd5a706c42",
+//             "Accept"=>"application/json, text/javascript"}
+//             */
+//            /* Xcodeinstall
+//             User-Agent: curl/7.79.1
+//             Content-Type: application/json
+//             X-Requested-With: XMLHttpRequest
+//             X-Apple-Widget-Key: e0b80c3bf78523bfe80974d320935bfa30add02e1bff88ec2166c6bd5a706c42
+//             Accept: application/json, text/javascript
+//             */
+//            let (data, response) =
+//                try await apiCall(
+//                    url: "https://idmsa.apple.com/appleauth/auth/signin/init",
+//                    method: .POST,
+//                    body: try JSONEncoder().encode(AppleSRPInitRequest(a: A.base64, accountName: username)),
+//                    headers: ["X-csrf-itc": "itc"],
+//                    validResponse: .value(200)
+//                )
+//    
+//            //TODO: throw error when statusCode is not 200
+//    //        let srpResponse = try JSONDecoder().decode(AppleSRPInitResponse.self, from: data)
+//    
+//            /* FASTLANE */
+//            let fastlaneSRIPResponse1 = """
+//    {
+//    "iteration": 20136,
+//    "salt": "pLG+B7bChHWevylEQapMfQ==",
+//    "protocol": "s2k",
+//    "b": "PhhcTzC9tokn188jSrgs2OttTsstXwxiG4VQDkJ74V/HfOaXurELnCT7pWdEOnDGwG7oDBbrcf3coy/Ye5I+D7gicqDIwCGdHtGgwP0FbLFMIz7PAuQUtxriRZHbgmjU9fop0+dHR87dBkHBBoGUnqPcMgXNUWnkVW/9elbAWkOrSitL42r1yq4J96IwuXISCjdDBCwxebvIccfdvyh0/dGKLk8W2bN2j3yrwqVJdTM72twA6E7Qcw1nW/HUDMa0a0f+gIEx8NCKv1nXxG5u9az986dG+Q0hnNtunlz6VTxMFAgrTgRhRpDIQg8Ua0d+Z1XzSlcOyNOVBUHKj3WZtg==",
+//    "c":"d-74e-df50ec54-947d-11ef-b119-9f0a113ef0df:PRN"
+//    }
+//    """
+//            let srpResponse = try JSONDecoder().decode(AppleSRPInitResponse.self, from: fastlaneSRIPResponse1.data(using: .utf8)!)
+//    
+//            let keyLength = 32
+//            let iterations = srpResponse.iteration
+//            let salt = srpResponse.saltBytes()
+//            let B = srpResponse.b  // server public key in base64
+//            let c = srpResponse.c  //what is c ?
+//    
+//            let serverPublicKey = SRPKey(base64: B)!  //TODO: remove the explicit unwrap (!)
+//    
+//    
+//            let derivedPassword: [UInt8] = try PBKDF2.pbkdf2(
+//                password: password,
+//                salt: salt,
+//                iterations: iterations,
+//                keyLength: keyLength
+//            )
+//            let derivedPasswordBase64: String = derivedPassword.base64
+//            let derivedPasswordHex = derivedPassword.map{ String(format:"%02X", $0) }.joined(separator: "")
+//    
+//    
+//            let sharedSecret = try client.calculateSharedSecret(
+//                username: username,
+//                password: derivedPasswordBase64,
+//                salt: salt,
+//                clientKeys: clientKeys,
+//                serverPublicKey: serverPublicKey
+//            )
+//            let clientProof = client.calculateClientProof(
+//                username: username,
+//                salt: salt,
+//                clientPublicKey: clientKeys.public,
+//                serverPublicKey: serverPublicKey,
+//                sharedSecret: sharedSecret
+//            )
+//    
+//            let m1 = clientProof
+//            let m2: [UInt8] = client.calculateServerProof(
+//                clientPublicKey: clientKeys.public,
+//                clientProof: m1,
+//                sharedSecret: sharedSecret
+//            )
+//    
+//            //TODO: I must verify the server proof at some point
+//            //try client.verifyServerProof(serverProof: ??, clientProof: m1, clientKeys: clientKeys, sharedSecret: sharedSecret)
+//    
+//            let hashcash = try await self.checkHashcash()
+//    
+//            let (data2, response2) =
+//                try await apiCall(
+//                    url: "https://idmsa.apple.com/appleauth/auth/signin/complete?isRememberMeEnabled=false",
+//                    method: .POST,
+//                    body: try JSONEncoder().encode(
+//                        AppleSRPCompleteRequest(accountName: username, c: c, m1: m1.base64, m2: m2.base64)
+//                    ),
+//                    headers: ["X-Apple-HC": hashcash],
+//                    validResponse: .range(0..<506)
+//                )
+//        }
     
     func startSRPAuthentication(username: String, password: String) async throws {
         
@@ -367,9 +367,8 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         let clientKeys = client.generateKeys()
         
         let A = clientKeys.public
-        let a = clientKeys.private
         
-        let (data, response) =
+        let (data, _) =
         try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth/signin/init",
             method: .POST,
@@ -419,7 +418,7 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         //TODO: I must verify the server proof at some point
         //try client.verifyServerProof(serverProof: ??, clientProof: m1, clientKeys: clientKeys, sharedSecret: sharedSecret)
         
-        let (data2, response2) =
+        let (_, response) =
         try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth/signin/complete?isRememberMeEnabled=false",
             method: .POST,
@@ -429,10 +428,19 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             headers: ["X-Apple-HC": hashcash],
             validResponse: .range(0..<506)
         )
+        
+        // store the response to keep cookies and HTTP headers
+        session.xAppleIdSessionId = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id")
+        session.scnt = response.value(forHTTPHeaderField: "scnt")
+
+        try await handleResponse(response)
+
     }
     
     func startAuthentication(username: String, password: String) async throws {
         
+        let _ = try await self.checkHashcash()
+
         let (_, response) =
         try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth/signin",
@@ -446,10 +454,13 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         session.scnt = response.value(forHTTPHeaderField: "scnt")
         
         // should I save other headers ?
-        // X-Apple-HC-Challenge
-        // X-Apple-HC-Bits
         // X-Apple-Auth-Attributes
         
+        try await handleResponse(response)
+        
+    }
+    
+    private func handleResponse(_ response: HTTPURLResponse) async throws {
         switch response.statusCode {
             
         case 200:
@@ -474,7 +485,6 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             log.debug("URLResponse = \(response)")
             throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)
         }
-        
     }
     
     func saveSession(response: HTTPURLResponse, session: AppleSession) async throws {
@@ -575,21 +585,22 @@ struct PBKDF2 {
     
 }
 
-extension SRPClient {
-    /// return shared secret given the password as [UInt8], B value and salt from the server
-    /// - Parameters:
-    ///   - password: password
-    ///   - salt: salt
-    ///   - clientKeys: client public/private keys
-    ///   - serverPublicKey: server public key
-    /// - Throws: `nullServerKey`
-    /// - Returns: shared secret
-    public func calculateSharedSecret(password: [UInt8], salt: [UInt8], clientKeys: SRPKeyPair, serverPublicKey: SRPKey) throws -> SRPKey {
-            let message = [0x3a] + password
-            let sharedSecret = try calculateSharedSecret(message: message, salt: salt, clientKeys: clientKeys, serverPublicKey: serverPublicKey)
-            return SRPKey(sharedSecret)
-    }
-}
+//extension SRPClient {
+//    /// return shared secret given the password as [UInt8], B value and salt from the server
+//    /// - Parameters:
+//    ///   - password: password
+//    ///   - salt: salt
+//    ///   - clientKeys: client public/private keys
+//    ///   - serverPublicKey: server public key
+//    /// - Throws: `nullServerKey`
+//    /// - Returns: shared secret
+//    public func calculateSharedSecret(password: [UInt8], salt: [UInt8], clientKeys: SRPKeyPair, serverPublicKey: SRPKey) throws -> SRPKey {
+//            // username is an empty string.  `message` format is `username:password`, so I'm prepending a ":" (ASCII 0x3a)
+//            let message = [0x3a] + password
+//            let sharedSecret = try calculateSharedSecret(message: message, salt: salt, clientKeys: clientKeys, serverPublicKey: serverPublicKey)
+//            return SRPKey(sharedSecret)
+//    }
+//}
 
 
 
