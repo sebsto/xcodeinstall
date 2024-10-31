@@ -7,11 +7,11 @@
 
 import XCTest
 
+@testable import xcodeinstall
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-
-@testable import xcodeinstall
 
 final class AppleSessionSecretTest: XCTestCase {
 

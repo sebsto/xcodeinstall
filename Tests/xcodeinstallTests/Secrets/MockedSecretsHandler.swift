@@ -6,11 +6,12 @@
 //
 
 import Foundation
+
+@testable import xcodeinstall
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-
-@testable import xcodeinstall
 
 class MockedSecretHandler: SecretsHandlerProtocol {
 

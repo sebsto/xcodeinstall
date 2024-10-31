@@ -6,11 +6,12 @@
 //
 
 import XCTest
+
+@testable import xcodeinstall
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-
-@testable import xcodeinstall
 
 class MFAuthenticationTest: HTTPClientTestCase {
 

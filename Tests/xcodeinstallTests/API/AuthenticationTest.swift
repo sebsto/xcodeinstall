@@ -6,18 +6,19 @@
 //
 
 import XCTest
+
+@testable import xcodeinstall
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 
-@testable import xcodeinstall
-
 class AuthenticationTest: HTTPClientTestCase {
-    
+
     func getHashcashHeaders() -> [String: String] {
-        return [
-            "X-Apple-HC-Bits" : "11",
-            "X-Apple-HC-Challenge": "4d74fb15eb23f465f1f6fcbf534e5877"
+        [
+            "X-Apple-HC-Bits": "11",
+            "X-Apple-HC-Challenge": "4d74fb15eb23f465f1f6fcbf534e5877",
         ]
     }
 
@@ -76,7 +77,7 @@ class AuthenticationTest: HTTPClientTestCase {
         }
 
     }
-    
+
     // test get hashcash
     func testAppleHashcash() async {
 

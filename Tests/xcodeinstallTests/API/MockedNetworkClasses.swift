@@ -7,11 +7,12 @@
 
 import CLIlib
 import Foundation
+
+@testable import xcodeinstall
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-
-@testable import xcodeinstall
 
 // mocked URLSessionDownloadTask
 class MockedURLSessionDownloadTask: URLSessionDownloadTaskProtocol {

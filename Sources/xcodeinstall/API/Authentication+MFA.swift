@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -106,48 +107,48 @@ struct MFAType: Codable {
 }
 
 extension AppleAuthenticator {
-    
+
     // call MFAType API and return the number of digit required for PIN
     func handleTwoFactorAuthentication() async throws -> Int {
-        
+
         guard let data = try? await getMFAType(),
-              let mfaType = try? JSONDecoder().decode(MFAType?.self, from: data)
+            let mfaType = try? JSONDecoder().decode(MFAType?.self, from: data)
         else {
             throw AuthenticationError.canNotReadMFATypes
         }
-        
+
         // FIXME: - add support for SMS fallback in case there is no trusted device
-        
+
         // I should first understand and handle case where there is a 'trustedDevices' in the answer according to
         // https://github.com/fastlane/fastlane/blob/master/spaceship/lib/spaceship/two_step_or_factor_client.rb#L18
         // when there is no 'trustedDevices', we are supposed to fallback to SMS to a phone number
         // but for my account, the API return no 'trustedDevices' but I still receive the code on my mac and iphone
-        
+
         guard let count = mfaType.trustedPhoneNumbers?.count,
-              count > 0,
-              let securityCodeLength = mfaType.securityCode?.length
+            count > 0,
+            let securityCodeLength = mfaType.securityCode?.length
         else {
             log.warning("⚠️ No Security code length provided in answer")
             throw AuthenticationError.requires2FATrustedPhoneNumber
         }
-        
+
         return securityCodeLength
-        
+
     }
-    
+
     func twoFactorAuthentication(pin: String) async throws {
-        
+
         struct TFACode: Codable {
             let code: String
         }
         struct TFABody: Codable {
             let securityCode: TFACode
         }
-        
+
         let codeType = "trusteddevice"
         let body = TFABody(securityCode: TFACode(code: pin))
         let requestHeader = ["X-Apple-Id-Session-Id": session.xAppleIdSessionId!]
-        
+
         let (_, response) = try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth/verify/\(codeType)/securitycode",  // swiftlint:disable:this line_length
             method: .POST,
@@ -155,12 +156,12 @@ extension AppleAuthenticator {
             headers: requestHeader,
             validResponse: .range(200..<413)
         )
-        
+
         switch response.statusCode {
         case 400:
             // authentication failed
             throw AuthenticationError.invalidPinCode
-            
+
         case 412:
             // upgrade account and repair with repair token
             // see https://my.diffend.io/gems/fastlane/2.170.0/2.175.0/page/9#d2h-629314-4781
@@ -172,31 +173,31 @@ extension AppleAuthenticator {
                     repairToken: "secret"
                 )  // X-Apple-Repair-Session-Token
             }
-            
+
         case 200, 204:
             // success
             try await self.saveSession(response: response, session: session)
-            
+
         default:
             // unknown error, fail gracefully
             throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)
-            
+
         }
-        
+
         // should we save additional cookies ?
         // return (try await getDESCookie(), session)
-        
+
     }
-    
+
     // by OOP design it should be private.  Make it internal (default) for testing
     func getMFAType() async throws -> Data? {
-        
+
         let (data, _) = try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth",
             validResponse: .range(200..<400)
         )
-        
+
         return data
-        
+
     }
 }

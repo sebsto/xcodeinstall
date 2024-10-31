@@ -5,7 +5,7 @@
 //  Created by Stormacq, Sebastien on 26/10/2024.
 //
 
-import CryptoSwift
+import CryptoKit
 import Foundation
 import Testing
 
@@ -70,11 +70,11 @@ struct SRPKeysTestCase {
         let hc = "1:11:20230223170600:4d74fb15eb23f465f1f6fcbf534e5877::6373"
 
         // when
-        let sha1 = SHA1().calculate(for: Array(hc.data(using: .utf8)!))
+        let sha1 = Insecure.SHA1.hash(data: Array(hc.data(using: .utf8)!))
 
         // then
         // [UInt8].hexdigest() coming from Swift-SRP
-        #expect(sha1.hexdigest() == "001CC13831C63CA2E739DBCF47BDD4597535265F".lowercased())
+        #expect(sha1.hexDigest().lowercased() == "001CC13831C63CA2E739DBCF47BDD4597535265F".lowercased())
 
     }
 
@@ -90,17 +90,19 @@ struct SRPKeysTestCase {
         let saltData = Data(base64Encoded: salt)!
 
         //given
-        let derivedKey = try PBKDF2.pbkdf2(
-            password: password,
-            salt: saltData.bytes,
-            iterations: iterations,
-            keyLength: keyLength
-        )
-        // print(derivedKey.hexdigest().lowercased())
+        #expect(throws: Never.self) {
+            let derivedKey = try PBKDF2.pbkdf2(
+                password: password,
+                salt: [UInt8](saltData),
+                iterations: iterations,
+                keyLength: keyLength
+            )
+            // print(derivedKey.hexdigest().lowercased())
 
-        // then
-        let fastlaneHexResult = "d7ff78163a0183db1e635ba5beaf4a45f7984b00aafec95e6a044fda331bbd45"
-        #expect(derivedKey.hexdigest().lowercased() == fastlaneHexResult)
+            // then
+            let fastlaneHexResult = "d7ff78163a0183db1e635ba5beaf4a45f7984b00aafec95e6a044fda331bbd45"
+            #expect(derivedKey.hexdigest().lowercased() == fastlaneHexResult)
+        }
     }
 
     @Test func hexString() {
