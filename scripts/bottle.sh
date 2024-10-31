@@ -90,7 +90,7 @@ brew untap sebsto/macos  2>/dev/null || true #ignore failure
 
 # Use formula from custom tap
 brew tap sebsto/macos
-brew update
+# brew update
 
 # Audit formula
 brew audit --strict sebsto/macos/xcodeinstall
