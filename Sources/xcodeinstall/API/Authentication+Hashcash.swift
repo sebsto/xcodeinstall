@@ -6,7 +6,7 @@
 //
 
 import CLIlib
-import CryptoSwift
+import CryptoKit
 import Foundation
 
 extension AppleAuthenticator {
@@ -65,7 +65,7 @@ extension AppleAuthenticator {
         }
 
         log.debug("Computing hashcash")
-        
+
         if date == nil {
             return Hashcash.make(bits: hcBits, challenge: hcChallenge)
         } else {
@@ -134,7 +134,7 @@ struct Hashcash {
             ].joined(separator: ":")
 
             if let data = hc.data(using: .utf8) {
-                let hash = SHA1().calculate(for: Array(data))
+                let hash = Insecure.SHA1.hash(data: data)
                 let hashBits = hash.map { String($0, radix: 2).padding(toLength: 8, withPad: "0") }.joined()
 
                 if hashBits.prefix(bits).allSatisfy({ $0 == "0" }) {

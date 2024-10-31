@@ -6,9 +6,9 @@
 //
 
 import Crypto
-import CryptoSwift
 import Foundation
 import SRP
+import _CryptoExtras
 
 //import _CryptoExtras
 
@@ -169,14 +169,20 @@ struct PBKDF2 {
         }
     }
     static func pbkdf2(password: [UInt8], salt: [UInt8], iterations: Int, keyLength: Int) throws -> [UInt8] {
-        let passwordHash = SHA2(variant: .sha256).calculate(for: password)
-        let pbkdf2 = try PKCS5.PBKDF2(
-            password: passwordHash,
+        let passwordHash = Data(SHA256.hash(data: Data(password)))
+
+        var result: [UInt8] = []
+        try KDF.Insecure.PBKDF2.deriveKey(
+            from: passwordHash,
             salt: salt,
-            iterations: iterations,
-            keyLength: keyLength
-        )
-        return try pbkdf2.calculate()
+            using: .sha256,
+            outputByteCount: keyLength,
+            // Swift-Crypto recommends 210000 or more rounds.  Apple's SRP uses less
+            unsafeUncheckedRounds: iterations
+        ).withUnsafeBytes {
+            result.append(contentsOf: $0)
+        }
+        return result
     }
 
 }

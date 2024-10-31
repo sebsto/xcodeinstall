@@ -15,11 +15,11 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
         .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"),
         .package(url: "https://github.com/sebsto/CLIlib/", from: "0.1.2"),
-        .package(url: "https://github.com/adam-fowler/swift-srp", branch: "padding"),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "1.8.3")
-        
+        .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-crypto", from: "3.9.0"),        
         //.package(path: "../CLIlib")
     ],
+
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
@@ -30,8 +30,7 @@ let package = Package(
                 .product(name: "SotoSecretsManager", package: "soto"),
                 .product(name: "SRP", package: "swift-srp"),
                 .product(name: "CLIlib", package: "CLIlib"),
-                .product(name: "CryptoSwift", package: "CryptoSwift")
-//                .product(name: "_CryptoExtras", package: "swift-crypto")
+                .product(name: "_CryptoExtras", package: "swift-crypto")
             ]
         ),
         .testTarget(
