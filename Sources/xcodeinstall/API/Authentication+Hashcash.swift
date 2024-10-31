@@ -6,7 +6,7 @@
 //
 
 import CLIlib
-import CryptoKit
+import Crypto
 import Foundation
 
 extension AppleAuthenticator {
