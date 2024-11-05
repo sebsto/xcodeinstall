@@ -95,7 +95,8 @@ struct SRPKeysTestCase {
                 password: password,
                 salt: [UInt8](saltData),
                 iterations: iterations,
-                keyLength: keyLength
+                keyLength: keyLength,
+                srpProtocol: .s2k
             )
             // print(derivedKey.hexdigest().lowercased())
 

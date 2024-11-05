@@ -164,7 +164,6 @@ extension String {
     }
 }
 
-//TODO: use swift-crypto instead of CryptoSwift
 struct PBKDF2 {
     static func pbkdf2(
         password: String,
