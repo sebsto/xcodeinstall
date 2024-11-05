@@ -5,7 +5,7 @@
 //  Created by Stormacq, Sebastien on 26/10/2024.
 //
 
-import CryptoKit
+import Crypto
 import Foundation
 import Testing
 
