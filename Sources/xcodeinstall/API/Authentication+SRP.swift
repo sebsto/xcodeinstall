@@ -48,7 +48,8 @@ extension AppleAuthenticator {
             password: password,
             salt: salt,
             iterations: iterations,
-            keyLength: key_length
+            keyLength: key_length,
+            srpProtocol: srpResponse.protocol
         )
 
         let sharedSecret = try client.calculateSharedSecret(
@@ -123,11 +124,15 @@ struct AppleSRPInitRequest: Encodable {
 struct AppleSRPInitResponse: Decodable {
     let iteration: Int
     let salt: String
-    let `protocol`: String
+    let `protocol`: SRPProtocol
     let b: String
     let c: String
     func saltBytes() -> [UInt8] { Array(Data(base64Encoded: salt)!) }
     func bBytes() -> Data? { Data(base64Encoded: b) }
+}
+
+public enum SRPProtocol: String, Codable {
+    case s2k, s2k_fo
 }
 
 struct AppleSRPCompleteRequest: Encodable {
@@ -161,15 +166,46 @@ extension String {
 
 //TODO: use swift-crypto instead of CryptoSwift
 struct PBKDF2 {
-    static func pbkdf2(password: String, salt: [UInt8], iterations: Int, keyLength: Int) throws -> [UInt8] {
+    static func pbkdf2(
+        password: String,
+        salt: [UInt8],
+        iterations: Int,
+        keyLength: Int,
+        srpProtocol: SRPProtocol
+    ) throws -> [UInt8] {
         if let pwdData = password.data(using: .utf8) {
-            return try pbkdf2(password: [UInt8](pwdData), salt: salt, iterations: iterations, keyLength: keyLength)
+            return try pbkdf2(
+                password: [UInt8](pwdData),
+                salt: salt,
+                iterations: iterations,
+                keyLength: keyLength,
+                srpProtocol: srpProtocol
+            )
         } else {
             fatalError()
         }
     }
-    static func pbkdf2(password: [UInt8], salt: [UInt8], iterations: Int, keyLength: Int) throws -> [UInt8] {
-        let passwordHash = Data(SHA256.hash(data: Data(password)))
+    static func pbkdf2(
+        password: [UInt8],
+        salt: [UInt8],
+        iterations: Int,
+        keyLength: Int,
+        srpProtocol: SRPProtocol
+    ) throws -> [UInt8] {
+
+        // when server asks s2k protocol, use a SHA256 hash of the password
+        // when server asks s2k_fo protocol, we must use a Hex encoded string of the hash of the password
+        let passwordHash: Data
+        switch srpProtocol {
+        case .s2k:
+            passwordHash = Data(SHA256.hash(data: Data(password)))
+        case .s2k_fo:
+            passwordHash = Data(
+                Data(SHA256.hash(data: Data(password)))
+                    .hexDigest()
+                    .lowercased().utf8
+            )
+        }
 
         var result: [UInt8] = []
         try KDF.Insecure.PBKDF2.deriveKey(
