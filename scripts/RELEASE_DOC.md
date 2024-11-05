@@ -32,7 +32,7 @@ This script
 
 ## To undo a release 
 
-While testing this procedure, it is usefull to undo a release.
+While testing this procedure, it is useful to undo a release.
 
 !! Destructive actions !! 
 
