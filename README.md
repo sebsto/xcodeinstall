@@ -2,7 +2,7 @@
 
 [![Build & Test on GitHub](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test_gh_hosted.yml/badge.svg)](https://github.com/sebsto/xcodeinstall/actions/workflows/build_and_test_gh_hosted.yml)
 
-
+![Test coverage](https://raw.githubusercontent.com/sebsto/xcodeinstall/refs/heads/main/Tests/coverage.svg)
 
 ![language](https://img.shields.io/badge/swift-5.9-blue)
 ![platform](https://img.shields.io/badge/platform-macOS-green)
