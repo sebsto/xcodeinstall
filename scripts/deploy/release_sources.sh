@@ -5,7 +5,7 @@ set -o pipefail
 # echo "Did you increment version number before running this script ?"
 # exit -1 
 ######################
-VERSION="0.9.1"
+VERSION="0.10.1"
 ######################
 
 echo $VERSION > VERSION
