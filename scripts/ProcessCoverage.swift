@@ -143,7 +143,7 @@ for d in report.data {
     out += "<pre id=\"f\(fileID)\" style=\"display: none\"><span>"
     var segments = f.segments
     for (index, line) in try
-      (String(contentsOfFile: f.filename).split(omittingEmptySubsequences: false) { $0.isNewline })
+            (String(contentsOfFile: f.filename, encoding: .utf8).split(omittingEmptySubsequences: false) { $0.isNewline })
       .enumerated()
     {
       var l = line

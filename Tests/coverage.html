@@ -1,0 +1,4100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage</title>
+    <style>
+      body {
+        background: #111;
+        color: #888;
+        font-family: monospace;
+        font-size: 15px;
+      }
+      nav { position: fixed; top: 0; }
+      pre { margin-top: 25px; }
+      .c { color: green; }
+      .nc { color: red; }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <select id="files">
+        <option value="f0">Sources/xcodeinstall/API/Authentication+Hashcash.swift (78.2%)</option><option value="f1">Sources/xcodeinstall/API/Authentication+MFA.swift (84.4%)</option><option value="f2">Sources/xcodeinstall/API/Authentication+SRP.swift (95.8%)</option><option value="f3">Sources/xcodeinstall/API/Authentication+UsernamePassword.swift (100.0%)</option><option value="f4">Sources/xcodeinstall/API/Authentication.swift (89.4%)</option><option value="f5">Sources/xcodeinstall/API/Download.swift (94.7%)</option><option value="f6">Sources/xcodeinstall/API/DownloadDelegate.swift (66.1%)</option><option value="f7">Sources/xcodeinstall/API/HTTPClient.swift (85.2%)</option><option value="f8">Sources/xcodeinstall/API/Install.swift (93.5%)</option><option value="f9">Sources/xcodeinstall/API/InstallCLTools.swift (76.8%)</option><option value="f10">Sources/xcodeinstall/API/InstallDownloadListExtension.swift (98.4%)</option><option value="f11">Sources/xcodeinstall/API/InstallPkg.swift (75.0%)</option><option value="f12">Sources/xcodeinstall/API/InstallSupportedFiles.swift (100.0%)</option><option value="f13">Sources/xcodeinstall/API/InstallXcode.swift (71.4%)</option><option value="f14">Sources/xcodeinstall/API/List.swift (94.6%)</option><option value="f15">Sources/xcodeinstall/API/URLLogger.swift (86.2%)</option><option value="f16">Sources/xcodeinstall/API/URLRequestExtension.swift (92.6%)</option><option value="f17">Sources/xcodeinstall/CLI-driver/CLIAuthenticate.swift (87.5%)</option><option value="f18">Sources/xcodeinstall/CLI-driver/CLIDownload.swift (90.9%)</option><option value="f19">Sources/xcodeinstall/CLI-driver/CLIInstall.swift (81.8%)</option><option value="f20">Sources/xcodeinstall/CLI-driver/CLIList.swift (92.3%)</option><option value="f21">Sources/xcodeinstall/CLI-driver/CLIMain.swift (100.0%)</option><option value="f22">Sources/xcodeinstall/CLI-driver/CLIProgressBar.swift (5.6%)</option><option value="f23">Sources/xcodeinstall/CLI-driver/CLIStoreSecrets.swift (84.6%)</option><option value="f24">Sources/xcodeinstall/Environment.swift (100.0%)</option><option value="f25">Sources/xcodeinstall/Secrets/AWSSecretsHandler.swift (77.9%)</option><option value="f26">Sources/xcodeinstall/Secrets/AWSSecretsHandlerSoto.swift (2.4%)</option><option value="f27">Sources/xcodeinstall/Secrets/FileSecretsHandler.swift (90.8%)</option><option value="f28">Sources/xcodeinstall/Secrets/SecretsHandler.swift (84.4%)</option><option value="f29">Sources/xcodeinstall/Utilities/FileHandler.swift (64.1%)</option><option value="f30">Sources/xcodeinstall/xcodeInstall/AuthenticateCommand.swift (49.6%)</option><option value="f31">Sources/xcodeinstall/xcodeInstall/DownloadCommand.swift (79.6%)</option><option value="f32">Sources/xcodeinstall/xcodeInstall/DownloadListParser.swift (93.3%)</option><option value="f33">Sources/xcodeinstall/xcodeInstall/InstallCommand.swift (67.7%)</option><option value="f34">Sources/xcodeinstall/xcodeInstall/ListCommand.swift (49.3%)</option><option value="f35">Sources/xcodeinstall/xcodeInstall/SignOutCommand.swift (100.0%)</option><option value="f36">Sources/xcodeinstall/xcodeInstall/StoreSecretsCommand.swift (88.2%)</option><option value="f37">Sources/xcodeinstall/xcodeInstall/XcodeInstallCommand.swift (100.0%)</option>
+      </select>
+    </nav><pre id="f0" style="display: none"><span>//
+//  File.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 30/10/2024.
+//
+
+import CLIlib
+import Crypto
+import Foundation
+
+extension AppleAuthenticator {
+    func checkHashcash() async throws -&gt; String </span><span class="c">{
+
+        guard let serviceKey = session.itcServiceKey?.authServiceKey else </span><span class="nc">{
+            throw AuthenticationError.unableToRetrieveAppleHashcash(nil)
+        }</span><span class="c">
+
+        if </span><span class="c">session.hashcash == nil</span><span class="c"> </span><span class="nc">{
+            var hashcash: String
+
+            log.debug</span><span class="nc">(</span><span class="nc">"Requesting data to compute a hashcash"</span><span class="nc">)
+
+            do </span><span class="nc">{
+                hashcash = try await getAppleHashcash(itServiceKey: serviceKey)</span><span class="nc">
+            }</span><span class="nc"> catch </span><span class="nc">{
+                throw AuthenticationError.unableToRetrieveAppleHashcash(error)
+            }</span><span class="nc">
+            session.hashcash = hashcash
+            log.debug</span><span class="nc">(</span><span class="nc">"Got an Apple hashcash : \(hashcash)"</span><span class="nc">)
+        }</span><span class="c">
+
+        // hashcash is never nil at this stage
+        return session.hashcash!</span><span class="c">
+    }</span><span class="">
+
+    // by OOP design it should be private.  Make it internal (default) for testing
+    func getAppleHashcash(itServiceKey: String, date: String? = nil) async throws -&gt; String </span><span class="c">{
+
+        /*
+         ➜  ~ curl https://idmsa.apple.com/appleauth/auth/signin?widgetKey=e0b80c3bf78523bfe80974d320935bfa30add02e1bff88ec2166c6bd5a706c42
+
+         ...
+
+         &lt; X-Apple-HC-Bits: 10
+         &lt; X-Apple-HC-Challenge: 0daf59bcaf9d721c0375756c5e404652
+
+         ....
+         */
+
+        let url =
+            "https://idmsa.apple.com/appleauth/auth/signin?widgetKey=\(itServiceKey)"
+        let (_, response) = try await apiCall(
+            url: url,
+            validResponse: .value(200)
+        )</span><span class="c">
+
+        guard let hcString = response.allHeaderFields["X-Apple-HC-Bits"] as? String,
+            let hcBits = Int(hcString),
+            let hcChallenge = response.allHeaderFields["X-Apple-HC-Challenge"] as? String
+        else </span><span class="c">{
+            throw AuthenticationError.missingHTTPHeaders(
+                "Unable to find 'X-Apple-HC-Bits' or 'X-Apple-HC-Challenge' to compute hashcash\n\(response.allHeaderFields)"
+            )
+        }</span><span class="c">
+
+        log.debug</span><span class="nc">(</span><span class="nc">"Computing hashcash"</span><span class="c">)
+
+        if </span><span class="c">date == nil</span><span class="c"> </span><span class="nc">{
+            return Hashcash.make(bits: hcBits, challenge: hcChallenge)
+        }</span><span class="c"> else </span><span class="c">{
+            // just used for unit tests
+            return Hashcash.make(bits: hcBits, challenge: hcChallenge, date: date)
+        }</span><span class="c">
+    }</span><span class="">
+}
+
+/*
+ # This App Store Connect hashcash spec was generously donated by...
+ #
+ #                         __  _
+ #    __ _  _ __   _ __   / _|(_)  __ _  _   _  _ __  ___  ___
+ #   / _` || '_ \ | '_ \ | |_ | | / _` || | | || '__|/ _ \/ __|
+ #  | (_| || |_) || |_) ||  _|| || (_| || |_| || |  |  __/\__ \
+ #   \__,_|| .__/ | .__/ |_|  |_| \__, | \__,_||_|   \___||___/
+ #         |_|    |_|             |___/
+ #
+ #
+ # &lt;summary&gt;
+ #             1:11:20230223170600:4d74fb15eb23f465f1f6fcbf534e5877::6373
+ # X-APPLE-HC: 1:11:20230223170600:4d74fb15eb23f465f1f6fcbf534e5877::6373
+ #             ^  ^      ^                       ^                     ^
+ #             |  |      |                       |                     +-- Counter
+ #             |  |      |                       +-- Resource
+ #             |  |      +-- Date YYMMDD[hhmm[ss]]
+ #             |  +-- Bits (number of leading zeros)
+ #             +-- Version
+ #
+ # We can't use an off-the-shelf Hashcash because Apple's implementation is not quite the same as the spec/convention.
+ #  1. The spec calls for a nonce called "Rand" to be inserted between the Ext and Counter. They don't do that at all.
+ #  2. The Counter conventionally encoded as base-64 but Apple just uses the decimal number's string representation.
+ #
+ # Iterate from Counter=0 to Counter=N finding an N that makes the SHA1(X-APPLE-HC) lead with Bits leading zero bits
+ #
+ #
+ # We get the "Resource" from the X-Apple-HC-Challenge header and Bits from X-Apple-HC-Bits
+ #
+ # &lt;/summary&gt;
+ */
+
+struct Hashcash {
+    static func make(bits: Int, challenge: String, date d: String? = nil) -&gt; String </span><span class="c">{
+        let version = 1
+
+        let date: String
+        if </span><span class="c">d != nil</span><span class="c"> </span><span class="c">{
+            // we received a date, use it (for testing)
+            date = d!
+        }</span><span class="c"> else </span><span class="nc">{
+            let df = DateFormatter()
+            df.dateFormat = "yyyyMMddHHmmss"
+            date = df.string(from: Date())
+        }</span><span class="c">
+
+        var counter = 0
+
+        while </span><span class="c">true</span><span class="c"> </span><span class="c">{
+            let hc = [
+                String(version),
+                String(bits),
+                date,
+                challenge,
+                ":\(counter)",
+            ].joined(separator: ":")
+
+            if let data = hc.data(using: .utf8) </span><span class="c">{
+                let hash = Insecure.SHA1.hash(data: data)
+                let hashBits = hash.map </span><span class="c">{ String($0, radix: 2).padding(toLength: 8, withPad: "0") }</span><span class="c">.joined()
+
+                if </span><span class="c">hashBits.prefix(bits).allSatisfy(</span><span class="c">{ $0 == "0" }</span><span class="c">) </span><span class="c">{
+                    return hc
+                }</span><span class="c">
+            }</span><span class="c">
+
+            counter += 1
+        }</span><span class="nc">
+    }</span><span class="">
+}
+
+extension String {
+    func padding(toLength length: Int, withPad character: Character) -&gt; String </span><span class="c">{
+        let paddingCount = length - self.count
+        guard paddingCount &gt; 0 else </span><span class="c">{ return self }</span><span class="c">
+        return String(repeating: character, count: paddingCount) + self</span><span class="c">
+    }</span><span class="">
+}
+
+</span></pre><pre id="f1" style="display: none"><span>//
+//  AuthenticationMFA.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 22/07/2022.
+//
+
+import CLIlib
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+// swiftlint:disable all
+/*
+ {
+ "trustedPhoneNumbers" : [ {
+ "numberWithDialCode" : "+33 •• •• •• •• 88",
+ "pushMode" : "sms",
+ "obfuscatedNumber" : "•• •• •• •• 88",
+ "lastTwoDigits" : "88",
+ "id" : 2
+ } ],
+ "securityCode" : {
+ "length" : 6,
+ "tooManyCodesSent" : false,
+ "tooManyCodesValidated" : false,
+ "securityCodeLocked" : false,
+ "securityCodeCooldown" : false
+ },
+ "authenticationType" : "hsa2",
+ "recoveryUrl" : "https://iforgot.apple.com/phone/add?prs_account_nm=sebsto%40mac.com&amp;autoSubmitAccount=true&amp;appId=142",
+ "cantUsePhoneNumberUrl" : "https://iforgot.apple.com/iforgot/phone/add?context=cantuse&amp;prs_account_nm=sebsto%40mac.com&amp;autoSubmitAccount=true&amp;appId=142",
+ "recoveryWebUrl" : "https://iforgot.apple.com/password/verify/appleid?prs_account_nm=sebsto%40mac.com&amp;autoSubmitAccount=true&amp;appId=142",
+ "repairPhoneNumberUrl" : "https://gsa.apple.com/appleid/account/manage/repair/verify/phone",
+ "repairPhoneNumberWebUrl" : "https://appleid.apple.com/widget/account/repair?#!repair",
+ "aboutTwoFactorAuthenticationUrl" : "https://support.apple.com/kb/HT204921",
+ "twoFactorVerificationSupportUrl" : "https://support.apple.com/HT208072",
+ "hasRecoveryKey" : true,
+ "supportsRecoveryKey" : false,
+ "autoVerified" : false,
+ "showAutoVerificationUI" : false,
+ "supportsCustodianRecovery" : false,
+ "hideSendSMSCodeOption" : false,
+ "supervisedChangePasswordFlow" : false,
+ "supportsRecovery" : true,
+ "trustedPhoneNumber" : {
+ "numberWithDialCode" : "+33 •• •• •• •• 88",
+ "pushMode" : "sms",
+ "obfuscatedNumber" : "•• •• •• •• 88",
+ "lastTwoDigits" : "88",
+ "id" : 2
+ },
+ "hsa2Account" : true,
+ "restrictedAccount" : false,
+ "managedAccount" : false
+ }
+ */
+// swiftlint:enable all
+
+struct MFAType: Codable {
+
+    struct PhoneNumber: Codable {
+        let numberWithDialCode: String?
+        let pushMode: String?
+        let obfuscatedNumber: String?
+        let lastTwoDigits: String?
+        let id: Int?
+    }
+
+    struct SecurityCode: Codable {
+        let length: Int?
+        let tooManyCodesSent: Bool?
+        let tooManyCodesValidated: Bool?
+        let securityCodeLocked: Bool?
+        let securityCodeCooldown: Bool?
+    }
+
+    enum AuthenticationType: String, Codable {
+        case hsa
+        case hsa2
+    }
+
+    let trustedPhoneNumbers: [PhoneNumber]?
+    let securityCode: SecurityCode?
+    let authenticationType: AuthenticationType?
+    let recoveryUrl: String?
+    let cantUsePhoneNumberUrl: String?
+    let recoveryWebUrl: String?
+    let repairPhoneNumberUrl: String?
+    let repairPhoneNumberWebUrl: String?
+    let aboutTwoFactorAuthenticationUrl: String?
+    let twoFactorVerificationSupportUrl: String?
+    let hasRecoveryKey: Bool?
+    let supportsRecoveryKey: Bool?
+    let autoVerified: Bool?
+    let showAutoVerificationUI: Bool?
+    let supportsCustodianRecovery: Bool?
+    let hideSendSMSCodeOption: Bool?
+    let supervisedChangePasswordFlow: Bool?
+    let supportsRecovery: Bool?
+    let trustedPhoneNumber: PhoneNumber?
+    let hsa2Account: Bool?
+    let restrictedAccount: Bool?
+    let managedAccount: Bool?
+}
+
+extension AppleAuthenticator {
+
+    // call MFAType API and return the number of digit required for PIN
+    func handleTwoFactorAuthentication() async throws -&gt; Int </span><span class="c">{
+
+        guard let data = try? await getMFAType(),
+            let mfaType = try? JSONDecoder().decode(MFAType?.self, from: data)
+        else </span><span class="c">{
+            throw AuthenticationError.canNotReadMFATypes
+        }</span><span class="c">
+
+        // FIXME: - add support for SMS fallback in case there is no trusted device
+
+        // I should first understand and handle case where there is a 'trustedDevices' in the answer according to
+        // https://github.com/fastlane/fastlane/blob/master/spaceship/lib/spaceship/two_step_or_factor_client.rb#L18
+        // when there is no 'trustedDevices', we are supposed to fallback to SMS to a phone number
+        // but for my account, the API return no 'trustedDevices' but I still receive the code on my mac and iphone
+
+        guard let count = mfaType.trustedPhoneNumbers?.count,
+            count &gt; 0,
+            let securityCodeLength = mfaType.securityCode?.length
+        else </span><span class="c">{
+            log.warning</span><span class="c">(</span><span class="c">"⚠️ No Security code length provided in answer"</span><span class="c">)
+            throw AuthenticationError.requires2FATrustedPhoneNumber
+        }</span><span class="c">
+
+        return securityCodeLength</span><span class="c">
+
+    }</span><span class="">
+
+    func twoFactorAuthentication(pin: String) async throws </span><span class="c">{
+
+        struct TFACode: Codable {
+            let code: String
+        }
+        struct TFABody: Codable {
+            let securityCode: TFACode
+        }
+
+        let codeType = "trusteddevice"
+        let body = TFABody(securityCode: TFACode(code: pin))
+        let requestHeader = ["X-Apple-Id-Session-Id": session.xAppleIdSessionId!]
+
+        let (_, response) = try await apiCall(
+            url: "https://idmsa.apple.com/appleauth/auth/verify/\(codeType)/securitycode",  // swiftlint:disable:this line_length
+            method: .POST,
+            body: try JSONEncoder().encode(body)</span><span class="c">,
+            headers: requestHeader,
+            validResponse: .range(200..&lt;413)
+        )</span><span class="c">
+
+        switch </span><span class="c">response.statusCode</span><span class="c"> {
+        </span><span class="nc">case 400:
+            // authentication failed
+            throw AuthenticationError.invalidPinCode</span><span class="c">
+
+        </span><span class="nc">case 412:
+            // upgrade account and repair with repair token
+            // see https://my.diffend.io/gems/fastlane/2.170.0/2.175.0/page/9#d2h-629314-4781
+            if let location = response.value(forHTTPHeaderField: "Location") </span><span class="nc">{
+                throw AuthenticationError.accountNeedsRepair(location: location, repairToken: "secret")  // X-Apple-Repair-Session-Token
+            }</span><span class="nc"> else </span><span class="nc">{
+                throw AuthenticationError.accountNeedsRepair(
+                    location: "no location HTTP header",
+                    repairToken: "secret"
+                )  // X-Apple-Repair-Session-Token
+            }</span><span class="c">
+
+        </span><span class="c">case 200, 204:
+            // success
+            try await self.saveSession(response: response, session: session)</span><span class="c">
+
+        </span><span class="nc">default:
+            // unknown error, fail gracefully
+            throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)</span><span class="c">
+
+        }</span><span class="c">
+
+        // should we save additional cookies ?
+        // return (try await getDESCookie(), session)
+
+    }</span><span class="">
+
+    // by OOP design it should be private.  Make it internal (default) for testing
+    func getMFAType() async throws -&gt; Data? </span><span class="c">{
+
+        let (data, _) = try await apiCall(
+            url: "https://idmsa.apple.com/appleauth/auth",
+            validResponse: .range(200..&lt;400)
+        )</span><span class="c">
+
+        return data</span><span class="c">
+
+    }</span><span class="">
+}
+
+</span></pre><pre id="f2" style="display: none"><span>//
+//  File.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 30/10/2024.
+//
+
+import Crypto
+import Foundation
+import SRP
+import _CryptoExtras
+
+//import _CryptoExtras
+
+extension AppleAuthenticator {
+    func startSRPAuthentication(username: String, password: String) async throws </span><span class="c">{
+
+        let hashcash = try await self.checkHashcash()</span><span class="c">
+
+        // signification of variables : https://blog.uniauth.com/what-is-secure-remote-password
+
+        let configuration = SRPConfiguration&lt;SHA256&gt;(.N2048)
+        let client = SRPClient(configuration: configuration)
+        let clientKeys = client.generateKeys()
+
+        let A = clientKeys.public
+
+        let (data, _) =
+            try await apiCall(
+                url: "https://idmsa.apple.com/appleauth/auth/signin/init",
+                method: .POST,
+                body: try JSONEncoder().encode(AppleSRPInitRequest(a: A.base64, accountName: username))</span><span class="c">,
+                validResponse: .range(0..&lt;506)
+            )</span><span class="c">
+
+        //TODO: throw error when statusCode is not 200
+        let srpResponse = try JSONDecoder().decode(AppleSRPInitResponse.self, from: data)</span><span class="c">
+
+        let key_length = 32
+        let iterations = srpResponse.iteration
+        let salt = srpResponse.saltBytes()
+        let B = srpResponse.b  // server public key
+        let c = srpResponse.c  //what is c ?
+
+        let serverPublicKey = SRPKey(base64: B)!  //TODO: remove !
+
+        let derivedPassword: [UInt8] = try PBKDF2.pbkdf2(
+            password: password,
+            salt: salt,
+            iterations: iterations,
+            keyLength: key_length,
+            srpProtocol: srpResponse.protocol
+        )</span><span class="c">
+
+        let sharedSecret = try client.calculateSharedSecret(
+            password: derivedPassword,
+            salt: salt,
+            clientKeys: clientKeys,
+            serverPublicKey: serverPublicKey
+        )</span><span class="c">
+        let clientProof = client.calculateClientProof(
+            username: username,
+            salt: salt,
+            clientPublicKey: clientKeys.public,
+            serverPublicKey: serverPublicKey,
+            sharedSecret: sharedSecret
+        )
+
+        let m1 = clientProof
+        let m2: [UInt8] = client.calculateServerProof(
+            clientPublicKey: clientKeys.public,
+            clientProof: m1,
+            sharedSecret: sharedSecret
+        )
+
+        //TODO: I must verify the server proof at some point
+        //try client.verifyServerProof(serverProof: ??, clientProof: m1, clientKeys: clientKeys, sharedSecret: sharedSecret)
+
+        let (_, response) =
+            try await apiCall(
+                url: "https://idmsa.apple.com/appleauth/auth/signin/complete?isRememberMeEnabled=false",
+                method: .POST,
+                body: try JSONEncoder().encode(
+                    AppleSRPCompleteRequest(accountName: username, c: c, m1: m1.base64, m2: m2.base64)
+                )</span><span class="c">,
+                headers: ["X-Apple-HC": hashcash],
+                validResponse: .range(0..&lt;506)
+            )</span><span class="c">
+
+        // store the response to keep cookies and HTTP headers
+        session.xAppleIdSessionId = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id")
+        session.scnt = response.value(forHTTPHeaderField: "scnt")
+
+        try await handleResponse(response)</span><span class="c">
+
+    }</span><span class="">
+}
+
+/*
+ {
+ "protocols": [
+ "s2k",
+ "s2k_fo"
+ ],
+ "a": "5DiL4KfAjhfeVN5dkrPD0Ykc9rhOvbSUlJel9miq8fI=",
+ "accountName": "xxx@me.com"
+ }
+ */
+struct AppleSRPInitRequest: Encodable {
+    let a: String
+    let accountName: String
+    let protocols: [String] = </span><span class="nc">["s2k", "s2k_fo"]</span><span class="">
+}
+
+/*
+ {
+ "iteration" : 1160,
+ "salt" : "iVGSz0+eXAe5jzBsuSH9Gg==",
+ "protocol" : "s2k_fo",
+ "b" : "feF9PcfeU6pKeZb27kxM080eOPvg0wZurW6sGglwhIi63VPyQE1FfU1NKdU5bRHpGYcz23AKetaZWX6EqlIUYsmguN7peY9OU74+V16kvPaMFtSvS4LUrl8W+unt2BTlwRoINTYVgoIiLwXFKAowH6dA9HGaOy8TffKw/FskGK1rPqf8TZJ3IKWk6LA8AAvNhQhaH2/rdtdysJpV+T7eLpoMlcILWCOVL1mzAeTr3lMO4UdcnPokjWIoHIEJXDF8XekRbqSeCZvMlZBP1qSeRFwPuxz//doEk0AS2wU2sZFinPmfz4OV2ESQ4j9lfxE+NvapT+fPAmEUysUL61piMw==",
+ "c" : "d-74e-7f288e09-93e6-11ef-9a9c-278293010698:PRN"
+ }
+ */
+struct AppleSRPInitResponse: Decodable {
+    let iteration: Int
+    let salt: String
+    let `protocol`: SRPProtocol
+    let b: String
+    let c: String
+    func saltBytes() -&gt; [UInt8] </span><span class="c">{ Array(Data(base64Encoded: salt)!) }</span><span class="">
+    func bBytes() -&gt; Data? </span><span class="nc">{ Data(base64Encoded: b) }</span><span class="">
+}
+
+public enum SRPProtocol: String, Codable {
+    case s2k, s2k_fo
+}
+
+struct AppleSRPCompleteRequest: Encodable {
+    let accountName: String
+    let c: String
+    let m1: String
+    let m2: String
+    let rememberMe: Bool = </span><span class="nc">false</span><span class="">
+}
+
+extension SRPKey {
+    public var base64: String </span><span class="c">{
+        Data(self.bytes).base64EncodedString()
+    }</span><span class="">
+    public init?(base64: String) </span><span class="c">{
+        guard let data = Data(base64Encoded: base64) else </span><span class="nc">{ return nil }</span><span class="c">
+        self.init(Array(data))
+    }</span><span class="">
+}
+
+extension Array where Element == UInt8 {
+    public var base64: String </span><span class="c">{
+        Data(self).base64EncodedString()
+    }</span><span class="">
+}
+extension String {
+    public var array: [UInt8] </span><span class="c">{
+        Array(self.utf8)
+    }</span><span class="">
+}
+
+struct PBKDF2 {
+    static func pbkdf2(
+        password: String,
+        salt: [UInt8],
+        iterations: Int,
+        keyLength: Int,
+        srpProtocol: SRPProtocol
+    ) throws -&gt; [UInt8] </span><span class="c">{
+        if let pwdData = password.data(using: .utf8) </span><span class="c">{
+            return try pbkdf2(
+                password: [UInt8](pwdData),
+                salt: salt,
+                iterations: iterations,
+                keyLength: keyLength,
+                srpProtocol: srpProtocol
+            )
+        }</span><span class="c"> else </span><span class="nc">{
+            fatalError()
+        }</span><span class="nc">
+    }</span><span class="">
+    static func pbkdf2(
+        password: [UInt8],
+        salt: [UInt8],
+        iterations: Int,
+        keyLength: Int,
+        srpProtocol: SRPProtocol
+    ) throws -&gt; [UInt8] </span><span class="c">{
+
+        // when server asks s2k protocol, use a SHA256 hash of the password
+        // when server asks s2k_fo protocol, we must use a Hex encoded string of the hash of the password
+        let passwordHash: Data
+        switch </span><span class="c">srpProtocol</span><span class="c"> {
+        </span><span class="c">case .s2k:
+            passwordHash = Data(SHA256.hash(data: Data(password)))</span><span class="c">
+        </span><span class="c">case .s2k_fo:
+            passwordHash = Data(
+                Data(SHA256.hash(data: Data(password)))
+                    .hexDigest()
+                    .lowercased().utf8
+            )</span><span class="c">
+        }</span><span class="c">
+
+        var result: [UInt8] = []
+        try KDF.Insecure.PBKDF2.deriveKey(
+            from: passwordHash,
+            salt: salt,
+            using: .sha256,
+            outputByteCount: keyLength,
+            // Swift-Crypto recommends 210000 or more rounds.  Apple's SRP uses less
+            unsafeUncheckedRounds: iterations
+        )</span><span class="c">.withUnsafeBytes </span><span class="c">{
+            result.append(contentsOf: $0)
+        }</span><span class="c">
+        return result
+    }</span><span class="">
+
+}
+
+</span></pre><pre id="f3" style="display: none"><span>//
+//  File.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 30/10/2024.
+//
+
+import Foundation
+
+extension AppleAuthenticator {
+    func startUserPasswordAuthentication(username: String, password: String) async throws </span><span class="c">{
+
+        let _ = try await self.checkHashcash()</span><span class="c">
+
+        let (_, response) =
+            try await apiCall(
+                url: "https://idmsa.apple.com/appleauth/auth/signin",
+                method: .POST,
+                body: try JSONEncoder().encode(User(accountName: username, password: password))</span><span class="c">,
+                validResponse: .range(0..&lt;506)
+            )</span><span class="c">
+
+        // store the response to keep cookies and HTTP headers
+        session.xAppleIdSessionId = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id")
+        session.scnt = response.value(forHTTPHeaderField: "scnt")
+
+        // should I save other headers ?
+        // X-Apple-Auth-Attributes
+
+        try await handleResponse(response)</span><span class="c">
+
+    }</span><span class="">
+}
+
+</span></pre><pre id="f4" style="display: none"><span>//
+//  Authentication.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 18/07/2022.
+//
+
+import CLIlib
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+// MARK: - Module Internal structures and data
+
+enum AuthenticationMethod {
+    case usernamePassword
+    case srp
+
+    static func withSRP(_ srp: Bool) -&gt; AuthenticationMethod </span><span class="c">{ srp ? </span><span class="c">.srp</span><span class="c"> : </span><span class="c">.usernamePassword</span><span class="c"> }</span><span class="">
+}
+
+struct User: Codable {
+    var accountName: String
+    var password: String
+    var rememberMe = </span><span class="c">false</span><span class="">
+}
+
+enum AuthenticationError: Error {
+    case invalidUsernamePassword
+    case requires2FA
+    //    case requires2FATrustedDevice
+    case requires2FATrustedPhoneNumber
+    case invalidPinCode
+    case unableToRetrieveAppleServiceKey(Error)
+    case unableToRetrieveAppleHashcash(Error?)
+    case missingHTTPHeaders(String)
+    case canNotReadMFATypes
+    case accountNeedsRepair(location: String, repairToken: String)
+    case serviceUnavailable  //503
+    case notImplemented(featureName: String)  // temporray while I'm working on a feature
+    case unexpectedHTTPReturnCode(code: Int)
+    case other(error: Error)
+}
+
+struct AppleServiceKey: Codable, Equatable {
+    let authServiceUrl: String
+    let authServiceKey: String
+
+    static func == (lhs: AppleServiceKey, rhs: AppleServiceKey) -&gt; Bool </span><span class="c">{
+        lhs.authServiceKey == rhs.authServiceKey &amp;&amp; </span><span class="c">lhs.authServiceUrl == rhs.authServiceUrl</span><span class="c">
+    }</span><span class="">
+}
+
+struct AppleSession: Codable, Equatable {
+    var itcServiceKey: AppleServiceKey?
+    var xAppleIdSessionId: String? = </span><span class="c">nil</span><span class="">
+    var scnt: String? = </span><span class="c">nil</span><span class="">
+    var hashcash: String? = </span><span class="c">nil</span><span class="">
+
+    static func == (lhs: AppleSession, rhs: AppleSession) -&gt; Bool </span><span class="c">{
+        lhs.itcServiceKey == rhs.itcServiceKey &amp;&amp; </span><span class="c">lhs.xAppleIdSessionId == rhs.xAppleIdSessionId</span><span class="c">
+            &amp;&amp; </span><span class="c">lhs.scnt == rhs.scnt</span><span class="c"> &amp;&amp; </span><span class="c">lhs.hashcash == rhs.hashcash</span><span class="c">
+    }</span><span class="">
+
+    func data() throws -&gt; Data </span><span class="c">{
+        try JSONEncoder().encode(self)</span><span class="c">
+    }</span><span class="">
+
+    func string() throws -&gt; String? </span><span class="nc">{
+        String(data: try self.data()</span><span class="nc">, encoding: .utf8)
+    }</span><span class="">
+
+    init(fromData data: Data) throws </span><span class="c">{
+        self = try JSONDecoder().decode(AppleSession.self, from: data)</span><span class="c">
+    }</span><span class="">
+
+    init(
+        itcServiceKey: AppleServiceKey? = nil,
+        xAppleIdSessionId: String? = nil,
+        scnt: String? = nil,
+        hashcash: String? = nil
+    ) </span><span class="c">{
+        self.itcServiceKey = itcServiceKey
+        self.xAppleIdSessionId = xAppleIdSessionId
+        self.scnt = scnt
+        self.hashcash = hashcash
+    }</span><span class="">
+}
+
+/**
+ Manage authentication with an Apple ID
+ */
+
+protocol AppleAuthenticatorProtocol {
+
+    // standard authentication methods
+    func startAuthentication(
+        with: AuthenticationMethod,
+        username: String,
+        password: String
+    )
+        async throws
+    func signout() async throws
+
+    // multi-factor authentication
+    func handleTwoFactorAuthentication() async throws -&gt; Int
+    func twoFactorAuthentication(pin: String) async throws
+}
+
+//FIXME: TODO: split into two classes : UsernamePasswordAuthenticator and SRPAuthenticator
+class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
+
+    func startAuthentication(
+        with authenticationMethod: AuthenticationMethod,
+        username: String,
+        password: String
+    ) async throws </span><span class="c">{
+        try await checkServiceKey()</span><span class="c">
+
+        switch </span><span class="c">authenticationMethod</span><span class="c"> {
+        </span><span class="c">case .usernamePassword:
+            try await self.startUserPasswordAuthentication(username: username, password: password)</span><span class="c">
+        </span><span class="c">case .srp:
+            try await self.startSRPAuthentication(username: username, password: password)</span><span class="c">
+        }</span><span class="c">
+    }</span><span class="">
+
+    // this is mainly for functional testing, it invalidates the session and force a full re-auth aftewards
+    func signout() async throws </span><span class="c">{
+
+        let (_, _) = try await apiCall(
+            url: "https://idmsa.apple.com/appleauth/signout",
+            validResponse: .range(0..&lt;500)
+        )</span><span class="c">
+
+        try await env.secrets.clearSecrets()</span><span class="c">
+
+    }</span><span class="">
+
+    // MARK: - Private structures and data
+
+    func checkServiceKey() async throws </span><span class="c">{
+        if </span><span class="c">session.itcServiceKey == nil</span><span class="c"> </span><span class="c">{
+            var appServiceKey: AppleServiceKey
+            do </span><span class="c">{
+                appServiceKey = try await getAppleServicekey()</span><span class="nc">
+            }</span><span class="c"> catch </span><span class="c">{
+                throw AuthenticationError.unableToRetrieveAppleServiceKey(error)
+            }</span><span class="nc">
+            session.itcServiceKey = appServiceKey
+            log.debug</span><span class="nc">(</span><span class="nc">"Got an Apple Service key : \(String(describing: session.itcServiceKey))"</span><span class="nc">)
+        }</span><span class="c">
+    }</span><span class="">
+
+    // by OOP design it should be private.  Make it internal (default) for testing
+    func getAppleServicekey() async throws -&gt; AppleServiceKey </span><span class="c">{
+
+        /*
+         ➜  ~ curl https://appstoreconnect.apple.com/olympus/v1/app/config\?hostname\=itunesconnect.apple.com
+         {
+         "authServiceUrl" : "https://idmsa.apple.com/appleauth",
+         "authServiceKey" : "e0b80c3bf78523bfe80974d320935bfa30add02e1bff88ec2166c6bd5a706c42"
+         }
+         */
+
+        let url =
+            "https://appstoreconnect.apple.com/olympus/v1/app/config?hostname=itunesconnect.apple.com"
+        let (data, _) = try await apiCall(
+            url: url,
+            validResponse: .range(200..&lt;400)  //FIXME: should this be .value(200) ?
+        )</span><span class="c">
+
+        return try JSONDecoder().decode(AppleServiceKey.self, from: data)</span><span class="c">
+    }</span><span class="">
+
+    func handleResponse(_ response: HTTPURLResponse) async throws </span><span class="c">{
+        switch </span><span class="c">response.statusCode</span><span class="c"> {
+
+        </span><span class="c">case 200:
+            // we were already authenticated
+
+            try await self.saveSession(response: response, session: session)</span><span class="c">
+
+        </span><span class="c">case 401, 403:
+            // invalid usernameor password
+            throw AuthenticationError.invalidUsernamePassword</span><span class="c">
+
+        </span><span class="nc">case 409:
+            // requires two-factors authentication
+            throw AuthenticationError.requires2FA</span><span class="c">
+
+        </span><span class="nc">case 503:
+            // service unavailable. Most probably teh requested Authentication method is not supported
+            throw AuthenticationError.serviceUnavailable</span><span class="c">
+
+        </span><span class="c">default:
+            log.critical</span><span class="c">(</span><span class="c">"💣 Unexpected return code : \(response.statusCode)"</span><span class="c">)
+            log.debug</span><span class="nc">(</span><span class="nc">"URLResponse = \(response)"</span><span class="c">)
+            throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)</span><span class="c">
+        }</span><span class="c">
+    }</span><span class="">
+
+    func saveSession(response: HTTPURLResponse, session: AppleSession) async throws </span><span class="c">{
+        guard let cookies = response.value(forHTTPHeaderField: "Set-Cookie") else </span><span class="c">{
+            return
+        }</span><span class="c">
+
+        // save session data to reuse in future invocation
+        _ = try await env.secrets.saveCookies(cookies)</span><span class="c">
+        _ = try await env.secrets.saveSession(session)</span><span class="c">
+    }</span><span class="">
+}
+
+</span></pre><pre id="f5" style="display: none"><span>//
+//  List.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 19/07/2022.
+//
+
+import CLIlib
+import Foundation
+
+protocol AppleDownloaderProtocol {
+    func list(force: Bool) async throws -&gt; DownloadList
+    func download(file: DownloadList.File) async throws -&gt; URLSessionDownloadTaskProtocol?
+}
+
+class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
+
+    // control the progress of the download
+    // not private for testability
+    var downloadTask: URLSessionDownloadTaskProtocol?
+
+    func download(file: DownloadList.File) async throws -&gt; URLSessionDownloadTaskProtocol? </span><span class="c">{
+
+        guard let downloadDelegate = env.urlSessionDownload.downloadDelegate() else </span><span class="nc">{
+            fatalError(</span><span class="nc">"This method requires an injected download delegate"</span><span class="nc">)
+        }</span><span class="c">
+
+        guard !file.remotePath.isEmpty,
+            !file.filename.isEmpty,
+            file.fileSize &gt; 0
+        else </span><span class="c">{
+            log.error</span><span class="c">(</span><span class="c">"🛑 Invalid file specification : \(file)"</span><span class="c">)
+            throw DownloadError.invalidFileSpec
+        }</span><span class="c">
+
+        let fileURL = "https://developer.apple.com/services-account/download?path=\(file.remotePath)"
+
+        // pass a progress update client to the download delegate to receive progress updates
+        downloadDelegate.totalFileSize = file.fileSize
+        downloadDelegate.dstFilePath = URL(
+            fileURLWithPath: env.fileHandler.downloadFilePath(file: file)
+        )
+        downloadDelegate.startTime = Date.now
+
+        // make a call to start the download
+        // first call, should send a redirect and an auth cookie
+        self.downloadTask = try await downloadCall(url: fileURL, requestHeaders: ["Accept": "*/*"])</span><span class="c">
+        if let dlt = self.downloadTask </span><span class="c">{
+            dlt.resume()
+            downloadDelegate.sema.wait()
+        }</span><span class="c">
+
+        // returns when the download is completed
+        return self.downloadTask</span><span class="c">
+
+    }</span><span class="">
+
+}
+
+</span></pre><pre id="f6" style="display: none"><span>//
+//  DownloadDelegate.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 17/08/2022.
+//
+
+import CLIlib
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+// delegate class to receive download progress
+class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
+
+    var dstFilePath: URL?
+    var totalFileSize: Int?
+    var startTime: Date?
+
+    // to notify the main thread when download is finish
+    let sema: DispatchSemaphoreProtocol
+
+    init(semaphore: DispatchSemaphoreProtocol) </span><span class="c">{
+        self.sema = semaphore
+    }</span><span class="">
+
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didFinishDownloadingTo location: URL
+    ) </span><span class="nc">{
+        completeTransfer(from: location)
+    }</span><span class="">
+
+    func completeTransfer(from location: URL) </span><span class="c">{
+        // tell the progress bar that we're done
+        env.progressBar.complete(success: true)
+
+        guard let dst = dstFilePath else </span><span class="nc">{
+            log.warning</span><span class="nc">(</span><span class="nc">"⚠️ No destination specified. I am keeping the file at \(location)"</span><span class="nc">)
+            return
+        }</span><span class="c">
+
+        log.debug</span><span class="c">(</span><span class="c">"Finished at \(location)\nMoving to \(dst)"</span><span class="c">)
+
+        // ignore the error here ? It is logged one level down. How to bring it up to the user ?
+        try? env.fileHandler.move(from: location, to: dst)
+
+        // tell the main thread that we're done
+        _ = self.sema.signal()
+    }</span><span class="">
+
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didWriteData bytesWritten: Int64,
+        totalBytesWritten: Int64,
+        totalBytesExpectedToWrite: Int64
+    ) </span><span class="nc">{
+        updateTransfer(totalBytesWritten: totalBytesWritten)
+    }</span><span class="">
+
+    func updateTransfer(totalBytesWritten: Int64) </span><span class="c">{
+        guard let tfs = totalFileSize else </span><span class="nc">{
+            fatalError(</span><span class="nc">"Developer forgot to share the total file size"</span><span class="nc">)
+        }</span><span class="c">
+
+        var text = "\(totalBytesWritten/1024/1024) MB"
+
+        // when a start time is specified, compute the bandwidth
+        if let start = self.startTime </span><span class="c">{
+
+            let dif: TimeInterval = 0 - start.timeIntervalSinceNow
+            let bandwidth = Double(totalBytesWritten) / Double(dif) / 1024 / 1024
+
+            text += String(format: " / %.2f MBs", bandwidth)
+        }</span><span class="c">
+        env.progressBar.update(
+            step: Int(totalBytesWritten / 1024),
+            total: Int(tfs / 1024),
+            text: text
+        )
+
+    }</span><span class="">
+
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest
+    ) async -&gt; URLRequest? </span><span class="nc">{
+        request
+    }</span><span class="">
+
+    func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) </span><span class="nc">{
+        log.warning</span><span class="nc">(</span><span class="nc">"error \(String(describing: error))"</span><span class="nc">)
+        _ = self.sema.signal()
+    }</span><span class="">
+}
+
+</span></pre><pre id="f7" style="display: none"><span>//
+//  HTTPClient.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 21/07/2022.
+//
+
+import CLIlib
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+/*
+    This fil contains code to make our APICall testable.
+
+    Inspired from https://masilotti.com/testing-nsurlsession-input/
+ */
+
+// make URLSession testable by abstracting its protocol
+// it allows to use the real URLSession or a mock interchangably
+protocol URLSessionProtocol {
+    func data(
+        for request: URLRequest,
+        delegate: URLSessionTaskDelegate?
+    ) async throws -&gt; (
+        Data, URLResponse
+    )
+    func downloadTask(with request: URLRequest) throws -&gt; URLSessionDownloadTaskProtocol
+    func downloadDelegate() -&gt; DownloadDelegate?
+}
+
+// make the real URLSession implements our new protocol to make the compiler happy
+extension URLSession: URLSessionProtocol {
+    func downloadTask(with request: URLRequest) throws -&gt; URLSessionDownloadTaskProtocol </span><span class="nc">{
+        downloadTask(with: request) as URLSessionDownloadTask
+    }</span><span class="">
+    func downloadDelegate() -&gt; DownloadDelegate? </span><span class="nc">{
+        self.delegate as? DownloadDelegate
+    }</span><span class="">
+}
+
+// make URLSessionDownloadTask testable by abstracting its protocol
+protocol URLSessionDownloadTaskProtocol {
+    func resume()
+}
+
+// make the real URLSessionDownloadTask implemnet our protocol to keep the compiler happy
+extension URLSessionDownloadTask: URLSessionDownloadTaskProtocol {}
+
+// callers can express expected HTTP Response code either as range, either as specific value
+enum ExpectedResponseCode {
+    case range(Range&lt;Int&gt;)
+    case value(Int)
+
+    func isValid(response: Int) -&gt; Bool </span><span class="c">{
+        switch </span><span class="c">self</span><span class="c"> {
+        </span><span class="c">case .range(let range):
+            return range.contains(response)</span><span class="c">
+        </span><span class="c">case .value(let value):
+            return value == response</span><span class="c">
+        }
+    }</span><span class="">
+}
+
+// provide common code for all network clients
+class HTTPClient {
+
+    enum HTTPVerb: String {
+        case GET
+        case POST
+    }
+
+    // some ID returned by Apple API to authenticate us
+    var session = </span><span class="c">AppleSession()</span><span class="">
+
+    // to be shared between apiCall and download methods
+    // prepare headers with correct cookies and X- value for Apple authentication
+    func prepareAuthenticationHeaders() async -&gt; [String: String] </span><span class="c">{
+
+        var requestHeaders: [String: String] = [
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/javascript",
+            "X-Requested-With": "XMLHttpRequest",
+            "User-Agent": "curl/7.79.1",
+        ]
+
+        // reload previous session if it exists
+        let session = try? await env.secrets.loadSession()
+        if let session </span><span class="nc">{
+
+            // session is loaded
+            self.session = session
+
+        }</span><span class="c"> else </span><span class="c">{
+            log.debug</span><span class="c">(</span><span class="c">"⚠️ I could not load session (this is normal the first time you authenticate)"</span><span class="c">)
+        }
+
+        // populate HTTP request with headers from session (either from self or the one just loaded)
+        if let isk = self.session.itcServiceKey </span><span class="c">{
+            requestHeaders["X-Apple-Widget-Key"] = isk.authServiceKey
+        }</span><span class="c">
+        if let aisi = self.session.xAppleIdSessionId </span><span class="c">{
+            requestHeaders["X-Apple-ID-Session-Id"] = aisi
+        }</span><span class="c">
+        if let scnt = self.session.scnt </span><span class="c">{
+            requestHeaders["scnt"] = scnt
+        }</span><span class="c">
+
+        // reload cookies if they exist
+        let cookies = try? await env.secrets.loadCookies()
+        if let cookies </span><span class="c">{
+            // cookies existed, let's add them to our HTTPHeaders
+            requestHeaders.merge(HTTPCookie.requestHeaderFields(with: cookies)) </span><span class="nc">{ (current, _) in current
+            }</span><span class="c">
+        } else </span><span class="nc">{
+            // swiftlint:disable line_length
+            log.debug</span><span class="nc">(</span><span class="nc">"⚠️ I could not load cookies (this is normal the first time you authenticate)"</span><span class="nc">)
+        }</span><span class="c">
+
+        return requestHeaders
+    }</span><span class="">
+
+    // generic API CALL method
+    // this is used by authentication API calls
+    func apiCall(
+        url: String,
+        method: HTTPVerb = .GET,
+        body: Data? = nil,
+        headers: [String: String] = [:],
+        validResponse: ExpectedResponseCode = .value(0)
+    ) async throws -&gt; (Data, HTTPURLResponse) </span><span class="c">{
+
+        let request: URLRequest
+
+        // let's add provided headers to our request (keeping new value in case of conflicts)
+        var requestHeaders = await prepareAuthenticationHeaders()
+
+        // add the headers our callers want in this request
+        requestHeaders.merge(headers, uniquingKeysWith: </span><span class="nc">{ (_, new) in new }</span><span class="c">)
+
+        // and build the request
+        request = self.request(
+            for: url,
+            method: method,
+            withBody: body,
+            withHeaders: requestHeaders
+        )
+
+        log(request: request, to: log)
+
+        // send request with that session
+        let (data, response) = try await env.urlSessionData.data(for: request, delegate: nil)</span><span class="c">
+        guard let httpResponse = response as? HTTPURLResponse,
+            validResponse.isValid(response: httpResponse.statusCode)
+        else </span><span class="c">{
+            log.error</span><span class="c">(</span><span class="c">
+                </span><span class="c">"=== HTTP ERROR. Status code \((response as? HTTPURLResponse)!.statusCode) not in range \(validResponse) ==="</span><span class="c">
+            )
+            log.debug</span><span class="c">(</span><span class="c">"URLResponse : \(response)"</span><span class="c">)
+            throw URLError(.badServerResponse)
+        }</span><span class="c">
+
+        log(response: httpResponse, data: data, error: nil, to: log)
+
+        return (data, httpResponse)</span><span class="c">
+    }</span><span class="">
+
+    // generic Download CALL method
+    // this is used by download API calls
+    func downloadCall(
+        url: String,
+        requestHeaders: [String: String] = [:]
+    ) async throws -&gt; (
+        URLSessionDownloadTaskProtocol
+    ) </span><span class="c">{
+
+        let request: URLRequest
+        var headers = requestHeaders
+
+        // reload cookies if they exist
+        let cookies = try? await env.secrets.loadCookies()
+        if let cookies </span><span class="c">{
+            // cookies existed, let's add them to our HTTPHeaders
+            headers.merge(HTTPCookie.requestHeaderFields(with: cookies)) </span><span class="nc">{ (current, _) in current }</span><span class="c">
+        } else </span><span class="nc">{
+            log.debug</span><span class="nc">(</span><span class="nc">"⚠️ I could not load cookies (this is normal the first time you authenticate)"</span><span class="nc">)
+        }</span><span class="c">
+
+        // build the request
+        request = self.request(for: url, withHeaders: headers)
+
+        log(request: request, to: log)
+
+        // send request with download session
+        // this is asynchronous, monitor progress through delegate
+        return try env.urlSessionDownload.downloadTask(with: request)
+    }</span><span class="">
+
+    // prepare an URLRequest for a given url, method, body, and headers
+    // https://softwareengineering.stackexchange.com/questions/100959/how-do-you-unit-test-private-methods
+    // by OOP design it should be private.  Make it internal (default) for testing
+    func request(
+        for url: String,
+        method: HTTPVerb = .GET,
+        withBody body: Data? = nil,
+        withHeaders headers: [String: String]? = nil
+    ) -&gt; URLRequest </span><span class="c">{
+
+        // create the request
+        let url = URL(string: url)!
+        var request = URLRequest(url: url)
+
+        // add HTTP verb
+        request.httpMethod = method.rawValue
+
+        // add body
+        if let body </span><span class="c">{
+            request.httpBody = body
+        }</span><span class="c">
+
+        // add headers
+        if let headers </span><span class="c">{
+            for (key, value) in headers </span><span class="c">{
+                request.addValue(value, forHTTPHeaderField: key)
+            }</span><span class="c">
+        }</span><span class="c">
+
+        return request
+    }</span><span class="">
+}
+
+</span></pre><pre id="f8" style="display: none"><span>//
+//  Install.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 22/08/2022.
+//
+
+import CLIlib
+import Foundation
+
+protocol InstallerProtocol {
+    func install(file: URL) async throws
+    func installCommandLineTools(atPath file: URL) throws
+    func installPkg(atURL pkg: URL) throws -&gt; ShellOutput
+    func installXcode(at src: URL) throws
+    func uncompressXIP(atURL file: URL) throws -&gt; ShellOutput
+    func moveApp(at src: URL) throws -&gt; String
+    func fileMatch(file: URL) -&gt; Bool
+}
+
+enum InstallerError: Error {
+    case unsupportedInstallation
+    case fileDoesNotExistOrIncorrect
+    case xCodeXIPInstallationError
+    case xCodeMoveInstallationError
+    case xCodePKGInstallationError
+    case CLToolsInstallationError
+}
+
+class ShellInstaller: InstallerProtocol {
+
+    // the shell commands we need to install XCode and its command line tools
+    let XIPCOMMAND = </span><span class="c">"/usr/bin/xip"</span><span class="">
+    let HDIUTILCOMMAND = </span><span class="c">"/usr/bin/hdiutil"</span><span class="">
+    let INSTALLERCOMMAND = </span><span class="c">"/usr/sbin/installer"</span><span class="">
+
+    // the pkg provided by Xcode to install
+    let PKGTOINSTALL = </span><span class="c">[
+        "XcodeSystemResources.pkg",
+        "CoreTypes.pkg",
+        "MobileDevice.pkg",
+        "MobileDeviceDevelopment.pkg",
+    ]</span><span class="">
+
+    /// Install Xcode or Xcode Command Line Tools
+    ///  At this stage, we do support only these two installation.
+    ///
+    ///   **Xcode** is provided as a XIP file. The installation procedure is as follow:
+    ///   - It is uncompressed
+    ///   - It is moved to /Applications
+    ///   - Four packages are installed
+    ///         - `/Applications/Xcode.app/Contents/Resources/Packages/XcodeSystemResources.pkg`
+    ///         - `/Applications/Xcode.app/Contents/Resources/Packages/CoreTypes.pkg`
+    ///         - `/Applications/Xcode.app/Contents/Resources/Packages/MobileDevice.pkg`
+    ///         - `/Applications/Xcode.app/Contents/Resources/Packages/MobileDeviceDevelopment.pkg`
+    ///
+    ///   **Command_Line_Tools_for_Xcode** is provided as a DMG file. The installation procedure is as follow:
+    ///   - the DMG file is mounted
+    ///   - Package `/Volumes/Command\ Line\ Developer\ Tools/Command\ Line\ Tools.pkg` is installed.
+    func install(file: URL) async throws </span><span class="c">{
+
+        // verify this is one the files we do support
+        let installationType = SupportedInstallation.supported(file.lastPathComponent)
+        guard installationType != .unsuported else </span><span class="c">{
+            log.debug</span><span class="c">(</span><span class="c">"Unsupported installation type"</span><span class="c">)
+            throw InstallerError.unsupportedInstallation
+        }</span><span class="c">
+
+        // find matching File in DownloadList (if there is one)
+        // and compare existing filesize vs expected filesize
+        guard fileMatch(file: file) else </span><span class="c">{
+            log.debug</span><span class="c">(</span><span class="c">"File does not exist or has incorrect size"</span><span class="c">)
+            throw InstallerError.fileDoesNotExistOrIncorrect
+        }</span><span class="c">
+
+        // Dispatch installation between DMG and XIP
+        switch </span><span class="c">installationType</span><span class="c"> {
+        </span><span class="c">case .xCode:
+            try self.installXcode(at: file)</span><span class="c">
+        </span><span class="c">case .xCodeCommandLineTools:
+            try self.installCommandLineTools(atPath: file)</span><span class="c">
+        </span><span class="nc">case .unsuported:
+            throw InstallerError.unsupportedInstallation</span><span class="c">
+        }</span><span class="c">
+    }</span><span class="">
+
+    // swiftlint:disable line_length
+    ///
+    ///  Verifies if file exists on disk. Also check if file exists in cached download list,
+    ///  in that case, it verifies the actuali file size is the same as the one from the cached list
+    ///
+    /// - Parameters
+    ///     - file  : the full path of the file to test
+    /// - Returns
+    ///     - true when file exists and, when download list cache exists too, if file size matches the one mentioned in the cached download list
+    ///
+    // swiftlint:enable line_length
+    func fileMatch(file: URL) -&gt; Bool </span><span class="c">{
+
+        // File exist on disk ?
+        // no =&gt; return FALSE
+        // yes - do an additional check
+        //    if there is a download list cache AND file is present in list AND size DOES NOT match =&gt; False
+        // all other cases return true (we can try to install even if their is no cached download list)
+
+        var match = env.fileHandler.fileExists(file: file, fileSize: 0)
+
+        if </span><span class="c">!match</span><span class="c"> </span><span class="c">{
+            return false
+        }</span><span class="c">
+
+        // find file in downloadlist (if the cached download list exists)
+        if let dll = try? env.fileHandler.loadDownloadList() </span><span class="c">{
+            if let dlFile = dll.find(fileName: file.lastPathComponent) </span><span class="nc">{
+                // compare download list cached sized with actual size
+                match = env.fileHandler.fileExists(file: file, fileSize: dlFile.fileSize)
+            }</span><span class="c">
+        }
+        return match</span><span class="c">
+    }</span><span class="">
+
+}
+
+</span></pre><pre id="f9" style="display: none"><span>//
+//  InstallCLTools.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 29/08/2022.
+//
+
+import CLIlib
+import Foundation
+
+// MARK: Command Line Tools
+// Command Line Tools installation functions
+extension ShellInstaller {
+
+    func installCommandLineTools(atPath file: URL) throws </span><span class="c">{
+
+        let filePath = file.path
+
+        // check if file exists
+        guard env.fileHandler.fileExists(file: file, fileSize: 0) else </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Command line disk image does not exist : \(filePath)"</span><span class="nc">)
+            throw InstallerError.fileDoesNotExistOrIncorrect
+        }</span><span class="c">
+
+        // mount, install, unmount
+        let totalSteps = 3
+        var currentStep: Int = 0
+
+        var resultOptional: ShellOutput?
+
+        // first mount the disk image
+        log.debug</span><span class="c">(</span><span class="c">"Mounting disk image \(file.lastPathComponent)"</span><span class="c">)
+        currentStep += 1
+        env.progressBar.update(step: currentStep, total: totalSteps, text: "Mounting disk image...")
+        resultOptional = try self.mountDMG(atURL: file)</span><span class="c">
+        if </span><span class="c">resultOptional == nil || </span><span class="c">resultOptional!.code != 0</span><span class="c"> </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Can not mount disk image : \(filePath)\n\(String(describing: resultOptional))"</span><span class="nc">)
+            throw InstallerError.CLToolsInstallationError
+        }</span><span class="c">
+
+        // second install the package
+        // find the name of the package ?
+        let pkg = URL(fileURLWithPath: "/Volumes/Command Line Developer Tools/Command Line Tools.pkg")
+        let pkgPath = pkg.path
+        log.debug</span><span class="c">(</span><span class="c">"Installing pkg \(pkgPath)"</span><span class="c">)
+        currentStep += 1
+        env.progressBar.update(step: currentStep, total: totalSteps, text: "Installing package...")
+        resultOptional = try self.installPkg(atURL: pkg)</span><span class="c">
+        if </span><span class="c">resultOptional == nil || </span><span class="c">resultOptional!.code != 0</span><span class="c"> </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Can not install package : \(pkgPath)\n\(String(describing: resultOptional))"</span><span class="nc">)
+            throw InstallerError.CLToolsInstallationError
+        }</span><span class="c">
+
+        // third unmount the disk image
+        let mountedDiskImage = URL(fileURLWithPath: "/Volumes/Command Line Developer Tools")
+        log.debug</span><span class="c">(</span><span class="c">"Unmounting volume \(mountedDiskImage)"</span><span class="c">)
+        currentStep += 1
+        env.progressBar.update(step: currentStep, total: totalSteps, text: "Unmounting volume...")
+        resultOptional = try self.unmountDMG(volume: mountedDiskImage)</span><span class="c">
+        if </span><span class="c">resultOptional == nil || </span><span class="c">resultOptional!.code != 0</span><span class="c"> </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">
+                </span><span class="nc">"Can not unmount volume : \(mountedDiskImage)\n\(String(describing: resultOptional))"</span><span class="nc">
+            )
+            throw InstallerError.CLToolsInstallationError
+        }</span><span class="c">
+    }</span><span class="">
+
+    private func mountDMG(atURL dmg: URL) throws -&gt; ShellOutput </span><span class="c">{
+
+        let dmgPath = dmg.path
+
+        // check if file exists
+        guard env.fileHandler.fileExists(file: dmg, fileSize: 0) else </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Disk Image does not exist : \(dmgPath)"</span><span class="nc">)
+            throw InstallerError.fileDoesNotExistOrIncorrect
+        }</span><span class="c">
+
+        // hdiutil mount ./xcode-cli.dmg
+        let cmd = "\(HDIUTILCOMMAND) mount \"\(dmgPath)\""
+        let result = try env.shell.run(cmd)</span><span class="c">
+
+        return result</span><span class="c">
+    }</span><span class="">
+
+    private func unmountDMG(volume: URL) throws -&gt; ShellOutput </span><span class="c">{
+
+        // hdiutil unmount /Volumes/Command\ Line\ Developer\ Tools/
+        let cmd = "\(HDIUTILCOMMAND) unmount \"\(volume.path)\""
+        let result = try env.shell.run(cmd)</span><span class="c">
+
+        return result</span><span class="c">
+    }</span><span class="">
+}
+
+</span></pre><pre id="f10" style="display: none"><span>//
+//  InstallDownloadListExtension.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 29/08/2022.
+//
+
+import Foundation
+
+// MARK: Extensions - DownloadList
+// not fileprivate to allow testing
+extension DownloadList {
+
+    /// Check an entire list for files matching the given filename
+    /// This generic function avoids repeating code in the two `find(...)` below
+    /// - Parameters
+    ///     - fileName: the file name to check (without full path)
+    ///     - inList: either a [Download] or a [File]
+    ///     - comparison: a function that receives either a `Download` either a `File`
+    ///                and returns a `File` when there is a file name match, nil otherwise
+    /// - Returns
+    ///     a File struct if a file matches, nil otherwise
+
+    private func _find&lt;T: Sequence&gt;(
+        fileName: String,
+        inList list: T,
+        comparison: (T.Element) -&gt; File?
+    ) -&gt; File? </span><span class="c">{
+
+        // first returns an array of File? with nil when filename does not match
+        // or file otherwise.
+        // for example : [nil, file, nil, nil]
+        let result: [File?] = list.compactMap </span><span class="c">{ element -&gt; File? in
+            return comparison(element)
+        }</span><span class="c">
+        // then remove all nil values
+        //        .filter { file in
+        //            return file != nil
+        //        }
+
+        // we should have 0 or 1 element
+        if </span><span class="c">result.count &gt; 0</span><span class="c"> </span><span class="c">{
+            assert(</span><span class="c">result.count == 1</span><span class="c">)
+            return result[0]
+        }</span><span class="c"> else </span><span class="c">{
+            return nil
+        }</span><span class="c">
+
+    }</span><span class="">
+
+    /// check the entire list of downloads for files matching the given filename
+    /// - Parameters
+    ///     - fileName: the file name to check (without full path)
+    /// - Returns
+    ///     a File struct if a file matches, nil otherwise
+    func find(fileName: String) -&gt; File? </span><span class="c">{
+
+        guard let listOfDownloads = self.downloads else </span><span class="nc">{
+            return nil
+        }</span><span class="c">
+
+        return _find(
+            fileName: fileName,
+            inList: listOfDownloads,
+            comparison: </span><span class="c">{ element in
+                let download = element as Download
+                return find(fileName: fileName, inDownload: download)
+            }</span><span class="c">
+        )
+    }</span><span class="">
+
+    // search the list of files ([File]) for an individual file match
+    func find(fileName: String, inDownload download: Download) -&gt; File? </span><span class="c">{
+
+        _find(
+            fileName: fileName,
+            inList: download.files,
+            comparison: </span><span class="c">{ element in
+                let file = element as File
+                return file.filename == fileName ? </span><span class="c">file</span><span class="c"> : </span><span class="c">nil</span><span class="c">
+            }</span><span class="c">
+        )
+
+    }</span><span class="">
+}
+
+</span></pre><pre id="f11" style="display: none"><span>//
+//  InstallPkg.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 29/08/2022.
+//
+
+import CLIlib
+import Foundation
+
+// MARK: PKG
+// generic PKG installation function
+extension ShellInstaller {
+
+    func installPkg(atURL pkg: URL) throws -&gt; ShellOutput </span><span class="c">{
+
+        let pkgPath = pkg.path
+
+        // check if file exists
+        guard env.fileHandler.fileExists(file: pkg, fileSize: 0) else </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Package does not exist : \(pkgPath)"</span><span class="nc">)
+            throw InstallerError.fileDoesNotExistOrIncorrect
+        }</span><span class="c">
+
+        let cmd = "sudo \(INSTALLERCOMMAND) -pkg \"\(pkgPath)\" -target /"
+        let result = try env.shell.run(cmd)</span><span class="c">
+        return result</span><span class="c">
+    }</span><span class="">
+}
+
+</span></pre><pre id="f12" style="display: none"><span>//
+//  InstallSupportedFiles.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 28/08/2022.
+//
+
+import Foundation
+
+enum SupportedInstallation {
+    case xCode
+    case xCodeCommandLineTools
+    case unsuported
+
+    static func supported(_ file: String) -&gt; SupportedInstallation </span><span class="c">{
+
+        // generic method to test file type
+
+        struct SupportedFiles {
+            // the start of the file names we currently support for installtion
+            static let packages = ["Xcode", "Command Line Tools for Xcode"]
+
+            // the file extensions of the the file names we currently support for installation
+            static let extensions = ["xip", "dmg"]
+
+            // the return values for this function
+            static let values: [SupportedInstallation] = [.xCode, .xCodeCommandLineTools]
+
+            static func enumerated() -&gt; EnumeratedSequence&lt;[String]&gt; </span><span class="c">{
+                assert(</span><span class="c">packages.count == extensions.count</span><span class="c">)
+                assert(</span><span class="c">packages.count == values.count</span><span class="c">)
+                return packages.enumerated()
+            }
+        }
+
+        // first return a [SupportedInstallation] with either unsupported or installation type
+        let tempResult: [SupportedInstallation] = SupportedFiles.enumerated().compactMap </span><span class="c">{
+            (index, filePrefix) in
+            if </span><span class="c">file.hasPrefix(filePrefix) &amp;&amp; </span><span class="c">file.hasSuffix(SupportedFiles.extensions[index])</span><span class="c"> </span><span class="c">{
+                return SupportedFiles.values[index]
+            }</span><span class="c"> else </span><span class="c">{
+                return SupportedInstallation.unsuported
+            }</span><span class="c">
+        }</span><span class="c">
+
+        // then remove all unsupported values
+        let result: [SupportedInstallation] = tempResult.filter </span><span class="c">{ installationType in
+            return installationType != .unsuported
+        }</span><span class="c">
+
+        // at this stage we should have 0 or 1 value left
+        assert(</span><span class="c">result.count == 0 || </span><span class="c">result.count == 1</span><span class="c">)
+        return result.count == 0 ? </span><span class="c">.unsuported</span><span class="c"> : </span><span class="c">result[0]</span><span class="c">
+
+        // non generic method to test the file type
+
+        //        if file.hasPrefix("Command Line Tools for Xcode") &amp;&amp; file.hasSuffix(".dmg") {
+        //            result = .xCodeCommandLineTools
+        //        } else if file.hasPrefix("Xcode") &amp;&amp; file.hasSuffix(".xip") {
+        //            result = .xCode
+        //        } else {
+        //            result = .unsuported
+        //        }
+
+        //        return result
+    }</span><span class="">
+}
+
+</span></pre><pre id="f13" style="display: none"><span>//
+//  InstallXcode.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 29/08/2022.
+//
+
+import CLIlib
+import Foundation
+
+// MARK: XCODE
+// XCode installation functions
+extension ShellInstaller {
+
+    func installXcode(at src: URL) throws </span><span class="c">{
+
+        // unXIP, mv, 4 PKG to install
+        let totalSteps = 2 + PKGTOINSTALL.count
+        var currentStep: Int = 0
+
+        var resultOptional: CLIlib.ShellOutput?
+
+        // first uncompress file
+        log.debug</span><span class="c">(</span><span class="c">"Decompressing files"</span><span class="c">)
+        // run synchronously as there is no output for this operation
+        currentStep += 1
+        env.progressBar.update(
+            step: currentStep,
+            total: totalSteps,
+            text: "Expanding Xcode xip (this might take a while)"
+        )
+        resultOptional = try self.uncompressXIP(atURL: src)</span><span class="c">
+        if </span><span class="c">resultOptional == nil || </span><span class="c">resultOptional!.code != 0</span><span class="c"> </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Can not unXip file : \(resultOptional!)"</span><span class="nc">)
+            throw InstallerError.xCodeXIPInstallationError
+        }</span><span class="c">
+
+        // second move file to /Applications
+        log.debug</span><span class="c">(</span><span class="c">"Moving app to destination"</span><span class="c">)
+        currentStep += 1
+        env.progressBar.update(
+            step: currentStep,
+            total: totalSteps,
+            text: "Moving Xcode to /Applications"
+        )
+        // find .app file
+        let appFile = try env.fileHandler.downloadedFiles()</span><span class="c">.filter(</span><span class="c">{ fileName in
+            return fileName.hasSuffix(".app")
+        }</span><span class="c">)
+        if </span><span class="c">appFile.count != 1</span><span class="c"> </span><span class="c">{
+            log.error</span><span class="c">(</span><span class="c">
+                </span><span class="c">"Zero or several app file to install in \(appFile), not sure which one is the correct one"</span><span class="c">
+            )
+            throw InstallerError.xCodeMoveInstallationError
+        }</span><span class="nc">
+
+        let installedFile =
+            try self.moveApp(at: FileHandler.downloadDirectory.appendingPathComponent(appFile[0]))</span><span class="nc">
+
+        // /Applications/Xcode.app/Contents/Resources/Packages/
+
+        // third install packages provided with Xcode app
+        for pkg in PKGTOINSTALL </span><span class="nc">{
+            log.debug</span><span class="nc">(</span><span class="nc">"Installing package \(pkg)"</span><span class="nc">)
+            currentStep += 1
+            env.progressBar.update(
+                step: currentStep,
+                total: totalSteps,
+                text: "Installing additional packages... \(pkg)"
+            )
+            resultOptional = try self.installPkg(
+                atURL: URL(fileURLWithPath: "\(installedFile)/Contents/resources/Packages/\(pkg)")
+            )</span><span class="nc">
+            if </span><span class="nc">resultOptional == nil || </span><span class="nc">resultOptional!.code != 0</span><span class="nc"> </span><span class="nc">{
+                log.error</span><span class="nc">(</span><span class="nc">"Can not install pkg at : \(pkg)\n\(resultOptional!)"</span><span class="nc">)
+                throw InstallerError.xCodePKGInstallationError
+            }</span><span class="nc">
+        }</span><span class="nc">
+
+    }</span><span class="">
+
+    // expand a XIP file.  There is no way to create XIP file.
+    // This code can not be tested without a valid, signed,  Xcode archive
+    // https://en.wikipedia.org/wiki/.XIP
+    func uncompressXIP(atURL file: URL) throws -&gt; ShellOutput </span><span class="c">{
+
+        let filePath = file.path
+
+        // not necessary, file existence has been checked before
+        guard env.fileHandler.fileExists(file: file, fileSize: 0) else </span><span class="c">{
+            log.error</span><span class="c">(</span><span class="c">"File to unXip does not exist : \(filePath)"</span><span class="c">)
+            throw InstallerError.fileDoesNotExistOrIncorrect
+        }</span><span class="c">
+
+        // synchronously uncompress in the download directory
+        let cmd =
+            "pushd \"\(FileHandler.downloadDirectory.path)\" &amp;&amp; "
+            + "\(XIPCOMMAND) --expand \"\(filePath)\" &amp;&amp; " + "popd"
+        let result = try env.shell.run(cmd)</span><span class="c">
+
+        return result</span><span class="c">
+    }</span><span class="">
+
+    func moveApp(at src: URL) throws -&gt; String </span><span class="c">{
+
+        // extract file name
+        let fileName = src.lastPathComponent
+
+        // create source and destination URL
+        let appURL = URL(fileURLWithPath: "/Applications/\(fileName)")
+
+        log.debug</span><span class="c">(</span><span class="c">"Going to move \n \(src) to \n \(appURL)"</span><span class="c">)
+        // move synchronously
+        try env.fileHandler.move(from: src, to: appURL)</span><span class="c">
+
+        return appURL.path</span><span class="c">
+    }</span><span class="">
+}
+
+</span></pre><pre id="f14" style="display: none"><span>//
+//  List.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 21/08/2022.
+//
+
+import CLIlib
+import Foundation
+
+extension AppleDownloader {
+
+    // load the list of available downloads
+    // when force is true, dowload from Apple even when there is a cache on disk
+    // https://developer.apple.com
+    // POST /services-account/QH65B2/downloadws/listDownloads.action
+    //
+    func list(force: Bool) async throws -&gt; DownloadList </span><span class="c">{
+
+        var downloadList: DownloadList?
+
+        if </span><span class="c">!force</span><span class="c"> </span><span class="c">{
+            // load the list from file if we have it
+            downloadList = try? env.fileHandler.loadDownloadList()
+        }</span><span class="c">
+
+        if </span><span class="c">downloadList == nil</span><span class="c"> </span><span class="c">{
+            let url =
+                "https://developer.apple.com/services-account/QH65B2/downloadws/listDownloads.action"
+            let (data, response) = try await apiCall(
+                url: url,
+                method: .POST,
+                validResponse: .range(200..&lt;400)
+            )</span><span class="c">
+
+            guard response.statusCode == 200 else </span><span class="c">{
+                log.error</span><span class="c">(</span><span class="c">"🛑 Download List response is not 200, something is incorrect"</span><span class="c">)
+                log.debug</span><span class="c">(</span><span class="c">"URLResponse = \(response)"</span><span class="c">)
+                throw DownloadError.invalidResponse
+            }</span><span class="c">
+
+            do </span><span class="c">{
+                downloadList = try JSONDecoder().decode(DownloadList.self, from: data)</span><span class="c">
+            }</span><span class="c"> catch </span><span class="c">{
+                throw DownloadError.parsingError(error: error)
+            }</span><span class="c">
+
+            if </span><span class="c">downloadList!.resultCode == 0</span><span class="c"> </span><span class="c">{
+
+                // grab authentication cookie for later download
+                if let cookies = response.value(forHTTPHeaderField: "Set-Cookie") </span><span class="c">{
+                    // save the new cookies we received (ADCDownloadAuth)
+                    _ = try await env.secrets.saveCookies(cookies)</span><span class="c">
+                }</span><span class="c"> else </span><span class="c">{
+                    // swiftlint:disable line_length
+                    log.error</span><span class="c">(</span><span class="c">
+                        </span><span class="c">"🛑 Download List response does not contain authentication cookie, something is incorrect"</span><span class="c">
+                    )
+                    log.debug</span><span class="c">(</span><span class="c">"URLResponse = \(response)"</span><span class="c">)
+                    throw DownloadError.invalidResponse
+                }</span><span class="c">
+
+                // success, save the list for reuse
+                _ = try env.fileHandler.saveDownloadList(list: downloadList!)</span><span class="c">
+
+            }</span><span class="c"> else </span><span class="c">{
+
+                switch </span><span class="c">downloadList!.resultCode</span><span class="c"> {
+                </span><span class="c">case 1100:  // authentication expired
+                    throw DownloadError.authenticationRequired</span><span class="c">
+                </span><span class="nc">case 2100:  // needs to accept ToC
+                    throw DownloadError.needToAcceptTermsAndCondition</span><span class="c">
+                </span><span class="c">case 2170:  // accounts need upgrade
+                    log.error</span><span class="c">(</span><span class="c">
+                        </span><span class="c">"Error \(downloadList!.resultCode) : \(downloadList!.userString ?? </span><span class="nc">"no user string"</span><span class="c">)"
+                    )
+                    throw DownloadError.accountneedUpgrade(
+                        errorCode: downloadList!.resultCode,
+                        errorMessage: downloadList!.userString ?? </span><span class="nc">"Your developer account needs to be updated"</span><span class="c">
+                    )</span><span class="c">
+                </span><span class="c">default:
+                    // is there other error cases that I need to handle explicitly ?
+                    throw DownloadError.unknownError(
+                        errorCode: downloadList!.resultCode,
+                        errorMessage: downloadList!.userString ?? </span><span class="nc">"Unknwon error"</span><span class="c">
+                    )</span><span class="c">
+                }
+            }</span><span class="c">
+        }</span><span class="c">
+
+        guard let dList = downloadList else </span><span class="nc">{
+            throw DownloadError.noDownloadsInDownloadList
+        }</span><span class="c">
+        return dList</span><span class="c">
+
+    }</span><span class="">
+}
+
+</span></pre><pre id="f15" style="display: none"><span>//
+//  URLLogger.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 18/07/2022.
+//
+
+import CLIlib
+import Foundation
+import Logging
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+// FIXME consider using Swift 5.7 regexp
+// https://github.com/apple/swift-evolution/blob/main/proposals/0350-regex-type-overview.md
+func filterPassword(_ input: String) -&gt; String </span><span class="c">{
+    input.replacingOccurrences(
+        of: "(\"password\":\").*(\"[,}])",
+        with: "$1*****$2",
+        options: .regularExpression
+    )
+}</span><span class="">
+
+func log(request: URLRequest, to logger: Logger) </span><span class="c">{
+
+    log.debug</span><span class="c">(</span><span class="c">"\n - - - - - - - - - - OUTGOING - - - - - - - - - - \n"</span><span class="c">)
+    defer { log.debug</span><span class="c">(</span><span class="c">"\n - - - - - - - - - -  END - - - - - - - - - - \n"</span><span class="c">) }
+    let urlAsString = request.url?.absoluteString ?? </span><span class="nc">""</span><span class="c">
+    let urlComponents = URLComponents(string: urlAsString)
+    let method = request.httpMethod != nil ? </span><span class="c">"\(request.httpMethod ?? </span><span class="nc">""</span><span class="c">)" : </span><span class="nc">""</span><span class="c">
+    let path = "\(urlComponents?.path ?? </span><span class="nc">""</span><span class="c">)"
+    let query = "\(urlComponents?.query ?? </span><span class="c">""</span><span class="c">)"
+    let host = "\(urlComponents?.host ?? </span><span class="nc">""</span><span class="c">)"
+    var output = """
+        \(urlAsString) \n\n
+        \(method) \(path)?\(query) HTTP/1.1 \n
+        HOST: \(host)\n
+        """
+
+    for (key, value) in request.allHTTPHeaderFields ?? </span><span class="nc">[:]</span><span class="c"> </span><span class="c">{
+        output += "\(key): \(value)\n"
+
+    }</span><span class="c">
+
+    if let body = request.httpBody </span><span class="c">{
+        output += "\n \(String(data: body, encoding: .utf8) ?? </span><span class="nc">""</span><span class="c">)"
+    }</span><span class="c">
+    logger.debug</span><span class="c">(</span><span class="c">"\(filterPassword(output))"</span><span class="c">)
+}</span><span class="">
+
+func log(response: HTTPURLResponse?, data: Data?, error: Error?, to logger: Logger) </span><span class="c">{
+
+    logger.debug</span><span class="c">(</span><span class="c">"\n - - - - - - - - - - INCOMMING - - - - - - - - - - \n"</span><span class="c">)
+    defer { logger.debug</span><span class="c">(</span><span class="c">"\n - - - - - - - - - -  END - - - - - - - - - - \n"</span><span class="c">) }
+    let urlString = response?.url?.absoluteString
+    let components = NSURLComponents(string: urlString ?? </span><span class="nc">""</span><span class="c">)
+    let path = "\(components?.path ?? </span><span class="nc">""</span><span class="c">)"
+    let query = "\(components?.query ?? </span><span class="c">""</span><span class="c">)"
+    var output = ""
+    if let urlString </span><span class="c">{
+        output += "\(urlString)"
+        output += "\n\n"
+    }</span><span class="c">
+    if let statusCode = response?.statusCode </span><span class="c">{
+        output += "HTTP \(statusCode) \(path)?\(query)\n"
+    }</span><span class="c">
+    if let host = components?.host </span><span class="c">{
+        output += "Host: \(host)\n"
+    }</span><span class="c">
+    for (key, value) in response?.allHeaderFields ?? </span><span class="nc">[:]</span><span class="c"> </span><span class="c">{
+        output += "\(key): \(value)\n"
+    }</span><span class="c">
+    if let data </span><span class="c">{
+        output += "\n\(String(data: data, encoding: .utf8) ?? </span><span class="nc">""</span><span class="c">)\n"
+    }
+    if </span><span class="c">error != nil</span><span class="c"> </span><span class="nc">{
+        output += "\nError: \(error!.localizedDescription)\n"
+    }</span><span class="c">
+    logger.debug</span><span class="c">(</span><span class="c">"\(output)"</span><span class="c">)
+}</span><span class="">
+
+</span></pre><pre id="f16" style="display: none"><span>//
+//  ExtensionURLRequest.swift
+//
+//  Created by Abhishek Maurya on 16/07/20.
+//  Copyright © 2020. All rights reserved.
+//
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+extension URLRequest {
+    public func cURL(pretty: Bool = false) -&gt; String </span><span class="c">{
+        let newLine = pretty ? </span><span class="c">"\\\n"</span><span class="c"> : </span><span class="c">""</span><span class="c">
+        let method = (pretty ? </span><span class="c">"--request "</span><span class="c"> : </span><span class="c">"-X "</span><span class="c">) + "\(self.httpMethod ?? </span><span class="nc">"GET"</span><span class="c">) \(newLine)"
+        let url: String = (pretty ? </span><span class="c">"--url "</span><span class="c"> : </span><span class="c">""</span><span class="c">) + "\'\(self.url?.absoluteString ?? </span><span class="nc">""</span><span class="c">)\' \(newLine)"
+
+        var cURL = (pretty ? </span><span class="c">"curl -v --disable "</span><span class="c"> : </span><span class="c">"curl -q "</span><span class="c">)
+        var header = ""
+        var data: String = ""
+
+        if let httpHeaders = self.allHTTPHeaderFields, httpHeaders.keys.count &gt; 0 </span><span class="c">{
+            for (key, value) in httpHeaders </span><span class="c">{
+                header += (pretty ? </span><span class="c">"--header "</span><span class="c"> : </span><span class="c">"-H "</span><span class="c">) + "\'\(key): \(value)\' \(newLine)"
+            }</span><span class="c">
+        }</span><span class="c">
+
+        if let bodyData = self.httpBody, let bodyString = String(data: bodyData, encoding: .utf8),
+            !bodyString.isEmpty
+        </span><span class="c">{
+            data = "--data '\(bodyString)'"
+        }</span><span class="c">
+
+        cURL += method + url + header + data
+
+        return cURL
+    }</span><span class="">
+}
+
+</span></pre><pre id="f17" style="display: none"><span>//
+//  CLIAuthenticate.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 23/07/2022.
+//
+
+import ArgumentParser
+import CLIlib
+import Foundation
+
+extension MainCommand {
+
+    struct Authenticate: AsyncParsableCommand {
+        static var configuration =
+            CommandConfiguration(abstract: "Authenticate yourself against Apple Developer Portal")
+
+        @OptionGroup var globalOptions: GlobalOptions
+        @OptionGroup var cloudOption: CloudOptions
+
+        @</span><span class="c">Option(name: .long, help: "Use SRP authentication")</span><span class="">
+        var srp = </span><span class="c">true</span><span class="">
+
+        func run() async throws </span><span class="c">{
+
+            if </span><span class="c">globalOptions.verbose</span><span class="c"> </span><span class="nc">{
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            }</span><span class="c"> else </span><span class="c">{
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
+            }</span><span class="c">
+
+            if let region = cloudOption.secretManagerRegion </span><span class="nc">{
+                env.secrets = try AWSSecretsHandler(region: region)</span><span class="nc">
+            }</span><span class="c">
+
+            let xci = XCodeInstall()
+            try await xci.authenticate(with: AuthenticationMethod.withSRP(srp))</span><span class="c">
+        }</span><span class="">
+    }
+
+    struct Signout: AsyncParsableCommand {
+        static var configuration = CommandConfiguration(abstract: "Signout from Apple Developer Portal")
+
+        @OptionGroup var globalOptions: GlobalOptions
+        @OptionGroup var cloudOption: CloudOptions
+
+        func run() async throws </span><span class="c">{
+
+            if </span><span class="c">globalOptions.verbose</span><span class="c"> </span><span class="nc">{
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            }</span><span class="c"> else </span><span class="c">{
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
+            }</span><span class="c">
+
+            if let region = cloudOption.secretManagerRegion </span><span class="nc">{
+                env.secrets = try AWSSecretsHandler(region: region)</span><span class="nc">
+            }</span><span class="c">
+
+            let xci = XCodeInstall()
+            try await xci.signout()</span><span class="c">
+        }</span><span class="">
+    }
+
+}
+
+</span></pre><pre id="f18" style="display: none"><span>//
+//  CLIAuthenticate.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 23/07/2022.
+//
+
+import ArgumentParser
+import CLIlib
+import Foundation
+
+// download implementation
+extension MainCommand {
+
+    struct Download: AsyncParsableCommand {
+        static var configuration = CommandConfiguration(
+            abstract: "Download the specified version of Xcode"
+        )
+
+        @OptionGroup var globalOptions: GlobalOptions
+        @OptionGroup var downloadListOptions: DownloadListOptions
+        @OptionGroup var cloudOption: CloudOptions
+
+        @Option(
+            name: .shortAndLong,
+            help: "The exact package name to downloads. When omited, it asks interactively"
+        )
+        var name: String?
+
+        func run() async throws </span><span class="c">{
+
+            if </span><span class="c">globalOptions.verbose</span><span class="c"> </span><span class="nc">{
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            }</span><span class="c"> else </span><span class="c">{
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
+            }</span><span class="c">
+
+            if let region = cloudOption.secretManagerRegion </span><span class="nc">{
+                env.secrets = try AWSSecretsHandler(region: region)</span><span class="nc">
+            }</span><span class="c">
+
+            let xci = XCodeInstall()
+            try await xci.download(
+                fileName: name,
+                force: downloadListOptions.force,
+                xCodeOnly: downloadListOptions.onlyXcode,
+                majorVersion: downloadListOptions.xCodeVersion,
+                sortMostRecentFirst: downloadListOptions.mostRecentFirst,
+                datePublished: downloadListOptions.datePublished
+            )</span><span class="c">
+        }</span><span class="">
+    }
+
+}
+
+</span></pre><pre id="f19" style="display: none"><span>//
+//  CLIInstall.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 22/08/2022.
+//
+
+import ArgumentParser
+import CLIlib
+import Foundation
+
+// Install implementation
+extension MainCommand {
+
+    struct Install: AsyncParsableCommand {
+
+        static var configuration =
+            CommandConfiguration(abstract: "Install a specific XCode version or addon package")
+
+        @OptionGroup var globalOptions: GlobalOptions
+
+        @Option(
+            name: .shortAndLong,
+            help: "The exact package name to install. When omited, it asks interactively"
+        )
+        var name: String?
+
+        func run() async throws </span><span class="c">{
+
+            if </span><span class="c">globalOptions.verbose</span><span class="c"> </span><span class="c">{
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            }</span><span class="c"> else </span><span class="nc">{
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
+            }</span><span class="c">
+
+            let xci = XCodeInstall()
+            _ = try await xci.install(file: name)</span><span class="c">
+        }</span><span class="">
+    }
+}
+
+</span></pre><pre id="f20" style="display: none"><span>//
+//  CLIAuthenticate.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 23/07/2022.
+//
+
+import ArgumentParser
+import CLIlib
+import Foundation
+
+// list implementation
+extension MainCommand {
+
+    struct DownloadListOptions: ParsableArguments {
+
+        static var configuration =
+            CommandConfiguration(
+                abstract: "Common options for list and download commands",
+                shouldDisplay: false
+            )
+
+        @</span><span class="c">Flag(
+            name: .shortAndLong,
+            help:
+                "Force to download the list from Apple Developer Portal, even if we have it in the cache"
+        )</span><span class="">
+        var force: Bool = </span><span class="c">false</span><span class="">
+
+        @</span><span class="c">Flag(name: .shortAndLong, help: "Filter on Xcode package only")</span><span class="">
+        var onlyXcode: Bool = </span><span class="c">false</span><span class="">
+
+        @</span><span class="c">Option(
+            name: [.customLong("xcode-version"), .short],
+            help: "Filter on provided Xcode version number"
+        )</span><span class="">
+        var xCodeVersion: String = </span><span class="c">"15"</span><span class="">
+
+        @</span><span class="c">Flag(name: .shortAndLong, help: "Sort by most recent releases first")</span><span class="">
+        var mostRecentFirst: Bool = </span><span class="c">false</span><span class="">
+
+        @</span><span class="c">Flag(name: .shortAndLong, help: "Show publication date")</span><span class="">
+        var datePublished: Bool = </span><span class="c">false</span><span class="">
+
+    }
+
+    struct List: AsyncParsableCommand {
+
+        static var configuration =
+            CommandConfiguration(abstract: "List available versions of Xcode and development tools")
+
+        @OptionGroup var globalOptions: GlobalOptions
+        @OptionGroup var downloadListOptions: DownloadListOptions
+        @OptionGroup var cloudOption: CloudOptions
+
+        func run() async throws </span><span class="c">{
+
+            if </span><span class="c">globalOptions.verbose</span><span class="c"> </span><span class="c">{
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            }</span><span class="c"> else </span><span class="nc">{
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
+            }</span><span class="c">
+
+            let xci = XCodeInstall()
+
+            if let region = cloudOption.secretManagerRegion </span><span class="nc">{
+                env.secrets = try AWSSecretsHandler(region: region)</span><span class="nc">
+            }</span><span class="c">
+
+            _ = try await xci.list(
+                force: downloadListOptions.force,
+                xCodeOnly: downloadListOptions.onlyXcode,
+                majorVersion: downloadListOptions.xCodeVersion,
+                sortMostRecentFirst: downloadListOptions.mostRecentFirst,
+                datePublished: downloadListOptions.datePublished
+            )</span><span class="c">
+        }</span><span class="">
+    }
+}
+
+</span></pre><pre id="f21" style="display: none"><span>//
+//  CLI.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 18/07/2022.
+//
+
+import ArgumentParser
+import Foundation
+
+enum CLIError: Error {
+    case invalidInput
+}
+
+@main
+struct MainCommand: AsyncParsableCommand {
+
+    // arguments that are global to all commands
+    struct GlobalOptions: ParsableArguments {
+
+        @</span><span class="c">Flag(name: .shortAndLong, help: "Produce verbose output for debugging")</span><span class="">
+        var verbose = </span><span class="c">false</span><span class="">
+    }
+
+    // arguments for Authenticate, Signout, List, and Download
+    struct CloudOptions: ParsableArguments {
+
+        @Option(
+            name: [.customLong("secretmanager-region"), .short],
+            help: "Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region"
+        )
+        var secretManagerRegion: String?
+    }
+
+    @OptionGroup var globalOptions: GlobalOptions
+
+    // Customize the command's help and subcommands by implementing the
+    // `configuration` property.
+    static var configuration = CommandConfiguration(
+        commandName: "xcodeinstall",
+
+        // Optional abstracts and discussions are used for help output.
+        abstract: "A utility to download and install Xcode",
+
+        // Commands can define a version for automatic '--version' support.
+        version: Version.version,  // generated by scripts/version.sh
+
+        // Pass an array to `subcommands` to set up a nested tree of subcommands.
+        // With language support for type-level introspection, this could be
+        // provided by automatically finding nested `ParsableCommand` types.
+        subcommands: [
+            Authenticate.self, Signout.self, List.self,
+            Download.self, Install.self, StoreSecrets.self,
+        ]
+
+        // A default subcommand, when provided, is automatically selected if a
+        // subcommand is not given on the command line.
+        // defaultSubcommand: List.self)
+    )
+
+}
+
+</span></pre><pre id="f22" style="display: none"><span>//
+//  CLIProgressBar.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 10/08/2022.
+//
+
+// found here https://www.fivestars.blog/articles/ultimate-guide-swift-executables/ and
+// https://www.fivestars.blog/articles/executables-progress/
+
+// alternatives to consider to reduce size of dependencies
+// https://github.com/vapor/console-kit/tree/main/Sources/ConsoleKit/Activity
+// https://github.com/nsscreencast/469-swift-command-line-progress-bar
+// https://github.com/jkandzi/Progress.swift/blob/master/Sources/Progress.swift
+
+import CLIlib
+import Foundation
+
+protocol CLIProgressBarProtocol: ProgressUpdateProtocol {
+    func define(animationType: ProgressBarType, message: String)
+}
+
+class CLIProgressBar: CLIProgressBarProtocol {
+
+    private var progressAnimation: ProgressUpdateProtocol?
+    private var message: String?
+    private let stream: OutputBuffer = </span><span class="c">FileHandle.standardOutput</span><span class="">
+
+    func define(animationType: ProgressBarType, message: String) </span><span class="nc">{
+        self.message = message
+        self.progressAnimation = ProgressBar(
+            output: stream,
+            progressBarType: animationType,
+            title: self.message
+        )
+    }</span><span class="">
+
+    /// Update the animation with a new step.
+    /// - Parameters:
+    ///   - step: The index of the operation's current step.
+    ///   - total: The total number of steps before the operation is complete.
+    ///   - text: The description of the current step.
+    func update(step: Int, total: Int, text: String) </span><span class="nc">{
+        self.progressAnimation?.update(step: step, total: total, text: text)
+    }</span><span class="">
+
+    /// Complete the animation.
+    /// - Parameters:
+    ///   - success: Defines if the operation the animation represents was succesful.
+    func complete(success: Bool) </span><span class="nc">{
+        self.progressAnimation?.complete(success: success)
+    }</span><span class="">
+
+    /// Clear the animation.
+    func clear() </span><span class="nc">{
+        self.progressAnimation?.clear()
+    }</span><span class="">
+
+}
+
+</span></pre><pre id="f23" style="display: none"><span>//
+//  CLIStoreSecrets.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 01/09/2022.
+//
+
+import ArgumentParser
+import CLIlib
+import Foundation
+
+extension MainCommand {
+
+    struct StoreSecrets: AsyncParsableCommand {
+        static var configuration =
+            CommandConfiguration(
+                commandName: "storesecrets",
+                abstract: "Store your Apple Developer Portal username and password in AWS Secrets Manager"
+            )
+
+        @OptionGroup var globalOptions: GlobalOptions
+
+        // repeat of CloudOption but this time mandatory
+        @Option(
+            name: [.customLong("secretmanager-region"), .short],
+            help: "Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region"
+        )
+        var secretManagerRegion: String
+
+        func run() async throws </span><span class="c">{
+
+            if </span><span class="c">globalOptions.verbose</span><span class="c"> </span><span class="c">{
+                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+            }</span><span class="c"> else </span><span class="nc">{
+                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
+            }</span><span class="c">
+
+            env.secrets = try AWSSecretsHandler(region: secretManagerRegion)</span><span class="c">
+
+            let xci = XCodeInstall()
+            _ = try await xci.storeSecrets()</span><span class="c">
+        }</span><span class="">
+    }
+
+}
+
+</span></pre><pre id="f24" style="display: none"><span>//
+//  Environment.swift
+//
+//
+//  Created by Stormacq, Sebastien on 22/11/2022.
+//
+
+import CLIlib
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+/**
+
+ a global struct to give access to classes for which I wrote tests.
+ this global object allows me to simplify dependency injection */
+
+var env = Environment()
+
+struct Environment {
+
+    // Utilities classes
+    var fileHandler: FileHandlerProtocol = </span><span class="c">FileHandler()</span><span class="">
+
+    // CLI related classes
+    var shell: AsyncShellProtocol = </span><span class="c">AsyncShell()</span><span class="">
+    var display: DisplayProtocol = </span><span class="c">Display()</span><span class="">
+    var readLine: ReadLineProtocol = </span><span class="c">ReadLine()</span><span class="">
+
+    // progress bar
+    var progressBar: CLIProgressBarProtocol = </span><span class="c">CLIProgressBar()</span><span class="">
+
+    // Secrets - will be overwritten by CLI when using AWS Secrets Manager
+    var secrets: SecretsHandlerProtocol = </span><span class="c">FileSecretsHandler()</span><span class="">
+    var awsSDK: AWSSecretsHandlerSDKProtocol = </span><span class="c">AWSSecretsHandlerSoto()</span><span class="">
+
+    // Commands
+    var authenticator: AppleAuthenticatorProtocol = </span><span class="c">AppleAuthenticator()</span><span class="">
+    var downloader: AppleDownloaderProtocol = </span><span class="c">AppleDownloader()</span><span class="">
+
+    // Network
+    var urlSessionData: URLSessionProtocol = </span><span class="c">URLSession.shared</span><span class="">
+    var urlSessionDownload: URLSessionProtocol = </span><span class="c">URLSession(
+        configuration: .default,
+        delegate: DownloadDelegate(semaphore: DispatchSemaphore(value: 0)),
+        delegateQueue: nil
+    )</span><span class="">
+
+}
+
+</span></pre><pre id="f25" style="display: none"><span>//
+//  AWSSecretsHandler.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 01/09/2022.
+//
+
+import CLIlib
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+// the errors thrown by the SecretsManager class
+enum AWSSecretsHandlerError: Error {
+    case invalidRegion(region: String)
+    case secretDoesNotExist(secretname: String)
+    case invalidOperation  // when trying to retrieve secrets Apple credentials from file
+}
+
+// the names we are using to store the secrets
+enum AWSSecretsName: String {
+    case appleCredentials = "xcodeinstall-apple-credentials"
+    case appleSessionToken = "xcodeinstall-apple-session-token"
+}
+
+// the data to be stored in Secrets Manager as JSON
+struct AppleSessionSecret: Codable, Secrets {
+    var rawCookies: String?
+    var session: AppleSession?
+
+    func data() throws -&gt; Data </span><span class="c">{
+        try JSONEncoder().encode(self)</span><span class="c">
+    }</span><span class="">
+
+    func string() throws -&gt; String? </span><span class="c">{
+        String(data: try self.data()</span><span class="c">, encoding: .utf8)
+    }</span><span class="">
+
+    func cookies() -&gt; [HTTPCookie] </span><span class="c">{
+        rawCookies != nil ? </span><span class="c">rawCookies!.cookies()</span><span class="c"> : </span><span class="c">[]</span><span class="c">
+    }</span><span class="">
+
+    init(fromData data: Data) throws </span><span class="c">{
+        self = try JSONDecoder().decode(AppleSessionSecret.self, from: data)</span><span class="c">
+    }</span><span class="">
+
+    init(fromString string: String) throws </span><span class="c">{
+        if let data = string.data(using: .utf8) </span><span class="c">{
+            try self.init(fromData: data)</span><span class="c">
+        }</span><span class="c"> else </span><span class="nc">{
+            fatalError(</span><span class="nc">"Can not create data from string : \(string)"</span><span class="nc">)
+        }</span><span class="c">
+    }</span><span class="">
+
+    init(cookies: String? = nil, session: AppleSession? = nil) </span><span class="c">{
+        self.rawCookies = cookies
+        self.session = session
+    }</span><span class="">
+
+}
+
+// the methods that must be implemented by the class encapsulating the SDK we are using
+protocol AWSSecretsHandlerSDKProtocol {
+    func setRegion(region: String) throws
+    func updateSecret&lt;T: Secrets&gt;(secretId: AWSSecretsName, newValue: T) async throws
+    func retrieveSecret&lt;T: Secrets&gt;(secretId: AWSSecretsName) async throws -&gt; T
+}
+
+// permissions needed
+// secretsmanager:CreateSecret
+// secretsmanager:TagResource ?
+// secretsmanager:GetSecretValue
+// secretsmanager:PutSecretValue
+
+struct AWSSecretsHandler: SecretsHandlerProtocol {
+
+    // provide a default implementation based on Soto
+    let awsSDK: AWSSecretsHandlerSDKProtocol = </span><span class="c">env.awsSDK</span><span class="">
+
+    init(region: String) throws </span><span class="c">{
+        try self.awsSDK.setRegion(region: region)</span><span class="c">
+    }</span><span class="">
+
+    // MARK: protocol implementation
+
+    // I do not delete the secrets because there is a 30 days deletion policy
+    // https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_DeleteSecret.html
+    // Instead, I update the secret value with an empty secret
+    func clearSecrets() async throws </span><span class="c">{
+
+        let emptySession = AppleSessionSecret()
+        try await awsSDK.updateSecret(
+            secretId: AWSSecretsName.appleSessionToken,
+            newValue: emptySession
+        )</span><span class="c">
+
+    }</span><span class="">
+
+    func saveCookies(_ cookies: String?) async throws -&gt; String? </span><span class="c">{
+        guard let cookieString = cookies else </span><span class="nc">{
+            return nil
+        }</span><span class="c">
+
+        var result: String? = cookieString
+
+        do </span><span class="c">{
+
+            // read existing cookies and session
+            let existingSession: AppleSessionSecret =
+                try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)</span><span class="c">
+
+            // append the new cookies and return the whole new thing
+            result = try await mergeCookies(
+                existingCookies: existingSession.cookies(),
+                newCookies: cookies
+            )</span><span class="c">
+
+            // create a new session secret object with merged cookies and existing session
+            let newSession = AppleSessionSecret(cookies: result, session: existingSession.session)
+
+            // save this new session secret object
+            try await self.awsSDK.updateSecret(
+                secretId: AWSSecretsName.appleSessionToken,
+                newValue: newSession
+            )</span><span class="c">
+
+        }</span><span class="c"> catch </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"⚠️ can not save cookies file in AWS Secret Manager: \(error)"</span><span class="nc">)
+            throw error
+        }</span><span class="c">
+
+        return result</span><span class="c">
+
+    }</span><span class="">
+
+    func loadCookies() async throws -&gt; [HTTPCookie] </span><span class="c">{
+        do </span><span class="c">{
+            let session: AppleSessionSecret = try await self.awsSDK.retrieveSecret(
+                secretId: AWSSecretsName.appleSessionToken
+            )</span><span class="c">
+            let result = session.cookies()
+            return result</span><span class="c">
+        } catch </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Error when trying to load session : \(error)"</span><span class="nc">)
+            throw error
+        }</span><span class="c">
+    }</span><span class="">
+
+    func saveSession(_ newSession: AppleSession) async throws -&gt; AppleSession </span><span class="c">{
+
+        do </span><span class="c">{
+
+            // read existing cookies and session
+            let existingSession: AppleSessionSecret =
+                try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)</span><span class="c">
+
+            // create a new session secret object with existing cookies and new session
+            let newSessionSecret = AppleSessionSecret(
+                cookies: existingSession.rawCookies,
+                session: newSession
+            )
+
+            try await self.awsSDK.updateSecret(
+                secretId: AWSSecretsName.appleSessionToken,
+                newValue: newSessionSecret
+            )</span><span class="c">
+        }</span><span class="c"> catch </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Error when trying to save session : \(error)"</span><span class="nc">)
+            throw error
+        }</span><span class="c">
+
+        return newSession</span><span class="c">
+    }</span><span class="">
+
+    func loadSession() async throws -&gt; AppleSession? </span><span class="c">{
+
+        if let sessionSecret: AppleSessionSecret =
+            try? await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+        </span><span class="c">{
+            return sessionSecret.session
+        }</span><span class="c"> else </span><span class="nc">{
+            return nil
+        }</span><span class="c">
+    }</span><span class="">
+
+    func retrieveAppleCredentials() async throws -&gt; AppleCredentialsSecret </span><span class="nc">{
+        do </span><span class="nc">{
+
+            return try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleCredentials)
+
+        }</span><span class="nc"> catch </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Error when trying to load session : \(error)"</span><span class="nc">)
+            throw error
+        }
+    }</span><span class="">
+
+    func storeAppleCredentials(_ credentials: AppleCredentialsSecret) async throws </span><span class="c">{
+        do </span><span class="c">{
+
+            try await self.awsSDK.updateSecret(
+                secretId: AWSSecretsName.appleCredentials,
+                newValue: credentials
+            )</span><span class="c">
+
+        }</span><span class="c"> catch </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Error when trying to save credentials : \(error)"</span><span class="nc">)
+            throw error
+        }</span><span class="c">
+
+    }</span><span class="">
+
+}
+
+</span></pre><pre id="f26" style="display: none"><span>//
+//  AWSSecretsHandlerSoto.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 04/09/2022.
+//
+
+import CLIlib
+import Foundation
+import SotoSecretsManager
+
+// use a class to have a chance to call client.shutdown() at deinit
+class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
+
+    let maxRetries = </span><span class="c">3</span><span class="">
+
+    var awsClient: AWSClient?  // var for injection
+    var smClient: SecretsManager?  // var for injection
+
+    func setRegion(region: String) throws </span><span class="nc">{
+
+        guard let awsRegion = Region(awsRegionName: region) else </span><span class="nc">{
+            throw AWSSecretsHandlerError.invalidRegion(region: region)
+        }</span><span class="nc">
+
+        self.awsClient = AWSClient(
+            credentialProvider: .selector(.environment, .ec2, .configFile()),
+            retryPolicy: .jitter(),
+            httpClientProvider: .createNew
+        )
+        self.smClient = SecretsManager(
+            client: awsClient!,
+            region: awsRegion
+        )
+    }</span><span class="">
+
+    deinit </span><span class="c">{
+        try? self.awsClient?.syncShutdown()
+    }</span><span class="">
+
+    // MARK: private functions - AWS SecretsManager Call using Soto SDK
+
+    //    func list() async throws {
+    //        print("calling list secrets")
+    //        let request = SecretsManager.ListSecretsRequest()
+    //        _ = try await smClient.listSecrets(request)
+    //    }
+
+    ///
+    /// Create a secret in AWS SecretsManager
+    /// - Parameters:
+    ///     - secretId : the name of the secret
+    ///     - secretValue : a string to store as a secret
+    /// - Throws:
+    ///         This function throws error from the underlying SDK
+    ///
+    private func createSecret(secretId: String, secretValue: Secrets) async throws </span><span class="nc">{
+        do </span><span class="nc">{
+            let secretString = try secretValue.string()</span><span class="nc">
+            let createSecretRequest = SecretsManager.CreateSecretRequest(
+                description: "xcodeinstall secret",
+                name: secretId,
+                secretString: secretString
+            )
+            _ = try await smClient?.createSecret(createSecretRequest)</span><span class="nc">
+        }</span><span class="nc"> catch </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Can not create secret \(secretId) : \(error)"</span><span class="nc">)
+            throw error
+        }</span><span class="nc">
+    }</span><span class="">
+
+    ///
+    ///  Execute an API call AWS SecretsManager and create the secret when the secret name does not exist.
+    ///  Aftre creating the secret, the API call is attempted again.  The function tries 3 times before abording
+    ///
+    /// - Parameters:
+    ///     - secretId : the name of the secret
+    ///     - secretValue : a string to store as a secret,
+    ///     - step: the current retry step (start at 1)
+    ///     - block: the block of code to execute (contains the call to SecretsManager)
+    /// - Throws:
+    ///         This function throws error from the underlying SDK
+    ///
+
+    private func executeRequestAndCreateWhenNotExist(
+        secretId: String,
+        secretValue: Secrets,
+        step: Int,
+        block: () async throws -&gt; Void
+    ) async throws </span><span class="nc">{
+
+        do </span><span class="nc">{
+            // try to execute the supplied block
+            try await block()</span><span class="nc">
+
+            // if it fails with a resource not found error,
+        }</span><span class="nc"> catch let error as SotoSecretsManager.SecretsManagerErrorType </span><span class="nc">{
+
+            // create the resource and try again
+            if </span><span class="nc">error == .resourceNotFoundException</span><span class="nc"> </span><span class="nc">{
+                log.debug</span><span class="nc">(</span><span class="nc">"Secrets \(secretId) does not exist, creating it"</span><span class="nc">)
+                try await self.createSecret(secretId: secretId, secretValue: secretValue)</span><span class="nc">
+
+                if </span><span class="nc">step &lt;= maxRetries</span><span class="nc"> </span><span class="nc">{
+                    // recursive call to ourselevs
+                    log.debug</span><span class="nc">(</span><span class="nc">"Re-trying the block call (attempt #\(step + 1))"</span><span class="nc">)
+                    try await self.executeRequestAndCreateWhenNotExist(
+                        secretId: secretId,
+                        secretValue: secretValue,
+                        step: step + 1,
+                        block: block
+                    )</span><span class="nc">
+                }</span><span class="nc"> else </span><span class="nc">{
+                    log.error</span><span class="nc">(</span><span class="nc">"Max attempt to call Secrets Manager"</span><span class="nc">)
+                }</span><span class="nc">
+
+            }</span><span class="nc"> else </span><span class="nc">{
+                log.error</span><span class="nc">(</span><span class="nc">"AWS API Error\n\(error)"</span><span class="nc">)
+                throw error
+            }</span><span class="nc">
+
+        }</span><span class="nc">
+    }</span><span class="">
+
+    ///
+    ///  Update an existing secret
+    ///
+    ///  - Parameters
+    ///     - secretId : the name of the secret
+    ///     - newValue : the updated value
+    /// - Throws:
+    ///         This function throws error from the underlying SDK
+    ///
+    func updateSecret&lt;T: Secrets&gt;(secretId: AWSSecretsName, newValue: T) async throws </span><span class="nc">{
+        do </span><span class="nc">{
+
+            // maybe the secret does not exist yet - so wrap our call with
+            // a function hat will create it in case it does not exist
+            try await executeRequestAndCreateWhenNotExist(
+                secretId: secretId.rawValue,
+                secretValue: newValue,
+                step: 1,
+                block: </span><span class="nc">{
+
+                    let secretString = try newValue.string()</span><span class="nc">
+                    let putSecretRequest = SecretsManager.PutSecretValueRequest(
+                        secretId: secretId.rawValue,
+                        secretString: secretString
+                    )
+
+                    log.debug</span><span class="nc">(</span><span class="nc">"Updating secret \(secretId) with \(newValue)"</span><span class="nc">)
+                    let putSecretResponse = try await smClient?.putSecretValue(putSecretRequest)</span><span class="nc">
+                    log.debug</span><span class="nc">(</span><span class="nc">
+                        </span><span class="nc">"\(putSecretResponse?.name ?? </span><span class="nc">""</span><span class="nc">) has version \(putSecretResponse?.versionId ?? </span><span class="nc">""</span><span class="nc">)"
+                    )
+                }
+            )</span><span class="nc">
+
+        }</span><span class="nc"> catch </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Unexpected error while updating secrets\n\(error)"</span><span class="nc">)
+            throw error
+        }</span><span class="nc">
+    }</span><span class="">
+
+    // FIXME: improve error handling when secret is not retrieved
+    // swiftlint:disable force_cast
+    func retrieveSecret&lt;T: Secrets&gt;(secretId: AWSSecretsName) async throws -&gt; T </span><span class="nc">{
+        do </span><span class="nc">{
+            let getSecretRequest = SecretsManager.GetSecretValueRequest(secretId: secretId.rawValue)
+            log.debug</span><span class="nc">(</span><span class="nc">"Retrieving secret \(secretId)"</span><span class="nc">)
+            let getSecretResponse = try await smClient?.getSecretValue(getSecretRequest)</span><span class="nc">
+            log.debug</span><span class="nc">(</span><span class="nc">"Secret \(getSecretResponse?.name ?? </span><span class="nc">"nil"</span><span class="nc">) retrieved")
+
+            guard let secret = getSecretResponse?.secretString else </span><span class="nc">{
+                log.error</span><span class="nc">(</span><span class="nc">"⚠️ no value returned by AWS Secrets Manager secret \(secretId)"</span><span class="nc">)
+                return secretId == .appleCredentials
+                    ? </span><span class="nc">AppleCredentialsSecret() as! T</span><span class="nc"> : </span><span class="nc">AppleSessionSecret() as! T</span><span class="nc">
+            }</span><span class="nc">
+
+            switch </span><span class="nc">secretId</span><span class="nc"> {
+            </span><span class="nc">case .appleCredentials:
+                return try AppleCredentialsSecret(fromString: secret)</span><span class="nc"> as! T</span><span class="nc">
+            </span><span class="nc">case .appleSessionToken:
+                return try AppleSessionSecret(fromString: secret)</span><span class="nc"> as! T</span><span class="nc">
+            }
+
+        } catch </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"Unexpected error while retrieving secrets\n\(error)"</span><span class="nc">)
+            throw error
+
+        }
+
+    }</span><span class="">
+    // swiftlint:enable force_cast
+
+}
+
+</span></pre><pre id="f27" style="display: none"><span>//
+//  FileSecretsHandler.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 14/08/2022.
+//
+
+import CLIlib
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+// store secrets on files in $HOME/.xcodeinstaller
+struct FileSecretsHandler: SecretsHandlerProtocol {
+
+    private let fileManager: FileManager
+    private var baseDirectory: URL
+    private let cookiesPath: URL
+    private let sessionPath: URL
+    private let newCookiesPath: URL
+    private let newSessionPath: URL
+
+    init() </span><span class="c">{
+
+        fileManager = FileManager()
+
+        baseDirectory = FileHandler.baseFilePath()
+
+        cookiesPath = baseDirectory.appendingPathComponent("cookies")
+        sessionPath = baseDirectory.appendingPathComponent("session")
+
+        newCookiesPath = cookiesPath.appendingPathExtension("copy")
+        newSessionPath = sessionPath.appendingPathExtension("copy")
+    }</span><span class="">
+
+    // used when testing to start from a clean place
+    //    func restoreSecrets() {
+    //
+    //        // remove file
+    //        try? fileManager.removeItem(at: sessionPath)
+    //
+    //        // copy backup to file
+    //        try? fileManager.copyItem(at: newSessionPath, to: sessionPath)
+    //
+    //        // remove backup
+    //        try? fileManager.removeItem(at: newSessionPath)
+    //
+    //        // do it again with cookies file
+    //
+    //        try? fileManager.removeItem(at: cookiesPath)
+    //        try? fileManager.copyItem(at: newCookiesPath, to: cookiesPath)
+    //        try? fileManager.removeItem(at: newCookiesPath)
+    //
+    //    }
+
+    // used when testing to start from a clean place
+    //    func clearSecrets(preserve: Bool = false) {
+    func clearSecrets() async throws </span><span class="c">{
+
+        //        if preserve {
+        //
+        //            // move files instead of deleting them (if they exist)
+        //            try? fileManager.copyItem(at: cookiesPath, to: newCookiesPath)
+        //            try? fileManager.copyItem(at: sessionPath, to: newSessionPath)
+        //
+        //        }
+
+        try? fileManager.removeItem(at: cookiesPath)
+        try? fileManager.removeItem(at: sessionPath)
+
+    }</span><span class="">
+
+    // save cookies in an HTTPUrlResponse
+    // save to ~/.xcodeinstall/cookies
+    // merge existing cookies into file when file already exists
+    func saveCookies(_ cookies: String?) async throws -&gt; String? </span><span class="c">{
+
+        guard let cookieString = cookies else </span><span class="nc">{
+            return nil
+        }</span><span class="c">
+
+        var result: String? = cookieString
+
+        do </span><span class="c">{
+
+            // if file exists,
+            if </span><span class="c">fileManager.fileExists(atPath: cookiesPath.path)</span><span class="c"> </span><span class="c">{
+
+                // load existing cookies as [HTTPCookie]
+                let existingCookies = try await self.loadCookies()</span><span class="c">
+
+                // read it, append the new cookies and save the whole new thing
+                result = try await mergeCookies(existingCookies: existingCookies, newCookies: cookies)</span><span class="c">
+                try result?.data(using: .utf8)!.write(to: cookiesPath)</span><span class="c">
+
+            }</span><span class="c"> else </span><span class="c">{
+
+                // otherwise, just save the cookies
+                try cookieString.data(using: .utf8)!.write(to: cookiesPath)</span><span class="c">
+            }</span><span class="c">
+        }</span><span class="c"> catch </span><span class="nc">{
+            log.error</span><span class="nc">(</span><span class="nc">"⚠️ can not write cookies file: \(error)"</span><span class="nc">)
+            throw error
+        }</span><span class="c">
+
+        return result</span><span class="c">
+
+    }</span><span class="">
+
+    // retrieve cookies
+    func loadCookies() async throws -&gt; [HTTPCookie] </span><span class="c">{
+
+        // read the raw file saved on disk
+        let cookieLongString = try String(contentsOf: cookiesPath, encoding: .utf8)</span><span class="c">
+        let result = cookieLongString.cookies()
+        return result</span><span class="c">
+    }</span><span class="">
+
+    // save Apple Session values as JSON
+    func saveSession(_ session: AppleSession) async throws -&gt; AppleSession </span><span class="c">{
+
+        // save session
+        try session.data()</span><span class="c">.write(to: sessionPath)</span><span class="c">
+
+        return session</span><span class="c">
+    }</span><span class="">
+
+    // load Apple Session from JSON
+    // returns nil when can not read file
+    func loadSession() async throws -&gt; AppleSession? </span><span class="c">{
+
+        // read the raw file saved on disk
+        if let sessionData = try? Data(contentsOf: sessionPath) </span><span class="c">{
+            return try AppleSession(fromData: sessionData)
+        }</span><span class="c"> else </span><span class="c">{
+            return nil
+        }</span><span class="c">
+    }</span><span class="">
+
+    func retrieveAppleCredentials() async throws -&gt; AppleCredentialsSecret </span><span class="nc">{
+        throw AWSSecretsHandlerError.invalidOperation
+    }</span><span class="">
+
+}
+
+</span></pre><pre id="f28" style="display: none"><span>//
+//  Helper.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 19/07/2022.
+//
+
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+protocol Secrets {
+    func data() throws -&gt; Data
+    func string() throws -&gt; String?
+}
+
+// the data to be stored in Secrets Manager as JSON
+struct AppleCredentialsSecret: Codable, Secrets {
+
+    let username: String
+    let password: String
+
+    func data() throws -&gt; Data </span><span class="nc">{
+        try JSONEncoder().encode(self)</span><span class="nc">
+    }</span><span class="">
+
+    func string() throws -&gt; String? </span><span class="nc">{
+        String(data: try self.data()</span><span class="nc">, encoding: .utf8)
+    }</span><span class="">
+
+    init(fromData data: Data) throws </span><span class="nc">{
+        self = try JSONDecoder().decode(AppleCredentialsSecret.self, from: data)</span><span class="nc">
+    }</span><span class="">
+
+    init(fromString string: String) throws </span><span class="nc">{
+        if let data = string.data(using: .utf8) </span><span class="nc">{
+            try self.init(fromData: data)</span><span class="nc">
+        }</span><span class="nc"> else </span><span class="nc">{
+            fatalError(</span><span class="nc">"Can not create data from string : \(string)"</span><span class="nc">)
+        }</span><span class="nc">
+    }</span><span class="">
+
+    init(username: String = "", password: String = "") </span><span class="c">{
+        self.username = username
+        self.password = password
+    }</span><span class="">
+
+}
+
+protocol SecretsHandlerProtocol {
+
+    func clearSecrets() async throws
+
+    //    func clearSecrets(preserve: Bool)
+    //    func restoreSecrets()
+
+    func saveCookies(_ cookies: String?) async throws -&gt; String?
+    func loadCookies() async throws -&gt; [HTTPCookie]
+
+    func saveSession(_ session: AppleSession) async throws -&gt; AppleSession
+    func loadSession() async throws -&gt; AppleSession?
+
+    func retrieveAppleCredentials() async throws -&gt; AppleCredentialsSecret
+}
+
+extension SecretsHandlerProtocol {
+
+    ///
+    /// Merge given cookies with the one stored already
+    ///
+    /// - Parameters
+    ///     - cookies : the new cookies to store (or to append)
+    ///
+    /// - Returns : the new string with all cookies
+    ///
+    func mergeCookies(existingCookies: [HTTPCookie], newCookies: String?) async throws -&gt; String? </span><span class="c">{
+
+        guard let cookieString = newCookies else </span><span class="nc">{
+            return nil
+        }</span><span class="c">
+
+        var result = existingCookies
+
+        // transform received cookie string into [HTTPCookie]
+        let newCookies = cookieString.cookies()
+
+        // merge cookies, new values have priority
+
+        // browse new cookies
+        for newCookie in newCookies </span><span class="c">{
+
+            // if a newCookie match an existing one
+            if </span><span class="c">(existingCookies.contains </span><span class="c">{ cookie in cookie.name == newCookie.name }</span><span class="c">) </span><span class="c">{
+
+                // replace old with new
+                // assuming there is only one !!
+                result.removeAll </span><span class="c">{ cookie in cookie.name == newCookie.name }</span><span class="c">
+                result.append(newCookie)
+            }</span><span class="c"> else </span><span class="c">{
+                // add new to existing
+                result.append(newCookie)
+            }</span><span class="c">
+
+        }</span><span class="c">
+
+        // save new set of cookie as string
+        return result.string()</span><span class="c">
+
+    }</span><span class="">
+}
+
+extension String {
+
+    func cookies() -&gt; [HTTPCookie] </span><span class="c">{
+        var fakeHttpHeader = [String: String]()
+        fakeHttpHeader["Set-Cookie"] = self
+        // only cookies from this domain or subdomains are going to be created
+        return HTTPCookie.cookies(
+            withResponseHeaderFields: fakeHttpHeader,
+            for: URL(string: "https://apple.com")!
+        )
+
+    }</span><span class="">
+
+}
+
+extension Array where Element == HTTPCookie {
+
+    func string() -&gt; String? </span><span class="c">{
+
+        var cookieString = ""
+
+        // for each cookie
+        for cookie in self </span><span class="c">{
+
+            if let props = cookie.properties </span><span class="c">{
+
+                // return all properties as an array of strings with key=value
+                var cookieAsString = props.map </span><span class="c">{ (key: HTTPCookiePropertyKey, value: Any) -&gt; String in
+                    switch </span><span class="c">key.rawValue</span><span class="c"> {
+                    // boolean values are handled separately
+                    </span><span class="c">case "Secure": return "Secure"</span><span class="c">
+                    </span><span class="c">case "HttpOnly": return "HttpOnly"</span><span class="c">
+                    </span><span class="c">case "Discard": return ""</span><span class="c">
+
+                    // name and value are handled separately to produce name=value
+                    // (and not Name=name and Value=value)
+                    </span><span class="c">case "Name": return ""</span><span class="c">
+                    </span><span class="c">case "Value": return ""</span><span class="c">
+
+                    </span><span class="c">default: return "\(key.rawValue)=\(value)"</span><span class="c">
+                    }
+                }</span><span class="c">
+
+                // remove empty strings
+                cookieAsString.removeAll </span><span class="c">{ string in string == "" }</span><span class="c">
+
+                // add a coma in between cookies
+                if </span><span class="c">cookieString != ""</span><span class="c"> </span><span class="c">{
+                    cookieString += ", "
+                }</span><span class="c">
+
+                // add name=value
+                if let name = props[HTTPCookiePropertyKey.name] as? String,
+                    let value = props[HTTPCookiePropertyKey.value] as? String
+                </span><span class="c">{
+                    cookieString += "\(name)=\(value); "
+                }</span><span class="c"> else </span><span class="nc">{
+                    fatalError(</span><span class="nc">"Cookie string has no name or value values"</span><span class="nc">)
+                }</span><span class="c">
+
+                // concatenate all strings, spearated by a coma
+                cookieString += cookieAsString.joined(separator: "; ")
+            }
+        }</span><span class="c">
+
+        // remove last
+        return cookieString</span><span class="c">
+    }</span><span class="">
+
+}
+
+</span></pre><pre id="f29" style="display: none"><span>//
+//  FileManagerExtension.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 20/08/2022.
+//
+
+import CLIlib
+import Foundation
+
+// the methods I want to mock for unit testing
+protocol FileHandlerProtocol {
+    func move(from src: URL, to dst: URL) throws
+    func fileExists(file: URL, fileSize: Int) -&gt; Bool
+    func checkFileSize(file: URL, fileSize: Int) throws -&gt; Bool
+    func downloadedFiles() throws -&gt; [String]
+    func downloadFilePath(file: DownloadList.File) -&gt; String
+    func downloadFileURL(file: DownloadList.File) -&gt; URL
+    func saveDownloadList(list: DownloadList) throws -&gt; DownloadList
+    func loadDownloadList() throws -&gt; DownloadList
+    //    func baseFilePath() -&gt; URL
+    //    func baseFilePath() -&gt; String
+}
+
+enum FileHandlerError: Error {
+    case fileDoesNotExist
+    case noDownloadedList
+}
+
+struct FileHandler: FileHandlerProtocol {
+
+    private static let baseDirectory = FileManager.default.homeDirectoryForCurrentUser
+        .appendingPathComponent(".xcodeinstall")
+    static let downloadDirectory = baseDirectory.appendingPathComponent("download")
+    static let downloadListPath = baseDirectory.appendingPathComponent("downloadList")
+
+    let fm = </span><span class="c">FileManager.default</span><span class="">  // swiftlint:disable:this identifier_name
+
+    static func baseFilePath() -&gt; String </span><span class="c">{
+        baseFilePath().path
+    }</span><span class="">
+    static func baseFilePath() -&gt; URL </span><span class="c">{
+
+        // if base directory does not exist, create it
+        let fm = FileManager.default  // swiftlint:disable:this identifier_name
+        if </span><span class="c">!fm.fileExists(atPath: FileHandler.baseDirectory.path)</span><span class="c"> </span><span class="nc">{
+            do </span><span class="nc">{
+                try fm.createDirectory(at: FileHandler.downloadDirectory, withIntermediateDirectories: true)</span><span class="nc">
+            }</span><span class="nc"> catch </span><span class="nc">{
+                log.error</span><span class="nc">(</span><span class="nc">"🛑 Can not create base directory : \(FileHandler.baseDirectory.path)\n\(error)"</span><span class="nc">)
+            }</span><span class="nc">
+        }</span><span class="c">
+
+        return FileHandler.baseDirectory</span><span class="c">
+    }</span><span class="">
+
+    func move(from src: URL, to dst: URL) throws </span><span class="c">{
+        do </span><span class="c">{
+            if </span><span class="c">fm.fileExists(atPath: dst.path)</span><span class="c"> </span><span class="c">{
+                log.debug</span><span class="c">(</span><span class="c">"⚠️ File \(dst) exists, I am overwriting it"</span><span class="c">)
+                try fm.removeItem(atPath: dst.path)</span><span class="c">
+            }</span><span class="c">
+
+            let dstUrl = URL(fileURLWithPath: dst.path)
+            try fm.moveItem(at: src, to: dstUrl)</span><span class="c">
+
+        }</span><span class="c"> catch </span><span class="c">{
+            log.error</span><span class="c">(</span><span class="c">"🛑 Can not move file : \(error)"</span><span class="c">)
+            throw error
+        }</span><span class="c">
+    }</span><span class="">
+
+    func downloadFilePath(file: DownloadList.File) -&gt; String </span><span class="nc">{
+        downloadFileURL(file: file).path
+    }</span><span class="">
+    func downloadFileURL(file: DownloadList.File) -&gt; URL </span><span class="nc">{
+
+        // if download directory does not exist, create it
+        if </span><span class="nc">!fm.fileExists(atPath: FileHandler.downloadDirectory.path)</span><span class="nc"> </span><span class="nc">{
+            do </span><span class="nc">{
+                try fm.createDirectory(at: FileHandler.downloadDirectory, withIntermediateDirectories: true)</span><span class="nc">
+            }</span><span class="nc"> catch </span><span class="nc">{
+                log.error</span><span class="nc">(</span><span class="nc">
+                    </span><span class="nc">"🛑 Can not create base directory : \(FileHandler.downloadDirectory.path)\n\(error)"</span><span class="nc">
+                )
+            }</span><span class="nc">
+        }</span><span class="nc">
+        return FileHandler.downloadDirectory.appendingPathComponent(file.filename)</span><span class="nc">
+
+    }</span><span class="">
+
+    /// Check if file exists and has correct size
+    ///  - Parameters:
+    ///     - filePath the path of the file to verify
+    ///     - fileSize the expected size of the file (in bytes).
+    ///  - Returns : true when the file exists and has the given size, false otherwise
+    ///  - Throws:
+    ///     - FileHandlerError.FileDoesNotExistswhen the file does not exists
+    func checkFileSize(file: URL, fileSize: Int) throws -&gt; Bool </span><span class="c">{
+
+        let filePath = file.path
+
+        // file exists ?
+        let exists = fm.fileExists(atPath: filePath)
+        if </span><span class="c">!exists</span><span class="c"> </span><span class="c">{ throw FileHandlerError.fileDoesNotExist }</span><span class="c">
+
+        // file size ?
+        let attributes = try? fm.attributesOfItem(atPath: filePath)
+        let actualSize = attributes?[.size] as? Int
+
+        // at this stage, we know the file exists, just check size now
+        return actualSize == fileSize</span><span class="c">
+    }</span><span class="">
+
+    /// Check if file exists and has correct size
+    /// - Parameters:
+    ///     - filePath the path of the file to verify
+    ///     - fileSize the expected size of the file (in bytes).
+    ///       when omited, file size is not checked
+    func fileExists(file: URL, fileSize: Int = 0) -&gt; Bool </span><span class="c">{
+
+        let filePath = file.path
+
+        let fileExists = fm.fileExists(atPath: filePath)
+        // does the file exists ?
+        if </span><span class="c">!fileExists</span><span class="c"> </span><span class="c">{
+            return false
+        }</span><span class="c">
+
+        // is the file complete ?
+        // use try! because I verified if file exists already
+        let fileComplete = try? self.checkFileSize(file: file, fileSize: fileSize)
+
+        return (fileSize &gt; 0 ? </span><span class="c">fileComplete ?? </span><span class="nc">false</span><span class="c"> : </span><span class="nc">fileExists</span><span class="c">)</span><span class="c">
+    }</span><span class="">
+
+    func downloadedFiles() throws -&gt; [String] </span><span class="c">{
+        do </span><span class="c">{
+            return try fm.contentsOfDirectory(atPath: FileHandler.downloadDirectory.path)
+        }</span><span class="c"> catch </span><span class="nc">{
+            log.debug</span><span class="nc">(</span><span class="nc">"\(error)"</span><span class="nc">)
+            throw FileHandlerError.noDownloadedList
+        }</span><span class="c">
+    }</span><span class="">
+
+    func saveDownloadList(list: DownloadList) throws -&gt; DownloadList </span><span class="nc">{
+
+        // save list
+        let data = try JSONEncoder().encode(list)</span><span class="nc">
+        try data.write(to: FileHandler.downloadListPath)</span><span class="nc">
+
+        return list</span><span class="nc">
+
+    }</span><span class="">
+
+    func loadDownloadList() throws -&gt; DownloadList </span><span class="c">{
+
+        // read the raw file saved on disk
+        let listData = try Data(contentsOf: FileHandler.downloadListPath)</span><span class="c">
+
+        return try JSONDecoder().decode(DownloadList.self, from: listData)</span><span class="c">
+    }</span><span class="">
+}
+
+</span></pre><pre id="f30" style="display: none"><span>//
+//  AuthenticateCommand.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 16/08/2022.
+//
+
+import Foundation
+
+extension XCodeInstall {
+
+    func authenticate(with authenticationMethod: AuthenticationMethod) async throws </span><span class="c">{
+
+        let auth = env.authenticator
+
+        do </span><span class="c">{
+
+            // delete previous session, if any
+            try await env.secrets.clearSecrets()</span><span class="c">
+            let appleCredentials = try await retrieveAppleCredentials()</span><span class="c">
+
+            if </span><span class="c">authenticationMethod == .usernamePassword</span><span class="c"> </span><span class="c">{
+                display("Authenticating with username and password (likely to fail) ...")
+            }</span><span class="c"> else </span><span class="c">{
+                display("Authenticating...")
+            }</span><span class="c">
+            try await auth.startAuthentication(
+                with: authenticationMethod,
+                username: appleCredentials.username,
+                password: appleCredentials.password
+            )</span><span class="c">
+            display("✅ Authenticated.")
+
+        }</span><span class="c"> catch AuthenticationError.invalidUsernamePassword </span><span class="c">{
+
+            // handle invalid username or password
+            display("🛑 Invalid username or password.")
+
+        }</span><span class="c"> catch AuthenticationError.requires2FA </span><span class="c">{
+
+            // handle two factors authentication
+            try await startMFAFlow()</span><span class="c">
+
+        }</span><span class="c"> catch AuthenticationError.serviceUnavailable </span><span class="nc">{
+
+            // service unavailable means that the authentication method requested is not available
+            display("🛑 Requested authentication method is not available. Try with SRP.")
+
+        }</span><span class="c"> catch AuthenticationError.unableToRetrieveAppleServiceKey(let error) </span><span class="nc">{
+
+            // handle connection errors
+            display(
+                "🛑 Can not connect to Apple Developer Portal.\nOriginal error : \(error.localizedDescription)"
+            )
+
+        }</span><span class="c"> catch AuthenticationError.notImplemented(let feature) </span><span class="nc">{
+
+            // handle not yet implemented errors
+            display(
+                "🛑 \(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available."
+            )
+
+        }</span><span class="c"> catch </span><span class="nc">{
+            display("🛑 Unexpected Error : \(error)")
+        }</span><span class="c">
+    }</span><span class="">
+
+    // retrieve apple developer portal credentials.
+    // either from AWS Secrets Manager, either interactively
+    private func retrieveAppleCredentials() async throws -&gt; AppleCredentialsSecret </span><span class="c">{
+
+        var appleCredentials: AppleCredentialsSecret
+        do </span><span class="c">{
+            // first try on AWS Secrets Manager
+            display("Retrieving Apple Developer Portal credentials...")
+            appleCredentials = try await env.secrets.retrieveAppleCredentials()</span><span class="c">
+
+        }</span><span class="c"> catch AWSSecretsHandlerError.invalidOperation </span><span class="nc">{
+
+            // we have a file secrets handler, prompt for credentials interactively
+            appleCredentials = try promptForCredentials()</span><span class="nc">
+
+        }</span><span class="c"> catch </span><span class="nc">{
+
+            // unexpected errors, do not handle here
+            throw error
+        }</span><span class="c">
+
+        return appleCredentials</span><span class="c">
+    }</span><span class="">
+
+    // prompt user for apple developer portal credentials interactively
+    private func promptForCredentials() throws -&gt; AppleCredentialsSecret </span><span class="nc">{
+        display(
+            """
+            ⚠️⚠️ We prompt you for your Apple ID username, password, and two factors authentication code.
+            These values are not stored anywhere. They are used to get an Apple session ID. ⚠️⚠️
+
+            Alternatively, you may store your credentials on AWS Secrets Manager
+            """
+        )
+
+        guard
+            let username = env.readLine.readLine(
+                prompt: "⌨️  Enter your Apple ID username: ",
+                silent: false
+            )
+        else </span><span class="nc">{
+            throw CLIError.invalidInput
+        }</span><span class="nc">
+
+        guard
+            let password = env.readLine.readLine(
+                prompt: "⌨️  Enter your Apple ID password: ",
+                silent: true
+            )
+        else </span><span class="nc">{
+            throw CLIError.invalidInput
+        }</span><span class="nc">
+
+        return AppleCredentialsSecret(username: username, password: password)</span><span class="nc">
+    }</span><span class="">
+
+    // manage the MFA authentication sequence
+    private func startMFAFlow() async throws </span><span class="c">{
+
+        let auth = env.authenticator
+
+        do </span><span class="c">{
+
+            let codeLength = try await auth.handleTwoFactorAuthentication()</span><span class="c">
+            assert(</span><span class="c">codeLength &gt; 0</span><span class="c">)
+
+            let prompt = "🔐 Two factors authentication is enabled, enter your 2FA code: "
+            guard let pinCode = env.readLine.readLine(prompt: prompt, silent: false) else </span><span class="nc">{
+                throw CLIError.invalidInput
+            }</span><span class="c">
+            try await auth.twoFactorAuthentication(pin: pinCode)</span><span class="c">
+            display("✅ Authenticated with MFA.")
+
+        }</span><span class="c"> catch AuthenticationError.requires2FATrustedPhoneNumber </span><span class="nc">{
+
+            display(
+                """
+                🔐 Two factors authentication is enabled, with 4 digits code and trusted phone numbers.
+                This tool does not support SMS MFA at the moment. Please enable 2 factors authentication
+                with trusted devices as described here: https://support.apple.com/en-us/HT204915
+                """
+            )
+
+        }</span><span class="c">
+    }</span><span class="">
+
+}
+
+</span></pre><pre id="f31" style="display: none"><span>//
+//  DownloadCommand.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 16/08/2022.
+//
+
+import Foundation
+
+extension XCodeInstall {
+
+    // swiftlint:disable: function_parameter_count
+    func download(
+        fileName: String?,
+        force: Bool,
+        xCodeOnly: Bool,
+        majorVersion: String,
+        sortMostRecentFirst: Bool,
+        datePublished: Bool
+    ) async throws </span><span class="c">{
+
+        let download = env.downloader
+
+        var fileToDownload: DownloadList.File
+        do </span><span class="c">{
+
+            // when filename was given by user
+            if </span><span class="c">fileName != nil</span><span class="c"> </span><span class="c">{
+
+                // search matching filename in the download list cache
+                let list = try await download.list(force: force)</span><span class="c">
+                if let result = list.find(fileName: fileName!) </span><span class="c">{
+                    fileToDownload = result
+                }</span><span class="c"> else </span><span class="c">{
+                    throw DownloadError.unknownFile(file: fileName!)
+                }</span><span class="c">
+
+            }</span><span class="c"> else </span><span class="c">{
+
+                // when no file was given, ask user
+                fileToDownload = try await self.askFile(
+                    force: force,
+                    xCodeOnly: xCodeOnly,
+                    majorVersion: majorVersion,
+                    sortMostRecentFirst: sortMostRecentFirst,
+                    datePublished: datePublished
+                )</span><span class="c">
+            }</span><span class="c">
+
+            // now we have a filename, let's proceed with download
+            let progressBar = env.progressBar
+            progressBar.define(
+                animationType: .percentProgressAnimation,
+                message: "Downloading \(fileToDownload.displayName ?? </span><span class="nc">fileToDownload.filename</span><span class="c">)"
+            )
+
+            _ = try await download.download(file: fileToDownload)</span><span class="c">
+
+            // check if the downloaded file is complete
+            let file: URL = env.fileHandler.downloadFileURL(file: fileToDownload)
+            let complete = try? env.fileHandler.checkFileSize(
+                file: file,
+                fileSize: fileToDownload.fileSize
+            )
+            if </span><span class="c">!(complete ?? </span><span class="nc">false</span><span class="c">) </span><span class="nc">{
+                display("🛑 Downloaded file has incorrect size, it might be incomplete or corrupted")
+            }</span><span class="c">
+            display("✅ \(fileName ?? </span><span class="c">"file"</span><span class="c">) downloaded")
+
+        }</span><span class="c"> catch DownloadError.zeroOrMoreThanOneFileToDownload(let count) </span><span class="nc">{
+            display("🛑 There are \(count) files to download " + "for this component. Not implemented.")
+        }</span><span class="c"> catch DownloadError.authenticationRequired </span><span class="nc">{
+
+            // error message has been printed already
+
+        }</span><span class="c"> catch CLIError.invalidInput </span><span class="nc">{
+            display("🛑 Invalid input")
+        }</span><span class="c"> catch DownloadError.unknownFile(let fileName) </span><span class="c">{
+            display("🛑 Unknown file name : \(fileName)")
+        }</span><span class="c"> catch </span><span class="nc">{
+            display("🛑 Unexpected error : \(error)")
+        }</span><span class="c">
+    }</span><span class="">
+
+    func askFile(
+        force: Bool,
+        xCodeOnly: Bool,
+        majorVersion: String,
+        sortMostRecentFirst: Bool,
+        datePublished: Bool
+    ) async throws -&gt; DownloadList.File </span><span class="c">{
+
+        let parsedList = try await self.list(
+            force: force,
+            xCodeOnly: xCodeOnly,
+            majorVersion: majorVersion,
+            sortMostRecentFirst: sortMostRecentFirst,
+            datePublished: datePublished
+        )</span><span class="c">
+
+        let response: String? = env.readLine.readLine(
+            prompt: "⌨️  Which one do you want to download? ",
+            silent: false
+        )
+        guard let number = response,
+            let num = Int(number)
+        else </span><span class="nc">{
+
+            if </span><span class="nc">(response ?? </span><span class="nc">""</span><span class="nc">) == "" </span><span class="nc">{
+                exit(0)
+            }</span><span class="nc">
+            throw CLIError.invalidInput
+        }</span><span class="c">
+
+        if </span><span class="c">parsedList[num].files.count == 1</span><span class="c"> </span><span class="c">{
+            return parsedList[num].files[0]
+        }</span><span class="c"> else </span><span class="nc">{
+            throw DownloadError.zeroOrMoreThanOneFileToDownload(count: parsedList[num].files.count)
+        }</span><span class="c">
+    }</span><span class="">
+}
+
+</span></pre><pre id="f32" style="display: none"><span>//
+//  DownloadListParser.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 24/07/2022.
+//
+
+import Foundation
+
+struct DownloadListParser {
+
+    var xCodeOnly: Bool
+    var majorVersion: String
+    var sortMostRecentFirst: Bool
+
+    init(xCodeOnly: Bool = true, majorVersion: String = "13", sortMostRecentFirst: Bool = false) </span><span class="c">{
+        self.xCodeOnly = xCodeOnly
+        self.majorVersion = majorVersion
+        self.sortMostRecentFirst = sortMostRecentFirst
+    }</span><span class="">
+
+    func parse(list: DownloadList?) throws -&gt; [DownloadList.Download] </span><span class="c">{
+
+        guard let list = list?.downloads else </span><span class="nc">{
+            throw DownloadError.noDownloadsInDownloadList
+        }</span><span class="c">
+
+        // filter on items having Xcode in their name
+        let listOfXcode = list.filter </span><span class="c">{ download in
+            if </span><span class="c">xCodeOnly</span><span class="c"> </span><span class="c">{
+                return download.name.starts(with: "Xcode \(majorVersion)")
+            }</span><span class="c"> else </span><span class="c">{
+                return download.name.contains("Xcode \(majorVersion)")
+            }</span><span class="c">
+        }</span><span class="c">
+
+        // sort by date (most recent last)
+        let sortedList = listOfXcode.sorted </span><span class="c">{ (downloadA, downloadB) in
+
+            var dateA: String
+            var dateB: String
+
+            // select a non nil-date, either Published or Created.
+            if let pubDateA = downloadA.datePublished,
+                let pubDateB = downloadB.datePublished
+            </span><span class="c">{
+                dateA = pubDateA
+                dateB = pubDateB
+            }</span><span class="c"> else </span><span class="nc">{
+                dateA = downloadA.dateCreated
+                dateB = downloadB.dateCreated
+            }</span><span class="c">
+
+            // parse the string and return a date
+            if let aAsDate = dateA.toDate(),
+                let bAsDate = dateB.toDate()
+            </span><span class="c">{
+                return self.sortMostRecentFirst ? </span><span class="c">aAsDate &gt; bAsDate</span><span class="c"> : </span><span class="nc">aAsDate &lt; bAsDate</span><span class="c">
+            } else </span><span class="nc">{
+                // I don't know what to do when we can not parse the date
+                return false
+            }</span><span class="c">
+        }</span><span class="c">
+
+        return sortedList
+    }</span><span class="">
+
+    /// Enrich the list of available downloads.
+    /// It adds a flag for each file in the list to indicate if the file is already downloaded and available in cache
+    func enrich(list: [DownloadList.Download]) -&gt; [DownloadList.Download] </span><span class="c">{
+
+        let fileHandler = env.fileHandler
+
+        return list.map </span><span class="c">{ download in
+
+            // swiftlint:disable identifier_name
+            var d = download
+            var file = download.files[0]
+
+            let downloadFile: URL = fileHandler.downloadFileURL(file: file)
+            let exists = fileHandler.fileExists(file: downloadFile, fileSize: file.fileSize)
+
+            file.existInCache = exists
+            d.files = [file]
+
+            return d
+
+        }</span><span class="c">
+    }</span><span class="">
+
+    func prettyPrint(list: [DownloadList.Download], withDate: Bool = true) -&gt; String </span><span class="c">{
+
+        // var result = ""
+
+        // map returns a [String] each containing a line to display
+        let result: String = list.enumerated().map </span><span class="c">{ (index, download) in
+            var line: String = ""
+            let file = download.files[0]
+
+            // swiftlint:disable line_length
+            line +=
+                "[\(String(format: "%02d", index))] \(download.name) (\(file.fileSize/1024/1024) Mb) \(file.existInCache ?? </span><span class="c">false</span><span class="c"> ? </span><span class="c">"(*)"</span><span class="c"> : </span><span class="c">""</span><span class="c">)"
+
+            if </span><span class="c">withDate</span><span class="c"> </span><span class="c">{
+                if let date = download.datePublished </span><span class="c">{
+                    let das = date.toDate()
+                    line += " (published on \(das?.formatted(date: .numeric, time: .omitted) ?? </span><span class="nc">""</span><span class="c">))"
+                } else </span><span class="nc">{
+                    let das = download.dateCreated.toDate()
+                    line += " (created on \(das?.formatted(date: .numeric, time: .omitted) ?? </span><span class="nc">""</span><span class="nc">))"
+                }</span><span class="c">
+            }
+            return line
+        }</span><span class="c">
+        // join all strings in [] with a \n
+        .joined(separator: "\n")
+
+        return result
+    }</span><span class="">
+}
+
+extension String {
+
+    func toDate() -&gt; Date? </span><span class="c">{
+
+        let appleDownloadDateFormatter = DateFormatter()
+        appleDownloadDateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        appleDownloadDateFormatter.dateFormat = "MM-dd-yy HH:mm"
+        //        appleDownloadDateFormatter.timeZone = TimeZone(secondsFromGMT: 0) // assume GMT timezone
+
+        return appleDownloadDateFormatter.date(from: self)
+    }</span><span class="">
+}
+
+</span></pre><pre id="f33" style="display: none"><span>//
+//  InstallCommand.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 22/08/2022.
+//
+
+import CLIlib
+import Foundation
+
+extension XCodeInstall {
+
+    func install(file: String?) async throws </span><span class="c">{
+
+        let installer = ShellInstaller()
+
+        // progress bar to report progress feedback
+        let progressBar = env.progressBar
+        progressBar.define(
+            animationType: .countingProgressAnimationMultiLine,
+            message: "Installing..."
+        )
+
+        var fileToInstall: URL?
+        do </span><span class="c">{
+            // when no file is specified, prompt user to select one
+            if </span><span class="c">nil == file</span><span class="c"> </span><span class="nc">{
+                fileToInstall = try promptForFile()</span><span class="nc">
+            }</span><span class="c"> else </span><span class="c">{
+                fileToInstall = FileHandler.downloadDirectory.appendingPathComponent(file!)
+            }</span><span class="c">
+            log.debug</span><span class="c">(</span><span class="c">"Going to attemp to install \(fileToInstall!.path)"</span><span class="c">)
+
+            try await installer.install(file: fileToInstall!)</span><span class="nc">
+            env.progressBar.complete(success: true)
+            display("✅ \(fileToInstall!) installed")
+        }</span><span class="c"> catch CLIError.invalidInput </span><span class="nc">{
+            display("🛑 Invalid input")
+            env.progressBar.complete(success: false)
+        }</span><span class="c"> catch FileHandlerError.noDownloadedList </span><span class="nc">{
+            display("⚠️ There is no downloaded file to be installed")
+            env.progressBar.complete(success: false)
+        }</span><span class="c"> catch InstallerError.xCodeXIPInstallationError </span><span class="nc">{
+            display("🛑 Can not expand XIP file. Is there enough space on / ? (16GiB required)")
+            env.progressBar.complete(success: false)
+        }</span><span class="c"> catch InstallerError.xCodeMoveInstallationError </span><span class="nc">{
+            display("🛑 Can not move Xcode to /Applications")
+            env.progressBar.complete(success: false)
+        }</span><span class="c"> catch InstallerError.xCodePKGInstallationError </span><span class="nc">{
+            display(
+                "🛑 Can not install additional packages. Be sure to run this command as root (sudo xcodinstall)."
+            )
+            env.progressBar.complete(success: false)
+        }</span><span class="c"> catch InstallerError.unsupportedInstallation </span><span class="c">{
+            display(
+                "🛑 Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)"
+            )
+            env.progressBar.complete(success: false)
+        }</span><span class="c"> catch </span><span class="nc">{
+            display("🛑 Error while installing \(String(describing: fileToInstall!))")
+            log.debug</span><span class="nc">(</span><span class="nc">"\(error)"</span><span class="nc">)
+            env.progressBar.complete(success: false)
+        }</span><span class="c">
+    }</span><span class="">
+
+    func promptForFile() throws -&gt; URL </span><span class="c">{
+
+        // list files ready to install
+        let installableFiles = try env.fileHandler.downloadedFiles()</span><span class="c">.filter(</span><span class="c">{ fileName in
+            return fileName.hasSuffix(".xip") || </span><span class="c">fileName.hasSuffix(".dmg")</span><span class="c">
+        }</span><span class="c">)
+
+        display("")
+        display("👉 Here is the list of available files to install:")
+        display("")
+        let printableList = installableFiles.enumerated().map(</span><span class="c">{ (index, fileName) in
+            return "[\(String(format: "%02d", index))] \(fileName)"
+        }</span><span class="c">).joined(separator: "\n")
+        display(printableList)
+        display("\(installableFiles.count) items")
+
+        let response: String? = env.readLine.readLine(
+            prompt: "⌨️  Which one do you want to install? ",
+            silent: false
+        )
+        guard let number = response,
+            let num = Int(number)
+        else </span><span class="nc">{
+
+            if </span><span class="nc">(response ?? </span><span class="nc">""</span><span class="nc">) == "" </span><span class="nc">{
+                exit(0)
+            }</span><span class="nc">
+            throw CLIError.invalidInput
+        }</span><span class="c">
+
+        return FileHandler.downloadDirectory.appendingPathComponent(installableFiles[num])</span><span class="c">
+    }</span><span class="">
+}
+
+</span></pre><pre id="f34" style="display: none"><span>//
+//  ListCommand.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 16/08/2022.
+//
+
+import Foundation
+
+extension XCodeInstall {
+
+    func list(
+        force: Bool,
+        xCodeOnly: Bool,
+        majorVersion: String,
+        sortMostRecentFirst: Bool,
+        datePublished: Bool
+    ) async throws -&gt; [DownloadList.Download] </span><span class="c">{
+
+        let download = env.downloader
+
+        display("Loading list of available downloads ", terminator: "")
+        display(
+            "\(force ? </span><span class="c">"forced download from Apple Developer Portal"</span><span class="c"> : </span><span class="nc">"fetched from cache in \(FileHandler.baseFilePath())"</span><span class="c">)"
+        )  // swiftlint:disable:this line_length
+
+        do </span><span class="c">{
+            let list = try await download.list(force: force)</span><span class="c">
+            display("✅ Done")
+
+            let parser = DownloadListParser(
+                xCodeOnly: xCodeOnly,
+                majorVersion: majorVersion,
+                sortMostRecentFirst: sortMostRecentFirst
+            )
+            let parsedList = try parser.parse(list: list)</span><span class="c">
+
+            // enrich the list to flag files already downloaded
+            let enrichedList = parser.enrich(list: parsedList)
+
+            display("")
+            display("👉 Here is the list of available downloads:")
+            display("Files marked with (*) are already downloaded in \(FileHandler.baseFilePath()) ")
+            display("")
+            let string = parser.prettyPrint(list: enrichedList, withDate: datePublished)
+            display(string)
+            display("\(enrichedList.count) items")
+
+            return enrichedList</span><span class="c">
+
+        } catch let error as DownloadError </span><span class="nc">{
+            switch </span><span class="nc">error</span><span class="nc"> {
+            </span><span class="nc">case .authenticationRequired:
+                display("🛑 Session expired, you neeed to re-authenticate.")
+                display("You can authenticate with the command: xcodeinstall authenticate")
+                throw error</span><span class="nc">
+            </span><span class="nc">case .accountneedUpgrade(let code, let message):
+                display("🛑 \(message) (Apple Portal error code : \(code))")
+                throw error</span><span class="nc">
+            </span><span class="nc">case .needToAcceptTermsAndCondition:
+                display(
+                    """
+                    🛑 This is a new Apple account, you need first to accept the developer terms of service.
+                    Open a session at https://developer.apple.com/register/agree/
+                    Read and accept the ToS and try again.
+                    """
+                )
+                throw error</span><span class="nc">
+            </span><span class="nc">case .unknownError(let code, let message):
+                display("🛑 \(message) (Unhandled download error : \(code))")
+                display(
+                    "Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&amp;labels=&amp;template=bug_report.md&amp;title="
+                )
+                throw error</span><span class="nc">
+            </span><span class="nc">default:
+                display("🛑 Unknown download error : \(error)")
+                display(
+                    "Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&amp;labels=&amp;template=bug_report.md&amp;title="
+                )
+                throw error</span><span class="nc">
+            }
+        }</span><span class="c"> catch </span><span class="nc">{
+            display("🛑 Unexpected error : \(error)")
+            display(
+                "Please file an error repor at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&amp;labels=&amp;template=bug_report.md&amp;title="
+            )
+            throw error
+        }</span><span class="c">
+
+    }</span><span class="">
+}
+
+</span></pre><pre id="f35" style="display: none"><span>//
+//  SignOutCommand.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 16/08/2022.
+//
+
+import Foundation
+
+extension XCodeInstall {
+
+    func signout() async throws </span><span class="c">{
+
+        let auth = env.authenticator
+
+        display("Signing out...")
+        try await auth.signout()</span><span class="c">
+        display("✅ Signed out.")
+
+    }</span><span class="">
+}
+
+</span></pre><pre id="f36" style="display: none"><span>//
+//  StoreSecretsCommand.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 05/09/2022.
+//
+
+import Foundation
+
+extension XCodeInstall {
+
+    func storeSecrets() async throws </span><span class="c">{
+
+        guard let secretsHandler = env.secrets as? AWSSecretsHandler else </span><span class="nc">{
+            fatalError(</span><span class="nc">"This function requires a AWSSecretsManager"</span><span class="nc">)
+        }</span><span class="c">
+
+        do </span><span class="c">{
+            // separate func for testability
+            let input = try promptForCredentials()</span><span class="c">
+            let credentials = AppleCredentialsSecret(username: input[0], password: input[1])
+
+            try await secretsHandler.storeAppleCredentials(credentials)</span><span class="c">
+            display("✅ Credentials are securely stored")
+
+        }</span><span class="c"> catch </span><span class="nc">{
+            display("🛑 Unexpected error : \(error)")
+            throw error
+        }</span><span class="c">
+
+    }</span><span class="">
+
+    func promptForCredentials() throws -&gt; [String] </span><span class="c">{
+        display(
+            """
+
+            This command captures your Apple ID username and password and store them securely in AWS Secrets Manager.
+            It allows this command to authenticate automatically, as long as no MFA is prompted.
+
+            """
+        )
+
+        guard
+            let username = env.readLine.readLine(
+                prompt: "⌨️  Enter your Apple ID username: ",
+                silent: false
+            )
+        else </span><span class="nc">{
+            throw CLIError.invalidInput
+        }</span><span class="c">
+
+        guard
+            let password = env.readLine.readLine(
+                prompt: "⌨️  Enter your Apple ID password: ",
+                silent: true
+            )
+        else </span><span class="nc">{
+            throw CLIError.invalidInput
+        }</span><span class="c">
+
+        return [username, password]</span><span class="c">
+    }</span><span class="">
+
+}
+
+</span></pre><pre id="f37" style="display: none"><span>//
+//  XcodeInstall.swift
+//  xcodeinstall
+//
+//  Created by Stormacq, Sebastien on 16/08/2022.
+//
+
+import CLIlib
+import Foundation
+
+struct XCodeInstall {
+
+    // display a message to the user
+    // avoid having to replicate the \n torough the code
+    func display(_ msg: String, terminator: String = "\n") </span><span class="c">{
+        env.display.display(msg, terminator: terminator)
+    }</span><span class="">
+
+}
+
+</span></pre><script>
+  (function() {
+    var filesEl = document.getElementById('files');
+    var selectedEl;
+    function select(fileID) {
+      if (selectedEl != null) {
+        selectedEl.style.display = 'none';
+      }
+      selectedEl = document.getElementById(fileID);
+      if (selectedEl == null) {
+        return;
+      }
+      filesEl.value = fileID;
+      selectedEl.style.display = 'block';
+      location.hash = fileID;
+    }
+
+    if (location.hash !== "") {
+      select(location.hash.substr(1));
+    }
+    if (selectedEl == null) {
+      select("f0");
+    }
+
+    filesEl.addEventListener('change', function() { 
+      select(filesEl.value);
+      window.scrollTo(0, 0);
+    } , false);
+  })();
+</script>
+</body></html>
