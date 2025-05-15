@@ -17,7 +17,7 @@ let package = Package(
         .package(url: "https://github.com/sebsto/CLIlib/", from: "0.1.2"),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
         .package(url: "https://github.com/apple/swift-crypto", from: "3.12.3"),
-        .package(url: "https://github.com/saagarjha/unxip", from: "1.0.0"),
+        .package(url: "https://github.com/saagarjha/unxip", from: "1.0.0", condition: .when(platforms: [.macOS])),
         //.package(path: "../CLIlib")
     ],
 
@@ -32,7 +32,7 @@ let package = Package(
                 .product(name: "SRP", package: "swift-srp"),
                 .product(name: "CLIlib", package: "CLIlib"),
                 .product(name: "_CryptoExtras", package: "swift-crypto"),
-                .product(name: "unxip", package: "unxip")
+                .product(name: "unxip", package: "unxip", condition: .when(platforms: [.macOS]))
             ]
         ),
         .testTarget(

@@ -7,7 +7,9 @@
 
 import CLIlib
 import Foundation
+#if os(macOS)
 import unxip
+#endif
 
 // MARK: XCODE
 // XCode installation functions
@@ -92,29 +94,35 @@ extension ShellInstaller {
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 
-        // Create a ShellOutput object to maintain compatibility with the existing code
-        var shellOutput = ShellOutput(code: 0, stdout: "", stderr: "")
+        var shellOutput: ShellOutput
         
+        #if os(macOS)
         do {
-            // Change to the download directory
+            // Use unxip library on macOS
             let originalWorkingDirectory = FileManager.default.currentDirectoryPath
             FileManager.default.changeCurrentDirectoryPath(FileHandler.downloadDirectory.path)
             
-            // Use the unxip library to extract the XIP file
             log.debug("Using unxip library to extract \(filePath)")
             let unxipper = try Unxipper(url: file)
             try unxipper.extract()
             
-            // Change back to the original directory
             FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
-            
-            shellOutput.stdout = "Successfully extracted \(filePath) using unxip library"
+            shellOutput = ShellOutput(code: 0, stdout: "Successfully extracted \(filePath) using unxip library", stderr: "")
         } catch {
             log.error("Failed to extract XIP file: \(error)")
-            shellOutput.code = 1
-            shellOutput.stderr = "Error extracting XIP file: \(error)"
             throw InstallerError.xCodeXIPInstallationError
         }
+        #else
+        // Use command line xip tool on non-macOS platforms
+        let cmd = "pushd \"\(FileHandler.downloadDirectory.path)\" && " +
+                 "\(XIPCOMMAND) --expand \"\(filePath)\" && " +
+                 "popd"
+        shellOutput = try env.shell.run(cmd)
+        if shellOutput.code != 0 {
+            log.error("Failed to extract XIP file using xip command")
+            throw InstallerError.xCodeXIPInstallationError
+        }
+        #endif
 
         return shellOutput
     }

@@ -31,7 +31,7 @@ The session stays valid for several days, sometimes weeks before it expires.  Wh
 
 ## Performance Improvements
 
-This tool uses [unxip](https://github.com/saagarjha/unxip) for extracting Xcode XIP files, which provides significantly faster extraction compared to Apple's built-in xip tool.
+This tool uses [unxip](https://github.com/saagarjha/unxip) for extracting Xcode XIP files on macOS, which provides significantly faster extraction compared to Apple's built-in xip tool. On other platforms, it falls back to using the command line xip tool.
 
 ## Demo 
 

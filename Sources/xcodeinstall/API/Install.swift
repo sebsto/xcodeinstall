@@ -30,6 +30,7 @@ enum InstallerError: Error {
 class ShellInstaller: InstallerProtocol {
 
     // the shell commands we need to install XCode and its command line tools
+    let XIPCOMMAND = "/usr/bin/xip"  // Used as fallback when unxip is not available
     let HDIUTILCOMMAND = "/usr/bin/hdiutil"
     let INSTALLERCOMMAND = "/usr/sbin/installer"
 
