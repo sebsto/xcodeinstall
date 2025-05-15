@@ -3,6 +3,36 @@
 
 import PackageDescription
 
+// Define base dependencies
+let baseDependencies: [Package.Dependency] = [
+    .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
+    .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"),
+    .package(url: "https://github.com/sebsto/CLIlib/", from: "0.1.2"),
+    .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
+    .package(url: "https://github.com/apple/swift-crypto", from: "3.12.3")
+]
+
+// Define base products
+let baseProducts: [Target.Dependency] = [
+    .product(name: "ArgumentParser", package: "swift-argument-parser"),
+    .product(name: "SotoSecretsManager", package: "soto"),
+    .product(name: "SRP", package: "swift-srp"),
+    .product(name: "CLIlib", package: "CLIlib"),
+    .product(name: "_CryptoExtras", package: "swift-crypto")
+]
+
+#if os(macOS)
+let dependencies = baseDependencies + [
+    .package(url: "https://github.com/saagarjha/unxip", from: "1.0.0")
+]
+let products = baseProducts + [
+    .product(name: "unxip", package: "unxip")
+]
+#else
+let dependencies = baseDependencies
+let products = baseProducts
+#endif
+
 let package = Package(
     name: "xcodeinstall",
     platforms: [
@@ -11,33 +41,14 @@ let package = Package(
     products: [
         .executable(name: "xcodeinstall", targets: ["xcodeinstall"])
     ],
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
-        .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"),
-        .package(url: "https://github.com/sebsto/CLIlib/", from: "0.1.2"),
-        .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
-        .package(url: "https://github.com/apple/swift-crypto", from: "3.12.3"),
-        #if os(macOS)
-        .package(url: "https://github.com/saagarjha/unxip", from: "1.0.0"),
-        #endif
-        //.package(path: "../CLIlib")
-    ],
+    dependencies: dependencies,
 
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .executableTarget(
             name: "xcodeinstall",
-            dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "SotoSecretsManager", package: "soto"),
-                .product(name: "SRP", package: "swift-srp"),
-                .product(name: "CLIlib", package: "CLIlib"),
-                .product(name: "_CryptoExtras", package: "swift-crypto"),
-                #if os(macOS)
-                .product(name: "unxip", package: "unxip"),
-                #endif
-            ]
+            dependencies: products
         ),
         .testTarget(
             name: "xcodeinstallTests",
