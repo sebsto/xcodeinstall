@@ -1,0 +1,29 @@
+name: Update Homebrew Formula
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-homebrew-formula:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update Homebrew Formula
+        uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          # GitHub token with access to the tap repository
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          # The tap repository where the formula is located
+          tap: sebsto/homebrew-macos
+          # The formula name to update
+          formula: xcodeinstall
+          # Optional: Force update even if the formula is already up-to-date
+          force: false
+          # Optional: Create a pull request instead of committing directly
+          # Set to true if you want to review changes before merging
+          pull_request: false
+          # Optional: Message for the commit
+          message: "Update xcodeinstall to ${{ github.event.release.tag_name }}"

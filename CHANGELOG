@@ -1,3 +1,11 @@
+## version 0.10.2
+
+- Added GitHub Action to automatically update Homebrew formula on new releases
+
+## version 0.10.1
+
+- Current version
+
 ## version 0.3
 
 - Build scripts now produce a fat binary (multiple commits)
