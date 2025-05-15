@@ -29,6 +29,10 @@ The session stays valid for several days, sometimes weeks before it expires.  Wh
 
 > When using Secrets Manager for authentication, it is required to use it FROM THE SAME AWS REGION, for the `list` and `download` command.
 
+## Performance Improvements
+
+This tool uses [unxip](https://github.com/saagarjha/unxip) for extracting Xcode XIP files, which provides significantly faster extraction compared to Apple's built-in xip tool.
+
 ## Demo 
 
 ![Video Demo](img/xcodeinstall-demo.gif)

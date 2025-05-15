@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+import unxip
 
 // MARK: XCODE
 // XCode installation functions
@@ -79,9 +80,8 @@ extension ShellInstaller {
 
     }
 
-    // expand a XIP file.  There is no way to create XIP file.
-    // This code can not be tested without a valid, signed,  Xcode archive
-    // https://en.wikipedia.org/wiki/.XIP
+    // expand a XIP file using the faster unxip library
+    // https://github.com/saagarjha/unxip
     func uncompressXIP(atURL file: URL) throws -> ShellOutput {
 
         let filePath = file.path
@@ -92,13 +92,31 @@ extension ShellInstaller {
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 
-        // synchronously uncompress in the download directory
-        let cmd =
-            "pushd \"\(FileHandler.downloadDirectory.path)\" && "
-            + "\(XIPCOMMAND) --expand \"\(filePath)\" && " + "popd"
-        let result = try env.shell.run(cmd)
+        // Create a ShellOutput object to maintain compatibility with the existing code
+        var shellOutput = ShellOutput(code: 0, stdout: "", stderr: "")
+        
+        do {
+            // Change to the download directory
+            let originalWorkingDirectory = FileManager.default.currentDirectoryPath
+            FileManager.default.changeCurrentDirectoryPath(FileHandler.downloadDirectory.path)
+            
+            // Use the unxip library to extract the XIP file
+            log.debug("Using unxip library to extract \(filePath)")
+            let unxipper = try Unxipper(url: file)
+            try unxipper.extract()
+            
+            // Change back to the original directory
+            FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
+            
+            shellOutput.stdout = "Successfully extracted \(filePath) using unxip library"
+        } catch {
+            log.error("Failed to extract XIP file: \(error)")
+            shellOutput.code = 1
+            shellOutput.stderr = "Error extracting XIP file: \(error)"
+            throw InstallerError.xCodeXIPInstallationError
+        }
 
-        return result
+        return shellOutput
     }
 
     func moveApp(at src: URL) throws -> String {
