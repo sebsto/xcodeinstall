@@ -1,3 +1,7 @@
+## version 0.4
+
+- Added [unxip](https://github.com/saagarjha/unxip) library for faster XIP extraction
+
 ## version 0.3
 
 - Build scripts now produce a fat binary (multiple commits)

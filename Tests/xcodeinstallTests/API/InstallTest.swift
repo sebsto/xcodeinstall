@@ -75,10 +75,15 @@ class InstallTest: XCTestCase {
         XCTAssertNoThrow(try installer.uncompressXIP(atURL: srcFile))
 
         // then
+        #if os(macOS)
+        // On macOS, we use the unxip library
+        // Just verify that no error is thrown
+        #else
+        // On other platforms, verify the shell command is correct
         XCTAssertTrue(mockedShell().command.contains("/usr/bin/xip --expand \"\(srcFile.path)\""))
         XCTAssertTrue(mockedShell().command.hasPrefix("pushd"))
         XCTAssertTrue(mockedShell().command.hasSuffix("popd"))
-
+        #endif
     }
 
     func testXIPNoFile() {

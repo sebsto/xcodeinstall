@@ -7,6 +7,9 @@
 
 import CLIlib
 import Foundation
+#if os(macOS)
+import unxip
+#endif
 
 // MARK: XCODE
 // XCode installation functions
@@ -79,9 +82,8 @@ extension ShellInstaller {
 
     }
 
-    // expand a XIP file.  There is no way to create XIP file.
-    // This code can not be tested without a valid, signed,  Xcode archive
-    // https://en.wikipedia.org/wiki/.XIP
+    // expand a XIP file using the faster unxip library
+    // https://github.com/saagarjha/unxip
     func uncompressXIP(atURL file: URL) throws -> ShellOutput {
 
         let filePath = file.path
@@ -92,13 +94,37 @@ extension ShellInstaller {
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 
-        // synchronously uncompress in the download directory
-        let cmd =
-            "pushd \"\(FileHandler.downloadDirectory.path)\" && "
-            + "\(XIPCOMMAND) --expand \"\(filePath)\" && " + "popd"
-        let result = try env.shell.run(cmd)
+        var shellOutput: ShellOutput
+        
+        #if os(macOS)
+        do {
+            // Use unxip library on macOS
+            let originalWorkingDirectory = FileManager.default.currentDirectoryPath
+            FileManager.default.changeCurrentDirectoryPath(FileHandler.downloadDirectory.path)
+            
+            log.debug("Using unxip library to extract \(filePath)")
+            let unxipper = try Unxipper(url: file)
+            try unxipper.extract()
+            
+            FileManager.default.changeCurrentDirectoryPath(originalWorkingDirectory)
+            shellOutput = ShellOutput(code: 0, stdout: "Successfully extracted \(filePath) using unxip library", stderr: "")
+        } catch {
+            log.error("Failed to extract XIP file: \(error)")
+            throw InstallerError.xCodeXIPInstallationError
+        }
+        #else
+        // Use command line xip tool on non-macOS platforms
+        let cmd = "pushd \"\(FileHandler.downloadDirectory.path)\" && " +
+                 "\(XIPCOMMAND) --expand \"\(filePath)\" && " +
+                 "popd"
+        shellOutput = try env.shell.run(cmd)
+        if shellOutput.code != 0 {
+            log.error("Failed to extract XIP file using xip command")
+            throw InstallerError.xCodeXIPInstallationError
+        }
+        #endif
 
-        return result
+        return shellOutput
     }
 
     func moveApp(at src: URL) throws -> String {
