@@ -13,7 +13,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    container: swift:6.0-noble
+    container: swift:6.1-noble
 
     steps:
     - name: Checkout
@@ -26,7 +26,7 @@ jobs:
   test:
     if: false 
     runs-on: ubuntu-latest
-    container: swift:6.0-noble
+    container: swift:6.1-noble
 
     steps:
     - uses: actions/checkout@v4
