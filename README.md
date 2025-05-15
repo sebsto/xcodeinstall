@@ -389,6 +389,17 @@ If you are not sure how to get started or how to be useful, contact me at storma
 
 I listed a couple of ideas below.
 
+## Release Process
+
+When a new release is published on GitHub, a GitHub Action automatically updates the Homebrew formula in the `sebsto/homebrew-macos` tap. This ensures that users always have access to the latest version through Homebrew.
+
+The update process:
+1. Create and publish a new release on GitHub
+2. The GitHub Action workflow automatically:
+   - Gets the latest release URL and SHA256 hash
+   - Updates the formula in the Homebrew tap repository
+   - Commits the changes directly to the tap repository
+
 ## List of ideas 
 
 - add a CloudWatch Log backend to Logging framework 
