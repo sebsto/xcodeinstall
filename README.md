@@ -7,6 +7,7 @@
 ![language](https://img.shields.io/badge/swift-5.9-blue)
 ![platform](https://img.shields.io/badge/platform-macOS-green)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+![testing](https://img.shields.io/badge/testing-swift--testing-orange)
 
 This is a command line utility to download and install Xcode in headless mode (from a Terminal only).
 
@@ -388,6 +389,10 @@ I welcome all type of contributions, not only code : testing and creating bug re
 If you are not sure how to get started or how to be useful, contact me at stormacq@amazon.com
 
 I listed a couple of ideas below.
+
+### Testing
+
+This project uses [Swift-testing](https://github.com/apple/swift-testing) for unit tests. See [SWIFT_TESTING_MIGRATION.md](SWIFT_TESTING_MIGRATION.md) for details on the migration from XCTest and how to write new tests.
 
 ## List of ideas 
 

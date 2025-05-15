@@ -16,7 +16,8 @@ let package = Package(
         .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"),
         .package(url: "https://github.com/sebsto/CLIlib/", from: "0.1.2"),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
-        .package(url: "https://github.com/apple/swift-crypto", from: "3.12.3"),        
+        .package(url: "https://github.com/apple/swift-crypto", from: "3.12.2"),
+        .package(url: "https://github.com/apple/swift-testing", from: "0.3.0"),
         //.package(path: "../CLIlib")
     ],
 
@@ -35,7 +36,10 @@ let package = Package(
         ),
         .testTarget(
             name: "xcodeinstallTests",
-            dependencies: ["xcodeinstall"],
+            dependencies: [
+                "xcodeinstall",
+                .product(name: "Testing", package: "swift-testing")
+            ],
             // https://stackoverflow.com/questions/47177036/use-resources-in-unit-tests-with-swift-package-manager
             resources: [.process("data/download-list-20220723.json"),
                         .process("data/download-list-20231115.json"),
