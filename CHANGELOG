@@ -1,3 +1,8 @@
+## version 0.4
+
+- Migrated from XCTest to Swift-testing framework
+- Added documentation for Swift-testing migration
+
 ## version 0.3
 
 - Build scripts now produce a fat binary (multiple commits)

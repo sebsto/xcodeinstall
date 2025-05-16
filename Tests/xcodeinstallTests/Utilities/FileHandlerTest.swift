@@ -3,270 +3,262 @@
 //  xcodeinstallTests
 //
 //  Created by Stormacq, Sebastien on 20/08/2022.
+//  Updated for swift-testing migration
 //
 
-import XCTest
+import Testing
+import Foundation
 
 @testable import xcodeinstall
 
-class FileHandlerTest: XCTestCase {
-
-    var fileManager: FileManager?
-
+@Suite("FileHandler Tests")
+struct FileHandlerTest {
+    
     let test_data: String = "test data éèà€ 🎧"
-
-    override func setUpWithError() throws {
+    var fileManager: FileManager!
+    
+    @Lifecycle
+    mutating func setUp() {
         self.fileManager = FileManager()
     }
-
-    override func tearDownWithError() throws {
-
-    }
-
+    
     private func tempDir() -> URL {
         guard let fm = fileManager else {
             fatalError("FileManager is not initialised")
         }
-
+        
         return fm.temporaryDirectory
     }
-
+    
     private func createSrcFile() -> URL {
         guard let fm = fileManager else {
             fatalError("FileManager is not initialised")
         }
-
+        
         let srcFile: URL = self.tempDir().appendingPathComponent("temp.txt")
         fm.createFile(atPath: srcFile.path, contents: test_data.data(using: .utf8))
         return srcFile
     }
-
+    
+    @Test("Move file succeeds")
     func testMoveSucceed() throws {
-
         guard let fm = fileManager else {
             fatalError("FileManager is not initialised")
         }
-
+        
         // given
         let srcFile = createSrcFile()
-
+        
         // when
         let dstFile: URL = self.tempDir().appendingPathComponent("temp2.txt")
         let fh = FileHandler()
-        XCTAssertNoThrow(try fh.move(from: srcFile, to: dstFile))
-
+        try fh.move(from: srcFile, to: dstFile)
+        
         // then
-
+        
         // srcFile does not exist
-        XCTAssertFalse(fm.fileExists(atPath: srcFile.path))
-
+        #expect(!fm.fileExists(atPath: srcFile.path))
+        
         // dstFile exist
-        XCTAssertTrue(fm.fileExists(atPath: dstFile.path))
-
+        #expect(fm.fileExists(atPath: dstFile.path))
+        
         // dstFile contains "test data"
         let data: String = try String(contentsOf: dstFile, encoding: .utf8)
-        XCTAssertEqual(data, test_data)
-
+        #expect(data == test_data)
+        
         // delete dstFile for cleanup
-        XCTAssertNoThrow(try fm.removeItem(at: dstFile))
-
+        try fm.removeItem(at: dstFile)
     }
-
+    
+    @Test("Move file when destination exists")
     func testMoveDstExists() throws {
-
         guard let fm = fileManager else {
             fatalError("FileManager is not initialised")
         }
-
+        
         let test_data2: String = "data already exists"
-
+        
         // given
         let srcFile = createSrcFile()
-
+        
         // dst exists and has a different content
         let dstFile: URL = self.tempDir().appendingPathComponent("temp2.txt")
         fm.createFile(atPath: dstFile.path, contents: test_data2.data(using: .utf8))
-
+        
         // when
         let fh = FileHandler()
-        XCTAssertNoThrow(try fh.move(from: srcFile, to: dstFile))
-
+        try fh.move(from: srcFile, to: dstFile)
+        
         // then
-
+        
         // srcFile does not exist
-        XCTAssertFalse(fm.fileExists(atPath: srcFile.path))
-
+        #expect(!fm.fileExists(atPath: srcFile.path))
+        
         // dstFile exist
-        XCTAssertTrue(fm.fileExists(atPath: dstFile.path))
-
+        #expect(fm.fileExists(atPath: dstFile.path))
+        
         // dstFile contains "test data"
         let data: String = try String(contentsOf: dstFile, encoding: .utf8)
-        XCTAssertEqual(data, test_data)
-
+        #expect(data == test_data)
+        
         // delete dstFile for cleanup
-        XCTAssertNoThrow(try fm.removeItem(at: dstFile))
-
+        try fm.removeItem(at: dstFile)
     }
-
+    
+    @Test("Move file with invalid destination")
     func testMoveDstInvalid() throws {
-
         guard let fm = fileManager else {
             fatalError("FileManager is not initialised")
         }
-
+        
         // given
         let srcFile = createSrcFile()
-
+        
         // dst file does not exist
         let dstFile = URL(fileURLWithPath: "/does_not_exist")
-
+        
         // when
         let fh = FileHandler()
-        XCTAssertThrowsError(try fh.move(from: srcFile, to: dstFile))
-
+        
         // then
-
+        #expect(throws: Error.self) {
+            try fh.move(from: srcFile, to: dstFile)
+        }
+        
         // srcFile exist
-        XCTAssertTrue(fm.fileExists(atPath: srcFile.path))
-
+        #expect(fm.fileExists(atPath: srcFile.path))
+        
         // dstFile does not exist
-        XCTAssertFalse(fm.fileExists(atPath: dstFile.path))
-
+        #expect(!fm.fileExists(atPath: dstFile.path))
     }
-
-    func testCheckFileSize() {
+    
+    @Test("Check file size")
+    func testCheckFileSize() throws {
         guard let fm = fileManager else {
             fatalError("FileManager is not initialised")
         }
-
+        
         // given
         let fileToCheck = createSrcFile()
-
+        
         // when
         let fh = FileHandler()
         let expectedFileSize = test_data.data(using: .utf8)?.count
         if let expectedFileSize {
             // then
-            XCTAssertNoThrow(try fh.checkFileSize(file: fileToCheck, fileSize: expectedFileSize))
-            XCTAssertTrue(try fh.checkFileSize(file: fileToCheck, fileSize: expectedFileSize))
-
+            #expect(try fh.checkFileSize(file: fileToCheck, fileSize: expectedFileSize))
         } else {
-            XCTAssert(false, "Can not convert test_data string to data")
+            #expect(false, "Can not convert test_data string to data")
         }
-
+        
         // delete srcFile for cleanup
-        XCTAssertNoThrow(try fm.removeItem(at: fileToCheck))
+        try fm.removeItem(at: fileToCheck)
     }
-
-    func testCheckFileSizeNotExist() {
-
+    
+    @Test("Check file size for non-existent file")
+    func testCheckFileSizeNotExist() throws {
         // given
         let fileToCheck = URL(fileURLWithPath: "/does_not_exist")
-
+        
         // when
         let fh = FileHandler()
-
+        
         // then
-        XCTAssertThrowsError(try fh.checkFileSize(file: fileToCheck, fileSize: 42))
-
+        #expect(throws: Error.self) {
+            try fh.checkFileSize(file: fileToCheck, fileSize: 42)
+        }
     }
-
-    func testFileExistsYes() {
+    
+    @Test("File exists returns true for existing file")
+    func testFileExistsYes() throws {
         // given
         let fileToCheck = createSrcFile()
-
+        
         // when
         let fh = FileHandler()
         let expectedFileSize = test_data.data(using: .utf8)?.count
         if let expectedFileSize {
             let exist = fh.fileExists(file: fileToCheck, fileSize: expectedFileSize)
-
+            
             // then
-            XCTAssertTrue(exist)
+            #expect(exist)
         }
     }
-
-    func testFileExistsNo() {
+    
+    @Test("File exists returns false for non-existent file")
+    func testFileExistsNo() throws {
         // given
         let fileToCheck = URL(fileURLWithPath: "/does_not_exist")
-
+        
         // when
         let fh = FileHandler()
         let expectedFileSize = test_data.data(using: .utf8)?.count
         if let expectedFileSize {
             let exist = fh.fileExists(file: fileToCheck, fileSize: expectedFileSize)
-
+            
             // then
-            XCTAssertFalse(exist)
+            #expect(!exist)
         }
     }
-
-    func testDownloadedFiles() {
-
+    
+    @Test("Downloaded files list")
+    func testDownloadedFiles() throws {
         let newFileName = "test.tmp"
-        do {
-            //given
-            let _: URL = FileHandler.baseFilePath()  // ensure directory exists
-            let fh = FileHandler()
-            let existing: [String] = try fh.downloadedFiles()
-
-            // when
-            // add a file and list directory again
-            let newFile = FileHandler.downloadDirectory.appendingPathComponent(newFileName)
-            XCTAssertTrue(fileManager!.createFile(atPath: newFile.path, contents: test_data.data(using: .utf8)))
-            let newListing = try fh.downloadedFiles()
-
-            // we have one file more
-            XCTAssertEqual(existing.count, newListing.count - 1)
-
-            // listing contains the new file
-            XCTAssertTrue(newListing.contains(newFileName))
-
-            // cleanup
-            try fileManager!.removeItem(at: newFile)
-        } catch {
-            XCTAssert(false, "Unexpected error during testing \(error)")
-        }
+        
+        //given
+        let _: URL = FileHandler.baseFilePath()  // ensure directory exists
+        let fh = FileHandler()
+        let existing: [String] = try fh.downloadedFiles()
+        
+        // when
+        // add a file and list directory again
+        let newFile = FileHandler.downloadDirectory.appendingPathComponent(newFileName)
+        #expect(fileManager!.createFile(atPath: newFile.path, contents: test_data.data(using: .utf8)))
+        let newListing = try fh.downloadedFiles()
+        
+        // we have one file more
+        #expect(existing.count == newListing.count - 1)
+        
+        // listing contains the new file
+        #expect(newListing.contains(newFileName))
+        
+        // cleanup
+        try fileManager!.removeItem(at: newFile)
     }
-
-    func testReadDownloadCacheExists() {
-
+    
+    @Test("Read download cache when it exists")
+    func testReadDownloadCacheExists() throws {
         // given
         let fh = FileHandler()
-
+        
         // copy test file at destination
-        createDownloadList()
-
+        try createDownloadList()
+        
         // when
-        do {
-            let list = try fh.loadDownloadList()
-
-            // then
-            XCTAssertNotNil(list)
-            XCTAssertEqual(list.downloads?.count, 1127)
-        } catch {
-            XCTAssert(false, "Method should not throw an error \(error)")
-        }
-
+        let list = try fh.loadDownloadList()
+        
+        // then
+        #expect(list.downloads != nil)
+        #expect(list.downloads?.count == 1127)
+        
         // cleanup
-        deleteDownloadList()
-
+        try deleteDownloadList()
     }
-
-    func testReadDownloadCacheDoesNotExist() {
-
+    
+    @Test("Read download cache when it does not exist")
+    func testReadDownloadCacheDoesNotExist() throws {
         // given
         let fh = FileHandler()
         let fm = FileManager.default
-
+        
         // delete existing file if any
         if fm.fileExists(atPath: FileHandler.downloadListPath.path) {
-            XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
+            try fm.removeItem(at: FileHandler.downloadListPath)
         }
-
-        // when && then
-        XCTAssertThrowsError(try fh.loadDownloadList())
-
+        
+        // when & then
+        #expect(throws: Error.self) {
+            try fh.loadDownloadList()
+        }
     }
-
 }

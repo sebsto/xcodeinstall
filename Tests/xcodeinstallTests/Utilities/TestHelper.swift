@@ -3,10 +3,11 @@
 //  xcodeinstallTests
 //
 //  Created by Stormacq, Sebastien on 04/08/2022.
+//  Updated for swift-testing migration
 //
 
 import Foundation
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
@@ -30,31 +31,29 @@ func loadTestData(file: TestData) throws -> Data {
     try Data(contentsOf: urlForTestData(file: file))
 }
 
-func createDownloadList() {
-
+func createDownloadList() throws {
     let fm = FileManager.default
 
     // copy test file at destination
 
     // delete file at destination if it exists
     if fm.fileExists(atPath: FileHandler.downloadListPath.path) {
-        XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
+        try fm.removeItem(at: FileHandler.downloadListPath)
     }
     // get the source URL
     guard let testFilePath = try? urlForTestData(file: .downloadList) else {
         fatalError("Can not retrieve url for \(TestData.downloadList.rawValue)")
     }
     // copy source to destination
-    XCTAssertNoThrow(try fm.copyItem(at: testFilePath, to: FileHandler.downloadListPath))
+    try fm.copyItem(at: testFilePath, to: FileHandler.downloadListPath)
 }
 
-func deleteDownloadList() {
-
+func deleteDownloadList() throws {
     let fm = FileManager.default
 
     // remove test file from destination
     if fm.fileExists(atPath: FileHandler.downloadListPath.path) {
-        XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
+        try fm.removeItem(at: FileHandler.downloadListPath)
     }
 }
 

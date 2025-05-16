@@ -7,29 +7,28 @@
 
 import Crypto
 import Foundation
-import Testing
+import XCTest
 
 @testable import SRP
 @testable import xcodeinstall
 
-@Suite("SRPKeysTestCase")
-struct SRPKeysTestCase {
-    @Test func base64() async throws {
+class SRPKeysTestCase: XCTestCase {
+    func testBase64() async throws {
         // given
         let keyRawMaterial: [UInt8] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         let key = SRPKey(keyRawMaterial)
-        #expect(key.bytes == keyRawMaterial)
+        XCTAssertEqual(key.bytes, keyRawMaterial)
 
         // when
         let b64Key = key.base64
         let newKey = SRPKey(base64: b64Key)
 
         // then
-        #expect(newKey != nil)
-        #expect(newKey?.bytes == keyRawMaterial)
+        XCTAssertNotNil(newKey)
+        XCTAssertEqual(newKey?.bytes, keyRawMaterial)
     }
 
-    @Test func stringToUInt8Array() async throws {
+    func testStringToUInt8Array() async throws {
         // given
         let s = "Hello World"
 
@@ -37,11 +36,11 @@ struct SRPKeysTestCase {
         let a = s.array
 
         // then
-        #expect(a.count == s.count)
-        #expect(a[5] == 32)  //space character
+        XCTAssertEqual(a.count, s.count)
+        XCTAssertEqual(a[5], 32)  //space character
     }
 
-    @Test func hashcash1() async throws {
+    func testHashcash1() async throws {
         // given
         let hcBits = 11
         let hcChallenge = "4d74fb15eb23f465f1f6fcbf534e5877"
@@ -50,10 +49,10 @@ struct SRPKeysTestCase {
         let hashcash = Hashcash.make(bits: hcBits, challenge: hcChallenge, date: "20230223170600")
 
         // then
-        #expect(hashcash == "1:11:20230223170600:4d74fb15eb23f465f1f6fcbf534e5877::6373")
+        XCTAssertEqual(hashcash, "1:11:20230223170600:4d74fb15eb23f465f1f6fcbf534e5877::6373")
     }
 
-    @Test func hashcash2() async throws {
+    func testHashcash2() async throws {
         // given
         let hcBits = 10
         let hcChallenge = "bb63edf88d2f9c39f23eb4d6f0281158"
@@ -62,10 +61,10 @@ struct SRPKeysTestCase {
         let hashcash = Hashcash.make(bits: hcBits, challenge: hcChallenge, date: "20230224001754")
 
         // then
-        #expect(hashcash == "1:10:20230224001754:bb63edf88d2f9c39f23eb4d6f0281158::866")
+        XCTAssertEqual(hashcash, "1:10:20230224001754:bb63edf88d2f9c39f23eb4d6f0281158::866")
     }
 
-    @Test func sha1() {
+    func testSha1() {
         // given
         let hc = "1:11:20230223170600:4d74fb15eb23f465f1f6fcbf534e5877::6373"
 
@@ -74,15 +73,18 @@ struct SRPKeysTestCase {
 
         // then
         // [UInt8].hexdigest() coming from Swift-SRP
-        #expect(sha1.hexDigest().lowercased() == "001CC13831C63CA2E739DBCF47BDD4597535265F".lowercased())
-
+        XCTAssertEqual(sha1.hexDigest().lowercased(), "001CC13831C63CA2E739DBCF47BDD4597535265F".lowercased())
     }
 
-    @Test("PBKDF2 for S2K and S2K_FO authentication protocol", arguments: [
-        SRPProtocol.s2k, SRPProtocol.s2k_fo
-    ])
-    func pbkdf2(srpProtocol: SRPProtocol) throws {
-
+    func testPBKDF2ForS2K() throws {
+        try pbkdf2(srpProtocol: .s2k)
+    }
+    
+    func testPBKDF2ForS2K_FO() throws {
+        try pbkdf2(srpProtocol: .s2k_fo)
+    }
+    
+    private func pbkdf2(srpProtocol: SRPProtocol) throws {
         // given
         let password = "password"
         let salt = "pLG+B7bChHWevylEQapMfQ=="
@@ -93,7 +95,7 @@ struct SRPKeysTestCase {
         let saltData = Data(base64Encoded: salt)!
 
         //given
-        #expect(throws: Never.self) {
+        XCTAssertNoThrow({
             let derivedKey = try PBKDF2.pbkdf2(
                 password: password,
                 salt: [UInt8](saltData),
@@ -112,16 +114,16 @@ struct SRPKeysTestCase {
                 // TODO: verify this result is correct 
                 hexResult = "858f8ba24e48af6f9cd5c8d4738827eb91340b6901fc5e47ee0d73e3346b502a"
             }
-            #expect(derivedKey.hexdigest().lowercased() == hexResult)
-        }
+            XCTAssertEqual(derivedKey.hexdigest().lowercased(), hexResult)
+        }())
     }
 
-    @Test func hexString() {
+    func testHexString() {
         let bytes: [UInt8] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
         let hexString = bytes.hexdigest()  //hexdigest provided by Swift-SRP
 
-        #expect(hexString.uppercased() == "000102030405060708090A0B0C0D0E0F")
+        XCTAssertEqual(hexString.uppercased(), "000102030405060708090A0B0C0D0E0F")
     }
 }
 
