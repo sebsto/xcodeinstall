@@ -83,7 +83,8 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
     let env: Environment
     public init(env: Environment, region: String) throws {
         self.env = env
-        try self.awsSDK = AWSSecretsHandlerSoto.forRegion(region)
+        //FIXME: we should use the env to create / replace the AWS SDK
+        self.awsSDK = try AWSSecretsHandlerSoto.forRegion(region)
     }
 
     // MARK: protocol implementation

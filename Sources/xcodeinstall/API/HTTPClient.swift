@@ -20,6 +20,7 @@ import FoundationNetworking
 
 // make URLSession testable by abstracting its protocol
 // it allows to use the real URLSession or a mock interchangably
+@MainActor
 protocol URLSessionProtocol: Sendable {
     func data(
         for request: URLRequest,
@@ -42,6 +43,7 @@ extension URLSession: URLSessionProtocol {
 }
 
 // make URLSessionDownloadTask testable by abstracting its protocol
+@MainActor
 protocol URLSessionDownloadTaskProtocol: Sendable {
     func resume()
 }

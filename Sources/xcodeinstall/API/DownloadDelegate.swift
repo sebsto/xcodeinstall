@@ -113,7 +113,9 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
     }
 
     nonisolated func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        log.warning("error \(String(describing: error))")
-        _ = self.sema.signal()
+        Task {
+            log.warning("error \(String(describing: error))")
+            _ = await self.sema.signal()
+        }
     }
 }

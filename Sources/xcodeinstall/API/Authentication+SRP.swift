@@ -131,7 +131,7 @@ struct AppleSRPInitResponse: Decodable {
     func bBytes() -> Data? { Data(base64Encoded: b) }
 }
 
-public enum SRPProtocol: String, Codable {
+public enum SRPProtocol: String, Sendable, Codable {
     case s2k, s2k_fo
 }
 
