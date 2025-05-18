@@ -127,7 +127,7 @@ class DownloadListParserTest: XCTestCase {
 
     }
 
-    private func createTestFile(file: DownloadList.File, fileSize: Int) async  -> URL {
+    private func createTestFile(file: DownloadList.File, fileSize: Int) async -> URL {
         let fm = FileManager()
         let fh = env.fileHandler
 
@@ -170,6 +170,7 @@ class DownloadListParserTest: XCTestCase {
             // given
             let (filteredList, dlp) = try prepareFilteredList()
             (env.fileHandler as! MockedFileHandler).nextFileExist = true
+            XCTAssert(filteredList[0].files.count == 1)
 
             // modify the list to add a fake file in position [0]
 
@@ -183,17 +184,16 @@ class DownloadListParserTest: XCTestCase {
                 dateModified: "",
                 fileFormat: DownloadList.FileFormat(fileExtension: "zip", description: "zip")
             )
-            let d = DownloadList.Download(from: filteredList[0], appendFile: newFile)
-
-            let newFilteredList = [d]
+            let newFilteredList = DownloadList.Download(from: filteredList[0], appendFile: newFile)
+            XCTAssert(newFilteredList.files.count == 2)
 
             _ = await self.createTestFile(file: newFile, fileSize: newFile.fileSize)
 
             // when
-            let enrichedList = await dlp.enrich(list: newFilteredList)
+            let enrichedList = await dlp.enrich(list: [newFilteredList])
 
             // then
-            XCTAssertNotNil(enrichedList[0].files[0].existInCache)
+            XCTAssert(enrichedList[0].files.count == 2)
             XCTAssertTrue(enrichedList[0].files[0].existInCache)
 
             _ = await self.deleteTestFile(file: newFile)

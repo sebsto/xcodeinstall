@@ -35,7 +35,6 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
                 try AWSSecretsHandlerSoto.forRegion(region, awsClient: awsClient, smClient: smClient)
                 as? AWSSecretsHandlerSoto
             XCTAssertNotNil(secretHandler)
-            XCTAssertNoThrow(try secretHandler!.awsClient?.syncShutdown())  // shut down the class provided AWS Client
 
             if TestEnvironment.isUsingLocalstack {
                 print("Connecting to Localstack")

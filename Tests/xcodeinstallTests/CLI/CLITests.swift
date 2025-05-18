@@ -10,12 +10,10 @@ import Testing
 struct CLITests {
 
     // MARK: - Test Environment
-    var env: Environment!
+    let env: MockedEnvironment = MockedEnvironment()
     var secretsHandler: SecretsHandlerProtocol!
 
     init() async throws {
-        // Setup environment for each test
-        self.env = createTestEnvironment()
         self.secretsHandler = MockedSecretsHandler(env: env)
         try await self.secretsHandler.clearSecrets()
     }
@@ -25,14 +23,14 @@ struct CLITests {
         try MainCommand.parseAsRoot(arguments) as! A
     }
 
-    func assertDisplay(_ msg: String) -> Bool {
+    func assertDisplay(_ msg: String) {
         let actual = (env.display as! MockedDisplay).string
-        return actual == "\(msg)\n"
+        #expect(actual == "\(msg)\n")
     }
 
-    func assertDisplayStartsWith(_ msg: String) -> Bool {
+    func assertDisplayStartsWith(_ msg: String) {
         let actual = (env.display as! MockedDisplay).string
-        return actual.starts(with: msg)
+        #expect(actual.starts(with: msg))
     }
 }
 
@@ -49,7 +47,7 @@ extension CLITests {
         (env.display as! MockedDisplay).string = "\(testMessage)\n"
 
         // Then
-        #expect(assertDisplay(testMessage))
+        assertDisplay(testMessage)
     }
 
     @Test("Test CLI Display Starts With Assertion")
@@ -62,6 +60,6 @@ extension CLITests {
         (env.display as! MockedDisplay).string = fullMessage
 
         // Then
-        #expect(assertDisplayStartsWith(testPrefix))
+        assertDisplayStartsWith(testPrefix)
     }
 }

@@ -5,18 +5,21 @@
 //  Created by Stormacq, Sebastien on 21/07/2022.
 //
 
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
+#else
+import Foundation
 #endif
 
-class AuthenticationSRPTest: HTTPClientTestCase {
+extension AuthenticationTests {
 
     // test authentication returns 401
-    func testAuthenticationInvalidUsernamePassword401() async {
+    @Test("Test srp authentication returns 401")
+    func testSRPAuthenticationInvalidUsernamePassword401() async {
 
         let url = "https://dummy"
 
@@ -29,7 +32,7 @@ class AuthenticationSRPTest: HTTPClientTestCase {
             headerFields: getHashcashHeaders()
         )
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             let authenticator = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
@@ -38,17 +41,13 @@ class AuthenticationSRPTest: HTTPClientTestCase {
                 username: "username",
                 password: "password"
             )
-            XCTAssert(false, "No exception thrown")
-
-        } catch AuthenticationError.invalidUsernamePassword {
-
-        } catch {
-            XCTAssert(false, "Invalid exception thrown \(error)")
         }
+        #expect(error == AuthenticationError.invalidUsernamePassword)
     }
 
     // test authentication returns 200
-    func testAuthentication200() async {
+    @Test("Test SRP authentication returns 200")
+    func testSRPAuthentication200() async {
         let url = "https://dummy"
         var header = [String: String]()
         header["Set-Cookie"] = getCookieString()
@@ -63,7 +62,7 @@ class AuthenticationSRPTest: HTTPClientTestCase {
             headerFields: header
         )
 
-        do {
+        let _ = await #expect(throws: Never.self) {
             let authenticator = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
@@ -73,25 +72,21 @@ class AuthenticationSRPTest: HTTPClientTestCase {
                 password: "password"
             )
 
-            XCTAssertNotNil(authenticator.session)
-            //XCTAssertNotNil(authenticator.cookies)
-
             // test apple session
-            XCTAssertEqual(authenticator.session.scnt, "scnt")
-            XCTAssertEqual(authenticator.session.xAppleIdSessionId, "x-apple-id")
-            XCTAssertEqual(authenticator.session.itcServiceKey?.authServiceKey, "key")
-            XCTAssertEqual(authenticator.session.itcServiceKey?.authServiceUrl, "url")
+            #expect(authenticator.session.scnt == "scnt")
+            #expect(authenticator.session.xAppleIdSessionId == "x-apple-id")
+            #expect(authenticator.session.itcServiceKey?.authServiceKey == "key")
+            #expect(authenticator.session.itcServiceKey?.authServiceUrl == "url")
 
             // test cookie
             //XCTAssertEqual(cookies, getCookieString())
 
-        } catch {
-            XCTAssert(false, "Exception thrown : \(error)")
         }
     }
 
     // test authentication with No Apple Service Key
-    func testAuthenticationWithNoAppleServiceKey() async {
+    @Test("Test srp authentication with No Apple Service Key")
+    func testSRPAuthenticationWithNoAppleServiceKey() async {
         let url = "https://dummy"
         var header = [String: String]()
         header["Set-Cookie"] = getCookieString()
@@ -106,7 +101,7 @@ class AuthenticationSRPTest: HTTPClientTestCase {
             headerFields: header
         )
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             let authenticator = getAppleAuthenticator()
             authenticator.session = getAppleSession()
             authenticator.session.itcServiceKey = nil
@@ -116,18 +111,13 @@ class AuthenticationSRPTest: HTTPClientTestCase {
                 username: "username",
                 password: "password"
             )
-
-            XCTAssert(false, "An exception must be thrown)")
-
-        } catch AuthenticationError.unableToRetrieveAppleServiceKey {
-            // success
-        } catch {
-            XCTAssert(false, "Unknown Exception thrown")
         }
+        #expect(error == AuthenticationError.unableToRetrieveAppleServiceKey(nil))
     }
 
     // test authentication throws an error
-    func testAuthenticationWithError() async {
+    @Test("Test srp authentication throws an error")
+    func testSRPAuthenticationWithError() async {
         let url = "https://dummy"
 
         self.sessionData.nextData = getSRPInitResponse()
@@ -147,26 +137,26 @@ class AuthenticationSRPTest: HTTPClientTestCase {
                 username: "username",
                 password: "password"
             )
-            XCTAssert(false, "No exception thrown")
+            Issue.record("No exception thrown")
 
         } catch let error as URLError {
 
             // verify it returns an error code
-            XCTAssertNotNil(error)
-            XCTAssert(error.code == URLError.badServerResponse)
+            #expect(error.code == URLError.badServerResponse)
 
         } catch AuthenticationError.unexpectedHTTPReturnCode(let code) {
 
             // this is the normal case for this test
-            XCTAssertEqual(code, 500)
+            #expect(code == 500)
 
         } catch {
-            XCTAssert(false, "Invalid exception thrown : \(error)")
+            Issue.record("Invalid exception thrown : \(error)")
         }
     }
 
     // test authentication returns 401
-    func testAuthenticationInvalidUsernamePassword403() async {
+    @Test("Test srp authentication returns 403")
+    func testSRPAuthenticationInvalidUsernamePassword403() async {
 
         let url = "https://dummy"
 
@@ -178,7 +168,7 @@ class AuthenticationSRPTest: HTTPClientTestCase {
             headerFields: nil
         )
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             let authenticator = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
@@ -187,18 +177,13 @@ class AuthenticationSRPTest: HTTPClientTestCase {
                 username: "username",
                 password: "password"
             )
-            XCTAssert(false, "No exception thrown")
-
-        } catch AuthenticationError.invalidUsernamePassword {
-
-        } catch {
-            XCTAssert(false, "Invalid exception thrown \(error)")
         }
-
+        #expect(error == AuthenticationError.invalidUsernamePassword)
     }
 
     // test authentication returns unhandled http sttaus code
-    func testAuthenticationUnknownStatusCode() async {
+    @Test("Test srp authentication returns unhandled http status code")
+    func testSRPAuthenticationUnknownStatusCode() async {
 
         let url = "https://dummy"
 
@@ -210,7 +195,7 @@ class AuthenticationSRPTest: HTTPClientTestCase {
             headerFields: nil
         )
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             let authenticator = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
@@ -219,14 +204,8 @@ class AuthenticationSRPTest: HTTPClientTestCase {
                 username: "username",
                 password: "password"
             )
-            XCTAssert(false, "No exception thrown")
-
-        } catch AuthenticationError.unexpectedHTTPReturnCode(let code) {
-            XCTAssertEqual(code, 100)
-        } catch {
-            XCTAssert(false, "Invalid exception thrown \(error)")
         }
-
+        #expect(error == AuthenticationError.unexpectedHTTPReturnCode(code: 100))
     }
 
     private func getSRPInitResponse() -> Data {
@@ -240,15 +219,4 @@ class AuthenticationSRPTest: HTTPClientTestCase {
              }
         """.data(using: .utf8)!
     }
-
-    private func getHashcashHeaders() -> [String: String] {
-        [
-            "X-Apple-HC-Bits": "11",
-            "X-Apple-HC-Challenge": "4d74fb15eb23f465f1f6fcbf534e5877",
-        ]
-    }
-    private func getCookieString() -> String {
-        "dslang=GB-EN; Domain=apple.com; Path=/; Secure; HttpOnly, site=GBR; Domain=apple.com; Path=/; Secure; HttpOnly, acn01=tP...QTb; Max-Age=31536000; Expires=Fri, 21-Jul-2023 13:14:09 GMT; Domain=apple.com; Path=/; Secure; HttpOnly, myacinfo=DAWTKN....a47V3; Domain=apple.com; Path=/; Secure; HttpOnly, aasp=DAA5DA...4EAE46; Domain=idmsa.apple.com; Path=/; Secure; HttpOnly"
-    }
-
 }

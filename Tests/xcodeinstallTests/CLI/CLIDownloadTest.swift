@@ -40,7 +40,7 @@ extension CLITests {
 
         // when
         await #expect(throws: Never.self) {
-            // try await download.run() // can not call this as I can not inject all the mocks
+            // try await download.run(with: env) // can not call this as I can not inject all the mocks
             try await xci.download(
                 fileName: nil,
                 force: true,
@@ -67,7 +67,7 @@ extension CLITests {
         }
 
         // mocked list succeeded
-        #expect(assertDisplay("✅ file downloaded"))
+        assertDisplay("✅ file downloaded")
     }
 
     @Test("Test Download with correct file name")
@@ -87,11 +87,8 @@ extension CLITests {
         )
 
         // when
-        do {
-            try await download.run()
-        } catch {
-            // then
-            #expect(false, "unexpected exception : \(error)")
+        await #expect(throws: Never.self) {
+            try await download.run(with: env)
         }
 
         // test parsing of commandline arguments
@@ -103,14 +100,14 @@ extension CLITests {
         #expect(!download.downloadListOptions.datePublished)
 
         // mocked list succeeded
-        #expect(assertDisplay("✅ \(fileName) downloaded"))
+        assertDisplay("✅ \(fileName) downloaded")
     }
 
     @Test("Test Download with incorrect file name")
     func testDownloadWithIncorrectFileName() async throws {
 
         // given
-        (env.fileHandler as! MockedFileHandler).nextFileCorrect = true
+        (env.fileHandler as! MockedFileHandler).nextFileCorrect = false
         let fileName = "xxx.xip"
 
         let download = try parse(
@@ -124,8 +121,8 @@ extension CLITests {
 
         // when
         await #expect(throws: Never.self) {
-            try await download.run()
-        } 
+            try await download.run(with: env)
+        }
 
         // test parsing of commandline arguments
         #expect(download.name == fileName)
@@ -136,7 +133,7 @@ extension CLITests {
         #expect(!download.downloadListOptions.datePublished)
 
         // mocked list succeeded
-        #expect(assertDisplay("🛑 Unknown file name : xxx.xip"))
+        assertDisplay("🛑 Unknown file name : xxx.xip")
     }
 
 }

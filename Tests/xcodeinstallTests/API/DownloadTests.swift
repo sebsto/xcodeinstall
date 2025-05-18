@@ -11,11 +11,11 @@ struct DownloadTests {
     var sessionData: MockedURLSession!
     var sessionDownload: MockedURLSession!
     var client: HTTPClient!
-    var env: MockedEnvironment!
+    let env: MockedEnvironment
 
     init() async throws {
         // Setup environment for each test
-        self.env = createTestEnvironment()
+        self.env = MockedEnvironment()
         self.sessionData = env.urlSessionData as? MockedURLSession
         self.sessionDownload = env.urlSessionDownload() as? MockedURLSession
         self.client = HTTPClient(env: env)

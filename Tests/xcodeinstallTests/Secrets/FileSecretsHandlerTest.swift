@@ -9,7 +9,6 @@ import Testing
 
 @testable import xcodeinstall
 
-
 struct FileSecretsHandlerTest {
 
     var secretHandlerTest: SecretsHandlerTestsBase<FileSecretsHandler>?

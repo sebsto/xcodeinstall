@@ -61,6 +61,7 @@ Package.pins
 .swiftpm
 
 .build/
+.index-build
 
 # CocoaPods
 #

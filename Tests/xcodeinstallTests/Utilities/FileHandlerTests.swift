@@ -4,6 +4,7 @@ import Testing
 @testable import xcodeinstall
 
 // MARK: - File Handler Tests
+@Suite("FileHandlerTests", .serialized)
 struct FileHandlerTests {
 
     // MARK: - Test Environment

@@ -19,7 +19,8 @@ struct MockedEnvironment: Environment {
     var progressBar: CLIProgressBarProtocol = MockedProgressBar()
 
     var secrets: SecretsHandlerProtocol {
-        MockedSecretsHandler(env: self)
+        get { MockedSecretsHandler(env: self) }
+        set {}
     }
     var awsSDK: AWSSecretsHandlerSDKProtocol = try! MockedAWSSecretsHandlerSDK()
 

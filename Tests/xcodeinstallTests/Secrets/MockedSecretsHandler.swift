@@ -77,7 +77,7 @@ final class MockedAWSSecretsHandlerSDK: AWSSecretsHandlerSDKProtocol {
     func regionSet() -> Bool {
         _regionSet.withLock { $0 }
     }
-    
+
     func saveSecret<T>(secretId: AWSSecretsName, secret: T) async throws where T: Secrets {
         switch secretId {
         case .appleCredentials:

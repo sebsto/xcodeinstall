@@ -5,17 +5,20 @@
 //  Created by Stormacq, Sebastien on 22/07/2022.
 //
 
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
+#else
+import Foundation
 #endif
 
-class MFAuthenticationTest: HTTPClientTestCase {
+extension AuthenticationTests {
 
     // test 2FA with invalid data returned
+    @Test("Test 2FA with invalid data returned")
     func test2FAAWithInvalidDataError() async {
 
         let url = "https://dummy"
@@ -28,21 +31,17 @@ class MFAuthenticationTest: HTTPClientTestCase {
             headerFields: nil
         )
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             let authenticator = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
             _ = try await authenticator.handleTwoFactorAuthentication()
-            XCTAssert(false, "No exception thrown")
-
-        } catch AuthenticationError.canNotReadMFATypes {
-            // success
-        } catch {
-            XCTAssert(false, "Invalid exception thrown : \(error)")
         }
+        #expect(error == AuthenticationError.canNotReadMFATypes)
     }
 
     // test 2FA with HTTP error code returned
+    @Test("Test 2FA with HTTP error code returned")
     func test2FAAWithHTTPError() async {
 
         let url = "https://dummy"
@@ -55,21 +54,17 @@ class MFAuthenticationTest: HTTPClientTestCase {
             headerFields: nil
         )
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             let authenticator = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
             _ = try await authenticator.handleTwoFactorAuthentication()
-            XCTAssert(false, "No exception thrown")
-
-        } catch AuthenticationError.canNotReadMFATypes {
-            // success
-        } catch {
-            XCTAssert(false, "Invalid exception thrown : \(error)")
         }
+        #expect(error == AuthenticationError.canNotReadMFATypes)
     }
 
     // test 2FA with success
+    @Test("Test 2FA with success")
     func test2FAA() async {
 
         let url = "https://dummy"
@@ -82,21 +77,18 @@ class MFAuthenticationTest: HTTPClientTestCase {
             headerFields: nil
         )
 
-        do {
+        let _ = await #expect(throws: Never.self) {
             let authenticator = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
             let codeLength = try await authenticator.handleTwoFactorAuthentication()
 
-            XCTAssertEqual(codeLength, 6)
-
-        } catch {
-            XCTAssert(false, "Exception thrown : \(error)")
+            #expect(codeLength == 6)
         }
-
     }
 
     // test 2FA with no security code provided
+    @Test("Test 2FA with no security code provided")
     func test2FAAWithNosecurityCode() async {
 
         let url = "https://dummy"
@@ -109,22 +101,18 @@ class MFAuthenticationTest: HTTPClientTestCase {
             headerFields: nil
         )
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             let authenticator = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
             _ = try await authenticator.handleTwoFactorAuthentication()
-            XCTAssert(false, "No exception thrown")
-
-        } catch AuthenticationError.requires2FATrustedPhoneNumber {
-            // success
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown : \(error)")
         }
+        #expect(error == AuthenticationError.requires2FATrustedPhoneNumber)
 
     }
 
     // test PIN Code with success
+    @Test("Test PIN Code with success")
     func test2FAWithPinCode() async {
 
         let url = "https://dummy"
@@ -137,44 +125,36 @@ class MFAuthenticationTest: HTTPClientTestCase {
             headerFields: nil
         )
 
-        do {
+        let _ = await #expect(throws: Never.self) {
             let authenticator = getAppleAuthenticator()
             authenticator.session = getAppleSession()
 
             try await authenticator.twoFactorAuthentication(pin: "123456")
 
-            XCTAssertEqual(authenticator.session.xAppleIdSessionId, authenticator.session.xAppleIdSessionId)
-
-        } catch {
-            XCTAssert(false, "Exception thrown : \(error)")
+            #expect(authenticator.session.xAppleIdSessionId == authenticator.session.xAppleIdSessionId)
         }
-
     }
 
     // test MFA encoding
+    @Test("Test MFA encoding")
     func testMFAEncoding() async {
 
         let data = getMFATypeOK().data(using: .utf8)
 
-        do {
+        let _ = #expect(throws: Never.self) {
             _ = try JSONDecoder().decode(MFAType.self, from: data!)
-        } catch {
-            XCTAssert(false, "Error while decoding \(error)")
         }
-
     }
 
     // test MFA encoding
+    @Test("Test MFA encoding UK example 1")
     func testMFAEncodingUKExample1() async {
 
         let data = getMFATypeUKExample1().data(using: .utf8)
 
-        do {
+        let _ = #expect(throws: Never.self) {
             _ = try JSONDecoder().decode(MFAType.self, from: data!)
-        } catch {
-            XCTAssert(false, "Error while decoding \(error)")
         }
-
     }
 
     private func getMFATypeOK() -> String {
@@ -307,5 +287,4 @@ class MFAuthenticationTest: HTTPClientTestCase {
         }
         """
     }
-
 }

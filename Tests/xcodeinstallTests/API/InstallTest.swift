@@ -71,7 +71,7 @@ class InstallTest: XCTestCase {
     //     // when
     //     do {
     //         try await installer.uncompressXIP(atURL: srcFile)
-    //     } catch {   
+    //     } catch {
     //         XCTFail("uncompressXIP generated an error : \(error)")
     //     }
 

@@ -32,7 +32,7 @@ extension CLITests {
 
         // when
 
-        await #expect(throws: Never.self) { try await list.run() }
+        await #expect(throws: Never.self) { try await list.run(with: env) }
 
         // test parsing of commandline arguments
         #expect(list.globalOptions.verbose)
@@ -43,6 +43,6 @@ extension CLITests {
         #expect(list.downloadListOptions.datePublished)
 
         // mocked list succeeded
-        #expect(assertDisplay("16 items"))
+        assertDisplay("16 items")
     }
 }

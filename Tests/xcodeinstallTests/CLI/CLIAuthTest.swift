@@ -16,7 +16,7 @@ import FoundationNetworking
 import Foundation
 #endif
 
-@MainActor 
+@MainActor
 extension CLITests {
 
     func testSignout() async throws {
@@ -24,18 +24,15 @@ extension CLITests {
         // given
 
         // when
-        do {
+        await #expect(throws: Never.self) {
 
             // verify no exception is thrown
             let signout = try parse(MainCommand.Signout.self, ["signout"])
-            try await signout.run()
+            try await signout.run(with: env)
 
-        } catch {
-            // then
-            #expect(false, "unexpected exception : \(error)")
         }
 
-        #expect(assertDisplay("✅ Signed out."))
+        assertDisplay("✅ Signed out.")
     }
 
     func testAuthenticate() async throws {
@@ -58,11 +55,11 @@ extension CLITests {
         // when
         await #expect(throws: Never.self) {
             let auth = try parse(MainCommand.Authenticate.self, ["authenticate"])
-            try await auth.run()
-        } 
+            try await auth.run(with: env)
+        }
 
         // mocked authentication succeeded
-        #expect(assertDisplay("✅ Authenticated."))
+        assertDisplay("✅ Authenticated.")
 
         // two prompts have been proposed
         // print((env.readLine as! MockedReadLine).input)
@@ -81,9 +78,9 @@ extension CLITests {
         await #expect(throws: Never.self) {
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
-        } 
+        }
 
-        #expect(assertDisplay("🛑 Invalid username or password."))
+        assertDisplay("🛑 Invalid username or password.")
 
     }
 
@@ -140,18 +137,17 @@ extension CLITests {
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
 
-        } 
+        }
         if case let .unexpectedHTTPReturnCode(code) = error {
             #expect(code == 500, "Unexpected HTTP return code : \(code)")
         } else {
-            Issue.record("unexpected exception : \(error)")
+            Issue.record("unexpected exception : \(String(describing: error))")
         }
 
-        
         // all inputs have been consumed
         #expect((env.readLine as! MockedReadLine).input.count == 0)
 
-        #expect(assertDisplay("✅ Authenticated with MFA."))
+        assertDisplay("✅ Authenticated with MFA.")
 
     }
 

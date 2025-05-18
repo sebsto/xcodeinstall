@@ -15,7 +15,6 @@ class DownloadDelegateTest: XCTestCase {
 
     let env = MockedEnvironment()
 
-
     func testDownloadDelegateCompleteTransfer() async {
 
         // given
@@ -43,7 +42,7 @@ class DownloadDelegateTest: XCTestCase {
         // then
 
         // destination file exists
-        XCTAssert(FileHandler().fileExists(file: dstUrl, fileSize: 0))
+        XCTAssert(fileHandler.fileExists(file: dstUrl, fileSize: 0))
 
         // semaphore is calles
         XCTAssert(sema.wasSignalCalled())
@@ -57,10 +56,12 @@ class DownloadDelegateTest: XCTestCase {
 
         // given
         let sema = MockedDispatchSemaphore()
-        let delegate = DownloadDelegate(env: env, 
-                                        totalFileSize: 1 * 1024 * 1024 * 1024, // 1 Gb
-                                        startTime: Date.init(timeIntervalSinceNow: -60),  // one minute ago
-                                        semaphore: sema)
+        let delegate = DownloadDelegate(
+            env: env,
+            totalFileSize: 1 * 1024 * 1024 * 1024,  // 1 Gb
+            startTime: Date.init(timeIntervalSinceNow: -60),  // one minute ago
+            semaphore: sema
+        )
 
         // when
         await delegate.updateTransfer(totalBytesWritten: 500 * 1024 * 1024)  // 500 MB downloaded

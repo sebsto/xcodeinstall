@@ -80,6 +80,7 @@ struct DownloadList: Sendable, Codable {
         let dateModified: String
         let fileFormat: FileFormat
         let existInCache: Bool
+
         init(
             filename: String,
             displayName: String?,
@@ -101,6 +102,7 @@ struct DownloadList: Sendable, Codable {
             self.fileFormat = fileFormat
             self.existInCache = existInCache
         }
+
         init(from: File, existInCache: Bool) {
             self.filename = from.filename
             self.displayName = from.displayName
@@ -112,7 +114,29 @@ struct DownloadList: Sendable, Codable {
             self.fileFormat = from.fileFormat
             self.existInCache = existInCache
         }
-
+        // add coding keys to bypass decoding of existIncache
+        init(from decoder: Decoder) throws {
+            let values = try decoder.container(keyedBy: CodingKeys.self)
+            filename = try values.decode(String.self, forKey: .filename)
+            displayName = try values.decodeIfPresent(String.self, forKey: .displayName)
+            remotePath = try values.decode(String.self, forKey: .remotePath)
+            fileSize = try values.decode(Int.self, forKey: .fileSize)
+            sortOrder = try values.decode(Int.self, forKey: .sortOrder)
+            dateCreated = try values.decode(String.self, forKey: .dateCreated)
+            dateModified = try values.decode(String.self, forKey: .dateModified)
+            fileFormat = try values.decode(FileFormat.self, forKey: .fileFormat)
+            existInCache = false
+        }
+        enum CodingKeys: String, Sendable, CodingKey {  // swiftlint:disable:this nesting
+            case filename
+            case displayName
+            case remotePath
+            case fileSize
+            case sortOrder
+            case dateCreated
+            case dateModified
+            case fileFormat
+        }
     }
 
     struct Download: Sendable, Codable {
@@ -149,7 +173,7 @@ struct DownloadList: Sendable, Codable {
             self.files = files
             self.isRelatedSeed = isRelatedSeed
         }
-        init(from: Download, appendFile: File) {
+        init(from: Download, replaceWith newFile: File) {
             self.id = from.id
             self.name = from.name
             self.description = from.description
@@ -158,7 +182,21 @@ struct DownloadList: Sendable, Codable {
             self.dateCreated = from.dateCreated
             self.dateModified = from.dateModified
             self.categories = from.categories
-            self.files = from.files + [appendFile]
+            // replace the file list with the new file
+            self.files = from.files.map { $0.filename == newFile.filename ? newFile : $0 }
+            self.isRelatedSeed = from.isRelatedSeed
+        }
+        init(from: Download, appendFile newFile: File) {
+            self.id = from.id
+            self.name = from.name
+            self.description = from.description
+            self.isReleased = from.isReleased
+            self.datePublished = from.datePublished
+            self.dateCreated = from.dateCreated
+            self.dateModified = from.dateModified
+            self.categories = from.categories
+            // append the file to the list
+            self.files = from.files + [newFile]
             self.isRelatedSeed = from.isRelatedSeed
         }
 

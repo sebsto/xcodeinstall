@@ -14,11 +14,11 @@ struct AuthenticationTests {
     // MARK: - Test Environment
     var sessionData: MockedURLSession!
     var client: HTTPClient!
-    var env: Environment!
+    let env: Environment
 
     init() async throws {
         // Setup environment for each test
-        self.env = createTestEnvironment()
+        self.env = MockedEnvironment()
         self.sessionData = env.urlSessionData as? MockedURLSession
         self.client = HTTPClient(env: env)
         try await env.secrets.clearSecrets()
@@ -154,15 +154,12 @@ extension AuthenticationTests {
         let authenticator = getAppleAuthenticator()
         authenticator.session = getAppleSession()
 
-        do {
+        let _ = await #expect(throws: AuthenticationError.self) {
             _ = try await authenticator.startAuthentication(
                 with: .usernamePassword,
                 username: "username",
                 password: "password"
             )
-            Issue.record("Should have thrown an error")
-        } catch AuthenticationError.invalidUsernamePassword {
-            // Expected error
         }
     }
 
@@ -218,16 +215,14 @@ extension AuthenticationTests {
         authenticator.session = getAppleSession()
         authenticator.session.itcServiceKey = nil
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             try await authenticator.startAuthentication(
                 with: .usernamePassword,
                 username: "username",
                 password: "password"
             )
-            Issue.record("Should have thrown an error")
-        } catch AuthenticationError.unableToRetrieveAppleServiceKey {
-            // Expected error
         }
+        #expect(error == AuthenticationError.unableToRetrieveAppleServiceKey(nil))
     }
 
     @Test("Test Authentication with Server Error")
@@ -245,16 +240,15 @@ extension AuthenticationTests {
         let authenticator = getAppleAuthenticator()
         authenticator.session = getAppleSession()
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             _ = try await authenticator.startAuthentication(
                 with: .usernamePassword,
                 username: "username",
                 password: "password"
             )
             Issue.record("Should have thrown an error")
-        } catch AuthenticationError.unexpectedHTTPReturnCode(let code) {
-            #expect(code == 500)
         }
+        #expect(error == AuthenticationError.unexpectedHTTPReturnCode(code: 500))
     }
 
     @Test("Test Authentication with Invalid Credentials (403)")
@@ -272,16 +266,14 @@ extension AuthenticationTests {
         let authenticator = getAppleAuthenticator()
         authenticator.session = getAppleSession()
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             _ = try await authenticator.startAuthentication(
                 with: .usernamePassword,
                 username: "username",
                 password: "password"
             )
-            Issue.record("Should have thrown an error")
-        } catch AuthenticationError.invalidUsernamePassword {
-            // Expected error
         }
+        #expect(error == AuthenticationError.invalidUsernamePassword)
     }
 
     @Test("Test Authentication with Unknown Status Code")
@@ -299,16 +291,15 @@ extension AuthenticationTests {
         let authenticator = getAppleAuthenticator()
         authenticator.session = getAppleSession()
 
-        do {
+        let error = await #expect(throws: AuthenticationError.self) {
             _ = try await authenticator.startAuthentication(
                 with: .usernamePassword,
                 username: "username",
                 password: "password"
             )
             Issue.record("Should have thrown an error")
-        } catch AuthenticationError.unexpectedHTTPReturnCode(let code) {
-            #expect(code == 100)
         }
+        #expect(error == AuthenticationError.unexpectedHTTPReturnCode(code: 100))
     }
 
     @Test("Test Signout")

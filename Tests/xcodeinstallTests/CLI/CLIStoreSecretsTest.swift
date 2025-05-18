@@ -19,7 +19,8 @@ extension CLITests {
         let mockedRL = MockedReadLine(["username", "password"])
         let env = MockedEnvironment(readLine: mockedRL)
         // use the real AWS Secrets Handler, but with a mocked SDK
-        let mockedSecrets = try AWSSecretsHandler(env: env, region: "us-east-1")
+        //FIXME - the mock should be in the ENV
+        let _ = try AWSSecretsHandler(env: env, region: "us-east-1")
 
         let storeSecrets = try parse(
             MainCommand.StoreSecrets.self,
@@ -31,7 +32,7 @@ extension CLITests {
         )
 
         // when
-        await #expect(throws: Never.self) { try await storeSecrets.run() }
+        await #expect(throws: Never.self) { try await storeSecrets.run(with: env) }
 
         // test parsing of commandline arguments
         #expect(storeSecrets.globalOptions.verbose)

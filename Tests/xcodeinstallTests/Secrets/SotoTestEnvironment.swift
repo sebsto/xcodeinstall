@@ -21,7 +21,7 @@ struct TestEnvironment {
 
     static var credentialProvider: CredentialProviderFactory {
         isUsingLocalstack
-            ? .static(accessKeyId: "foo", secretAccessKey: "bar") : .selector(.environment, .ec2, .configFile())
+            ? .static(accessKeyId: "foo", secretAccessKey: "bar") : .selector(.configFile(), .environment, .ec2)
     }
 
     /// current list of middleware

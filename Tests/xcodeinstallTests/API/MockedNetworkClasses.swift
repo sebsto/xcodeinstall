@@ -7,9 +7,10 @@
 
 import CLIlib
 import Foundation
-// import Synchronization
 
 @testable import xcodeinstall
+
+// import Synchronization
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -86,7 +87,8 @@ final class MockedURLSession: URLSessionProtocol {
         if delegate == nil {
             delegate = DownloadDelegate(
                 env: MockedEnvironment(),
-                semaphore: MockedDispatchSemaphore())
+                semaphore: MockedDispatchSemaphore()
+            )
         }
         return delegate
     }

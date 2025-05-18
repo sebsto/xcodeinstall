@@ -3,14 +3,6 @@ import Testing
 
 @testable import xcodeinstall
 
-// MARK: - Environment Setup
-
-/// Creates a test environment with mocked components
-@MainActor
-func createTestEnvironment() -> MockedEnvironment {
-    MockedEnvironment()
-}
-
 // MARK: - Test Helpers for MainActor Isolation
 
 /// Helper to set session on an AppleAuthenticator (handles MainActor isolation)

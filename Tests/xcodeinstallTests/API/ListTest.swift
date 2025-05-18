@@ -5,16 +5,19 @@
 //  Created by Stormacq, Sebastien on 22/08/2022.
 //
 
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
-#if canImport(FoundationNetworking)
-import FoundationNetworking
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else 
+import Foundation
 #endif
 
-class ListTest: HTTPClientTestCase {
+extension DownloadTests {
 
+    @Test("Test list no force")
     func testListNoForce() async throws {
 
         // given
@@ -24,15 +27,14 @@ class ListTest: HTTPClientTestCase {
         let result: DownloadList? = try await ad.list(force: false)
 
         // then
-        XCTAssertNotNil(result)
-        XCTAssertNotNil(result!.downloads)
-        XCTAssert(result!.downloads!.count > 0)
+        #expect(result != nil)
+        #expect(result?.downloads != nil)
+        #expect(result!.downloads!.count > 0)
     }
 
+    @Test("Test list force")
     func testListForce() async throws {
-
-        do {
-
+        let _ = await #expect(throws: Never.self) {
             // given
             let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadList)
             self.sessionData.nextData = listData
@@ -43,23 +45,15 @@ class ListTest: HTTPClientTestCase {
             let result = try await ad.list(force: true)
 
             // then
-            XCTAssertNotNil(result)
-            XCTAssertNotNil(result.downloads)
-            XCTAssert(result.downloads!.count == 1127)
-
-        } catch let error as DownloadError {
-
-            XCTAssert(false, "Exception thrown : \(error)")
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown")
+            #expect(result.downloads != nil)
+            #expect(result.downloads!.count == 1127)
         }
-
     }
 
+    @Test("Test list force with parsing error")
     func testListForceParsingError() async throws {
 
-        do {
+        let error = await #expect(throws: DownloadError.self) {
 
             // given
             let (listData, urlResponse) = try prepareResponse()
@@ -71,21 +65,16 @@ class ListTest: HTTPClientTestCase {
             let _ = try await ad.list(force: true)
 
             // then
-            XCTAssert(false)  // an exception must be thrown
+            // an exception must be thrown
 
-        } catch DownloadError.parsingError {
-
-            // expected result
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown")
-        }
-
+        } 
+        #expect(error == DownloadError.parsingError(error: nil))
     }
 
+    @Test("Test list force with authentication error")
     func testListForceAuthenticationError() async throws {
 
-        do {
+        let error = await #expect(throws: DownloadError.self) {
 
             // given
             let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadError)
@@ -97,21 +86,16 @@ class ListTest: HTTPClientTestCase {
             let _ = try await ad.list(force: true)
 
             // then
-            XCTAssert(false)  //an exception must be thrown
+            //an exception must be thrown
 
-        } catch DownloadError.authenticationRequired {
-
-            XCTAssert(true)
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown")
         }
-
+        #expect(error == DownloadError.authenticationRequired)
     }
 
+    @Test("Test list force with unknown error")
     func testListForceUnknownError() async throws {
 
-        do {
+        let error = await #expect(throws: DownloadError.self){
 
             // given
             let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadUnknownError)
@@ -123,21 +107,16 @@ class ListTest: HTTPClientTestCase {
             let _ = try await ad.list(force: true)
 
             // then
-            XCTAssert(false)  //an exception must be thrown
+            //an exception must be thrown
 
-        } catch DownloadError.unknownError(let errorCode, _) {
-
-            XCTAssert(errorCode == 9999)
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown : \(error)")
-        }
-
+        } 
+        #expect(error == DownloadError.unknownError(errorCode: 9999, errorMessage: "Unknown error"))
     }
 
+    @Test("Test list force with non 200 code")
     func testListForceNon200Code() async throws {
 
-        do {
+        let error = await #expect(throws: DownloadError.self) {
 
             // given
             let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadUnknownError, statusCode: 302)
@@ -149,22 +128,17 @@ class ListTest: HTTPClientTestCase {
             let _ = try await ad.list(force: true)
 
             // then
-            XCTAssert(false)  //an exception must be thrown
+            //an exception must be thrown
 
-        } catch DownloadError.invalidResponse {
-
-            // this is the expected answer
-            XCTAssert(true)
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown : \(error)")
-        }
-
+        } 
+        
+        #expect(error == DownloadError.invalidResponse)
     }
 
+    @Test("Test list force with no cookies")
     func testListForceNoCookies() async throws {
 
-        do {
+        let error = await #expect(throws: DownloadError.self) {
 
             // given
             let (listData, urlResponse) = try prepareResponse(
@@ -180,21 +154,17 @@ class ListTest: HTTPClientTestCase {
             let _ = try await ad.list(force: true)
 
             // then
-            XCTAssert(false)  //an exception must be thrown
+            //an exception must be thrown
 
-        } catch DownloadError.invalidResponse {
-
-            // this is the expected answer
-            XCTAssert(true)
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown : \(error)")
-        }
+        } 
+        
+        #expect(error == DownloadError.invalidResponse)
     }
 
+    @Test("Test list force with account needs upgrade")
     func testAccountNeedsUpgrade() async {
 
-        do {
+        let error = await #expect(throws: DownloadError.self) {
             // given
             let response =
                 """
@@ -210,22 +180,11 @@ class ListTest: HTTPClientTestCase {
             let _ = try await ad.list(force: true)
 
             // then
-            XCTAssert(false)  //an exception must be thrown
+            //an exception must be thrown
 
-        } catch DownloadError.accountneedUpgrade(let code, _) {
-
-            // an exception should be thrown
-            XCTAssert(true)
-            XCTAssertEqual(code, 2170)
-
-        } catch {
-
-            // an exception should be thrown
-            XCTAssert(false)
-            print("\(error)")
-
-        }
-
+        } 
+        
+        #expect(error == DownloadError.accountneedUpgrade(errorCode: 2170, errorMessage: "Your developer account needs to be updated.  Please visit Apple Developer Registration."))
     }
 
     func prepareResponse(

@@ -76,7 +76,6 @@ struct DownloadListParser {
             let fileHandler = await self.env.fileHandler
 
             // swiftlint:disable identifier_name
-            let d = download
             let file = download.files[0]
 
             let fileCopy = file
@@ -90,8 +89,8 @@ struct DownloadListParser {
 
             // create a copy of the download to be used in the list
             let newDownload = DownloadList.Download(
-                from: d,
-                appendFile: newFile
+                from: download,
+                replaceWith: newFile
             )
 
             return newDownload

@@ -73,6 +73,7 @@ final class MockedFileHandler: FileHandlerProtocol {
     }
 }
 
+@MainActor
 class MockedProgressBar: CLIProgressBarProtocol {
 
     var isComplete = false

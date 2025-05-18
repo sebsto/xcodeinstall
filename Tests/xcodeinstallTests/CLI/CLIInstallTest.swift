@@ -27,7 +27,7 @@ extension CLITests {
         )
 
         // when
-        await #expect(throws: Never.self) { try await inst.run() }
+        await #expect(throws: Never.self) { try await inst.run(with: env) }
 
         // test parsing of commandline arguments
         #expect(inst.globalOptions.verbose)
@@ -45,7 +45,7 @@ extension CLITests {
     func testPromptForFile() {
 
         // given
-        let env : MockedEnvironment = MockedEnvironment(readLine: MockedReadLine(["0"]))
+        let env: MockedEnvironment = MockedEnvironment(readLine: MockedReadLine(["0"]))
         let xci = XCodeInstall(env: env)
 
         // when
