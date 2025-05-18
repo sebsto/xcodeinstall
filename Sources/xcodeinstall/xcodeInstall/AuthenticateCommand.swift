@@ -50,7 +50,7 @@ extension XCodeInstall {
 
             // handle connection errors
             display(
-                "🛑 Can not connect to Apple Developer Portal.\nOriginal error : \(error.localizedDescription)"
+                "🛑 Can not connect to Apple Developer Portal.\nOriginal error : \(error?.localizedDescription ?? "nil")"
             )
 
         } catch AuthenticationError.notImplemented(let feature) {

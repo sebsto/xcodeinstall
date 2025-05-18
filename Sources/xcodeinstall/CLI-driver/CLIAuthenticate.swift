@@ -23,8 +23,13 @@ extension MainCommand {
         var srp = true
 
         func run() async throws {
+            try await run(with: RuntimeEnvironment())
+        }
+
+        func run(with env: Environment) async throws {
 
             let xci = try await MainCommand.XCodeInstaller(
+                with: env,
                 for: cloudOption.secretManagerRegion,
                 verbose: globalOptions.verbose
             )
@@ -40,11 +45,17 @@ extension MainCommand {
         @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-            try await MainCommand.XCodeInstaller(
+            try await run(with: RuntimeEnvironment())
+        }
+
+        func run(with env: Environment) async throws {
+
+            let xci = try await MainCommand.XCodeInstaller(
+                with: env,
                 for: cloudOption.secretManagerRegion,
                 verbose: globalOptions.verbose
             )
-            .signout()
+            try await xci.signout()
         }
     }
 

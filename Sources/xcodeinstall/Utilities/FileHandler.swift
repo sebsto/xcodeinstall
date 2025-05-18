@@ -10,7 +10,7 @@ import Foundation
 
 // the methods I want to mock for unit testing
 @MainActor
-protocol FileHandlerProtocol: Sendable {
+protocol FileHandlerProtocol: Sendable, Decodable {
     func move(from src: URL, to dst: URL) async throws
     func fileExists(file: URL, fileSize: Int) -> Bool
     func checkFileSize(file: URL, fileSize: Int) throws -> Bool

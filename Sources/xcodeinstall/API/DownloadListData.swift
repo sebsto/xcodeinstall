@@ -7,10 +7,10 @@
 
 import Foundation
 
-enum DownloadError: Error {
+enum DownloadError: Error, Equatable {
     case authenticationRequired
     case unknownError(errorCode: Int, errorMessage: String)
-    case parsingError(error: Error)
+    case parsingError(error: Error?)
     case noDownloadsInDownloadList
     case invalidFileSpec
     case invalidResponse
@@ -18,6 +18,34 @@ enum DownloadError: Error {
     case unknownFile(file: String)
     case needToAcceptTermsAndCondition
     case accountneedUpgrade(errorCode: Int, errorMessage: String)
+
+    static func == (lhs: DownloadError, rhs: DownloadError) -> Bool {
+        switch (lhs, rhs) {
+        case (.authenticationRequired, .authenticationRequired):
+            return true
+        case let (.unknownError(code1, _), .unknownError(code2, _)):
+            return code1 == code2 
+        case let (.parsingError(error1), .parsingError(error2)):
+            // Compare error descriptions since Error is not Equatable
+            return String(describing: error1) == String(describing: error2)
+        case (.noDownloadsInDownloadList, .noDownloadsInDownloadList):
+            return true
+        case (.invalidFileSpec, .invalidFileSpec):
+            return true
+        case (.invalidResponse, .invalidResponse):
+            return true
+        case let (.zeroOrMoreThanOneFileToDownload(count1), .zeroOrMoreThanOneFileToDownload(count2)):
+            return count1 == count2
+        case let (.unknownFile(file1), .unknownFile(file2)):
+            return file1 == file2
+        case (.needToAcceptTermsAndCondition, .needToAcceptTermsAndCondition):
+            return true
+        case let (.accountneedUpgrade(code1, _), .accountneedUpgrade(code2, _)):
+            return code1 == code2 
+        default:
+            return false
+        }
+    }
 }
 
 struct DownloadList: Sendable, Codable {

@@ -61,7 +61,11 @@ struct MainCommand: AsyncParsableCommand {
         // defaultSubcommand: List.self)
     )
 
-    public static func XCodeInstaller(for region: String? = nil, verbose: Bool) async throws -> XCodeInstall {
+    public static func XCodeInstaller(
+        with env: Environment,
+        for region: String? = nil,
+        verbose: Bool
+    ) async throws -> XCodeInstall {
         let logger: Logger!
         if verbose {
             logger = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
@@ -69,7 +73,7 @@ struct MainCommand: AsyncParsableCommand {
             logger = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
         }
 
-        var runtimeEnv = RuntimeEnvironment()
+        var runtimeEnv = env
         let xci: XCodeInstall!
         if let region {
             runtimeEnv.secrets = try AWSSecretsHandler(env: runtimeEnv, region: region)

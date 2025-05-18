@@ -23,7 +23,7 @@ protocol Environment: Sendable {
     var display: DisplayProtocol { get }
     var readLine: ReadLineProtocol { get }
     var progressBar: CLIProgressBarProtocol { get }
-    var secrets: SecretsHandlerProtocol { get }
+    var secrets: SecretsHandlerProtocol { get set }
     var awsSDK: AWSSecretsHandlerSDKProtocol { get }
     var authenticator: AppleAuthenticatorProtocol { get }
     var downloader: AppleDownloaderProtocol { get }

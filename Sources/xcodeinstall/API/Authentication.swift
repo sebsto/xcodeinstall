@@ -27,13 +27,14 @@ struct User: Codable {
     var rememberMe = false
 }
 
-enum AuthenticationError: Error {
+enum AuthenticationError: Error, Equatable {
+
     case invalidUsernamePassword
     case requires2FA
     //    case requires2FATrustedDevice
     case requires2FATrustedPhoneNumber
     case invalidPinCode
-    case unableToRetrieveAppleServiceKey(Error)
+    case unableToRetrieveAppleServiceKey(Error?)
     case unableToRetrieveAppleHashcash(Error?)
     case missingHTTPHeaders(String)
     case canNotReadMFATypes
@@ -42,6 +43,39 @@ enum AuthenticationError: Error {
     case notImplemented(featureName: String)  // temporray while I'm working on a feature
     case unexpectedHTTPReturnCode(code: Int)
     case other(error: Error)
+
+    static func == (lhs: AuthenticationError, rhs: AuthenticationError) -> Bool {
+        switch (lhs, rhs) {
+        case (.invalidUsernamePassword, .invalidUsernamePassword):
+            return true
+        case (.requires2FA, .requires2FA):
+            return true
+        case (.requires2FATrustedPhoneNumber, .requires2FATrustedPhoneNumber):
+            return true
+        case (.invalidPinCode, .invalidPinCode):
+            return true
+        case (.unableToRetrieveAppleServiceKey, .unableToRetrieveAppleServiceKey):
+            return true  // Can't compare errors, so just check the case
+        case (.unableToRetrieveAppleHashcash, .unableToRetrieveAppleHashcash):
+            return true  // Can't compare errors, so just check the case
+        case let (.missingHTTPHeaders(a), .missingHTTPHeaders(b)):
+            return a == b
+        case (.canNotReadMFATypes, .canNotReadMFATypes):
+            return true
+        case let (.accountNeedsRepair(locationA, repairTokenA), .accountNeedsRepair(locationB, repairTokenB)):
+            return locationA == locationB && repairTokenA == repairTokenB
+        case (.serviceUnavailable, .serviceUnavailable):
+            return true
+        case let (.notImplemented(featureNameA), .notImplemented(featureNameB)):
+            return featureNameA == featureNameB
+        case let (.unexpectedHTTPReturnCode(codeA), .unexpectedHTTPReturnCode(codeB)):
+            return codeA == codeB
+        case (.other, .other):
+            return true  // Can't compare errors, so just check the case
+        default:
+            return false
+        }
+    }
 }
 
 struct AppleServiceKey: Codable, Equatable {
