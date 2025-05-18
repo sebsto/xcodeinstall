@@ -16,8 +16,8 @@ let package = Package(
         .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"),
         .package(url: "https://github.com/sebsto/CLIlib/", branch: "main"),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
-        .package(url: "https://github.com/apple/swift-crypto", from: "3.9.1"),
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-crypto", from: "3.12.3"),        
         //.package(path: "../CLIlib")
     ],
 
