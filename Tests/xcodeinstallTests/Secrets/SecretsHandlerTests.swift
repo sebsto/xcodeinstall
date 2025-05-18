@@ -5,7 +5,7 @@
 //  Created by Stormacq, Sebastien on 05/08/2022.
 //
 
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
@@ -13,7 +13,7 @@ import XCTest
 import FoundationNetworking
 #endif
 
-protocol SecretsHandlerTestProtocol {
+protocol SecretsHandlerTestsProtocol {
     func testMergeCookiesNoConflict() async throws
     func testMergeCookiesOneConflict() async throws
     func testLoadAndSaveSession() async throws
@@ -21,7 +21,7 @@ protocol SecretsHandlerTestProtocol {
     func testLoadSessionNoExist() async
 }
 
-class SecretsHandlerTestBase<T: SecretsHandlerProtocol>: AsyncTestCase {
+struct SecretsHandlerTestsBase<T: SecretsHandlerProtocol> {
 
     var secrets: T?
 
@@ -35,13 +35,6 @@ class SecretsHandlerTestBase<T: SecretsHandlerProtocol>: AsyncTestCase {
 
     // 1 cookie : dslang  conflict with string one
     private let cookieStringConflict = "dslang=FR-FR; Domain=apple.com; Path=/; Secure; HttpOnly"
-
-    // class override var defaultTestSuite: XCTestSuite {
-    //     get {
-    //         XCTestSuite(name: "InterfaceTests Excluded")
-    //     }
-    // }
-    // override init() { super.init() }
 
     func testMergeCookiesNoConflict() async throws {
 
@@ -61,11 +54,11 @@ class SecretsHandlerTestBase<T: SecretsHandlerProtocol>: AsyncTestCase {
         let cookies = try await self.secrets!.loadCookies()
 
         // number of cookie is the sum of the two files
-        XCTAssert(cookies.count == 6)
+        #expect(cookies.count == 6)
 
         // cookies from second file are present with correct values
-        XCTAssert(cookies.contains(where: { c in c.name == "ADCDownloadAuth" }))
-        XCTAssert(cookies.contains(where: { c in c.name == "DSESSIONID" }))
+        #expect(cookies.contains(where: { c in c.name == "ADCDownloadAuth" }))
+        #expect(cookies.contains(where: { c in c.name == "DSESSIONID" }))
     }
 
     func testMergeCookiesOneConflict() async throws {
@@ -85,14 +78,14 @@ class SecretsHandlerTestBase<T: SecretsHandlerProtocol>: AsyncTestCase {
         let cookies = try await self.secrets!.loadCookies()
 
         // number of cookie is the original count (conflicted cookie is not added, but merged)
-        XCTAssert(cookies.count == 4)
+        #expect(cookies.count == 4)
 
         // cookies from second file is present
-        XCTAssert(cookies.contains(where: { c in c.name == "dslang" }))
+        #expect(cookies.contains(where: { c in c.name == "dslang" }))
 
         // with correct values
         let c = cookies.first(where: { c in c.name == "dslang" && c.value == "FR-FR" })
-        XCTAssertNotNil(c)
+        #expect(c != nil)
     }
 
     func testLoadAndSaveSession() async throws {
@@ -110,10 +103,10 @@ class SecretsHandlerTestBase<T: SecretsHandlerProtocol>: AsyncTestCase {
             let newSession = try await secrets!.loadSession()
 
             // then
-            XCTAssertEqual(session, newSession)
+            #expect(session == newSession)
 
         } catch {
-            XCTAssert(false, "Unexpected exception while testing")
+            Issue.record("Unexpected exception while testing : \(error)")
         }
     }
 
@@ -132,13 +125,13 @@ class SecretsHandlerTestBase<T: SecretsHandlerProtocol>: AsyncTestCase {
         // then
 
         // number of cookie is equal the orginal string
-        XCTAssert(cookies.count == 4)
+        #expect(cookies.count == 4)
 
         // cookies are present with correct values
-        XCTAssert(cookies.contains(where: { c in c.name == "dslang" }))
-        XCTAssert(cookies.contains(where: { c in c.name == "site" }))
-        XCTAssert(cookies.contains(where: { c in c.name == "myacinfo" }))
-        XCTAssert(cookies.contains(where: { c in c.name == "aasp" }))
+        #expect(cookies.contains(where: { c in c.name == "dslang" }))
+        #expect(cookies.contains(where: { c in c.name == "site" }))
+        #expect(cookies.contains(where: { c in c.name == "myacinfo" }))
+        #expect(cookies.contains(where: { c in c.name == "aasp" }))
     }
 
     func testLoadSessionNoExist() async {
@@ -150,7 +143,7 @@ class SecretsHandlerTestBase<T: SecretsHandlerProtocol>: AsyncTestCase {
         let newSession = try? await secrets!.loadSession()
 
         // then
-        XCTAssertNil(newSession)
+        #expect(newSession == nil)
 
     }
 }

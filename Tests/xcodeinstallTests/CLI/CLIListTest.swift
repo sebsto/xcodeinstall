@@ -5,12 +5,14 @@
 //  Created by Stormacq, Sebastien on 22/08/2022.
 //
 
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
-class CLIListTest: CLITest {
+@MainActor
+extension CLITests {
 
+    @Test("Test List Command")
     func testList() async throws {
 
         // given
@@ -29,23 +31,18 @@ class CLIListTest: CLITest {
         )
 
         // when
-        do {
-            //_ = try await xci.list(force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: true, datePublished: true)
-            try await list.run()
-        } catch {
-            // then
-            XCTAssert(false, "unexpected exception : \(error)")
-        }
+
+        await #expect(throws: Never.self) { try await list.run() }
 
         // test parsing of commandline arguments
-        XCTAssert(list.globalOptions.verbose)
-        XCTAssert(list.downloadListOptions.force)
-        XCTAssert(list.downloadListOptions.onlyXcode)
-        XCTAssert(list.downloadListOptions.xCodeVersion == "14")
-        XCTAssert(list.downloadListOptions.mostRecentFirst)
-        XCTAssert(list.downloadListOptions.datePublished)
+        #expect(list.globalOptions.verbose)
+        #expect(list.downloadListOptions.force)
+        #expect(list.downloadListOptions.onlyXcode)
+        #expect(list.downloadListOptions.xCodeVersion == "14")
+        #expect(list.downloadListOptions.mostRecentFirst)
+        #expect(list.downloadListOptions.datePublished)
 
         // mocked list succeeded
-        assertDisplay("16 items")
+        #expect(assertDisplay("16 items"))
     }
 }

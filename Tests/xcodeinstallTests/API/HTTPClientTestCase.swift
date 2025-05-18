@@ -5,25 +5,24 @@
 //  Created by Stormacq, Sebastien on 04/09/2022.
 //
 
-import XCTest
-
 @testable import xcodeinstall
 
 // common initilaisation code for all network agents
-class HTTPClientTestCase: AsyncTestCase {
+@MainActor
+class HTTPClientTestCase {
 
     var sessionData: MockedURLSession!
     var sessionDownload: MockedURLSession!
     var client: HTTPClient!
     var delegate: DownloadDelegate!
 
-    override func asyncSetUpWithError() async throws {
+    let env = MockedEnvironment()
 
-        env = Environment.mock
+    init() async throws {
 
         self.sessionData = env.urlSessionData as? MockedURLSession
-        self.sessionDownload = env.urlSessionDownload as? MockedURLSession
-        self.client = HTTPClient()
+        self.sessionDownload = env.urlSessionDownload() as? MockedURLSession
+        self.client = HTTPClient(env: env)
 
         try await env.secrets.clearSecrets()
     }
@@ -38,10 +37,10 @@ class HTTPClientTestCase: AsyncTestCase {
     }
 
     func getAppleDownloader() -> AppleDownloader {
-        AppleDownloader()
+        AppleDownloader(env: env)
     }
 
     func getAppleAuthenticator() -> AppleAuthenticator {
-        AppleAuthenticator()
+        AppleAuthenticator(env: env)
     }
 }

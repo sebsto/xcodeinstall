@@ -78,9 +78,12 @@ struct SRPKeysTestCase {
 
     }
 
-    @Test("PBKDF2 for S2K and S2K_FO authentication protocol", arguments: [
-        SRPProtocol.s2k, SRPProtocol.s2k_fo
-    ])
+    @Test(
+        "PBKDF2 for S2K and S2K_FO authentication protocol",
+        arguments: [
+            SRPProtocol.s2k, SRPProtocol.s2k_fo,
+        ]
+    )
     func pbkdf2(srpProtocol: SRPProtocol) throws {
 
         // given
@@ -109,7 +112,7 @@ struct SRPKeysTestCase {
             case .s2k:
                 hexResult = "d7ff78163a0183db1e635ba5beaf4a45f7984b00aafec95e6a044fda331bbd45"
             case .s2k_fo:
-                // TODO: verify this result is correct 
+                // TODO: verify this result is correct
                 hexResult = "858f8ba24e48af6f9cd5c8d4738827eb91340b6901fc5e47ee0d73e3346b502a"
             }
             #expect(derivedKey.hexdigest().lowercased() == hexResult)

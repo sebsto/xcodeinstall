@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+// import Synchronization
 
 @testable import xcodeinstall
 
@@ -15,17 +16,27 @@ import FoundationNetworking
 #endif
 
 // mocked URLSessionDownloadTask
-class MockedURLSessionDownloadTask: URLSessionDownloadTaskProtocol {
+@MainActor
+final class MockedURLSessionDownloadTask: URLSessionDownloadTaskProtocol {
 
-    var wasResumeCalled = false
+    // private let _wasResumeCalled: Mutex<Bool> = .init(false)
+    // var wasResumeCalled: Bool {
+    //     return self._wasResumeCalled.withLock { $0 }
+    // }
 
+    // func resume() {
+    //     self._wasResumeCalled.withLock { $0 = true }
+    // }
+
+    var wasResumeCalled: Bool = false
     func resume() {
-        self.wasResumeCalled = true
+        wasResumeCalled = true
     }
 }
 
 // mocked URLSession to be used during test
-class MockedURLSession: URLSessionProtocol {
+@MainActor
+final class MockedURLSession: URLSessionProtocol {
 
     private(set) var lastURL: URL?
     private(set) var lastRequest: URLRequest?
@@ -73,13 +84,16 @@ class MockedURLSession: URLSessionProtocol {
     var delegate: DownloadDelegate?
     func downloadDelegate() -> DownloadDelegate? {
         if delegate == nil {
-            delegate = DownloadDelegate(semaphore: MockedDispatchSemaphore())
+            delegate = DownloadDelegate(
+                env: MockedEnvironment(),
+                semaphore: MockedDispatchSemaphore())
         }
         return delegate
     }
 }
 
-class MockedAppleAuthentication: AppleAuthenticatorProtocol {
+@MainActor
+final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
 
     var nextError: AuthenticationError?
     var nextMFAError: AuthenticationError?
@@ -129,7 +143,8 @@ struct MockedAppleDownloader: AppleDownloaderProtocol {
     }
 }
 
-class MockedDispatchSemaphore: DispatchSemaphoreProtocol {
+@MainActor
+final class MockedDispatchSemaphore: DispatchSemaphoreProtocol {
     var _wasWaitCalled = false
     var _wasSignalCalled = false
 

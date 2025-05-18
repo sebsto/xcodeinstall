@@ -5,26 +5,26 @@
 //  Created by Stormacq, Sebastien on 04/08/2022.
 //
 
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
+#else
+import Foundation
 #endif
 
-class URLRequestCurlTest: XCTestCase {
+@MainActor
+struct URLRequestCurlTest {
 
     var agent: HTTPClient!
 
-    override func setUpWithError() throws {
-
-        env = Environment.mock
-
-        try super.setUpWithError()
-        self.agent = HTTPClient()
+    init() throws {
+        self.agent = HTTPClient(env: MockedEnvironment())
     }
 
+    @Test("Test URLRequest to cURL")
     func testRequestToCurl() throws {
 
         //given
@@ -44,16 +44,17 @@ class URLRequestCurlTest: XCTestCase {
         let curl = request.cURL(pretty: false)
 
         // then
-        XCTAssertNotNil(curl)
-        XCTAssert(curl.starts(with: "curl "))
-        XCTAssert(curl.contains("-H 'header1: value1'"))
-        XCTAssert(curl.contains("-H 'header2: value2'"))
-        XCTAssert(curl.contains("-H 'Cookie: cookieName=cookieValue'"))
-        XCTAssert(curl.contains("-X GET 'https://dummy.com'"))
-        XCTAssert(curl.contains("--data 'test data'"))
+        #expect(curl != nil)
+        #expect(curl.starts(with: "curl "))
+        #expect(curl.contains("-H 'header1: value1'"))
+        #expect(curl.contains("-H 'header2: value2'"))
+        #expect(curl.contains("-H 'Cookie: cookieName=cookieValue'"))
+        #expect(curl.contains("-X GET 'https://dummy.com'"))
+        #expect(curl.contains("--data 'test data'"))
 
     }
 
+    @Test("Test URLRequest to cURL pretty print")
     func testRequestToCurlPrettyPrint() throws {
 
         //given
@@ -73,14 +74,14 @@ class URLRequestCurlTest: XCTestCase {
         let curl = request.cURL(pretty: true)
 
         // then
-        XCTAssertNotNil(curl)
-        XCTAssert(curl.starts(with: "curl "))
-        XCTAssert(curl.contains("--header 'header1: value1'"))
-        XCTAssert(curl.contains("--header 'header2: value2'"))
-        XCTAssert(curl.contains("--header 'Cookie: cookieName=cookieValue'"))
-        XCTAssert(curl.contains("--request GET"))
-        XCTAssert(curl.contains("--url 'https://dummy.com'"))
-        XCTAssert(curl.contains("--data 'test data'"))
+        #expect(curl != nil)
+        #expect(curl.starts(with: "curl "))
+        #expect(curl.contains("--header 'header1: value1'"))
+        #expect(curl.contains("--header 'header2: value2'"))
+        #expect(curl.contains("--header 'Cookie: cookieName=cookieValue'"))
+        #expect(curl.contains("--request GET"))
+        #expect(curl.contains("--url 'https://dummy.com'"))
+        #expect(curl.contains("--data 'test data'"))
 
     }
 

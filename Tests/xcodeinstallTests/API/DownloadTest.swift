@@ -9,11 +9,12 @@ import XCTest
 
 @testable import xcodeinstall
 
+@MainActor
 class DownloadTest: HTTPClientTestCase {
 
     func testHasDownloadDelegate() {
         // given
-        let sessionDownload = env.urlSessionDownload
+        let sessionDownload = env.urlSessionDownload()
 
         //when
         let delegate = sessionDownload.downloadDelegate()
@@ -56,7 +57,7 @@ class DownloadTest: HTTPClientTestCase {
             }
 
             // verify if semaphore wait() was called
-            if let sema = env.urlSessionDownload.downloadDelegate()?.sema as? MockedDispatchSemaphore {
+            if let sema = env.urlSessionDownload().downloadDelegate()?.sema as? MockedDispatchSemaphore {
                 XCTAssert(sema.wasWaitCalled())
             } else {
                 XCTAssert(

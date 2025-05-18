@@ -1,0 +1,114 @@
+import Foundation
+import Testing
+
+@testable import xcodeinstall
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+// MARK: - Test Suite Setup
+@MainActor
+struct HTTPClientTests {
+
+    // MARK: - Test Environment
+    var sessionData: MockedURLSession!
+    var sessionDownload: MockedURLSession!
+    var client: HTTPClient!
+    var delegate: DownloadDelegate!
+    var env: MockedEnvironment!
+
+    init() async throws {
+        // Setup environment for each test
+        self.env = createTestEnvironment()
+        self.sessionData = env.urlSessionData as? MockedURLSession
+        self.sessionDownload = env.urlSessionDownload() as? MockedURLSession
+        self.client = HTTPClient(env: env)
+        try await env.secrets.clearSecrets()
+    }
+
+    // MARK: - Helper Methods
+    func getAppleSession() -> AppleSession {
+        AppleSession(
+            itcServiceKey: AppleServiceKey(authServiceUrl: "url", authServiceKey: "key"),
+            xAppleIdSessionId: "x_apple_id_session_id",
+            scnt: "scnt",
+            hashcash: "hashcash"
+        )
+    }
+}
+
+// MARK: - Test Cases
+@MainActor
+extension HTTPClientTests {
+
+    @Test("Test HTTP Request Creation")
+    func testRequest() async throws {
+        let url = "https://test.com/path"
+        let username = "username"
+        let password = "password"
+
+        let headers = [
+            "header1": "value1",
+            "header2": "value2",
+        ]
+        let body = try JSONEncoder().encode(User(accountName: username, password: password))
+        let request = client.request(
+            for: url,
+            method: .POST,
+            withBody: body,
+            withHeaders: headers
+        )
+
+        // Test URL
+        #expect(request.url?.debugDescription == url)
+
+        // Test method
+        #expect(request.httpMethod == "POST")
+
+        // Test body
+        #expect(request.httpBody != nil)
+        let user = try JSONDecoder().decode(User.self, from: request.httpBody!)
+        #expect(user.accountName == username)
+        #expect(user.password == password)
+
+        // Test headers
+        #expect(request.allHTTPHeaderFields != nil)
+        #expect(request.allHTTPHeaderFields?.count == 2)
+        #expect(request.allHTTPHeaderFields?["header1"] == "value1")
+        #expect(request.allHTTPHeaderFields?["header2"] == "value2")
+    }
+
+    @Test("Test Password Obfuscation in Logs")
+    func testPasswordObfuscation() async throws {
+        // Given
+        let username = "username"
+        let password = "myComplexPassw0rd!"
+        let body = try JSONEncoder().encode(User(accountName: username, password: password))
+        let str = String(data: body, encoding: .utf8)
+        #expect(str != nil)
+
+        // When
+        let obfuscated = filterPassword(str!)
+
+        // Then
+        #expect(str != obfuscated)
+        #expect(!obfuscated.contains(password))
+    }
+
+    @Test("Test Data Request URL")
+    func testDataRequestsTheURL() async throws {
+        // Given
+        let url = "http://dummy"
+
+        self.sessionData.nextData = Data()
+        self.sessionData.nextResponse = URLResponse()
+
+        // When
+        let request = client.request(for: url)
+        _ = try await self.sessionData.data(for: request, delegate: nil)
+
+        // Then
+        #expect(self.sessionData.lastURL?.debugDescription == url)
+    }
+}

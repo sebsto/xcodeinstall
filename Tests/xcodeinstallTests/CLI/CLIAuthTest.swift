@@ -6,15 +6,18 @@
 //
 
 import ArgumentParser
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
+#else
+import Foundation
 #endif
 
-class CLIAUthTest: CLITest {
+@MainActor 
+extension CLITests {
 
     func testSignout() async throws {
 
@@ -29,16 +32,16 @@ class CLIAUthTest: CLITest {
 
         } catch {
             // then
-            XCTAssert(false, "unexpected exception : \(error)")
+            #expect(false, "unexpected exception : \(error)")
         }
 
-        assertDisplay("✅ Signed out.")
+        #expect(assertDisplay("✅ Signed out."))
     }
 
     func testAuthenticate() async throws {
 
         // given
-        env.readLine = MockedReadLine(["username", "password"])
+        let env = MockedEnvironment(readLine: MockedReadLine(["username", "password"]))
 
         let authenticator = (env.authenticator as! MockedAppleAuthentication)
         authenticator.nextError = nil
@@ -53,40 +56,34 @@ class CLIAUthTest: CLITest {
         )
 
         // when
-        do {
+        await #expect(throws: Never.self) {
             let auth = try parse(MainCommand.Authenticate.self, ["authenticate"])
             try await auth.run()
-        } catch {
-            // then
-            XCTAssert(false, "unexpected exception : \(error)")
-        }
+        } 
 
         // mocked authentication succeeded
-        assertDisplay("✅ Authenticated.")
+        #expect(assertDisplay("✅ Authenticated."))
 
         // two prompts have been proposed
-        print((env.readLine as! MockedReadLine).input)
-        XCTAssert((env.readLine as! MockedReadLine).input.count == 0)
+        // print((env.readLine as! MockedReadLine).input)
+        #expect((env.readLine as! MockedReadLine).input.count == 0)
 
     }
 
     func testAuthenticateInvalidUserOrpassword() async throws {
 
         // given
-        env.readLine = MockedReadLine(["username", "password"])
-        let xci = XCodeInstall()
+        let env = MockedEnvironment(readLine: MockedReadLine(["username", "password"]))
+        let xci = XCodeInstall(env: env)
         (env.authenticator as! MockedAppleAuthentication).nextError = AuthenticationError.invalidUsernamePassword
 
         // when
-        do {
+        await #expect(throws: Never.self) {
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
-        } catch {
-            // then
-            XCTAssert(false, "unexpected exception : \(error)")
-        }
+        } 
 
-        assertDisplay("🛑 Invalid username or password.")
+        #expect(assertDisplay("🛑 Invalid username or password."))
 
     }
 
@@ -123,10 +120,10 @@ class CLIAUthTest: CLITest {
     func testAuthenticateMFATrustedPhoneNumber() async throws {
 
         // given
-        env.readLine = MockedReadLine(["username", "password", "1234"])
+        let env = MockedEnvironment(readLine: MockedReadLine(["username", "password", "1234"]))
         let authenticator = (env.authenticator as! MockedAppleAuthentication)
         authenticator.nextError = AuthenticationError.requires2FA
-        (self.secretsHandler as! MockedSecretHandler).nextError = AWSSecretsHandlerError.invalidOperation
+        (self.secretsHandler as! MockedSecretsHandler).nextError = AWSSecretsHandlerError.invalidOperation
         let session: MockedURLSession = env.urlSessionData as! MockedURLSession
         session.nextData = getMFATypeOK().data(using: .utf8)
         let headers = ["X-Apple-ID-Session-Id": "dummySessionID", "scnt": "dummySCNT"]
@@ -138,25 +135,23 @@ class CLIAUthTest: CLITest {
         )
 
         // when
-        do {
-            let xci = XCodeInstall()
+        let error = await #expect(throws: AuthenticationError.self) {
+            let xci = XCodeInstall(env: env)
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
 
-        } catch AuthenticationError.unexpectedHTTPReturnCode(let code) {
-
-            // this is the normal case for this test
-            XCTAssert(code == 500, "Unexpected HTTP return code : \(code)")
-
-        } catch {
-            // then
-            XCTAssert(false, "unexpected exception : \(error)")
+        } 
+        if case let .unexpectedHTTPReturnCode(code) = error {
+            #expect(code == 500, "Unexpected HTTP return code : \(code)")
+        } else {
+            Issue.record("unexpected exception : \(error)")
         }
 
+        
         // all inputs have been consumed
-        XCTAssert((env.readLine as! MockedReadLine).input.count == 0)
+        #expect((env.readLine as! MockedReadLine).input.count == 0)
 
-        assertDisplay("✅ Authenticated with MFA.")
+        #expect(assertDisplay("✅ Authenticated with MFA."))
 
     }
 

@@ -30,31 +30,33 @@ func loadTestData(file: TestData) throws -> Data {
     try Data(contentsOf: urlForTestData(file: file))
 }
 
-func createDownloadList() {
+@MainActor
+func createDownloadList() throws {
 
     let fm = FileManager.default
 
     // copy test file at destination
 
     // delete file at destination if it exists
-    if fm.fileExists(atPath: FileHandler.downloadListPath.path) {
-        XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
+    if fm.fileExists(atPath: FileHandler().downloadListPath().path) {
+        XCTAssertNoThrow(try fm.removeItem(at: FileHandler().downloadListPath()))
     }
     // get the source URL
     guard let testFilePath = try? urlForTestData(file: .downloadList) else {
         fatalError("Can not retrieve url for \(TestData.downloadList.rawValue)")
     }
     // copy source to destination
-    XCTAssertNoThrow(try fm.copyItem(at: testFilePath, to: FileHandler.downloadListPath))
+    XCTAssertNoThrow(try fm.copyItem(at: testFilePath, to: FileHandler().downloadListPath()))
 }
 
+@MainActor
 func deleteDownloadList() {
 
     let fm = FileManager.default
 
     // remove test file from destination
-    if fm.fileExists(atPath: FileHandler.downloadListPath.path) {
-        XCTAssertNoThrow(try fm.removeItem(at: FileHandler.downloadListPath))
+    if fm.fileExists(atPath: FileHandler().downloadListPath().path) {
+        XCTAssertNoThrow(try fm.removeItem(at: FileHandler().downloadListPath()))
     }
 }
 

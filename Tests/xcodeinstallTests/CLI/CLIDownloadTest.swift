@@ -6,19 +6,23 @@
 //
 
 import ArgumentParser
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
-class CLIDownloadTest: CLITest {
+@MainActor
+extension CLITests {
 
+    @Test("Test Download")
     func testDownload() async throws {
 
         // given
 
-        env.readLine = MockedReadLine(["0"])
-        let xci = XCodeInstall()
-        (env.fileHandler as! MockedFileHandler).nextFileCorrect = true
+        let mockedRL = MockedReadLine(["0"])
+        let mockedFH = MockedFileHandler()
+        mockedFH.nextFileCorrect = true
+        let env = MockedEnvironment(fileHandler: mockedFH, readLine: mockedRL)
+        let xci = XCodeInstall(env: env)
 
         let download = try parse(
             MainCommand.Download.self,
@@ -35,7 +39,7 @@ class CLIDownloadTest: CLITest {
         )
 
         // when
-        do {
+        await #expect(throws: Never.self) {
             // try await download.run() // can not call this as I can not inject all the mocks
             try await xci.download(
                 fileName: nil,
@@ -45,30 +49,28 @@ class CLIDownloadTest: CLITest {
                 sortMostRecentFirst: true,
                 datePublished: true
             )
-        } catch {
-            // then
-            XCTAssert(false, "unexpected exception : \(error)")
         }
 
         // test parsing of commandline arguments
-        XCTAssert(download.globalOptions.verbose)
-        XCTAssert(download.downloadListOptions.force)
-        XCTAssert(download.downloadListOptions.onlyXcode)
-        XCTAssert(download.downloadListOptions.xCodeVersion == "14")
-        XCTAssert(download.downloadListOptions.mostRecentFirst)
-        XCTAssert(download.downloadListOptions.datePublished)
+        #expect(download.globalOptions.verbose)
+        #expect(download.downloadListOptions.force)
+        #expect(download.downloadListOptions.onlyXcode)
+        #expect(download.downloadListOptions.xCodeVersion == "14")
+        #expect(download.downloadListOptions.mostRecentFirst)
+        #expect(download.downloadListOptions.datePublished)
 
         // verify if progressbar define() was called
         if let progress = env.progressBar as? MockedProgressBar {
-            XCTAssert(progress.defineCalled())
+            #expect(progress.defineCalled())
         } else {
-            XCTAssert(false, "Error in test implementation, the env.progressBar must be a MockedProgressBar")
+            Issue.record("Error in test implementation, the env.progressBar must be a MockedProgressBar")
         }
 
         // mocked list succeeded
-        assertDisplay("✅ file downloaded")
+        #expect(assertDisplay("✅ file downloaded"))
     }
 
+    @Test("Test Download with correct file name")
     func testDownloadWithCorrectFileName() async throws {
 
         // given
@@ -89,21 +91,22 @@ class CLIDownloadTest: CLITest {
             try await download.run()
         } catch {
             // then
-            XCTAssert(false, "unexpected exception : \(error)")
+            #expect(false, "unexpected exception : \(error)")
         }
 
         // test parsing of commandline arguments
-        XCTAssertEqual(download.name, fileName)
-        XCTAssertFalse(download.globalOptions.verbose)
-        XCTAssertFalse(download.downloadListOptions.force)
-        XCTAssertFalse(download.downloadListOptions.onlyXcode)
-        XCTAssertFalse(download.downloadListOptions.mostRecentFirst)
-        XCTAssertFalse(download.downloadListOptions.datePublished)
+        #expect(download.name == fileName)
+        #expect(!download.globalOptions.verbose)
+        #expect(!download.downloadListOptions.force)
+        #expect(!download.downloadListOptions.onlyXcode)
+        #expect(!download.downloadListOptions.mostRecentFirst)
+        #expect(!download.downloadListOptions.datePublished)
 
         // mocked list succeeded
-        assertDisplay("✅ \(fileName) downloaded")
+        #expect(assertDisplay("✅ \(fileName) downloaded"))
     }
 
+    @Test("Test Download with incorrect file name")
     func testDownloadWithIncorrectFileName() async throws {
 
         // given
@@ -120,24 +123,20 @@ class CLIDownloadTest: CLITest {
         )
 
         // when
-        do {
+        await #expect(throws: Never.self) {
             try await download.run()
-        } catch {
-
-            // then
-            XCTAssert(false, "unexpected exception : \(error)")
-        }
+        } 
 
         // test parsing of commandline arguments
-        XCTAssertEqual(download.name, fileName)
-        XCTAssertFalse(download.globalOptions.verbose)
-        XCTAssertFalse(download.downloadListOptions.force)
-        XCTAssertFalse(download.downloadListOptions.onlyXcode)
-        XCTAssertFalse(download.downloadListOptions.mostRecentFirst)
-        XCTAssertFalse(download.downloadListOptions.datePublished)
+        #expect(download.name == fileName)
+        #expect(!download.globalOptions.verbose)
+        #expect(!download.downloadListOptions.force)
+        #expect(!download.downloadListOptions.onlyXcode)
+        #expect(!download.downloadListOptions.mostRecentFirst)
+        #expect(!download.downloadListOptions.datePublished)
 
         // mocked list succeeded
-        assertDisplay("🛑 Unknown file name : xxx.xip")
+        #expect(assertDisplay("🛑 Unknown file name : xxx.xip"))
     }
 
 }

@@ -5,27 +5,35 @@
 //  Created by Stormacq, Sebastien on 22/11/2022.
 //
 
+import CLIlib
 import Foundation
 
 @testable import xcodeinstall
 
-extension Environment {
+struct MockedEnvironment: Environment {
 
-    static var mock = Environment(
-        fileHandler: MockedFileHandler(),
+    var fileHandler: FileHandlerProtocol = MockedFileHandler()
 
-        shell: MockShell(),
-        display: MockedDisplay(),
-        readLine: MockedReadLine(),
-        progressBar: MockedProgressBar(),
+    var display: DisplayProtocol = MockedDisplay()
+    var readLine: ReadLineProtocol = MockedReadLine()
+    var progressBar: CLIProgressBarProtocol = MockedProgressBar()
 
-        secrets: MockedSecretHandler(),
-        awsSDK: MockedAWSSecretsHandlerSDK(),
+    var secrets: SecretsHandlerProtocol {
+        MockedSecretsHandler(env: self)
+    }
+    var awsSDK: AWSSecretsHandlerSDKProtocol = try! MockedAWSSecretsHandlerSDK()
 
-        authenticator: MockedAppleAuthentication(),
-        downloader: MockedAppleDownloader(),
+    var authenticator: AppleAuthenticatorProtocol = MockedAppleAuthentication()
+    var downloader: AppleDownloaderProtocol = MockedAppleDownloader()
 
-        urlSessionData: MockedURLSession(),
-        urlSessionDownload: MockedURLSession()
-    )
+    var urlSessionData: URLSessionProtocol = MockedURLSession()
+
+    func urlSessionDownload(
+        dstFilePath: URL? = nil,
+        totalFileSize: Int? = nil,
+        startTime: Date? = nil
+    ) -> any xcodeinstall.URLSessionProtocol {
+        MockedURLSession()
+    }
+
 }

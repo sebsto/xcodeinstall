@@ -9,16 +9,10 @@ import XCTest
 
 @testable import xcodeinstall
 
+@MainActor
 class DownloadListParserTest: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-        env = Environment.mock
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
+    var env: MockedEnvironment = MockedEnvironment()
 
     func testParseDownloadList() throws {
 
@@ -84,7 +78,7 @@ class DownloadListParserTest: XCTestCase {
             let downloads = list.downloads
             XCTAssertNotNil(downloads)
 
-            let dlp = DownloadListParser(xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
+            let dlp = DownloadListParser(env: env, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
             let filteredList = try dlp.parse(list: list)
             XCTAssertNotNil(filteredList)
 
@@ -114,7 +108,7 @@ class DownloadListParserTest: XCTestCase {
             let downloads = list.downloads
             XCTAssertNotNil(downloads)
 
-            let dlp = DownloadListParser(xCodeOnly: false, majorVersion: "13", sortMostRecentFirst: true)
+            let dlp = DownloadListParser(env: env, xCodeOnly: false, majorVersion: "13", sortMostRecentFirst: true)
             let filteredList = try dlp.parse(list: list)
             XCTAssertNotNil(filteredList)
 
@@ -133,21 +127,21 @@ class DownloadListParserTest: XCTestCase {
 
     }
 
-    private func createTestFile(file: DownloadList.File, fileSize: Int) -> URL {
+    private func createTestFile(file: DownloadList.File, fileSize: Int) async  -> URL {
         let fm = FileManager()
         let fh = env.fileHandler
 
         let data = Data(count: fileSize)
-        let testFile: URL = fh.downloadFileURL(file: file)
+        let testFile: URL = await fh.downloadFileURL(file: file)
         fm.createFile(atPath: testFile.path, contents: data)
         return testFile
     }
 
-    private func deleteTestFile(file: DownloadList.File) -> URL {
+    private func deleteTestFile(file: DownloadList.File) async -> URL {
         let fm = FileManager()
         let fh = env.fileHandler
 
-        let testFile: URL = fh.downloadFileURL(file: file)
+        let testFile: URL = await fh.downloadFileURL(file: file)
         try? fm.removeItem(at: testFile)
         return testFile
     }
@@ -162,14 +156,14 @@ class DownloadListParserTest: XCTestCase {
         XCTAssertNotNil(downloads)
 
         // filter and sort the list
-        let dlp = DownloadListParser(xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
+        let dlp = DownloadListParser(env: env, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
         let filteredList = try dlp.parse(list: list)
         XCTAssertNotNil(filteredList)
 
         return (filteredList, dlp)
     }
 
-    func testDownloadListParserEnrichedListTrue() {
+    func testDownloadListParserEnrichedListTrue() async {
 
         do {
 
@@ -179,7 +173,6 @@ class DownloadListParserTest: XCTestCase {
 
             // modify the list to add a fake file in position [0]
 
-            var d = filteredList[0]
             let newFile = DownloadList.File(
                 filename: "test.zip",
                 displayName: "",
@@ -190,20 +183,20 @@ class DownloadListParserTest: XCTestCase {
                 dateModified: "",
                 fileFormat: DownloadList.FileFormat(fileExtension: "zip", description: "zip")
             )
-            d.files = [newFile]
+            let d = DownloadList.Download(from: filteredList[0], appendFile: newFile)
 
             let newFilteredList = [d]
 
-            _ = self.createTestFile(file: newFile, fileSize: newFile.fileSize)
+            _ = await self.createTestFile(file: newFile, fileSize: newFile.fileSize)
 
             // when
-            let enrichedList = dlp.enrich(list: newFilteredList)
+            let enrichedList = await dlp.enrich(list: newFilteredList)
 
             // then
             XCTAssertNotNil(enrichedList[0].files[0].existInCache)
-            XCTAssertTrue(enrichedList[0].files[0].existInCache ?? false)
+            XCTAssertTrue(enrichedList[0].files[0].existInCache)
 
-            _ = self.deleteTestFile(file: newFile)
+            _ = await self.deleteTestFile(file: newFile)
 
         } catch {
             XCTAssert(false, "Unexpected exception thrown : \(error)")
@@ -211,7 +204,7 @@ class DownloadListParserTest: XCTestCase {
 
     }
 
-    func testDownloadListParserEnrichedListFalse() {
+    func testDownloadListParserEnrichedListFalse() async {
 
         do {
 
@@ -221,7 +214,6 @@ class DownloadListParserTest: XCTestCase {
 
             // modify the list to add a fake file in position [0]
 
-            var d = filteredList[0]
             let newFile = DownloadList.File(
                 filename: "test.zip",
                 displayName: "",
@@ -232,18 +224,18 @@ class DownloadListParserTest: XCTestCase {
                 dateModified: "",
                 fileFormat: DownloadList.FileFormat(fileExtension: "zip", description: "zip")
             )
-            d.files = [newFile]
+            let d = DownloadList.Download(from: filteredList[0], appendFile: newFile)
 
             let newFilteredList = [d]
 
             // do not create the file !!
 
             // when
-            let enrichedList = dlp.enrich(list: newFilteredList)
+            let enrichedList = await dlp.enrich(list: newFilteredList)
 
             // then
             XCTAssertNotNil(enrichedList[0].files[0].existInCache)
-            XCTAssertFalse(enrichedList[0].files[0].existInCache ?? false)
+            XCTAssertFalse(enrichedList[0].files[0].existInCache)
 
         } catch {
             XCTAssert(false, "Unexpected exception thrown : \(error)")

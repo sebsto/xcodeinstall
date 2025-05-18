@@ -15,7 +15,8 @@ import Foundation
 //
 
 // mocked display (use class because string is mutating)
-class MockedDisplay: DisplayProtocol {
+@MainActor
+final class MockedDisplay: DisplayProtocol {
     var string: String = ""
 
     func display(_ msg: String, terminator: String) {
@@ -24,7 +25,8 @@ class MockedDisplay: DisplayProtocol {
 }
 
 // mocked read line
-class MockedReadLine: ReadLineProtocol {
+@MainActor
+final class MockedReadLine: ReadLineProtocol {
 
     var input: [String] = []
 

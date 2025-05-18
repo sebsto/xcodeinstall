@@ -10,32 +10,31 @@ import XCTest
 
 @testable import xcodeinstall
 
+@MainActor
 class DownloadDelegateTest: XCTestCase {
 
-    override func setUpWithError() throws {
-        env = Environment.mock
-    }
+    let env = MockedEnvironment()
 
-    func testDownloadDelegateCompleteTransfer() {
+
+    func testDownloadDelegateCompleteTransfer() async {
 
         // given
         let testData = "test data"
         let sema = MockedDispatchSemaphore()
         let fileHandler = env.fileHandler
         (fileHandler as! MockedFileHandler).nextFileExist = true
-        let delegate = DownloadDelegate(semaphore: sema)
 
-        var srcUrl: URL = FileHandler.baseFilePath()
+        var srcUrl: URL = FileHandler().baseFilePath()
         srcUrl.appendPathComponent("xcodeinstall.source.test")
-        var dstUrl: URL = FileHandler.baseFilePath()
+        var dstUrl: URL = FileHandler().baseFilePath()
         dstUrl.appendPathComponent("xcodeinstall.destination.test")
 
         do {
             try testData.data(using: .utf8)?.write(to: srcUrl)
-            delegate.dstFilePath = dstUrl
+            let delegate = DownloadDelegate(env: env, dstFilePath: dstUrl, semaphore: sema)
 
             // when
-            delegate.completeTransfer(from: srcUrl)
+            await delegate.completeTransfer(from: srcUrl)
 
         } catch {
             XCTAssert(false, "Unexpected error : \(error)")
@@ -44,7 +43,7 @@ class DownloadDelegateTest: XCTestCase {
         // then
 
         // destination file exists
-        XCTAssert(fileHandler.fileExists(file: dstUrl, fileSize: 0))
+        XCTAssert(FileHandler().fileExists(file: dstUrl, fileSize: 0))
 
         // semaphore is calles
         XCTAssert(sema.wasSignalCalled())
@@ -54,16 +53,17 @@ class DownloadDelegateTest: XCTestCase {
 
     }
 
-    func testDownloadDelegateUpdate() {
+    func testDownloadDelegateUpdate() async {
 
         // given
         let sema = MockedDispatchSemaphore()
-        let delegate = DownloadDelegate(semaphore: sema)
-        delegate.startTime = Date.init(timeIntervalSinceNow: -60)  // one minute ago
-        delegate.totalFileSize = 1 * 1024 * 1024 * 1024  // 1 Gb
+        let delegate = DownloadDelegate(env: env, 
+                                        totalFileSize: 1 * 1024 * 1024 * 1024, // 1 Gb
+                                        startTime: Date.init(timeIntervalSinceNow: -60),  // one minute ago
+                                        semaphore: sema)
 
         // when
-        delegate.updateTransfer(totalBytesWritten: 500 * 1024 * 1024)  // 500 MB downloaded
+        await delegate.updateTransfer(totalBytesWritten: 500 * 1024 * 1024)  // 500 MB downloaded
 
         // then
         let mockedProgressBar = env.progressBar as! MockedProgressBar

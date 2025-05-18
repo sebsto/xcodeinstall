@@ -228,7 +228,7 @@ class AuthenticationSRPTest: HTTPClientTestCase {
         }
 
     }
-    
+
     private func getSRPInitResponse() -> Data {
         """
              {

@@ -5,19 +5,21 @@
 //  Created by Stormacq, Sebastien on 15/09/2022.
 //
 
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
-class CLIStoreSecretsTest: CLITest {
+@MainActor
+extension CLITests {
 
+    @Test("Test Store Secrets")
     func testStoreSecrets() async throws {
 
         // given
-        env.readLine = MockedReadLine(["username", "password"])
-
+        let mockedRL = MockedReadLine(["username", "password"])
+        let env = MockedEnvironment(readLine: mockedRL)
         // use the real AWS Secrets Handler, but with a mocked SDK
-        env.secrets = try AWSSecretsHandler(region: "us-east-1")
+        let mockedSecrets = try AWSSecretsHandler(env: env, region: "us-east-1")
 
         let storeSecrets = try parse(
             MainCommand.StoreSecrets.self,
@@ -29,38 +31,34 @@ class CLIStoreSecretsTest: CLITest {
         )
 
         // when
-        do {
-            try await storeSecrets.run()
-        } catch {
-            // then
-            XCTAssert(false, "unexpected exception : \(error)")
-        }
+        await #expect(throws: Never.self) { try await storeSecrets.run() }
 
         // test parsing of commandline arguments
-        XCTAssert(storeSecrets.globalOptions.verbose)
+        #expect(storeSecrets.globalOptions.verbose)
 
         // did we call setRegion on the SDK class ?
-        XCTAssertTrue((env.awsSDK as! MockedAWSSecretsHandlerSDK).regionSet())
+        #expect((env.awsSDK as? MockedAWSSecretsHandlerSDK)?.regionSet() ?? false)
     }
 
     func testPromptForCredentials() {
 
         // given
-        env.readLine = MockedReadLine(["username", "password"])
-        let xci = XCodeInstall()
+        let mockedRL = MockedReadLine(["username", "password"])
+        let env = MockedEnvironment(readLine: mockedRL)
+        let xci = XCodeInstall(env: env)
 
         // when
         do {
             let result = try xci.promptForCredentials()
 
             // then
-            XCTAssertTrue(result.count == 2)
-            XCTAssertEqual(result[0], "username")
-            XCTAssertEqual(result[1], "password")
+            #expect(result.count == 2)
+            #expect(result[0] == "username")
+            #expect(result[1] == "password")
 
         } catch {
             // then
-            XCTAssert(false, "unexpected exception : \(error)")
+            Issue.record("unexpected exception : \(error)")
         }
 
     }

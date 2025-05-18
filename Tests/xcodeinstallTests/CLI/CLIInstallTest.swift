@@ -5,12 +5,14 @@
 //  Created by Stormacq, Sebastien on 22/08/2022.
 //
 
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
-class CLIInstallTest: CLITest {
+@MainActor
+extension CLITests {
 
+    @Test("Test Install Command")
     func testInstall() async throws {
 
         // given
@@ -25,41 +27,37 @@ class CLIInstallTest: CLITest {
         )
 
         // when
-        do {
-            try await inst.run()
-        } catch {
-            // then
-            XCTAssert(false, "unexpected exception : \(error)")
-        }
+        await #expect(throws: Never.self) { try await inst.run() }
 
         // test parsing of commandline arguments
-        XCTAssert(inst.globalOptions.verbose)
-        XCTAssertEqual(inst.name, "test.xip")
+        #expect(inst.globalOptions.verbose)
+        #expect(inst.name == "test.xip")
 
         // verify if progressbar define() was called
         if let progress = env.progressBar as? MockedProgressBar {
-            XCTAssert(progress.defineCalled())
+            #expect(progress.defineCalled())
         } else {
-            XCTAssert(false, "Error in test implementation, the env.progressBar must be a MockedProgressBar")
+            Issue.record("Error in test implementation, the env.progressBar must be a MockedProgressBar")
         }
     }
 
+    @Test("Test Install Command with no name")
     func testPromptForFile() {
 
         // given
-        env.readLine = MockedReadLine(["0"])
-        let xci = XCodeInstall()
+        let env : MockedEnvironment = MockedEnvironment(readLine: MockedReadLine(["0"]))
+        let xci = XCodeInstall(env: env)
 
         // when
         do {
             let result = try xci.promptForFile()
 
             // then
-            XCTAssertTrue(result.lastPathComponent.hasSuffix("name.dmg"))
+            #expect(result.lastPathComponent.hasSuffix("name.dmg"))
 
         } catch {
             // then
-            XCTAssert(false, "unexpected exception : \(error)")
+            Issue.record("unexpected exception : \(error)")
         }
 
     }

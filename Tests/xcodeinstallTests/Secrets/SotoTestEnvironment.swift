@@ -11,7 +11,7 @@ import SotoCore
 import XCTest
 
 /// Provide various test environment variables
-enum TestEnvironment {
+struct TestEnvironment {
     /// are we using Localstack to test. Also return use localstack if we are running a github action and don't have an access key if
     static var isUsingLocalstack: Bool {
         //        return Environment["AWS_DISABLE_LOCALSTACK"] != "true" ||

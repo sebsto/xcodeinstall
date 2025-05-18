@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Synchronization
 
 @testable import xcodeinstall
 
@@ -13,9 +14,15 @@ import Foundation
 import FoundationNetworking
 #endif
 
-class MockedSecretHandler: SecretsHandlerProtocol {
+@MainActor
+final class MockedSecretsHandler: SecretsHandlerProtocol {
 
     var nextError: AWSSecretsHandlerError?
+    let env: Environment
+    public init(env: Environment, nextError: AWSSecretsHandlerError? = nil) {
+        self.nextError = nextError
+        self.env = env
+    }
 
     func clearSecrets() async throws {
 
@@ -38,7 +45,7 @@ class MockedSecretHandler: SecretsHandlerProtocol {
     }
 
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
-        if let nextError {
+        if let nextError = nextError {
             throw nextError
         }
         guard let rl = env.readLine as? MockedReadLine else {
@@ -50,41 +57,52 @@ class MockedSecretHandler: SecretsHandlerProtocol {
 
 }
 
-class MockedAWSSecretsHandlerSDK: AWSSecretsHandlerSDKProtocol {
+final class MockedAWSSecretsHandlerSDK: AWSSecretsHandlerSDKProtocol {
 
-    var _setRegion: Bool = false
-    var appleSession: AppleSessionSecret
-    var appleCredentials: AppleCredentialsSecret
+    private let _regionSet: Mutex<Bool> = .init(false)
+    let appleSession: Mutex<AppleSessionSecret>
+    let appleCredentials: Mutex<AppleCredentialsSecret>
 
-    init() {
-        appleSession = try! AppleSessionSecret(fromString: "{}")
-        appleCredentials = AppleCredentialsSecret(username: "", password: "")
+    init() throws {
+        appleSession = try .init(AppleSessionSecret(fromString: "{}"))
+        appleCredentials = .init(AppleCredentialsSecret(username: "", password: ""))
+    }
+
+    static func forRegion(_ region: String) throws -> any xcodeinstall.AWSSecretsHandlerSDKProtocol {
+        let mock = try MockedAWSSecretsHandlerSDK()
+        mock._regionSet.withLock { $0 = true }
+        return mock
     }
 
     func regionSet() -> Bool {
-        let rs = _setRegion
-        _setRegion = false
-        return rs
+        _regionSet.withLock { $0 }
     }
-    func setRegion(region: String) throws {
-        _setRegion = true
+    
+    func saveSecret<T>(secretId: AWSSecretsName, secret: T) async throws where T: Secrets {
+        switch secretId {
+        case .appleCredentials:
+            appleCredentials.withLock { $0 = secret as! AppleCredentialsSecret }
+        case .appleSessionToken:
+            appleSession.withLock { $0 = secret as! AppleSessionSecret }
+        }
     }
 
     func updateSecret<T>(secretId: AWSSecretsName, newValue: T) async throws where T: Secrets {
         switch secretId {
         case .appleCredentials:
-            appleCredentials = newValue as! AppleCredentialsSecret
+
+            appleCredentials.withLock { $0 = newValue as! AppleCredentialsSecret }
         case .appleSessionToken:
-            appleSession = newValue as! AppleSessionSecret
+            appleSession.withLock { $0 = newValue as! AppleSessionSecret }
         }
     }
 
     func retrieveSecret<T>(secretId: AWSSecretsName) async throws -> T where T: Secrets {
         switch secretId {
         case .appleCredentials:
-            return appleCredentials as! T
+            return appleCredentials.withLock { $0 as! T }
         case .appleSessionToken:
-            return appleSession as! T
+            return appleSession.withLock { $0 as! T }
         }
     }
 }
