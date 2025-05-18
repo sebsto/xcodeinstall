@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "xcodeinstall",
     platforms: [
-        .macOS(.v12)
+        .macOS(.v15)
     ],    
     products: [
         .executable(name: "xcodeinstall", targets: ["xcodeinstall"])
@@ -14,9 +14,10 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
         .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"),
-        .package(url: "https://github.com/sebsto/CLIlib/", from: "0.1.2"),
+        .package(url: "https://github.com/sebsto/CLIlib/", branch: "main"),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
-        .package(url: "https://github.com/apple/swift-crypto", from: "3.9.1"),        
+        .package(url: "https://github.com/apple/swift-crypto", from: "3.9.1"),
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", branch: "main"),
         //.package(path: "../CLIlib")
     ],
 
@@ -30,7 +31,8 @@ let package = Package(
                 .product(name: "SotoSecretsManager", package: "soto"),
                 .product(name: "SRP", package: "swift-srp"),
                 .product(name: "CLIlib", package: "CLIlib"),
-                .product(name: "_CryptoExtras", package: "swift-crypto")
+                .product(name: "_CryptoExtras", package: "swift-crypto"),
+                .product(name: "Subprocess", package: "swift-subprocess"),
             ]
         ),
         .testTarget(
@@ -46,5 +48,5 @@ let package = Package(
             // ]
         )
     ],
-    swiftLanguageModes: [.v5]
+//    swiftLanguageModes: [.v5]
 )

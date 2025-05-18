@@ -11,7 +11,7 @@ extension XCodeInstall {
 
     func storeSecrets() async throws {
 
-        guard let secretsHandler = env.secrets as? AWSSecretsHandler else {
+        guard let secretsHandler = self.env.secrets as? AWSSecretsHandler else {
             fatalError("This function requires a AWSSecretsManager")
         }
 
@@ -41,7 +41,7 @@ extension XCodeInstall {
         )
 
         guard
-            let username = env.readLine.readLine(
+            let username = self.env.readLine.readLine(
                 prompt: "⌨️  Enter your Apple ID username: ",
                 silent: false
             )
@@ -50,7 +50,7 @@ extension XCodeInstall {
         }
 
         guard
-            let password = env.readLine.readLine(
+            let password = self.env.readLine.readLine(
                 prompt: "⌨️  Enter your Apple ID password: ",
                 silent: true
             )

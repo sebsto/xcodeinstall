@@ -49,7 +49,7 @@ struct AppleCredentialsSecret: Codable, Secrets {
 
 }
 
-protocol SecretsHandlerProtocol {
+protocol SecretsHandlerProtocol: Sendable {
 
     func clearSecrets() async throws
 

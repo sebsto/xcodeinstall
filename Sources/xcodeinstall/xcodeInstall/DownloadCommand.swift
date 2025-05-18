@@ -19,7 +19,7 @@ extension XCodeInstall {
         datePublished: Bool
     ) async throws {
 
-        let download = env.downloader
+        let download = self.env.downloader
 
         var fileToDownload: DownloadList.File
         do {
@@ -48,7 +48,7 @@ extension XCodeInstall {
             }
 
             // now we have a filename, let's proceed with download
-            let progressBar = env.progressBar
+            let progressBar = self.env.progressBar
             progressBar.define(
                 animationType: .percentProgressAnimation,
                 message: "Downloading \(fileToDownload.displayName ?? fileToDownload.filename)"
@@ -57,8 +57,9 @@ extension XCodeInstall {
             _ = try await download.download(file: fileToDownload)
 
             // check if the downloaded file is complete
-            let file: URL = env.fileHandler.downloadFileURL(file: fileToDownload)
-            let complete = try? env.fileHandler.checkFileSize(
+            let fh = self.env.fileHandler
+            let file: URL = await Task { await fh.downloadFileURL(file: fileToDownload) } .value
+            let complete = try? self.env.fileHandler.checkFileSize(
                 file: file,
                 fileSize: fileToDownload.fileSize
             )
@@ -98,7 +99,7 @@ extension XCodeInstall {
             datePublished: datePublished
         )
 
-        let response: String? = env.readLine.readLine(
+        let response: String? = self.env.readLine.readLine(
             prompt: "⌨️  Which one do you want to download? ",
             silent: false
         )

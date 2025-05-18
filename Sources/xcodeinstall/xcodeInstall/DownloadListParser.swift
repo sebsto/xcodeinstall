@@ -7,13 +7,16 @@
 
 import Foundation
 
+@MainActor
 struct DownloadListParser {
 
-    var xCodeOnly: Bool
-    var majorVersion: String
-    var sortMostRecentFirst: Bool
+    let env: Environment
+    let xCodeOnly: Bool
+    let majorVersion: String
+    let sortMostRecentFirst: Bool
 
-    init(xCodeOnly: Bool = true, majorVersion: String = "13", sortMostRecentFirst: Bool = false) {
+    init(env: Environment, xCodeOnly: Bool = true, majorVersion: String = "13", sortMostRecentFirst: Bool = false) {
+        self.env = env
         self.xCodeOnly = xCodeOnly
         self.majorVersion = majorVersion
         self.sortMostRecentFirst = sortMostRecentFirst
@@ -67,23 +70,30 @@ struct DownloadListParser {
 
     /// Enrich the list of available downloads.
     /// It adds a flag for each file in the list to indicate if the file is already downloaded and available in cache
-    func enrich(list: [DownloadList.Download]) -> [DownloadList.Download] {
+    func enrich(list: [DownloadList.Download]) async  -> [DownloadList.Download] {
 
-        let fileHandler = env.fileHandler
 
-        return list.map { download in
+        return await list.asyncMap { download in
+            let fileHandler = await self.env.fileHandler
 
             // swiftlint:disable identifier_name
-            var d = download
-            var file = download.files[0]
+            let d = download
+            let file = download.files[0]
 
-            let downloadFile: URL = fileHandler.downloadFileURL(file: file)
-            let exists = fileHandler.fileExists(file: downloadFile, fileSize: file.fileSize)
+            let fileCopy = file
+            let downloadFile: URL = await Task {
+                await fileHandler.downloadFileURL(file: fileCopy)
+            }.value
+            let exists = await fileHandler.fileExists(file: downloadFile, fileSize: file.fileSize)
 
-            file.existInCache = exists
-            d.files = [file]
+            // create a copy of the file to be used in the list
+            let newFile = DownloadList.File.init(from: file, existInCache: exists)
+            
+            // create a copy of the download to be used in the list
+            let newDownload = DownloadList.Download(
+                from: d,appendFile: newFile)
 
-            return d
+            return newDownload
 
         }
     }
@@ -99,7 +109,7 @@ struct DownloadListParser {
 
             // swiftlint:disable line_length
             line +=
-                "[\(String(format: "%02d", index))] \(download.name) (\(file.fileSize/1024/1024) Mb) \(file.existInCache ?? false ? "(*)" : "")"
+                "[\(String(format: "%02d", index))] \(download.name) (\(file.fileSize/1024/1024) Mb) \(file.existInCache ? "(*)" : "")"
 
             if withDate {
                 if let date = download.datePublished {

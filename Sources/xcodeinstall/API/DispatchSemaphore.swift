@@ -8,7 +8,7 @@
 import Foundation
 
 // abstract protocol for testing
-protocol DispatchSemaphoreProtocol {
+protocol DispatchSemaphoreProtocol: Sendable {
     func wait()
     func signal() -> Int
 }

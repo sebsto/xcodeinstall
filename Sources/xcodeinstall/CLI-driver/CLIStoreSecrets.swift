@@ -8,11 +8,12 @@
 import ArgumentParser
 import CLIlib
 import Foundation
+import Logging
 
 extension MainCommand {
 
     struct StoreSecrets: AsyncParsableCommand {
-        static var configuration =
+        nonisolated static let configuration =
             CommandConfiguration(
                 commandName: "storesecrets",
                 abstract: "Store your Apple Developer Portal username and password in AWS Secrets Manager"
@@ -29,15 +30,9 @@ extension MainCommand {
 
         func run() async throws {
 
-            if globalOptions.verbose {
-                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
-            } else {
-                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
-            }
+            let xci = try await MainCommand.XCodeInstaller(for: secretManagerRegion,
+                                                           verbose: globalOptions.verbose)
 
-            env.secrets = try AWSSecretsHandler(region: secretManagerRegion)
-
-            let xci = XCodeInstall()
             _ = try await xci.storeSecrets()
         }
     }

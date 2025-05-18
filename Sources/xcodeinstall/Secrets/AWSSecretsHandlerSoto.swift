@@ -10,28 +10,42 @@ import Foundation
 import SotoSecretsManager
 
 // use a class to have a chance to call client.shutdown() at deinit
-class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
+final class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
 
     let maxRetries = 3
 
-    var awsClient: AWSClient?  // var for injection
-    var smClient: SecretsManager?  // var for injection
+    let awsClient: AWSClient?  // var for injection
+    let smClient: SecretsManager?  // var for injection
 
-    func setRegion(region: String) throws {
+    init(awsClient: AWSClient? = nil, smClient: SecretsManager? = nil) {
+        self.awsClient = awsClient
+        self.smClient = smClient
+    }
+
+    static func forRegion(_ region: String) throws -> AWSSecretsHandlerSDKProtocol {
+        try AWSSecretsHandlerSoto.forRegion(region, awsClient: nil, smClient: nil)
+    }
+    static func forRegion(_ region: String, awsClient: AWSClient? = nil, smClient: SecretsManager? = nil) throws -> AWSSecretsHandlerSDKProtocol{
 
         guard let awsRegion = Region(awsRegionName: region) else {
             throw AWSSecretsHandlerError.invalidRegion(region: region)
         }
-
-        self.awsClient = AWSClient(
-            credentialProvider: .selector(.environment, .ec2, .configFile()),
-            retryPolicy: .jitter(),
-            httpClientProvider: .createNew
-        )
-        self.smClient = SecretsManager(
-            client: awsClient!,
-            region: awsRegion
-        )
+        var newAwsClient: AWSClient? = nil
+        if awsClient == nil {
+            newAwsClient = AWSClient(
+                credentialProvider: .selector(.environment, .ec2, .configFile()),
+                retryPolicy: .jitter(),
+                httpClientProvider: .createNew
+            )
+        }
+        var newSMClient: SecretsManager?
+        if smClient == nil {
+            newSMClient = SecretsManager(
+                client: awsClient ?? newAwsClient!,
+                region: awsRegion
+            )
+        }
+        return AWSSecretsHandlerSoto(awsClient: awsClient ?? newAwsClient!, smClient: smClient ?? newSMClient!)
     }
 
     deinit {

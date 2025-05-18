@@ -8,13 +8,14 @@
 import ArgumentParser
 import CLIlib
 import Foundation
+import Logging
 
 // list implementation
 extension MainCommand {
 
     struct DownloadListOptions: ParsableArguments {
 
-        static var configuration =
+        nonisolated static let configuration =
             CommandConfiguration(
                 abstract: "Common options for list and download commands",
                 shouldDisplay: false
@@ -44,28 +45,23 @@ extension MainCommand {
 
     }
 
+    @MainActor
     struct List: AsyncParsableCommand {
 
-        static var configuration =
+        
+        
+       nonisolated  static let configuration =
             CommandConfiguration(abstract: "List available versions of Xcode and development tools")
-
+        
         @OptionGroup var globalOptions: GlobalOptions
         @OptionGroup var downloadListOptions: DownloadListOptions
         @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
 
-            if globalOptions.verbose {
-                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
-            } else {
-                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
-            }
+            let xci = try await MainCommand.XCodeInstaller(for: cloudOption.secretManagerRegion,
+                                                           verbose: globalOptions.verbose)
 
-            let xci = XCodeInstall()
-
-            if let region = cloudOption.secretManagerRegion {
-                env.secrets = try AWSSecretsHandler(region: region)
-            }
 
             _ = try await xci.list(
                 force: downloadListOptions.force,

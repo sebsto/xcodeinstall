@@ -11,7 +11,7 @@ extension XCodeInstall {
 
     func signout() async throws {
 
-        let auth = env.authenticator
+        let auth = self.env.authenticator
 
         display("Signing out...")
         try await auth.signout()

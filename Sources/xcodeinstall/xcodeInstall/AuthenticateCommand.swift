@@ -11,12 +11,12 @@ extension XCodeInstall {
 
     func authenticate(with authenticationMethod: AuthenticationMethod) async throws {
 
-        let auth = env.authenticator
+        let auth = self.env.authenticator
 
         do {
 
             // delete previous session, if any
-            try await env.secrets.clearSecrets()
+            try await self.env.secrets.clearSecrets()
             let appleCredentials = try await retrieveAppleCredentials()
 
             if authenticationMethod == .usernamePassword {
@@ -73,7 +73,7 @@ extension XCodeInstall {
         do {
             // first try on AWS Secrets Manager
             display("Retrieving Apple Developer Portal credentials...")
-            appleCredentials = try await env.secrets.retrieveAppleCredentials()
+            appleCredentials = try await self.env.secrets.retrieveAppleCredentials()
 
         } catch AWSSecretsHandlerError.invalidOperation {
 
@@ -101,7 +101,7 @@ extension XCodeInstall {
         )
 
         guard
-            let username = env.readLine.readLine(
+            let username = self.env.readLine.readLine(
                 prompt: "⌨️  Enter your Apple ID username: ",
                 silent: false
             )
@@ -110,7 +110,7 @@ extension XCodeInstall {
         }
 
         guard
-            let password = env.readLine.readLine(
+            let password = self.env.readLine.readLine(
                 prompt: "⌨️  Enter your Apple ID password: ",
                 silent: true
             )
@@ -124,7 +124,7 @@ extension XCodeInstall {
     // manage the MFA authentication sequence
     private func startMFAFlow() async throws {
 
-        let auth = env.authenticator
+        let auth = self.env.authenticator
 
         do {
 
@@ -132,7 +132,7 @@ extension XCodeInstall {
             assert(codeLength > 0)
 
             let prompt = "🔐 Two factors authentication is enabled, enter your 2FA code: "
-            guard let pinCode = env.readLine.readLine(prompt: prompt, silent: false) else {
+            guard let pinCode = self.env.readLine.readLine(prompt: prompt, silent: false) else {
                 throw CLIError.invalidInput
             }
             try await auth.twoFactorAuthentication(pin: pinCode)

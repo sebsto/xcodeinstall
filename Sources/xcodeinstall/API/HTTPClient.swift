@@ -20,7 +20,7 @@ import FoundationNetworking
 
 // make URLSession testable by abstracting its protocol
 // it allows to use the real URLSession or a mock interchangably
-protocol URLSessionProtocol {
+protocol URLSessionProtocol: Sendable {
     func data(
         for request: URLRequest,
         delegate: URLSessionTaskDelegate?
@@ -42,7 +42,7 @@ extension URLSession: URLSessionProtocol {
 }
 
 // make URLSessionDownloadTask testable by abstracting its protocol
-protocol URLSessionDownloadTaskProtocol {
+protocol URLSessionDownloadTaskProtocol: Sendable {
     func resume()
 }
 
@@ -65,7 +65,13 @@ enum ExpectedResponseCode {
 }
 
 // provide common code for all network clients
+@MainActor
 class HTTPClient {
+    
+    let env: Environment
+    public init(env: Environment) {
+        self.env = env
+    }
 
     enum HTTPVerb: String {
         case GET
@@ -87,7 +93,7 @@ class HTTPClient {
         ]
 
         // reload previous session if it exists
-        let session = try? await env.secrets.loadSession()
+        let session = try? await self.env.secrets.loadSession()
         if let session {
 
             // session is loaded
@@ -109,7 +115,7 @@ class HTTPClient {
         }
 
         // reload cookies if they exist
-        let cookies = try? await env.secrets.loadCookies()
+        let cookies = try? await self.env.secrets.loadCookies()
         if let cookies {
             // cookies existed, let's add them to our HTTPHeaders
             requestHeaders.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current
@@ -151,7 +157,7 @@ class HTTPClient {
         log(request: request, to: log)
 
         // send request with that session
-        let (data, response) = try await env.urlSessionData.data(for: request, delegate: nil)
+        let (data, response) = try await self.env.urlSessionData.data(for: request, delegate: nil)
         guard let httpResponse = response as? HTTPURLResponse,
             validResponse.isValid(response: httpResponse.statusCode)
         else {
@@ -180,7 +186,7 @@ class HTTPClient {
         var headers = requestHeaders
 
         // reload cookies if they exist
-        let cookies = try? await env.secrets.loadCookies()
+        let cookies = try? await self.env.secrets.loadCookies()
         if let cookies {
             // cookies existed, let's add them to our HTTPHeaders
             headers.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
@@ -195,7 +201,7 @@ class HTTPClient {
 
         // send request with download session
         // this is asynchronous, monitor progress through delegate
-        return try env.urlSessionDownload.downloadTask(with: request)
+        return try self.env.urlSessionDownload(dstFilePath: nil, totalFileSize: nil, startTime: nil).downloadTask(with: request)
     }
 
     // prepare an URLRequest for a given url, method, body, and headers

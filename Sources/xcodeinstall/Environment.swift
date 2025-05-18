@@ -17,15 +17,27 @@ import FoundationNetworking
  a global struct to give access to classes for which I wrote tests.
  this global object allows me to simplify dependency injection */
 
-var env = Environment()
+@MainActor
+protocol Environment: Sendable {
+    var fileHandler: FileHandlerProtocol { get }
+    var display: DisplayProtocol { get }
+    var readLine: ReadLineProtocol { get }
+    var progressBar: CLIProgressBarProtocol { get }
+    var secrets: SecretsHandlerProtocol { get }
+    var awsSDK: AWSSecretsHandlerSDKProtocol { get }
+    var authenticator: AppleAuthenticatorProtocol { get }
+    var downloader: AppleDownloaderProtocol { get }
+    var urlSessionData: URLSessionProtocol { get }
+    func urlSessionDownload(dstFilePath: URL?, totalFileSize: Int?, startTime: Date?) -> URLSessionProtocol
+}
 
-struct Environment {
+@MainActor
+struct RuntimeEnvironment: Environment {
 
     // Utilities classes
     var fileHandler: FileHandlerProtocol = FileHandler()
 
     // CLI related classes
-    var shell: AsyncShellProtocol = AsyncShell()
     var display: DisplayProtocol = Display()
     var readLine: ReadLineProtocol = ReadLine()
 
@@ -37,15 +49,26 @@ struct Environment {
     var awsSDK: AWSSecretsHandlerSDKProtocol = AWSSecretsHandlerSoto()
 
     // Commands
-    var authenticator: AppleAuthenticatorProtocol = AppleAuthenticator()
-    var downloader: AppleDownloaderProtocol = AppleDownloader()
+    var authenticator: AppleAuthenticatorProtocol {
+        AppleAuthenticator(env: self)
+    }
+    var downloader: AppleDownloaderProtocol {
+        AppleDownloader(env: self)
+    }
 
     // Network
     var urlSessionData: URLSessionProtocol = URLSession.shared
-    var urlSessionDownload: URLSessionProtocol = URLSession(
-        configuration: .default,
-        delegate: DownloadDelegate(semaphore: DispatchSemaphore(value: 0)),
-        delegateQueue: nil
-    )
-
+    func urlSessionDownload(dstFilePath: URL? = nil,
+                            totalFileSize: Int? = nil,
+                            startTime: Date? = nil) -> URLSessionProtocol {
+        URLSession(
+            configuration: .default,
+            delegate: DownloadDelegate(env: self,
+                                       dstFilePath: dstFilePath,
+                                       totalFileSize: totalFileSize,
+                                       startTime: startTime,
+                                       semaphore: DispatchSemaphore(value: 0)),
+            delegateQueue: nil
+            )
+    }
 }

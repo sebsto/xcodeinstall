@@ -8,11 +8,12 @@
 import ArgumentParser
 import CLIlib
 import Foundation
+import Logging
 
 extension MainCommand {
 
     struct Authenticate: AsyncParsableCommand {
-        static var configuration =
+        nonisolated static let configuration =
             CommandConfiguration(abstract: "Authenticate yourself against Apple Developer Portal")
 
         @OptionGroup var globalOptions: GlobalOptions
@@ -23,41 +24,23 @@ extension MainCommand {
 
         func run() async throws {
 
-            if globalOptions.verbose {
-                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
-            } else {
-                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
-            }
+            let xci = try await MainCommand.XCodeInstaller(for: cloudOption.secretManagerRegion,
+                                                           verbose: globalOptions.verbose)
 
-            if let region = cloudOption.secretManagerRegion {
-                env.secrets = try AWSSecretsHandler(region: region)
-            }
-
-            let xci = XCodeInstall()
             try await xci.authenticate(with: AuthenticationMethod.withSRP(srp))
         }
     }
 
     struct Signout: AsyncParsableCommand {
-        static var configuration = CommandConfiguration(abstract: "Signout from Apple Developer Portal")
+        nonisolated static let configuration = CommandConfiguration(abstract: "Signout from Apple Developer Portal")
 
         @OptionGroup var globalOptions: GlobalOptions
         @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-
-            if globalOptions.verbose {
-                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
-            } else {
-                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
-            }
-
-            if let region = cloudOption.secretManagerRegion {
-                env.secrets = try AWSSecretsHandler(region: region)
-            }
-
-            let xci = XCodeInstall()
-            try await xci.signout()
+            try await MainCommand.XCodeInstaller(for: cloudOption.secretManagerRegion,
+                                                 verbose: globalOptions.verbose)
+            .signout()
         }
     }
 

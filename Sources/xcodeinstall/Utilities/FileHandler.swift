@@ -9,17 +9,19 @@ import CLIlib
 import Foundation
 
 // the methods I want to mock for unit testing
-protocol FileHandlerProtocol {
-    func move(from src: URL, to dst: URL) throws
+@MainActor
+protocol FileHandlerProtocol: Sendable {
+    func move(from src: URL, to dst: URL) async throws
     func fileExists(file: URL, fileSize: Int) -> Bool
     func checkFileSize(file: URL, fileSize: Int) throws -> Bool
     func downloadedFiles() throws -> [String]
-    func downloadFilePath(file: DownloadList.File) -> String
-    func downloadFileURL(file: DownloadList.File) -> URL
+    func downloadFilePath(file: DownloadList.File) async -> String
+    func downloadFileURL(file: DownloadList.File) async -> URL
     func saveDownloadList(list: DownloadList) throws -> DownloadList
     func loadDownloadList() throws -> DownloadList
-    //    func baseFilePath() -> URL
-    //    func baseFilePath() -> String
+    func baseFilePath() -> URL
+    func baseFilePath() -> String
+    func downloadDirectory() -> URL
 }
 
 enum FileHandlerError: Error {
@@ -31,21 +33,19 @@ struct FileHandler: FileHandlerProtocol {
 
     private static let baseDirectory = FileManager.default.homeDirectoryForCurrentUser
         .appendingPathComponent(".xcodeinstall")
-    static let downloadDirectory = baseDirectory.appendingPathComponent("download")
-    static let downloadListPath = baseDirectory.appendingPathComponent("downloadList")
+    func downloadDirectory() -> URL { FileHandler.baseDirectory.appendingPathComponent("download") }
+    func downloadListPath() -> URL { FileHandler.baseDirectory.appendingPathComponent("downloadList") }
 
-    let fm = FileManager.default  // swiftlint:disable:this identifier_name
-
-    static func baseFilePath() -> String {
+    func baseFilePath() -> String {
         baseFilePath().path
     }
-    static func baseFilePath() -> URL {
+    func baseFilePath() -> URL {
 
         // if base directory does not exist, create it
         let fm = FileManager.default  // swiftlint:disable:this identifier_name
         if !fm.fileExists(atPath: FileHandler.baseDirectory.path) {
             do {
-                try fm.createDirectory(at: FileHandler.downloadDirectory, withIntermediateDirectories: true)
+                try FileManager.default.createDirectory(at: downloadDirectory(), withIntermediateDirectories: true)
             } catch {
                 log.error("🛑 Can not create base directory : \(FileHandler.baseDirectory.path)\n\(error)")
             }
@@ -54,15 +54,15 @@ struct FileHandler: FileHandlerProtocol {
         return FileHandler.baseDirectory
     }
 
-    func move(from src: URL, to dst: URL) throws {
+    func move(from src: URL, to dst: URL) async throws {
         do {
-            if fm.fileExists(atPath: dst.path) {
+            if FileManager.default.fileExists(atPath: dst.path) {
                 log.debug("⚠️ File \(dst) exists, I am overwriting it")
-                try fm.removeItem(atPath: dst.path)
+                try FileManager.default.removeItem(atPath: dst.path)
             }
 
             let dstUrl = URL(fileURLWithPath: dst.path)
-            try fm.moveItem(at: src, to: dstUrl)
+            try FileManager.default.moveItem(at: src, to: dstUrl)
 
         } catch {
             log.error("🛑 Can not move file : \(error)")
@@ -70,22 +70,22 @@ struct FileHandler: FileHandlerProtocol {
         }
     }
 
-    func downloadFilePath(file: DownloadList.File) -> String {
-        downloadFileURL(file: file).path
+    func downloadFilePath(file: DownloadList.File) async -> String {
+        await downloadFileURL(file: file).path
     }
-    func downloadFileURL(file: DownloadList.File) -> URL {
+    func downloadFileURL(file: DownloadList.File) async -> URL {
 
         // if download directory does not exist, create it
-        if !fm.fileExists(atPath: FileHandler.downloadDirectory.path) {
+        if !FileManager.default.fileExists(atPath: downloadDirectory().path) {
             do {
-                try fm.createDirectory(at: FileHandler.downloadDirectory, withIntermediateDirectories: true)
+                try FileManager.default.createDirectory(at: downloadDirectory(), withIntermediateDirectories: true)
             } catch {
                 log.error(
-                    "🛑 Can not create base directory : \(FileHandler.downloadDirectory.path)\n\(error)"
+                    "🛑 Can not create base directory : \(downloadDirectory().path)\n\(error)"
                 )
             }
         }
-        return FileHandler.downloadDirectory.appendingPathComponent(file.filename)
+        return downloadDirectory().appendingPathComponent(file.filename)
 
     }
 
@@ -101,11 +101,11 @@ struct FileHandler: FileHandlerProtocol {
         let filePath = file.path
 
         // file exists ?
-        let exists = fm.fileExists(atPath: filePath)
+        let exists = FileManager.default.fileExists(atPath: filePath)
         if !exists { throw FileHandlerError.fileDoesNotExist }
 
         // file size ?
-        let attributes = try? fm.attributesOfItem(atPath: filePath)
+        let attributes = try? FileManager.default.attributesOfItem(atPath: filePath)
         let actualSize = attributes?[.size] as? Int
 
         // at this stage, we know the file exists, just check size now
@@ -121,7 +121,7 @@ struct FileHandler: FileHandlerProtocol {
 
         let filePath = file.path
 
-        let fileExists = fm.fileExists(atPath: filePath)
+        let fileExists = FileManager.default.fileExists(atPath: filePath)
         // does the file exists ?
         if !fileExists {
             return false
@@ -136,7 +136,7 @@ struct FileHandler: FileHandlerProtocol {
 
     func downloadedFiles() throws -> [String] {
         do {
-            return try fm.contentsOfDirectory(atPath: FileHandler.downloadDirectory.path)
+            return try FileManager.default.contentsOfDirectory(atPath: downloadDirectory().path)
         } catch {
             log.debug("\(error)")
             throw FileHandlerError.noDownloadedList
@@ -147,7 +147,7 @@ struct FileHandler: FileHandlerProtocol {
 
         // save list
         let data = try JSONEncoder().encode(list)
-        try data.write(to: FileHandler.downloadListPath)
+        try data.write(to: downloadListPath())
 
         return list
 
@@ -156,7 +156,7 @@ struct FileHandler: FileHandlerProtocol {
     func loadDownloadList() throws -> DownloadList {
 
         // read the raw file saved on disk
-        let listData = try Data(contentsOf: FileHandler.downloadListPath)
+        let listData = try Data(contentsOf: downloadListPath())
 
         return try JSONDecoder().decode(DownloadList.self, from: listData)
     }

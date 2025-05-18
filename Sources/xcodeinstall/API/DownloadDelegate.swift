@@ -13,30 +13,42 @@ import FoundationNetworking
 #endif
 
 // delegate class to receive download progress
-class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
+@MainActor
+final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
-    var dstFilePath: URL?
-    var totalFileSize: Int?
-    var startTime: Date?
+    let env: Environment
+    let dstFilePath: URL?
+    let totalFileSize: Int?
+    let startTime: Date?
 
     // to notify the main thread when download is finish
     let sema: DispatchSemaphoreProtocol
 
-    init(semaphore: DispatchSemaphoreProtocol) {
+    init(env: Environment,
+         dstFilePath: URL? = nil,
+         totalFileSize: Int? = nil,
+         startTime: Date? = nil,
+         semaphore: DispatchSemaphoreProtocol) {
+        self.env = env
+        self.dstFilePath = dstFilePath
+        self.totalFileSize = totalFileSize
+        self.startTime = startTime
         self.sema = semaphore
     }
 
-    func urlSession(
+    nonisolated func urlSession(
         _ session: URLSession,
         downloadTask: URLSessionDownloadTask,
         didFinishDownloadingTo location: URL
     ) {
-        completeTransfer(from: location)
+        Task {
+            await completeTransfer(from: location)
+        }
     }
 
-    func completeTransfer(from location: URL) {
+    func completeTransfer(from location: URL) async {
         // tell the progress bar that we're done
-        env.progressBar.complete(success: true)
+        self.env.progressBar.complete(success: true)
 
         guard let dst = dstFilePath else {
             log.warning("⚠️ No destination specified. I am keeping the file at \(location)")
@@ -46,23 +58,27 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         log.debug("Finished at \(location)\nMoving to \(dst)")
 
         // ignore the error here ? It is logged one level down. How to bring it up to the user ?
-        try? env.fileHandler.move(from: location, to: dst)
+        // file handler is not isolated to MainActor, need to use Task
+        let fh = env.fileHandler
+        let _ = await Task { try? await fh.move(from: location, to: dst) }.value
 
         // tell the main thread that we're done
         _ = self.sema.signal()
     }
 
-    func urlSession(
+    nonisolated func urlSession(
         _ session: URLSession,
         downloadTask: URLSessionDownloadTask,
         didWriteData bytesWritten: Int64,
         totalBytesWritten: Int64,
         totalBytesExpectedToWrite: Int64
     ) {
-        updateTransfer(totalBytesWritten: totalBytesWritten)
+        Task {
+            await updateTransfer(totalBytesWritten: totalBytesWritten)
+        }
     }
 
-    func updateTransfer(totalBytesWritten: Int64) {
+    func updateTransfer(totalBytesWritten: Int64) async {
         guard let tfs = totalFileSize else {
             fatalError("Developer forgot to share the total file size")
         }
@@ -94,7 +110,7 @@ class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         request
     }
 
-    func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
+    nonisolated func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
         log.warning("error \(String(describing: error))")
         _ = self.sema.signal()
     }

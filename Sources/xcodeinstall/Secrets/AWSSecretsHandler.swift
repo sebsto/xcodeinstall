@@ -62,8 +62,8 @@ struct AppleSessionSecret: Codable, Secrets {
 }
 
 // the methods that must be implemented by the class encapsulating the SDK we are using
-protocol AWSSecretsHandlerSDKProtocol {
-    func setRegion(region: String) throws
+protocol AWSSecretsHandlerSDKProtocol: Sendable {
+    static func forRegion(_ region: String) throws -> AWSSecretsHandlerSDKProtocol
     func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws
     func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T
 }
@@ -74,15 +74,18 @@ protocol AWSSecretsHandlerSDKProtocol {
 // secretsmanager:GetSecretValue
 // secretsmanager:PutSecretValue
 
+@MainActor
 struct AWSSecretsHandler: SecretsHandlerProtocol {
 
     // provide a default implementation based on Soto
-    let awsSDK: AWSSecretsHandlerSDKProtocol = env.awsSDK
+    let awsSDK: AWSSecretsHandlerSDKProtocol
 
-    init(region: String) throws {
-        try self.awsSDK.setRegion(region: region)
+    let env: Environment
+    public init(env: Environment, region: String) throws {
+        self.env = env
+        try self.awsSDK = AWSSecretsHandlerSoto.forRegion(region)
     }
-
+    
     // MARK: protocol implementation
 
     // I do not delete the secrets because there is a 30 days deletion policy

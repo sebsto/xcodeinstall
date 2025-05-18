@@ -13,9 +13,10 @@ import FoundationNetworking
 #endif
 
 // store secrets on files in $HOME/.xcodeinstaller
+@MainActor
 struct FileSecretsHandler: SecretsHandlerProtocol {
 
-    private let fileManager: FileManager
+    private var fileManager: FileManager
     private var baseDirectory: URL
     private let cookiesPath: URL
     private let sessionPath: URL
@@ -23,10 +24,9 @@ struct FileSecretsHandler: SecretsHandlerProtocol {
     private let newSessionPath: URL
 
     init() {
-
-        fileManager = FileManager()
-
-        baseDirectory = FileHandler.baseFilePath()
+        self.fileManager = FileManager.default
+        
+        baseDirectory = FileHandler().baseFilePath()
 
         cookiesPath = baseDirectory.appendingPathComponent("cookies")
         sessionPath = baseDirectory.appendingPathComponent("session")

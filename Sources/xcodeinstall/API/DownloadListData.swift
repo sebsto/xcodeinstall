@@ -20,15 +20,15 @@ enum DownloadError: Error {
     case accountneedUpgrade(errorCode: Int, errorMessage: String)
 }
 
-struct DownloadList: Codable {
+struct DownloadList: Sendable, Codable {
 
-    struct DownloadCategory: Codable {
+    struct DownloadCategory: Sendable, Codable {
         let id: Int
         let name: String
         let sortOrder: Int
     }
 
-    struct FileFormat: Codable {
+    struct FileFormat: Sendable, Codable {
         let fileExtension: String
         let description: String
 
@@ -36,13 +36,13 @@ struct DownloadList: Codable {
         // but this is a Swift reserved keyword
         // this allows to map internal name with JSON name
 
-        enum CodingKeys: String, CodingKey {  // swiftlint:disable:this nesting
+        enum CodingKeys: String, Sendable, CodingKey {  // swiftlint:disable:this nesting
             case fileExtension = "extension"
             case description
         }
     }
 
-    struct File: Codable {
+    struct File: Sendable, Codable {
         let filename: String
         let displayName: String?
         let remotePath: String
@@ -51,10 +51,22 @@ struct DownloadList: Codable {
         let dateCreated: String
         let dateModified: String
         let fileFormat: FileFormat
-        var existInCache: Bool?
+        let existInCache: Bool
+        init(from: File, existInCache: Bool) {
+            self.filename = from.filename
+            self.displayName = from.displayName
+            self.remotePath = from.remotePath
+            self.fileSize = from.fileSize
+            self.sortOrder = from.sortOrder
+            self.dateCreated = from.dateCreated
+            self.dateModified = from.dateModified
+            self.fileFormat = from.fileFormat
+            self.existInCache = existInCache
+        }
+                
     }
 
-    struct Download: Codable {
+    struct Download: Sendable, Codable {
         let id: String
         let name: String
         let description: String
@@ -63,8 +75,21 @@ struct DownloadList: Codable {
         let dateCreated: String
         let dateModified: String
         let categories: [DownloadCategory]
-        var files: [File]
+        let files: [File]
         let isRelatedSeed: Bool
+        init(from: Download, appendFile: File) {
+            self.id = from.id
+            self.name = from.name
+            self.description = from.description
+            self.isReleased = from.isReleased
+            self.datePublished = from.datePublished
+            self.dateCreated = from.dateCreated
+            self.dateModified = from.dateModified
+            self.categories = from.categories
+            self.files = from.files + [appendFile]
+            self.isRelatedSeed = from.isRelatedSeed
+        }
+            
     }
 
     let creationTimestamp: String

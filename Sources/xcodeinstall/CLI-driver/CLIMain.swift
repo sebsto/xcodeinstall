@@ -6,13 +6,16 @@
 //
 
 import ArgumentParser
+import CLIlib
 import Foundation
+import Logging
 
 enum CLIError: Error {
     case invalidInput
 }
 
 @main
+@MainActor
 struct MainCommand: AsyncParsableCommand {
 
     // arguments that are global to all commands
@@ -36,7 +39,7 @@ struct MainCommand: AsyncParsableCommand {
 
     // Customize the command's help and subcommands by implementing the
     // `configuration` property.
-    static var configuration = CommandConfiguration(
+    nonisolated static let configuration = CommandConfiguration(
         commandName: "xcodeinstall",
 
         // Optional abstracts and discussions are used for help output.
@@ -58,4 +61,22 @@ struct MainCommand: AsyncParsableCommand {
         // defaultSubcommand: List.self)
     )
 
+    public static func XCodeInstaller(for region: String? = nil, verbose: Bool ) async throws -> XCodeInstall {
+        let logger: Logger!
+        if verbose {
+            logger = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
+        } else {
+            logger = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
+        }
+        
+        var runtimeEnv = RuntimeEnvironment()
+        let xci: XCodeInstall!
+        if let region {
+            runtimeEnv.secrets = try AWSSecretsHandler(env: runtimeEnv, region: region)
+            xci = XCodeInstall(log: logger, env: runtimeEnv)
+        } else {
+            xci = XCodeInstall(log: logger, env: runtimeEnv)
+        }
+        return xci
+    }
 }

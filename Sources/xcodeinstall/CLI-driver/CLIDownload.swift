@@ -8,12 +8,13 @@
 import ArgumentParser
 import CLIlib
 import Foundation
+import Logging
 
 // download implementation
 extension MainCommand {
 
     struct Download: AsyncParsableCommand {
-        static var configuration = CommandConfiguration(
+        nonisolated static let configuration = CommandConfiguration(
             abstract: "Download the specified version of Xcode"
         )
 
@@ -29,17 +30,9 @@ extension MainCommand {
 
         func run() async throws {
 
-            if globalOptions.verbose {
-                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
-            } else {
-                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
-            }
+            let xci = try await MainCommand.XCodeInstaller(for: cloudOption.secretManagerRegion,
+                                                           verbose: globalOptions.verbose)
 
-            if let region = cloudOption.secretManagerRegion {
-                env.secrets = try AWSSecretsHandler(region: region)
-            }
-
-            let xci = XCodeInstall()
             try await xci.download(
                 fileName: name,
                 force: downloadListOptions.force,

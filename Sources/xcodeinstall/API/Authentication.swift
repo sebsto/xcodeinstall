@@ -93,7 +93,7 @@ struct AppleSession: Codable, Equatable {
  Manage authentication with an Apple ID
  */
 
-protocol AppleAuthenticatorProtocol {
+protocol AppleAuthenticatorProtocol: Sendable {
 
     // standard authentication methods
     func startAuthentication(
@@ -110,6 +110,7 @@ protocol AppleAuthenticatorProtocol {
 }
 
 //FIXME: TODO: split into two classes : UsernamePasswordAuthenticator and SRPAuthenticator
+@MainActor
 class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
 
     func startAuthentication(
@@ -135,7 +136,7 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             validResponse: .range(0..<500)
         )
 
-        try await env.secrets.clearSecrets()
+        try await self.env.secrets.clearSecrets()
 
     }
 
@@ -208,7 +209,7 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         }
 
         // save session data to reuse in future invocation
-        _ = try await env.secrets.saveCookies(cookies)
-        _ = try await env.secrets.saveSession(session)
+        _ = try await self.env.secrets.saveCookies(cookies)
+        _ = try await self.env.secrets.saveSession(session)
     }
 }

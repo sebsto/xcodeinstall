@@ -8,13 +8,15 @@
 import ArgumentParser
 import CLIlib
 import Foundation
+import Logging
 
 // Install implementation
+@MainActor
 extension MainCommand {
 
     struct Install: AsyncParsableCommand {
 
-        static var configuration =
+        nonisolated static let configuration =
             CommandConfiguration(abstract: "Install a specific XCode version or addon package")
 
         @OptionGroup var globalOptions: GlobalOptions
@@ -27,13 +29,8 @@ extension MainCommand {
 
         func run() async throws {
 
-            if globalOptions.verbose {
-                log = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
-            } else {
-                log = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
-            }
+            let xci = try await MainCommand.XCodeInstaller(verbose: globalOptions.verbose)
 
-            let xci = XCodeInstall()
             _ = try await xci.install(file: name)
         }
     }
