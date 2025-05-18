@@ -29,12 +29,12 @@ enum InstallerError: Error {
 
 @MainActor
 class ShellInstaller: InstallerProtocol {
-    
+
     let env: Environment
     public init(env: Environment) {
         self.env = env
     }
-        
+
     // the shell commands we need to install XCode and its command line tools
     let XIPCOMMAND = "/usr/bin/xip"
     let HDIUTILCOMMAND = "/usr/bin/hdiutil"

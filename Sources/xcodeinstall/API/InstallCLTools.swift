@@ -12,8 +12,8 @@ import Subprocess
 // MARK: Command Line Tools
 // Command Line Tools installation functions
 extension ShellInstaller {
-    
-    func installCommandLineTools(atPath file: URL) async  throws {
+
+    func installCommandLineTools(atPath file: URL) async throws {
 
         let filePath = file.path
 
@@ -83,6 +83,6 @@ extension ShellInstaller {
     private func unmountDMG(volume: URL) async throws -> ShellOutput {
 
         // hdiutil unmount /Volumes/Command\ Line\ Developer\ Tools/
-        return try await run(.path(HDIUTILCOMMAND), arguments: ["unmount", volume.path])
+        try await run(.path(HDIUTILCOMMAND), arguments: ["unmount", volume.path])
     }
 }

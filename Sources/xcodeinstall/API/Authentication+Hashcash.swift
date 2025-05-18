@@ -39,12 +39,12 @@ extension AppleAuthenticator {
 
         /*
          ➜  ~ curl https://idmsa.apple.com/appleauth/auth/signin?widgetKey=e0b80c3bf78523bfe80974d320935bfa30add02e1bff88ec2166c6bd5a706c42
-
+        
          ...
-
+        
          < X-Apple-HC-Bits: 10
          < X-Apple-HC-Challenge: 0daf59bcaf9d721c0375756c5e404652
-
+        
          ....
          */
 

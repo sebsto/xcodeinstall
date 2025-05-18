@@ -52,6 +52,27 @@ struct DownloadList: Sendable, Codable {
         let dateModified: String
         let fileFormat: FileFormat
         let existInCache: Bool
+        init(
+            filename: String,
+            displayName: String?,
+            remotePath: String,
+            fileSize: Int,
+            sortOrder: Int,
+            dateCreated: String,
+            dateModified: String,
+            fileFormat: FileFormat,
+            existInCache: Bool
+        ) {
+            self.filename = filename
+            self.displayName = displayName
+            self.remotePath = remotePath
+            self.fileSize = fileSize
+            self.sortOrder = sortOrder
+            self.dateCreated = dateCreated
+            self.dateModified = dateModified
+            self.fileFormat = fileFormat
+            self.existInCache = existInCache
+        }
         init(from: File, existInCache: Bool) {
             self.filename = from.filename
             self.displayName = from.displayName
@@ -63,7 +84,7 @@ struct DownloadList: Sendable, Codable {
             self.fileFormat = from.fileFormat
             self.existInCache = existInCache
         }
-                
+
     }
 
     struct Download: Sendable, Codable {
@@ -89,7 +110,7 @@ struct DownloadList: Sendable, Codable {
             self.files = from.files + [appendFile]
             self.isRelatedSeed = from.isRelatedSeed
         }
-            
+
     }
 
     let creationTimestamp: String

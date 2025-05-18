@@ -61,14 +61,14 @@ struct MainCommand: AsyncParsableCommand {
         // defaultSubcommand: List.self)
     )
 
-    public static func XCodeInstaller(for region: String? = nil, verbose: Bool ) async throws -> XCodeInstall {
+    public static func XCodeInstaller(for region: String? = nil, verbose: Bool) async throws -> XCodeInstall {
         let logger: Logger!
         if verbose {
             logger = Log.defaultLogger(logLevel: .debug, label: "xcodeinstall")
         } else {
             logger = Log.defaultLogger(logLevel: .error, label: "xcodeinstall")
         }
-        
+
         var runtimeEnv = RuntimeEnvironment()
         let xci: XCodeInstall!
         if let region {

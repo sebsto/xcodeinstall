@@ -48,20 +48,19 @@ extension MainCommand {
     @MainActor
     struct List: AsyncParsableCommand {
 
-        
-        
-       nonisolated  static let configuration =
+        nonisolated static let configuration =
             CommandConfiguration(abstract: "List available versions of Xcode and development tools")
-        
+
         @OptionGroup var globalOptions: GlobalOptions
         @OptionGroup var downloadListOptions: DownloadListOptions
         @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
 
-            let xci = try await MainCommand.XCodeInstaller(for: cloudOption.secretManagerRegion,
-                                                           verbose: globalOptions.verbose)
-
+            let xci = try await MainCommand.XCodeInstaller(
+                for: cloudOption.secretManagerRegion,
+                verbose: globalOptions.verbose
+            )
 
             _ = try await xci.list(
                 force: downloadListOptions.force,

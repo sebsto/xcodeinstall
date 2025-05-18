@@ -85,7 +85,7 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
         self.env = env
         try self.awsSDK = AWSSecretsHandlerSoto.forRegion(region)
     }
-    
+
     // MARK: protocol implementation
 
     // I do not delete the secrets because there is a 30 days deletion policy

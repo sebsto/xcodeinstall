@@ -30,8 +30,10 @@ extension MainCommand {
 
         func run() async throws {
 
-            let xci = try await MainCommand.XCodeInstaller(for: secretManagerRegion,
-                                                           verbose: globalOptions.verbose)
+            let xci = try await MainCommand.XCodeInstaller(
+                for: secretManagerRegion,
+                verbose: globalOptions.verbose
+            )
 
             _ = try await xci.storeSecrets()
         }

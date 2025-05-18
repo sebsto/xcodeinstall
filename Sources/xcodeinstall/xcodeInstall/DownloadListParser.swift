@@ -70,10 +70,9 @@ struct DownloadListParser {
 
     /// Enrich the list of available downloads.
     /// It adds a flag for each file in the list to indicate if the file is already downloaded and available in cache
-    func enrich(list: [DownloadList.Download]) async  -> [DownloadList.Download] {
+    func enrich(list: [DownloadList.Download]) async -> [DownloadList.Download] {
 
-
-        return await list.asyncMap { download in
+        await list.asyncMap { download in
             let fileHandler = await self.env.fileHandler
 
             // swiftlint:disable identifier_name
@@ -88,10 +87,12 @@ struct DownloadListParser {
 
             // create a copy of the file to be used in the list
             let newFile = DownloadList.File.init(from: file, existInCache: exists)
-            
+
             // create a copy of the download to be used in the list
             let newDownload = DownloadList.Download(
-                from: d,appendFile: newFile)
+                from: d,
+                appendFile: newFile
+            )
 
             return newDownload
 

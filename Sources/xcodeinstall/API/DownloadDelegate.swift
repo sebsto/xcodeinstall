@@ -24,11 +24,13 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
     // to notify the main thread when download is finish
     let sema: DispatchSemaphoreProtocol
 
-    init(env: Environment,
-         dstFilePath: URL? = nil,
-         totalFileSize: Int? = nil,
-         startTime: Date? = nil,
-         semaphore: DispatchSemaphoreProtocol) {
+    init(
+        env: Environment,
+        dstFilePath: URL? = nil,
+        totalFileSize: Int? = nil,
+        startTime: Date? = nil,
+        semaphore: DispatchSemaphoreProtocol
+    ) {
         self.env = env
         self.dstFilePath = dstFilePath
         self.totalFileSize = totalFileSize

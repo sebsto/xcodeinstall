@@ -30,8 +30,10 @@ extension MainCommand {
 
         func run() async throws {
 
-            let xci = try await MainCommand.XCodeInstaller(for: cloudOption.secretManagerRegion,
-                                                           verbose: globalOptions.verbose)
+            let xci = try await MainCommand.XCodeInstaller(
+                for: cloudOption.secretManagerRegion,
+                verbose: globalOptions.verbose
+            )
 
             try await xci.download(
                 fileName: name,

@@ -25,7 +25,11 @@ final class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
     static func forRegion(_ region: String) throws -> AWSSecretsHandlerSDKProtocol {
         try AWSSecretsHandlerSoto.forRegion(region, awsClient: nil, smClient: nil)
     }
-    static func forRegion(_ region: String, awsClient: AWSClient? = nil, smClient: SecretsManager? = nil) throws -> AWSSecretsHandlerSDKProtocol{
+    static func forRegion(
+        _ region: String,
+        awsClient: AWSClient? = nil,
+        smClient: SecretsManager? = nil
+    ) throws -> AWSSecretsHandlerSDKProtocol {
 
         guard let awsRegion = Region(awsRegionName: region) else {
             throw AWSSecretsHandlerError.invalidRegion(region: region)

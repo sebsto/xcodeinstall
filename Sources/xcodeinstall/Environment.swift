@@ -58,17 +58,21 @@ struct RuntimeEnvironment: Environment {
 
     // Network
     var urlSessionData: URLSessionProtocol = URLSession.shared
-    func urlSessionDownload(dstFilePath: URL? = nil,
-                            totalFileSize: Int? = nil,
-                            startTime: Date? = nil) -> URLSessionProtocol {
+    func urlSessionDownload(
+        dstFilePath: URL? = nil,
+        totalFileSize: Int? = nil,
+        startTime: Date? = nil
+    ) -> URLSessionProtocol {
         URLSession(
             configuration: .default,
-            delegate: DownloadDelegate(env: self,
-                                       dstFilePath: dstFilePath,
-                                       totalFileSize: totalFileSize,
-                                       startTime: startTime,
-                                       semaphore: DispatchSemaphore(value: 0)),
+            delegate: DownloadDelegate(
+                env: self,
+                dstFilePath: dstFilePath,
+                totalFileSize: totalFileSize,
+                startTime: startTime,
+                semaphore: DispatchSemaphore(value: 0)
+            ),
             delegateQueue: nil
-            )
+        )
     }
 }

@@ -25,7 +25,7 @@ struct FileSecretsHandler: SecretsHandlerProtocol {
 
     init() {
         self.fileManager = FileManager.default
-        
+
         baseDirectory = FileHandler().baseFilePath()
 
         cookiesPath = baseDirectory.appendingPathComponent("cookies")
