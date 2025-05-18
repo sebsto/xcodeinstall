@@ -6,7 +6,11 @@
 //
 
 import Subprocess
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 
 typealias ShellOutput = CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>
 
