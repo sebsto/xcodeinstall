@@ -44,7 +44,6 @@ struct URLRequestCurlTest {
         let curl = request.cURL(pretty: false)
 
         // then
-        #expect(curl != nil)
         #expect(curl.starts(with: "curl "))
         #expect(curl.contains("-H 'header1: value1'"))
         #expect(curl.contains("-H 'header2: value2'"))
@@ -74,7 +73,6 @@ struct URLRequestCurlTest {
         let curl = request.cURL(pretty: true)
 
         // then
-        #expect(curl != nil)
         #expect(curl.starts(with: "curl "))
         #expect(curl.contains("--header 'header1: value1'"))
         #expect(curl.contains("--header 'header2: value2'"))
