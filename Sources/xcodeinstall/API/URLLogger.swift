@@ -13,14 +13,12 @@ import Logging
 import FoundationNetworking
 #endif
 
-// FIXME consider using Swift 5.7 regexp
-// https://github.com/apple/swift-evolution/blob/main/proposals/0350-regex-type-overview.md
+// Using Swift's modern regex syntax
 func filterPassword(_ input: String) -> String {
-    input.replacingOccurrences(
-        of: "(\"password\":\").*(\"[,}])",
-        with: "$1*****$2",
-        options: .regularExpression
-    )
+    let regex = /("password":").*?("[\,\}])/
+    return input.replacing(regex) { match in
+        "\(match.1)*****\(match.2)"
+    }
 }
 
 func log(request: URLRequest, to logger: Logger) {
