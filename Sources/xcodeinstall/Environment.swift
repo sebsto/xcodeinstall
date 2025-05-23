@@ -14,6 +14,10 @@ import System
 import SystemPackage
 #endif
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 /**
 
  a global struct to give access to classes for which I wrote tests.

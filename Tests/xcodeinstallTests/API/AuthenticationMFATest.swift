@@ -9,10 +9,14 @@ import Testing
 
 @testable import xcodeinstall
 
+import Foundation
+
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
+#endif
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
 #endif
 
 extension AuthenticationTests {

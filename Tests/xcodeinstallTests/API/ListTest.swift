@@ -9,10 +9,14 @@ import Testing
 
 @testable import xcodeinstall
 
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
-#else 
-import Foundation
 #endif
 
 extension DownloadTests {

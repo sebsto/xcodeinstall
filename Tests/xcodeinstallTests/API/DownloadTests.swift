@@ -3,6 +3,16 @@ import Testing
 
 @testable import xcodeinstall
 
+import Foundation
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#endif
+
 // MARK: - Download Tests
 @MainActor
 @Suite("DownloadTests")
