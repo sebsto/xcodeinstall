@@ -26,7 +26,7 @@ struct MockedEnvironment: xcodeinstall.Environment {
 
     // this has to be injected by the caller (it contains a reference to the env
     var secrets: SecretsHandlerProtocol? = nil
-    var awsSDK: AWSSecretsHandlerSDKProtocol = try! MockedAWSSecretsHandlerSDK()
+    var awsSDK: AWSSecretsHandlerSDKProtocol? = nil
 
     var authenticator: AppleAuthenticatorProtocol = MockedAppleAuthentication()
     var downloader: AppleDownloaderProtocol = MockedAppleDownloader()

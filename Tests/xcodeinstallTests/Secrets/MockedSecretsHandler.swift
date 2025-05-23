@@ -66,7 +66,7 @@ final class MockedAWSSecretsHandlerSDK: AWSSecretsHandlerSDKProtocol {
     let appleSession: Mutex<AppleSessionSecret>
     let appleCredentials: Mutex<AppleCredentialsSecret>
 
-    init() throws {
+    private init() throws {
         appleSession = try .init(AppleSessionSecret(fromString: "{}"))
         appleCredentials = .init(AppleCredentialsSecret(username: "", password: ""))
     }

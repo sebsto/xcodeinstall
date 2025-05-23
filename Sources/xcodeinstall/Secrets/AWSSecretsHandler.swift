@@ -75,11 +75,17 @@ protocol AWSSecretsHandlerSDKProtocol: Sendable {
 // secretsmanager:PutSecretValue
 
 @MainActor
-struct AWSSecretsHandler: SecretsHandlerProtocol {
+class AWSSecretsHandler: SecretsHandlerProtocol {
 
-    let env: Environment
-    public init(env: Environment, region: String) throws {
+    var env: Environment
+    let awsSDK: AWSSecretsHandlerSDKProtocol
+    public init(env: Environment, sdk: AWSSecretsHandlerSDKProtocol? = nil, region: String = "us-east-1") throws {
         self.env = env
+        if let sdk  {
+            self.awsSDK = sdk
+        } else {
+            self.awsSDK = try AWSSecretsHandlerSoto.forRegion(region)
+        }
     }
 
     // MARK: protocol implementation
@@ -90,7 +96,7 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
     func clearSecrets() async throws {
 
         let emptySession = AppleSessionSecret()
-        try await self.env.awsSDK.updateSecret(
+        try await self.awsSDK.updateSecret(
             secretId: AWSSecretsName.appleSessionToken,
             newValue: emptySession
         )
@@ -108,7 +114,7 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
 
             // read existing cookies and session
             let existingSession: AppleSessionSecret =
-            try await self.env.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+            try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
 
             // append the new cookies and return the whole new thing
             result = try await mergeCookies(
@@ -120,7 +126,7 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
             let newSession = AppleSessionSecret(cookies: result, session: existingSession.session)
 
             // save this new session secret object
-            try await self.env.awsSDK.updateSecret(
+            try await self.awsSDK.updateSecret(
                 secretId: AWSSecretsName.appleSessionToken,
                 newValue: newSession
             )
@@ -136,7 +142,7 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
 
     func loadCookies() async throws -> [HTTPCookie] {
         do {
-            let session: AppleSessionSecret = try await self.env.awsSDK.retrieveSecret(
+            let session: AppleSessionSecret = try await self.awsSDK.retrieveSecret(
                 secretId: AWSSecretsName.appleSessionToken
             )
             let result = session.cookies()
@@ -153,7 +159,7 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
 
             // read existing cookies and session
             let existingSession: AppleSessionSecret =
-            try await self.env.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+            try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
 
             // create a new session secret object with existing cookies and new session
             let newSessionSecret = AppleSessionSecret(
@@ -161,7 +167,7 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
                 session: newSession
             )
 
-            try await self.env.awsSDK.updateSecret(
+            try await self.awsSDK.updateSecret(
                 secretId: AWSSecretsName.appleSessionToken,
                 newValue: newSessionSecret
             )
@@ -176,7 +182,7 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
     func loadSession() async throws -> AppleSession? {
 
         if let sessionSecret: AppleSessionSecret =
-            try? await self.env.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+            try? await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
         {
             return sessionSecret.session
         } else {
@@ -187,7 +193,7 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
         do {
 
-            return try await self.env.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleCredentials)
+            return try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleCredentials)
 
         } catch {
             log.error("Error when trying to load session : \(error)")
@@ -198,7 +204,7 @@ struct AWSSecretsHandler: SecretsHandlerProtocol {
     func storeAppleCredentials(_ credentials: AppleCredentialsSecret) async throws {
         do {
 
-            try await self.env.awsSDK.updateSecret(
+            try await self.awsSDK.updateSecret(
                 secretId: AWSSecretsName.appleCredentials,
                 newValue: credentials
             )

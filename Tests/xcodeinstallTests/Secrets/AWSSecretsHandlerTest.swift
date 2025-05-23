@@ -19,7 +19,9 @@ struct AWSSecretsHandlerTest {
 
         let AWS_REGION = "us-east-1"
 
-        secretHandlerTest!.secrets = try await AWSSecretsHandler(env: MockedEnvironment(), region: AWS_REGION)
+        let env: Environment = await MockedEnvironment()
+        let mockedSDK = try MockedAWSSecretsHandlerSDK.forRegion(AWS_REGION)
+        secretHandlerTest!.secrets = try await AWSSecretsHandler(env: env, sdk: mockedSDK)
         try await secretHandlerTest!.secrets!.clearSecrets()
     }
 

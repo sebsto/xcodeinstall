@@ -17,9 +17,11 @@ extension CLITests {
 
         // given
         let mockedRL = MockedReadLine(["username", "password"])
-        var env = MockedEnvironment(readLine: mockedRL)
+        var env: Environment = MockedEnvironment(readLine: mockedRL)
         // use the real AWS Secrets Handler, but with a mocked SDK
-        env.secrets = try AWSSecretsHandler(env: env, region: "us-east-1")
+        let mcokedSDK = try MockedAWSSecretsHandlerSDK.forRegion("us-east-1")
+        let secretsHandler = try AWSSecretsHandler(env: env, sdk: mcokedSDK)
+        env.secrets = secretsHandler
 
         let storeSecrets = try parse(
             MainCommand.StoreSecrets.self,
@@ -31,7 +33,7 @@ extension CLITests {
         )
 
         // when
-        await #expect(throws: Never.self) { try await storeSecrets.run(with: env) }
+        await #expect(throws: Never.self) { try await storeSecrets.run(with: &env) }
 
         // test parsing of commandline arguments
         #expect(storeSecrets.globalOptions.verbose)
@@ -40,7 +42,7 @@ extension CLITests {
         //it can not modify the env we have here 
         
         // did we call setRegion on the SDK class ?
-        // #expect((env.awsSDK as? MockedAWSSecretsHandlerSDK)?.regionSet() ?? false)
+        #expect((secretsHandler.awsSDK as? MockedAWSSecretsHandlerSDK)?.regionSet() ?? false)
     }
 
     func testPromptForCredentials() {

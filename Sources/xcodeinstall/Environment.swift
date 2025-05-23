@@ -30,7 +30,6 @@ protocol Environment: Sendable {
     var readLine: ReadLineProtocol { get }
     var progressBar: CLIProgressBarProtocol { get }
     var secrets: SecretsHandlerProtocol? { get set }
-    var awsSDK: AWSSecretsHandlerSDKProtocol { get }
     var authenticator: AppleAuthenticatorProtocol { get }
     var downloader: AppleDownloaderProtocol { get }
     var urlSessionData: URLSessionProtocol { get }
@@ -66,13 +65,6 @@ struct RuntimeEnvironment: Environment {
 
     // Secrets - will be overwritten by CLI when using AWS Secrets Manager
     var secrets: SecretsHandlerProtocol? = FileSecretsHandler()
-    var awsSDK: AWSSecretsHandlerSDKProtocol {
-        do {
-            return try AWSSecretsHandlerSoto.forRegion(region ?? "us-east-1")
-        } catch {
-            fatalError("Invalid region: \(String(describing: region))")
-        }
-    }
 
     // Commands
     var authenticator: AppleAuthenticatorProtocol {

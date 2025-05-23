@@ -10,8 +10,6 @@ import XCTest
 
 @testable import xcodeinstall
 
-//FIXME: mock the shell installer
-
 @MainActor
 final class InstallTest: XCTestCase {
 
