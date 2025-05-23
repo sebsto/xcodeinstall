@@ -56,8 +56,8 @@ extension HTTPClientTests {
         let password = "password"
 
         let headers = [
-            "header1": "value1",
-            "header2": "value2",
+            "Header1": "value1",
+            "Header2": "value2",
         ]
         let body = try JSONEncoder().encode(User(accountName: username, password: password))
         let request = client.request(
@@ -82,8 +82,8 @@ extension HTTPClientTests {
         // Test headers
         #expect(request.allHTTPHeaderFields != nil)
         #expect(request.allHTTPHeaderFields?.count == 2)
-        #expect(request.allHTTPHeaderFields?["header1"] == "value1")
-        #expect(request.allHTTPHeaderFields?["header2"] == "value2")
+        #expect(request.allHTTPHeaderFields?["Header1"] == "value1")
+        #expect(request.allHTTPHeaderFields?["Header2"] == "value2")
     }
 
     @Test("Test Password Obfuscation in Logs")

@@ -95,7 +95,7 @@ struct FileHandler: FileHandlerProtocol {
     ///     - fileSize the expected size of the file (in bytes).
     ///  - Returns : true when the file exists and has the given size, false otherwise
     ///  - Throws:
-    ///     - FileHandlerError.FileDoesNotExistswhen the file does not exists
+    ///     - FileHandlerError.FileDoesNotExist when the file does not exists
     func checkFileSize(file: URL, fileSize: Int) throws -> Bool {
 
         let filePath = file.path

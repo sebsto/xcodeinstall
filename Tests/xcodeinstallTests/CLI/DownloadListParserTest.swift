@@ -111,7 +111,7 @@ struct DownloadListParserTest {
 
         let data = Data(count: fileSize)
         let testFile: URL = await fh.downloadFileURL(file: file)
-        fm.createFile(atPath: testFile.path, contents: data)
+        let _ = fm.createFile(atPath: testFile.path, contents: data)
         return testFile
     }
 

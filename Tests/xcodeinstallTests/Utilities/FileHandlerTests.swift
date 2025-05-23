@@ -90,7 +90,7 @@ extension FileHandlerTests {
         let srcFile = createSrcFile()
 
         // dst file does not exist in an invalid location
-        let dstFile = URL(fileURLWithPath: "/does_not_exist")
+        let dstFile = URL(fileURLWithPath: "/does_not_exist/tmp.txt")
 
         // When/Then
         let fh = FileHandler()
@@ -132,16 +132,14 @@ extension FileHandlerTests {
     @MainActor
     func testCheckFileSizeNotExist() throws {
         // Given
-        let fileToCheck = URL(fileURLWithPath: "/does_not_exist")
+        let fileToCheck = URL(fileURLWithPath: "/does_not_exist/tmp.txt")
 
         // When/Then
         let fh = FileHandler()
-        do {
+        let error = #expect(throws: FileHandlerError.self) {
             _ = try fh.checkFileSize(file: fileToCheck, fileSize: 42)
-            Issue.record("Should have thrown an error")
-        } catch {
-            // Expected error
         }
+        #expect(error == FileHandlerError.fileDoesNotExist)
     }
 
     @Test("Test File Exists Check - Positive")
@@ -169,7 +167,7 @@ extension FileHandlerTests {
     @MainActor
     func testFileExistsNo() {
         // Given
-        let fileToCheck = URL(fileURLWithPath: "/does_not_exist")
+        let fileToCheck = URL(fileURLWithPath: "/does_not_exist/tmp.txt")
 
         // When
         let fh = FileHandler()
