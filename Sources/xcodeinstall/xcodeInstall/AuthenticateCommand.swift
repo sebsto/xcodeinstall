@@ -16,7 +16,7 @@ extension XCodeInstall {
         do {
 
             // delete previous session, if any
-            try await self.env.secrets.clearSecrets()
+            try await self.env.secrets!.clearSecrets()
             let appleCredentials = try await retrieveAppleCredentials()
 
             if authenticationMethod == .usernamePassword {
@@ -73,7 +73,7 @@ extension XCodeInstall {
         do {
             // first try on AWS Secrets Manager
             display("Retrieving Apple Developer Portal credentials...")
-            appleCredentials = try await self.env.secrets.retrieveAppleCredentials()
+            appleCredentials = try await self.env.secrets!.retrieveAppleCredentials()
 
         } catch AWSSecretsHandlerError.invalidOperation {
 

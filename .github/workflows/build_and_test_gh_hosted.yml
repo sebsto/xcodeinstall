@@ -24,7 +24,7 @@ jobs:
   # disabled until resolved
   # https://github.com/sebsto/xcodeinstall/issues/51
   test:
-    if: false 
+    if: true 
     runs-on: ubuntu-latest
     container: swift:6.1-noble
 

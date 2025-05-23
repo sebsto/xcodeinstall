@@ -50,7 +50,7 @@ extension AppleDownloader {
                 // grab authentication cookie for later download
                 if let cookies = response.value(forHTTPHeaderField: "Set-Cookie") {
                     // save the new cookies we received (ADCDownloadAuth)
-                    _ = try await self.env.secrets.saveCookies(cookies)
+                    _ = try await self.env.secrets!.saveCookies(cookies)
                 } else {
                     // swiftlint:disable line_length
                     log.error(

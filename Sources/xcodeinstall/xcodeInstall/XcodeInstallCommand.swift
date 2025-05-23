@@ -10,10 +10,10 @@ import Foundation
 import Logging
 
 @MainActor
-struct XCodeInstall {
+final class XCodeInstall {
 
     let log: Logger
-    let env: Environment
+    var env: Environment
 
     public init(log: Logger = Log.defaultLogger(), env: Environment) {
         self.log = log

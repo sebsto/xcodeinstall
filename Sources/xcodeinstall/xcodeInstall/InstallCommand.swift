@@ -12,7 +12,7 @@ extension XCodeInstall {
 
     func install(file: String?) async throws {
 
-        let installer = ShellInstaller(env: self.env)
+        let installer = ShellInstaller(env: &self.env)
 
         // progress bar to report progress feedback
         let progressBar = self.env.progressBar

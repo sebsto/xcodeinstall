@@ -20,15 +20,6 @@ import FoundationNetworking
 @MainActor
 final class MockedURLSessionDownloadTask: URLSessionDownloadTaskProtocol {
 
-    // private let _wasResumeCalled: Mutex<Bool> = .init(false)
-    // var wasResumeCalled: Bool {
-    //     return self._wasResumeCalled.withLock { $0 }
-    // }
-
-    // func resume() {
-    //     self._wasResumeCalled.withLock { $0 = true }
-    // }
-
     var wasResumeCalled: Bool = false
     func resume() {
         wasResumeCalled = true

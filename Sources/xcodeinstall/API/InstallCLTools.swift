@@ -83,6 +83,6 @@ extension ShellInstaller {
     private func unmountDMG(volume: URL) async throws -> ShellOutput {
 
         // hdiutil unmount /Volumes/Command\ Line\ Developer\ Tools/
-        try await run(.path(HDIUTILCOMMAND), arguments: ["unmount", volume.path])
+        try await self.env.run(.path(HDIUTILCOMMAND), arguments: ["unmount", volume.path])
     }
 }

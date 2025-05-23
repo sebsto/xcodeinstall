@@ -11,10 +11,7 @@ extension XCodeInstall {
 
     func storeSecrets() async throws {
 
-        guard let secretsHandler = self.env.secrets as? AWSSecretsHandler else {
-            fatalError("This function requires a AWSSecretsManager")
-        }
-
+        let secretsHandler = self.env.secrets!
         do {
             // separate func for testability
             let input = try promptForCredentials()

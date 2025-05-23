@@ -13,10 +13,10 @@ import XCTest
 //FIXME: mock the shell installer
 
 @MainActor
-class InstallTest: XCTestCase {
+final class InstallTest: XCTestCase {
 
     // private var installer: ShellInstaller
-    private let env = MockedEnvironment()
+    private var env: Environment = MockedEnvironment()
 
     // override func setUpWithError() throws {
     //     installer = ShellInstaller(env: env)
@@ -60,65 +60,71 @@ class InstallTest: XCTestCase {
 
     }
 
-    // func testXIP() async {
+    func testXIP() async {
 
-    //     // given
-    //     let mfh = env.fileHandler as! MockedFileHandler
-    //     mfh.nextFileExist = true
+        // given
+        let mfh = env.fileHandler as! MockedFileHandler
+        mfh.nextFileExist = true
 
-    //     let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
+        let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
 
-    //     // when
-    //     do {
-    //         try await installer.uncompressXIP(atURL: srcFile)
-    //     } catch {
-    //         XCTFail("uncompressXIP generated an error : \(error)")
-    //     }
+        // when
+        do {
+            let installer = ShellInstaller(env: &env)
+            let _ = try await installer.uncompressXIP(atURL: srcFile)
+        } catch {
+            XCTFail("uncompressXIP generated an error : \(error)")
+        }
 
-    //     // then
-    //            XCTAssertTrue(mockedShell().command.contains("/usr/bin/xip --expand \"\(srcFile.path)\""))
-    //            XCTAssertTrue(mockedShell().command.hasPrefix("pushd"))
-    //            XCTAssertTrue(mockedShell().command.hasSuffix("popd"))
+        // then
+        let runRecorder = MockedEnvironment.runRecorder
+        XCTAssertTrue(runRecorder.containsExecutable("/usr/bin/xip"))
+        XCTAssertTrue(runRecorder.containsArgument("--expand"))
+        XCTAssertTrue(runRecorder.containsArgument(srcFile.path))
+    }
 
-    // }
+   func testXIPNoFile() async {
 
-    // func testXIPNoFile() {
+       // given
+       (env.fileHandler as! MockedFileHandler).nextFileExist = false
 
-    //     // given
-    //     (env.fileHandler as! MockedFileHandler).nextFileExist = false
+       let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
 
-    //     let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
+       // when
+       // (give a file name that exists, otherwise, it throws an exception)
+       do {
+           let installer = ShellInstaller(env: &self.env)
+           let _ = try await installer.uncompressXIP(atURL: srcFile)
+       } catch InstallerError.fileDoesNotExistOrIncorrect {
+            // expected use case
+       } catch {
+           XCTFail("uncompressXIP generated an unknown error : \(error)")
+       }
 
-    //     // when
-    //     // (give a file name that exists, otherwise, it throws an exception)
-    //     do {
-    //          installer.uncompressXIP(atURL: srcFile)
-    //     } catch {
-    //         XCTFail("uncompressXIP generated an error : \(error)")
-    //     }
+       // then
+        let runRecorder = MockedEnvironment.runRecorder
+       XCTAssertEqual(runRecorder.isEmpty(), true)
+   }
 
-    //     // then
-    //     //        XCTAssertEqual(mockedShell().command, "")
-    // }
+   func testMoveApp() async {
+       // given
+       let src = URL(fileURLWithPath: "/Users/stormacq/.xcodeinstall/Downloads/Xcode 14 beta 5.app")
+       let dst = URL(fileURLWithPath: "/Applications/Xcode 14 beta 5.app")
 
-    // func testMoveApp() async {
-    //     // given
-    //     let src = URL(fileURLWithPath: "/Users/stormacq/.xcodeinstall/Downloads/Xcode 14 beta 5.app")
-    //     let dst = URL(fileURLWithPath: "/Applications/Xcode 14 beta 5.app")
+       // when
+       do {
+           let installer = ShellInstaller(env: &self.env)
+           _ = try await installer.moveApp(at: src)
+       } catch {
+           XCTFail("Move app generated an error : \(error)")
+       }
 
-    //     // when
-    //     do {
-    //         _ = try await installer.moveApp(at: src)
-    //     } catch {
-    //         XCTFail("Move app generated an error : \(error)")
-    //     }
+       // then
+       let mfh = env.fileHandler as! MockedFileHandler
+       XCTAssertEqual(mfh.moveSrc?.path, src.path)
+       XCTAssertEqual(mfh.moveDst?.path, dst.path)
 
-    //     // then
-    //     let mfh = env.fileHandler as! MockedFileHandler
-    //     XCTAssertEqual(mfh.moveSrc?.path, src.path)
-    //     XCTAssertEqual(mfh.moveDst?.path, dst.path)
-
-    // }
+   }
 
     func testFindInDownloadListFileExists() {
 

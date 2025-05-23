@@ -7,9 +7,11 @@
 
 import CLIlib
 import Foundation
-
-#if canImport(FoundationNetworking)
-import FoundationNetworking
+import Subprocess
+#if canImport(System)
+import System
+#else
+import SystemPackage
 #endif
 
 /**
@@ -23,16 +25,30 @@ protocol Environment: Sendable {
     var display: DisplayProtocol { get }
     var readLine: ReadLineProtocol { get }
     var progressBar: CLIProgressBarProtocol { get }
-    var secrets: SecretsHandlerProtocol { get set }
+    var secrets: SecretsHandlerProtocol? { get set }
     var awsSDK: AWSSecretsHandlerSDKProtocol { get }
     var authenticator: AppleAuthenticatorProtocol { get }
     var downloader: AppleDownloaderProtocol { get }
     var urlSessionData: URLSessionProtocol { get }
     func urlSessionDownload(dstFilePath: URL?, totalFileSize: Int?, startTime: Date?) -> URLSessionProtocol
+    func run(
+        _ executable: Executable,
+        arguments: Arguments,
+        workingDirectory: FilePath?,
+    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>
+    func run(
+        _ executable: Executable,
+        arguments: Arguments,
+    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>
 }
 
 @MainActor
 struct RuntimeEnvironment: Environment {
+    
+    let region: String?
+    init(region: String? = nil) {
+        self.region = region
+    }
 
     // Utilities classes
     var fileHandler: FileHandlerProtocol = FileHandler()
@@ -45,8 +61,14 @@ struct RuntimeEnvironment: Environment {
     var progressBar: CLIProgressBarProtocol = CLIProgressBar()
 
     // Secrets - will be overwritten by CLI when using AWS Secrets Manager
-    var secrets: SecretsHandlerProtocol = FileSecretsHandler()
-    var awsSDK: AWSSecretsHandlerSDKProtocol = AWSSecretsHandlerSoto()
+    var secrets: SecretsHandlerProtocol? = FileSecretsHandler()
+    var awsSDK: AWSSecretsHandlerSDKProtocol {
+        do {
+            return try AWSSecretsHandlerSoto.forRegion(region ?? "us-east-1")
+        } catch {
+            fatalError("Invalid region: \(String(describing: region))")
+        }
+    }
 
     // Commands
     var authenticator: AppleAuthenticatorProtocol {
@@ -74,5 +96,31 @@ struct RuntimeEnvironment: Environment {
             ),
             delegateQueue: nil
         )
+    }
+
+    func run (
+        _ executable: Executable,
+        arguments: Arguments,
+    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>  {
+        return try await run(executable,
+                   arguments: arguments,
+                   workingDirectory: nil
+        )
+    }
+    func run (
+        _ executable: Executable,
+        arguments: Arguments,
+        workingDirectory: FilePath?,
+    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>  {
+        try await Subprocess.run(
+            executable,
+            arguments: arguments,
+            environment: .inherit,
+            workingDirectory: workingDirectory,
+            platformOptions: PlatformOptions(),
+            input: .none,
+            output: .string,
+            error: .discarded)
+        
     }
 }

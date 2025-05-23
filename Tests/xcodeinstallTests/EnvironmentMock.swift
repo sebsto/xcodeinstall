@@ -7,10 +7,16 @@
 
 import CLIlib
 import Foundation
+@testable import Subprocess // to be able to call internal init() functions
+#if canImport(System)
+import System
+#else
+import SystemPackage
+#endif
 
 @testable import xcodeinstall
 
-struct MockedEnvironment: Environment {
+struct MockedEnvironment: xcodeinstall.Environment {
 
     var fileHandler: FileHandlerProtocol = MockedFileHandler()
 
@@ -18,10 +24,8 @@ struct MockedEnvironment: Environment {
     var readLine: ReadLineProtocol = MockedReadLine()
     var progressBar: CLIProgressBarProtocol = MockedProgressBar()
 
-    var secrets: SecretsHandlerProtocol {
-        get { MockedSecretsHandler(env: self) }
-        set {}
-    }
+    // this has to be injected by the caller (it contains a reference to the env
+    var secrets: SecretsHandlerProtocol? = nil
     var awsSDK: AWSSecretsHandlerSDKProtocol = try! MockedAWSSecretsHandlerSDK()
 
     var authenticator: AppleAuthenticatorProtocol = MockedAppleAuthentication()
@@ -34,7 +38,59 @@ struct MockedEnvironment: Environment {
         totalFileSize: Int? = nil,
         startTime: Date? = nil
     ) -> any xcodeinstall.URLSessionProtocol {
-        MockedURLSession()
+        self.urlSessionData
     }
 
+}
+
+@MainActor
+final class MockedRunRecorder: InputProtocol, OutputProtocol {
+    func write(with writer: Subprocess.StandardInputWriter) async throws {
+        
+    }
+
+    var lastExecutable: Executable?
+    var lastArguments: Arguments = []
+    
+    func containsExecutable(_ command: String) -> Bool {
+        lastExecutable?.description.contains(command) ?? false
+    }
+    func containsArgument(_ argument: String) -> Bool {
+        lastArguments.description.contains(argument)
+    }
+    func isEmpty() -> Bool {
+        lastExecutable == nil || lastExecutable?.description.isEmpty == true
+    }
+    
+}
+
+extension MockedEnvironment {
+    static var runRecorder = MockedRunRecorder()
+
+    func run (
+        _ executable: Executable,
+        arguments: Arguments,
+    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>  {
+        return try await run(executable,
+                   arguments: arguments,
+                   workingDirectory: nil
+        )
+    }
+    func run (
+        _ executable: Executable,
+        arguments: Arguments,
+        workingDirectory: FilePath?,
+    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>  {
+        
+        MockedEnvironment.runRecorder.lastExecutable = executable
+        MockedEnvironment.runRecorder.lastArguments = arguments
+
+        // Return a dummy CollectedResult
+        return CollectedResult(
+            processIdentifier: ProcessIdentifier(value: 9999),
+            terminationStatus: TerminationStatus.exited(0),
+            standardOutput: "mocked output",
+            standardError: DiscardedOutput.OutputType(),
+        )
+    }
 }

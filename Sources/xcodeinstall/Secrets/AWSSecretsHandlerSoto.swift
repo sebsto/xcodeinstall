@@ -17,7 +17,7 @@ final class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
     let awsClient: AWSClient?  // var for injection
     let smClient: SecretsManager?  // var for injection
 
-    init(awsClient: AWSClient? = nil, smClient: SecretsManager? = nil) {
+    private init(awsClient: AWSClient? = nil, smClient: SecretsManager? = nil) {
         self.awsClient = awsClient
         self.smClient = smClient
     }

@@ -107,3 +107,4 @@ class MockedProgressBar: CLIProgressBarProtocol {
     }
 
 }
+

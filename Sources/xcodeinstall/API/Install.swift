@@ -31,7 +31,7 @@ enum InstallerError: Error {
 class ShellInstaller: InstallerProtocol {
 
     let env: Environment
-    public init(env: Environment) {
+    public init(env: inout Environment) {
         self.env = env
     }
 

@@ -170,7 +170,7 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             validResponse: .range(0..<500)
         )
 
-        try await self.env.secrets.clearSecrets()
+        try await self.env.secrets!.clearSecrets()
 
     }
 
@@ -189,8 +189,8 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         }
     }
 
-    // by OOP design it should be private.  Make it internal (default) for testing
-    func getAppleServicekey() async throws -> AppleServiceKey {
+    // by OOP design it should be private. 
+    internal func getAppleServicekey() async throws -> AppleServiceKey {
 
         /*
          ➜  ~ curl https://appstoreconnect.apple.com/olympus/v1/app/config\?hostname\=itunesconnect.apple.com
@@ -243,7 +243,7 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         }
 
         // save session data to reuse in future invocation
-        _ = try await self.env.secrets.saveCookies(cookies)
-        _ = try await self.env.secrets.saveSession(session)
+        _ = try await self.env.secrets!.saveCookies(cookies)
+        _ = try await self.env.secrets!.saveSession(session)
     }
 }

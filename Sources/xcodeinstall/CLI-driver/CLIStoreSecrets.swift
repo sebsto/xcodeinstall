@@ -29,7 +29,13 @@ extension MainCommand {
         var secretManagerRegion: String
 
         func run() async throws {
-            try await run(with: RuntimeEnvironment())
+            // this command works with secrets stored in the cloud
+//            var env = await RuntimeEnvironment(region: secretManagerRegion)
+//            env.secrets = try  await AWSSecretsHandler(env: env, region: secretManagerRegion)
+//            try await run(with: env)
+            
+            //TODO: I think we don't need to create a secret handler here, XCodeInstaller will create one
+            try await run(with: RuntimeEnvironment(region: secretManagerRegion))
         }
 
         func run(with env: Environment) async throws {

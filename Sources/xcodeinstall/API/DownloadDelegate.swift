@@ -16,7 +16,7 @@ import FoundationNetworking
 @MainActor
 final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
-    let env: Environment
+    var env: Environment
     let dstFilePath: URL?
     let totalFileSize: Int?
     let startTime: Date?

@@ -22,7 +22,6 @@ extension CLITests {
         let mockedFH = MockedFileHandler()
         mockedFH.nextFileCorrect = true
         let env = MockedEnvironment(fileHandler: mockedFH, readLine: mockedRL)
-        let xci = XCodeInstall(env: env)
 
         let download = try parse(
             MainCommand.Download.self,
@@ -40,7 +39,7 @@ extension CLITests {
 
         // when
         await #expect(throws: Never.self) {
-            // try await download.run(with: env) // can not call this as I can not inject all the mocks
+            let xci = XCodeInstall(env: env)
             try await xci.download(
                 fileName: nil,
                 force: true,
@@ -67,7 +66,7 @@ extension CLITests {
         }
 
         // mocked list succeeded
-        assertDisplay("✅ file downloaded")
+        assertDisplay(env: env, "✅ file downloaded")
     }
 
     @Test("Test Download with correct file name")

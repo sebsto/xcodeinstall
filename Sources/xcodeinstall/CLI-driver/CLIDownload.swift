@@ -29,7 +29,7 @@ extension MainCommand {
         var name: String?
 
         func run() async throws {
-            try await run(with: RuntimeEnvironment())
+            try await run(with: RuntimeEnvironment(region: cloudOption.secretManagerRegion))
         }
 
         func run(with env: Environment) async throws {

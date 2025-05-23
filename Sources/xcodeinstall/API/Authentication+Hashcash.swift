@@ -34,8 +34,7 @@ extension AppleAuthenticator {
         return session.hashcash!
     }
 
-    // by OOP design it should be private.  Make it internal (default) for testing
-    func getAppleHashcash(itServiceKey: String, date: String? = nil) async throws -> String {
+    internal func getAppleHashcash(itServiceKey: String, date: String? = nil) async throws -> String {
 
         /*
          ➜  ~ curl https://idmsa.apple.com/appleauth/auth/signin?widgetKey=e0b80c3bf78523bfe80974d320935bfa30add02e1bff88ec2166c6bd5a706c42

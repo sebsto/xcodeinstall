@@ -63,6 +63,7 @@ protocol SecretsHandlerProtocol: Sendable {
     func loadSession() async throws -> AppleSession?
 
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret
+    func storeAppleCredentials(_ credentials: AppleCredentialsSecret) async throws
 }
 
 extension SecretsHandlerProtocol {

@@ -95,7 +95,7 @@ class HTTPClient {
         ]
 
         // reload previous session if it exists
-        let session = try? await self.env.secrets.loadSession()
+        let session = try? await self.env.secrets!.loadSession()
         if let session {
 
             // session is loaded
@@ -117,7 +117,7 @@ class HTTPClient {
         }
 
         // reload cookies if they exist
-        let cookies = try? await self.env.secrets.loadCookies()
+        let cookies = try? await self.env.secrets!.loadCookies()
         if let cookies {
             // cookies existed, let's add them to our HTTPHeaders
             requestHeaders.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current
@@ -188,7 +188,7 @@ class HTTPClient {
         var headers = requestHeaders
 
         // reload cookies if they exist
-        let cookies = try? await self.env.secrets.loadCookies()
+        let cookies = try? await self.env.secrets!.loadCookies()
         if let cookies {
             // cookies existed, let's add them to our HTTPHeaders
             headers.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
@@ -210,8 +210,7 @@ class HTTPClient {
 
     // prepare an URLRequest for a given url, method, body, and headers
     // https://softwareengineering.stackexchange.com/questions/100959/how-do-you-unit-test-private-methods
-    // by OOP design it should be private.  Make it internal (default) for testing
-    func request(
+    internal func request(
         for url: String,
         method: HTTPVerb = .GET,
         withBody body: Data? = nil,

@@ -14,14 +14,15 @@ struct AuthenticationTests {
     // MARK: - Test Environment
     var sessionData: MockedURLSession!
     var client: HTTPClient!
-    let env: Environment
+    var env: MockedEnvironment
 
     init() async throws {
         // Setup environment for each test
         self.env = MockedEnvironment()
+        self.env.secrets = MockedSecretsHandler(env: &self.env)
         self.sessionData = env.urlSessionData as? MockedURLSession
         self.client = HTTPClient(env: env)
-        try await env.secrets.clearSecrets()
+        try await env.secrets!.clearSecrets()
     }
 
     // MARK: - Helper Methods

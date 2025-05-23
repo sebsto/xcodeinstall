@@ -26,8 +26,12 @@ enum DownloadError: Error, Equatable {
         case let (.unknownError(code1, _), .unknownError(code2, _)):
             return code1 == code2 
         case let (.parsingError(error1), .parsingError(error2)):
-            // Compare error descriptions since Error is not Equatable
-            return String(describing: error1) == String(describing: error2)
+            if error1 == nil || error2 == nil {
+                return true
+            } else {
+                // Compare error descriptions since Error is not Equatable
+                return String(describing: error1) == String(describing: error2)
+            }
         case (.noDownloadsInDownloadList, .noDownloadsInDownloadList):
             return true
         case (.invalidFileSpec, .invalidFileSpec):

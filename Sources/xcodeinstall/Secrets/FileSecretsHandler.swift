@@ -15,7 +15,6 @@ import FoundationNetworking
 // store secrets on files in $HOME/.xcodeinstaller
 @MainActor
 struct FileSecretsHandler: SecretsHandlerProtocol {
-
     private var fileManager: FileManager
     private var baseDirectory: URL
     private let cookiesPath: URL
@@ -139,8 +138,11 @@ struct FileSecretsHandler: SecretsHandlerProtocol {
         }
     }
 
+    //MARK: these operations are only valid on AWSSecretsHandler
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
         throw AWSSecretsHandlerError.invalidOperation
     }
-
+    func storeAppleCredentials(_ credentials: AppleCredentialsSecret) async throws {
+        throw AWSSecretsHandlerError.invalidOperation
+    }
 }

@@ -71,12 +71,12 @@ extension CLITests {
 
         // given
         let env = MockedEnvironment(readLine: MockedReadLine(["username", "password"]))
-        let xci = XCodeInstall(env: env)
         (env.authenticator as! MockedAppleAuthentication).nextError = AuthenticationError.invalidUsernamePassword
 
         // when
         await #expect(throws: Never.self) {
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
+            let xci = XCodeInstall(env: env)
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
         }
 

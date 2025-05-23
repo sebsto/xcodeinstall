@@ -16,15 +16,16 @@ struct HTTPClientTests {
     var sessionDownload: MockedURLSession!
     var client: HTTPClient!
     var delegate: DownloadDelegate!
-    let env: MockedEnvironment
+    var env: MockedEnvironment
 
     init() async throws {
         // Setup environment for each test
         self.env = MockedEnvironment()
+        self.env.secrets = MockedSecretsHandler(env: &self.env)
         self.sessionData = env.urlSessionData as? MockedURLSession
         self.sessionDownload = env.urlSessionDownload() as? MockedURLSession
         self.client = HTTPClient(env: env)
-        try await env.secrets.clearSecrets()
+        try await env.secrets!.clearSecrets()
     }
 
     // MARK: - Helper Methods

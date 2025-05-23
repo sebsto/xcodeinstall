@@ -23,7 +23,7 @@ extension MainCommand {
         var srp = true
 
         func run() async throws {
-            try await run(with: RuntimeEnvironment())
+            try await run(with: RuntimeEnvironment(region: cloudOption.secretManagerRegion))
         }
 
         func run(with env: Environment) async throws {
@@ -45,7 +45,7 @@ extension MainCommand {
         @OptionGroup var cloudOption: CloudOptions
 
         func run() async throws {
-            try await run(with: RuntimeEnvironment())
+            try await run(with: RuntimeEnvironment(region: cloudOption.secretManagerRegion))
         }
 
         func run(with env: Environment) async throws {

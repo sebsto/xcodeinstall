@@ -9,6 +9,7 @@ import Testing
 
 @testable import xcodeinstall
 
+@Suite("FileSecretsHandlerTest", .serialized)
 struct FileSecretsHandlerTest {
 
     var secretHandlerTest: SecretsHandlerTestsBase<FileSecretsHandler>?

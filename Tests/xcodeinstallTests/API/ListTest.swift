@@ -36,12 +36,11 @@ extension DownloadTests {
     func testListForce() async throws {
         let _ = await #expect(throws: Never.self) {
             // given
-            let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadList)
-            self.sessionData.nextData = listData
-            self.sessionData.nextResponse = urlResponse
+            let (listData, urlResponse) = try self.prepareResponse(withDataFile: .downloadList)
+            self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = getAppleDownloader()
+            let ad = self.getAppleDownloader()
             let result = try await ad.list(force: true)
 
             // then
@@ -50,18 +49,19 @@ extension DownloadTests {
         }
     }
 
-    @Test("Test list force with parsing error")
+    @Test("Test list force with parsing error"
+        //   ,.enabled(if: false)
+    )
     func testListForceParsingError() async throws {
 
         let error = await #expect(throws: DownloadError.self) {
 
             // given
-            let (listData, urlResponse) = try prepareResponse()
-            self.sessionData.nextData = listData
-            self.sessionData.nextResponse = urlResponse
+            let (listData, urlResponse) = try self.prepareResponse()
+            self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = getAppleDownloader()
+            let ad = self.getAppleDownloader()
             let _ = try await ad.list(force: true)
 
             // then
@@ -77,12 +77,11 @@ extension DownloadTests {
         let error = await #expect(throws: DownloadError.self) {
 
             // given
-            let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadError)
-            self.sessionData.nextData = listData
-            self.sessionData.nextResponse = urlResponse
+            let (listData, urlResponse) = try self.prepareResponse(withDataFile: .downloadError)
+            self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = getAppleDownloader()
+            let ad = self.getAppleDownloader()
             let _ = try await ad.list(force: true)
 
             // then
@@ -98,12 +97,11 @@ extension DownloadTests {
         let error = await #expect(throws: DownloadError.self){
 
             // given
-            let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadUnknownError)
-            self.sessionData.nextData = listData
-            self.sessionData.nextResponse = urlResponse
+            let (listData, urlResponse) = try self.prepareResponse(withDataFile: .downloadUnknownError)
+            self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = getAppleDownloader()
+            let ad = self.getAppleDownloader()
             let _ = try await ad.list(force: true)
 
             // then
@@ -119,12 +117,11 @@ extension DownloadTests {
         let error = await #expect(throws: DownloadError.self) {
 
             // given
-            let (listData, urlResponse) = try prepareResponse(withDataFile: .downloadUnknownError, statusCode: 302)
-            self.sessionData.nextData = listData
-            self.sessionData.nextResponse = urlResponse
+            let (listData, urlResponse) = try self.prepareResponse(withDataFile: .downloadUnknownError, statusCode: 302)
+            self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = getAppleDownloader()
+            let ad = self.getAppleDownloader()
             let _ = try await ad.list(force: true)
 
             // then
@@ -141,16 +138,15 @@ extension DownloadTests {
         let error = await #expect(throws: DownloadError.self) {
 
             // given
-            let (listData, urlResponse) = try prepareResponse(
+            let (listData, urlResponse) = try self.prepareResponse(
                 withDataFile: .downloadList,
                 statusCode: 200,
                 noCookies: true
             )
-            self.sessionData.nextData = listData
-            self.sessionData.nextResponse = urlResponse
+            self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = getAppleDownloader()
+            let ad = self.getAppleDownloader()
             let _ = try await ad.list(force: true)
 
             // then
@@ -171,12 +167,11 @@ extension DownloadTests {
                 {"responseId":"4a09c41c-f010-4ef0-ae03-66787439f918","resultCode":2170,"resultString":"Your developer account needs to be updated.  Please visit Apple Developer Registration.","userString":"Your developer account needs to be updated.  Please visit Apple Developer Registration.","creationTimestamp":"2022-11-29T23:50:58Z","protocolVersion":"QH65B2","userLocale":"en_US","requestUrl":"https://developer.apple.com/services-account/QH65B2/downloadws/listDownloads.action","httpCode":200}
                 """
 
-            let (_, urlResponse) = try prepareResponse(withDataFile: nil, statusCode: 200, noCookies: true)
-            self.sessionData.nextData = response.data(using: .utf8)
-            self.sessionData.nextResponse = urlResponse
+            let (_, urlResponse) = try self.prepareResponse(withDataFile: nil, statusCode: 200, noCookies: true)
+            self.setSessionData(data: response.data(using: .utf8), response: urlResponse)
 
             // when
-            let ad = getAppleDownloader()
+            let ad = self.getAppleDownloader()
             let _ = try await ad.list(force: true)
 
             // then

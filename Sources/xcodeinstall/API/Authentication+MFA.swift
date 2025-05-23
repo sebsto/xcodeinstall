@@ -189,8 +189,7 @@ extension AppleAuthenticator {
 
     }
 
-    // by OOP design it should be private.  Make it internal (default) for testing
-    func getMFAType() async throws -> Data? {
+    private func getMFAType() async throws -> Data? {
 
         let (data, _) = try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth",
