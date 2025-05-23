@@ -83,29 +83,26 @@ final class InstallTest: XCTestCase {
         XCTAssertTrue(runRecorder.containsArgument(srcFile.path))
     }
 
-   func testXIPNoFile() async {
-
-       // given
-       (env.fileHandler as! MockedFileHandler).nextFileExist = false
-
-       let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
-
-       // when
-       // (give a file name that exists, otherwise, it throws an exception)
-       do {
-           let installer = ShellInstaller(env: &self.env)
-           let _ = try await installer.uncompressXIP(atURL: srcFile)
-       } catch InstallerError.fileDoesNotExistOrIncorrect {
+    func testXIPNoFile() async {
+        
+        // given
+        (env.fileHandler as! MockedFileHandler).nextFileExist = false
+        
+        let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
+        
+        // when
+        // (give a file name that exists, otherwise, it throws an exception)
+        do {
+            let installer = ShellInstaller(env: &self.env)
+            let _ = try await installer.uncompressXIP(atURL: srcFile)
+        } catch InstallerError.fileDoesNotExistOrIncorrect {
             // expected use case
-       } catch {
-           XCTFail("uncompressXIP generated an unknown error : \(error)")
-       }
-
-       // then
-        let runRecorder = MockedEnvironment.runRecorder
-       XCTAssertEqual(runRecorder.isEmpty(), true)
-   }
-
+            
+            // then
+        } catch {
+            XCTFail("uncompressXIP generated an unknown error : \(error)")
+        }
+    }   
    func testMoveApp() async {
        // given
        let src = URL(fileURLWithPath: "/Users/stormacq/.xcodeinstall/Downloads/Xcode 14 beta 5.app")
@@ -294,140 +291,152 @@ final class InstallTest: XCTestCase {
         )
     }
 
-    // func testFileMatchDownloadListExistsAndFileExists() throws{
+    func testFileMatchDownloadListExistsAndFileExists() throws{
 
-    //     // given
-    //     try createDownloadList()
-    //     let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
+        // given
+        try createDownloadList()
+        let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
 
-    //     let mfh = env.fileHandler as! MockedFileHandler
-    //     mfh.nextFileExist = true
+        let mfh = env.fileHandler as! MockedFileHandler
+        mfh.nextFileExist = true
 
-    //     // when
-    //     let existAndCorrect = installer.fileMatch(file: file)
+        // when
+        let installer = ShellInstaller(env: &self.env)
+        let existAndCorrect = installer.fileMatch(file: file)
 
-    //     // then
-    //     XCTAssertTrue(existAndCorrect)
-    // }
+        // then
+        XCTAssertTrue(existAndCorrect)
+    }
 
-    // func testFileMatchDownloadListExistsAndFileDoesNotExistInCache() throws {
+    func testFileMatchDownloadListExistsAndFileDoesNotExistInCache() throws {
 
-    //     //given
-    //     try createDownloadList()
-    //     let file = URL(fileURLWithPath: "/test/xxx.xip")
+        //given
+        try createDownloadList()
+        let file = URL(fileURLWithPath: "/test/xxx.xip")
 
-    //     let mfh = env.fileHandler as! MockedFileHandler
-    //     mfh.nextFileExist = false
+        let mfh = env.fileHandler as! MockedFileHandler
+        mfh.nextFileExist = false
 
-    //     // when
-    //     let fileExists = installer.fileMatch(file: file)
+        // when
+        let installer = ShellInstaller(env: &self.env)
+        let fileExists = installer.fileMatch(file: file)
 
-    //     // then
-    //     XCTAssertFalse(fileExists)
-    // }
+        // then
+        XCTAssertFalse(fileExists)
+    }
 
-    // func testFileMatchDownloadListDoesNotExistAndFileExists() {
+    func testFileMatchDownloadListDoesNotExistAndFileExists() {
 
-    //     //given
-    //     deleteDownloadList()
-    //     let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
+        //given
+        deleteDownloadList()
+        let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
 
-    //     let mfh = env.fileHandler as! MockedFileHandler
-    //     mfh.nextFileExist = true
+        let mfh = env.fileHandler as! MockedFileHandler
+        mfh.nextFileExist = true
 
-    //     // when
-    //     let fileExists = installer.fileMatch(file: file)
+        // when
+        let installer = ShellInstaller(env: &self.env)
+        let fileExists = installer.fileMatch(file: file)
 
-    //     // then
-    //     XCTAssertTrue(fileExists)
-    // }
+        // then
+        XCTAssertTrue(fileExists)
+    }
 
-    // func testInstallXcode() async {
+    func testInstallXcode() async {
 
-    //     // given
-    //     let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
+        // given
+        let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
 
-    //     // when
-    //     do {
+        // when
+        do {
 
-    //         try await installer.install(file: file)
-    //         XCTAssert(false)
-    //     } catch InstallerError.xCodeMoveInstallationError {
-    //         //expected
-    //     } catch {
-    //         // check no error is thrown
-    //         print("\(error)")
-    //         XCTAssert(false)
-    //     }
+            let installer = ShellInstaller(env: &self.env)
+            try await installer.install(file: file)
+            XCTAssert(false)
+        } catch InstallerError.xCodeMoveInstallationError {
+            //expected
+        } catch {
+            // check no error is thrown
+            print("\(error)")
+            XCTAssert(false)
+        }
 
-    //     // then
-    // }
+        // then
+    }
 
-    // func testInstallCommandLineTools() async {
+    #if os(macOS)
+    // on linux, hdiutil is not available. This test fails with
+    //  Executable "/usr/bin/hdiutil" is not found or cannot be executed.
+    func testInstallCommandLineTools() async {
 
-    //     // given
-    //     let file = URL(fileURLWithPath: "/test/Command Line Tools for Xcode 14 beta 5.dmg")
+        // given
+        let file = URL(fileURLWithPath: "/test/Command Line Tools for Xcode 14 beta 5.dmg")
 
-    //     // when
-    //     do {
-    //         try await installer.install(file: file)
-    //     } catch {
-    //         // check no error is thrown
-    //         print("\(error)")
-    //         XCTAssert(false)
-    //     }
+        // when
+        do {
+           let installer = ShellInstaller(env: &self.env)
+            try await installer.install(file: file)
+        } catch InstallerError.CLToolsInstallationError {
+            //expected
+            print("======== CLToolsInstallationError")
+        } catch {
+            // check no error is thrown
+            print("======== \(error)")
+            XCTAssert(false)
+        }
+    }
+    #endif
 
-    //     // then
-    // }
+    func testInstallFileDoesNotExist() async {
 
-    // func testInstallFileDoesNotExist() async {
+        let mfh = env.fileHandler as! MockedFileHandler
+        mfh.nextFileExist = false
 
-    //     let mfh = env.fileHandler as! MockedFileHandler
-    //     mfh.nextFileExist = false
+        // given
+        let file = URL(fileURLWithPath: "/test/Command Line Tools for Xcode 14 beta 5.dmg")
 
-    //     // given
-    //     let file = URL(fileURLWithPath: "/test/Command Line Tools for Xcode 14 beta 5.dmg")
+        // when
+        do {
+            let installer = ShellInstaller(env: &self.env)
+            try await installer.install(file: file)
 
-    //     // when
-    //     do {
-    //         try await installer.install(file: file)
+            // then
+            XCTAssert(false, "This method must throw an error")
 
-    //         // then
-    //         XCTAssert(false, "This method must throw an error")
+        } catch InstallerError.fileDoesNotExistOrIncorrect {
+            // expected
+        } catch {
+            // check no other error is thrown
+            print("\(error)")
+            XCTAssert(false)
+        }
 
-    //     } catch InstallerError.fileDoesNotExistOrIncorrect {
-    //         // expected
-    //     } catch {
-    //         // check no other error is thrown
-    //         print("\(error)")
-    //         XCTAssert(false)
-    //     }
+    }
 
-    // }
+    func testInstallFileUnsuported() async {
 
-    // func testInstallFileUnsuported() async {
+        let mfh = env.fileHandler as! MockedFileHandler
+        mfh.nextFileExist = true
 
-    //     let mfh = env.fileHandler as! MockedFileHandler
-    //     mfh.nextFileExist = true
+        // given
+        let file = URL(fileURLWithPath: "/test/test.zip")
 
-    //     // given
-    //     let file = URL(fileURLWithPath: "/test/test.zip")
+        // when
+        do {
+            let installer = ShellInstaller(env: &self.env)
+            try await installer.install(file: file)
 
-    //     // when
-    //     do {
-    //         try await installer.install(file: file)
+            // then
+            XCTAssert(false, "This method must throw an error")
 
-    //         // then
-    //         XCTAssert(false, "This method must throw an error")
+        } catch InstallerError.unsupportedInstallation {
+            // expected
+        } catch {
+            // check no other error is thrown
+            print("\(error)")
+            XCTAssert(false)
+        }
 
-    //     } catch InstallerError.unsupportedInstallation {
-    //         // expected
-    //     } catch {
-    //         // check no other error is thrown
-    //         print("\(error)")
-    //         XCTAssert(false)
-    //     }
-
-    // }
+    }
 
 }

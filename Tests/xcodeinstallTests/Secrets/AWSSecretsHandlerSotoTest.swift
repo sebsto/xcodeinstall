@@ -92,6 +92,8 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
         }
     }
 
+#if os(macOS)
+// [CI] on Linux fails because there is no AWS credentials provider configured
     func testCreateSecret() async {
 
         // given
@@ -106,4 +108,6 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
         }
 
     }
+#endif
 }
+

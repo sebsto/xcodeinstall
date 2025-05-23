@@ -9,10 +9,9 @@ import Testing
 
 @testable import xcodeinstall
 
+import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
-#else
-import Foundation
 #endif
 
 @MainActor
@@ -30,11 +29,11 @@ struct URLRequestCurlTest {
         //given
         let url = "https://dummy.com"
         var headers = [
-            "header1": "value1",
-            "header2": "value2",
+            "Header1": "value1",
+            "Header2": "value2",
         ]
         let data = "test data".data(using: .utf8)
-        let cookie = HTTPCookie(properties: [.name: "cookieName", .value: "cookieValue", .path: "/", .originURL: url])
+        let cookie = HTTPCookie(properties: [.name: "cookieName", .value: "cookieValue", .path: "/", .originURL: URL(string: url)!])
         if let cookie {
             headers.merge(HTTPCookie.requestHeaderFields(with: [cookie])) { (current, _) in current }
         }
@@ -45,8 +44,8 @@ struct URLRequestCurlTest {
 
         // then
         #expect(curl.starts(with: "curl "))
-        #expect(curl.contains("-H 'header1: value1'"))
-        #expect(curl.contains("-H 'header2: value2'"))
+        #expect(curl.contains("-H 'Header1: value1'"))
+        #expect(curl.contains("-H 'Header2: value2'"))
         #expect(curl.contains("-H 'Cookie: cookieName=cookieValue'"))
         #expect(curl.contains("-X GET 'https://dummy.com'"))
         #expect(curl.contains("--data 'test data'"))
@@ -59,11 +58,11 @@ struct URLRequestCurlTest {
         //given
         let url = "https://dummy.com"
         var headers = [
-            "header1": "value1",
-            "header2": "value2",
+            "Header1": "value1",
+            "Header2": "value2",
         ]
         let data = "test data".data(using: .utf8)
-        let cookie = HTTPCookie(properties: [.name: "cookieName", .value: "cookieValue", .path: "/", .originURL: url])
+        let cookie = HTTPCookie(properties: [.name: "cookieName", .value: "cookieValue", .path: "/", .originURL: URL(string: url)!])
         if let cookie {
             headers.merge(HTTPCookie.requestHeaderFields(with: [cookie])) { (current, _) in current }
         }
@@ -74,8 +73,8 @@ struct URLRequestCurlTest {
 
         // then
         #expect(curl.starts(with: "curl "))
-        #expect(curl.contains("--header 'header1: value1'"))
-        #expect(curl.contains("--header 'header2: value2'"))
+        #expect(curl.contains("--header 'Header1: value1'"))
+        #expect(curl.contains("--header 'Header2: value2'"))
         #expect(curl.contains("--header 'Cookie: cookieName=cookieValue'"))
         #expect(curl.contains("--request GET"))
         #expect(curl.contains("--url 'https://dummy.com'"))

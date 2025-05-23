@@ -22,7 +22,7 @@ struct FileHandlerTests {
 
     private func createSrcFile() -> URL {
         let srcFile: URL = self.tempDir().appendingPathComponent("temp.txt")
-        fileManager.createFile(atPath: srcFile.path, contents: test_data.data(using: .utf8))
+        let _ = fileManager.createFile(atPath: srcFile.path, contents: test_data.data(using: .utf8))
         return srcFile
     }
 }
@@ -63,7 +63,7 @@ extension FileHandlerTests {
 
         // dst exists and has a different content
         let dstFile: URL = self.tempDir().appendingPathComponent("temp2.txt")
-        fileManager.createFile(atPath: dstFile.path, contents: test_data2.data(using: .utf8))
+        let _ = fileManager.createFile(atPath: dstFile.path, contents: test_data2.data(using: .utf8))
 
         // When
         let fh = FileHandler()

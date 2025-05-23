@@ -59,7 +59,8 @@ final class MockedRunRecorder: InputProtocol, OutputProtocol {
         lastArguments.description.contains(argument)
     }
     func isEmpty() -> Bool {
-        lastExecutable == nil || lastExecutable?.description.isEmpty == true
+//        print(lastExecutable?.description)
+        return lastExecutable == nil || lastExecutable?.description.isEmpty == true
     }
     
 }
