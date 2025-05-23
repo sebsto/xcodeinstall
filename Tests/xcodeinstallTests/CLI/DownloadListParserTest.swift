@@ -5,38 +5,36 @@
 //  Created by Stormacq, Sebastien on 04/08/2022.
 //
 
-import XCTest
 
+import Testing
 @testable import xcodeinstall
 
+import Foundation
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#endif
+
 @MainActor
-class DownloadListParserTest: XCTestCase {
+@Suite("DownloadListParser Tests")
+struct DownloadListParserTest {
 
     var env: MockedEnvironment = MockedEnvironment()
 
+    @Test("Parse Download List")
     func testParseDownloadList() throws {
+        // given
+        let listData = try loadTestData(file: .downloadList)
 
-        do {
+        // when
+        let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
+        let downloads = list.downloads
 
-            // given
-
-            // load list from file
-            let listData = try loadTestData(file: .downloadList)
-
-            // when
-            let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
-            let downloads = list.downloads
-
-            // then
-            XCTAssertNotNil(list)
-            XCTAssertNotNil(downloads)
-            XCTAssert(downloads?.count == 1127)
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown : \(error)")
-        }
+        // then
+        #expect(downloads != nil)
+        #expect(downloads?.count == 1127)
     }
 
+    @Test("Date Parser OK")
     func testDateParserOK() {
         // given
         let date = "12-31-22 10:13"
@@ -45,14 +43,15 @@ class DownloadListParserTest: XCTestCase {
         let d = date.toDate()
 
         // then
-        XCTAssertNotNil(d)
-        XCTAssert(Calendar.current.component(.year, from: d!) == 2022)
-        XCTAssert(Calendar.current.component(.month, from: d!) == 12)
-        XCTAssert(Calendar.current.component(.day, from: d!) == 31)
-        XCTAssert(Calendar.current.component(.hour, from: d!) == 10)
-        XCTAssert(Calendar.current.component(.minute, from: d!) == 13)
+        #expect(d != nil)
+        #expect(Calendar.current.component(.year, from: d!) == 2022)
+        #expect(Calendar.current.component(.month, from: d!) == 12)
+        #expect(Calendar.current.component(.day, from: d!) == 31)
+        #expect(Calendar.current.component(.hour, from: d!) == 10)
+        #expect(Calendar.current.component(.minute, from: d!) == 13)
     }
 
+    @Test("Date Parser Invalid Data")
     func testDateParserInvalidData() {
         // given
         let date = "31-99-22 10:13"
@@ -61,70 +60,49 @@ class DownloadListParserTest: XCTestCase {
         let d = date.toDate()
 
         // then
-        XCTAssertNil(d)
+        #expect(d == nil)
     }
 
-    func testDownloadListParserOnlyXCode() {
+    @Test("Download List Parser Only XCode")
+    func testDownloadListParserOnlyXCode() throws {
+        // given
+        let listData = try loadTestData(file: .downloadList)
 
-        do {
+        // when
+        let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
+        let downloads = list.downloads
+        #expect(downloads != nil)
 
-            // given
+        let dlp = DownloadListParser(env: env, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
+        let filteredList = try dlp.parse(list: list)
 
-            // load list from file
-            let listData = try loadTestData(file: .downloadList)
-
-            // when
-            let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
-            let downloads = list.downloads
-            XCTAssertNotNil(downloads)
-
-            let dlp = DownloadListParser(env: env, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
-            let filteredList = try dlp.parse(list: list)
-            XCTAssertNotNil(filteredList)
-
-            // then
-            XCTAssert(filteredList.count == 21)
-            for item in filteredList {
-                XCTAssert(item.name.starts(with: "Xcode 13"))
-            }
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown : \(error)")
+        // then
+        #expect(filteredList.count == 21)
+        for item in filteredList {
+            #expect(item.name.starts(with: "Xcode 13"))
         }
-
     }
 
-    func testDownloadListParserAll() {
+    @Test("Download List Parser All")
+    func testDownloadListParserAll() throws {
+        // given
+        let listData = try loadTestData(file: .downloadList)
 
-        do {
+        // when
+        let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
+        let downloads = list.downloads
+        #expect(downloads != nil)
 
-            // given
+        let dlp = DownloadListParser(env: env, xCodeOnly: false, majorVersion: "13", sortMostRecentFirst: true)
+        let filteredList = try dlp.parse(list: list)
 
-            // load list from file
-            let listData = try loadTestData(file: .downloadList)
-
-            // when
-            let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
-            let downloads = list.downloads
-            XCTAssertNotNil(downloads)
-
-            let dlp = DownloadListParser(env: env, xCodeOnly: false, majorVersion: "13", sortMostRecentFirst: true)
-            let filteredList = try dlp.parse(list: list)
-            XCTAssertNotNil(filteredList)
-
-            // then
-            XCTAssert(filteredList.count == 56)
-            for item in filteredList {
-                XCTAssert(item.name.contains("Xcode 13"))
-            }
-
-            // just to verify no exception is thrown
-            _ = dlp.prettyPrint(list: filteredList)
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown : \(error)")
+        // then
+        #expect(filteredList.count == 56)
+        for item in filteredList {
+            #expect(item.name.contains("Xcode 13"))
         }
 
+        _ = dlp.prettyPrint(list: filteredList)
     }
 
     private func createTestFile(file: DownloadList.File, fileSize: Int) async -> URL {
@@ -146,101 +124,67 @@ class DownloadListParserTest: XCTestCase {
         return testFile
     }
 
-    func prepareFilteredList() throws -> ([DownloadList.Download], DownloadListParser) {
-        // load list from file
+    private func prepareFilteredList() throws -> ([DownloadList.Download], DownloadListParser) {
         let listData = try loadTestData(file: .downloadList)
-
-        // decode the JSON
         let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
         let downloads = list.downloads
-        XCTAssertNotNil(downloads)
+        #expect(downloads != nil)
 
-        // filter and sort the list
         let dlp = DownloadListParser(env: env, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
         let filteredList = try dlp.parse(list: list)
-        XCTAssertNotNil(filteredList)
 
         return (filteredList, dlp)
     }
 
-    func testDownloadListParserEnrichedListTrue() async {
+    @Test("Download List Parser Enriched List True")
+    func testDownloadListParserEnrichedListTrue() async throws {
+        let (filteredList, dlp) = try prepareFilteredList()
+        (env.fileHandler as! MockedFileHandler).nextFileExist = true
+        #expect(filteredList[0].files.count == 1)
 
-        do {
+        let newFile = DownloadList.File(
+            filename: "test.zip",
+            displayName: "",
+            remotePath: "",
+            fileSize: 1,
+            sortOrder: 0,
+            dateCreated: "",
+            dateModified: "",
+            fileFormat: DownloadList.FileFormat(fileExtension: "zip", description: "zip")
+        )
+        let newFilteredList = DownloadList.Download(from: filteredList[0], appendFile: newFile)
+        #expect(newFilteredList.files.count == 2)
 
-            // given
-            let (filteredList, dlp) = try prepareFilteredList()
-            (env.fileHandler as! MockedFileHandler).nextFileExist = true
-            XCTAssert(filteredList[0].files.count == 1)
+        _ = await self.createTestFile(file: newFile, fileSize: newFile.fileSize)
 
-            // modify the list to add a fake file in position [0]
+        let enrichedList = await dlp.enrich(list: [newFilteredList])
 
-            let newFile = DownloadList.File(
-                filename: "test.zip",
-                displayName: "",
-                remotePath: "",
-                fileSize: 1,
-                sortOrder: 0,
-                dateCreated: "",
-                dateModified: "",
-                fileFormat: DownloadList.FileFormat(fileExtension: "zip", description: "zip")
-            )
-            let newFilteredList = DownloadList.Download(from: filteredList[0], appendFile: newFile)
-            XCTAssert(newFilteredList.files.count == 2)
+        #expect(enrichedList[0].files.count == 2)
+        #expect(enrichedList[0].files[0].existInCache)
 
-            _ = await self.createTestFile(file: newFile, fileSize: newFile.fileSize)
-
-            // when
-            let enrichedList = await dlp.enrich(list: [newFilteredList])
-
-            // then
-            XCTAssert(enrichedList[0].files.count == 2)
-            XCTAssertTrue(enrichedList[0].files[0].existInCache)
-
-            _ = await self.deleteTestFile(file: newFile)
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown : \(error)")
-        }
-
+        _ = await self.deleteTestFile(file: newFile)
     }
 
-    func testDownloadListParserEnrichedListFalse() async {
+    @Test("Download List Parser Enriched List False")
+    func testDownloadListParserEnrichedListFalse() async throws {
+        let (filteredList, dlp) = try prepareFilteredList()
+        (env.fileHandler as! MockedFileHandler).nextFileExist = false
 
-        do {
+        let newFile = DownloadList.File(
+            filename: "test.zip",
+            displayName: "",
+            remotePath: "",
+            fileSize: 1,
+            sortOrder: 0,
+            dateCreated: "",
+            dateModified: "",
+            fileFormat: DownloadList.FileFormat(fileExtension: "zip", description: "zip")
+        )
+        let d = DownloadList.Download(from: filteredList[0], appendFile: newFile)
+        let newFilteredList = [d]
 
-            // given
-            let (filteredList, dlp) = try prepareFilteredList()
-            (env.fileHandler as! MockedFileHandler).nextFileExist = false
+        let enrichedList = await dlp.enrich(list: newFilteredList)
 
-            // modify the list to add a fake file in position [0]
-
-            let newFile = DownloadList.File(
-                filename: "test.zip",
-                displayName: "",
-                remotePath: "",
-                fileSize: 1,
-                sortOrder: 0,
-                dateCreated: "",
-                dateModified: "",
-                fileFormat: DownloadList.FileFormat(fileExtension: "zip", description: "zip")
-            )
-            let d = DownloadList.Download(from: filteredList[0], appendFile: newFile)
-
-            let newFilteredList = [d]
-
-            // do not create the file !!
-
-            // when
-            let enrichedList = await dlp.enrich(list: newFilteredList)
-
-            // then
-            XCTAssertNotNil(enrichedList[0].files[0].existInCache)
-            XCTAssertFalse(enrichedList[0].files[0].existInCache)
-
-        } catch {
-            XCTAssert(false, "Unexpected exception thrown : \(error)")
-        }
-
+        #expect(enrichedList[0].files[0].existInCache == false)
     }
-
 }
