@@ -12,7 +12,7 @@ let package = Package(
         .executable(name: "xcodeinstall", targets: ["xcodeinstall"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.1"),
         .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"),
         .package(url: "https://github.com/sebsto/CLIlib/", branch: "main"),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
