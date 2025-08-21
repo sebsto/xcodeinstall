@@ -38,7 +38,8 @@ final class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
         if awsClient == nil {
             newAwsClient = AWSClient(
                 credentialProvider: .selector(.environment, .ec2, .configFile()),
-                retryPolicy: .jitter()
+                retryPolicy: .jitter(),
+                httpClientProvider: .createNew
             )
         }
         var newSMClient: SecretsManager?
