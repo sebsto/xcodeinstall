@@ -77,10 +77,8 @@ protocol AWSSecretsHandlerSDKProtocol: Sendable {
 @MainActor
 class AWSSecretsHandler: SecretsHandlerProtocol {
 
-    var env: Environment
     let awsSDK: AWSSecretsHandlerSDKProtocol
-    public init(env: Environment, sdk: AWSSecretsHandlerSDKProtocol? = nil, region: String = "us-east-1") throws {
-        self.env = env
+    public init(sdk: AWSSecretsHandlerSDKProtocol? = nil, region: String = "us-east-1") throws {
         if let sdk  {
             self.awsSDK = sdk
         } else {

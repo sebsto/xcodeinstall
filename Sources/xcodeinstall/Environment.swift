@@ -38,11 +38,11 @@ protocol Environment: Sendable {
         _ executable: Executable,
         arguments: Arguments,
         workingDirectory: FilePath?,
-    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>
+    ) async throws -> ShellOutput
     func run(
         _ executable: Executable,
         arguments: Arguments,
-    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>
+    ) async throws -> ShellOutput
 }
 
 @MainActor
@@ -97,7 +97,7 @@ struct RuntimeEnvironment: Environment {
     func run (
         _ executable: Executable,
         arguments: Arguments,
-    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>  {
+    ) async throws -> ShellOutput  {
         return try await run(executable,
                    arguments: arguments,
                    workingDirectory: nil
@@ -107,7 +107,7 @@ struct RuntimeEnvironment: Environment {
         _ executable: Executable,
         arguments: Arguments,
         workingDirectory: FilePath?,
-    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>  {
+    ) async throws -> ShellOutput  {
         try await Subprocess.run(
             executable,
             arguments: arguments,
@@ -115,8 +115,7 @@ struct RuntimeEnvironment: Environment {
             workingDirectory: workingDirectory,
             platformOptions: PlatformOptions(),
             input: .none,
-            output: .string,
-            error: .discarded)
-        
+            output: .string(limit: 1024, encoding: UTF8.self),
+            error: .string(limit: 1024, encoding: UTF8.self))
     }
 }

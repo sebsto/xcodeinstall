@@ -25,10 +25,10 @@ struct TestEnvironment {
     }
 
     /// current list of middleware
-    static var middlewares: [AWSServiceMiddleware] {
-        //        return (Environment["AWS_ENABLE_LOGGING"] == "true") ? [AWSLoggingMiddleware()] : []
-        []
-    }
+//    static var middlewares: [AWSServiceMiddleware] {
+//        //        return (Environment["AWS_ENABLE_LOGGING"] == "true") ? [AWSLoggingMiddleware()] : []
+//        []
+//    }
 
     /// return endpoint
     static func getEndPoint(environment: String = "") -> String? {

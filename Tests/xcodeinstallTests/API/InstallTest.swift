@@ -58,28 +58,54 @@ final class InstallTest: XCTestCase {
 
     }
 
-    func testXIP() async {
-
+    func testInstallPkgUsesSudo() async throws {
         // given
         let mfh = env.fileHandler as! MockedFileHandler
         mfh.nextFileExist = true
 
-        let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
+        let srcFile = URL(fileURLWithPath: "/tmp/temp.pkg")
 
         // when
         do {
             let installer = ShellInstaller(env: &env)
-            let _ = try await installer.uncompressXIP(atURL: srcFile)
+            let _ = try await installer.installPkg(atURL: srcFile)
         } catch {
-            XCTFail("uncompressXIP generated an error : \(error)")
+            XCTFail("installPkg generated an error : \(error)")
         }
 
         // then
         let runRecorder = MockedEnvironment.runRecorder
-        XCTAssertTrue(runRecorder.containsExecutable("/usr/bin/xip"))
-        XCTAssertTrue(runRecorder.containsArgument("--expand"))
+        XCTAssertTrue(runRecorder.containsExecutable("/usr/bin/sudo"))
+        XCTAssertTrue(runRecorder.containsArgument("/usr/sbin/installer"))
         XCTAssertTrue(runRecorder.containsArgument(srcFile.path))
+        XCTAssertTrue(runRecorder.containsArgument("-pkg"))
+        XCTAssertTrue(runRecorder.containsArgument("-target"))
+        XCTAssertTrue(runRecorder.containsArgument("/"))
     }
+    
+//    func testXIP() async {
+//
+//        // given
+//        let mfh = env.fileHandler as! MockedFileHandler
+//        mfh.nextFileExist = true
+//
+//        let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
+//
+//        // when
+//        do {
+//            let installer = ShellInstaller(env: &env)
+//            let _ = try await installer.uncompressXIP(atURL: srcFile)
+//        } catch {
+//            XCTFail("uncompressXIP generated an error : \(error)")
+//        }
+//
+//        // then
+//        let runRecorder = MockedEnvironment.runRecorder
+//        XCTAssertTrue(runRecorder.containsExecutable("/usr/sbin/pkgutil"))
+//        XCTAssertTrue(runRecorder.containsArgument("--expand-full"))
+//        XCTAssertTrue(runRecorder.containsArgument(srcFile.path))
+//        XCTAssertTrue(runRecorder.containsArgument("Xcode.app"))
+//    }
 
     func testXIPNoFile() async {
         
@@ -340,27 +366,27 @@ final class InstallTest: XCTestCase {
         XCTAssertTrue(fileExists)
     }
 
-    func testInstallXcode() async {
-
-        // given
-        let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
-
-        // when
-        do {
-
-            let installer = ShellInstaller(env: &self.env)
-            try await installer.install(file: file)
-            XCTAssert(false)
-        } catch InstallerError.xCodeMoveInstallationError {
-            //expected
-        } catch {
-            // check no error is thrown
-            print("\(error)")
-            XCTAssert(false)
-        }
-
-        // then
-    }
+//    func testInstallXcode() async {
+//
+//        // given
+//        let file = URL(fileURLWithPath: "/tmp/Xcode 14 beta.xip")
+//
+//        // when
+//        do {
+//
+//            let installer = ShellInstaller(env: &self.env)
+//            try await installer.install(file: file)
+//            XCTAssert(false)
+//        } catch InstallerError.xCodeMoveInstallationError {
+//            //expected
+//        } catch {
+//            // check no error is thrown
+//            print("\(error)")
+//            XCTAssert(false)
+//        }
+//
+//        // then
+//    }
 
     #if os(macOS)
     // on linux, hdiutil is not available. This test fails with

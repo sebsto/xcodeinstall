@@ -71,7 +71,7 @@ extension MockedEnvironment {
     func run (
         _ executable: Executable,
         arguments: Arguments,
-    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>  {
+    ) async throws -> ShellOutput  {
         return try await run(executable,
                    arguments: arguments,
                    workingDirectory: nil
@@ -81,7 +81,7 @@ extension MockedEnvironment {
         _ executable: Executable,
         arguments: Arguments,
         workingDirectory: FilePath?,
-    ) async throws -> CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>  {
+    ) async throws -> ShellOutput  {
         
         MockedEnvironment.runRecorder.lastExecutable = executable
         MockedEnvironment.runRecorder.lastArguments = arguments
@@ -91,7 +91,7 @@ extension MockedEnvironment {
             processIdentifier: ProcessIdentifier(value: 9999),
             terminationStatus: TerminationStatus.exited(0),
             standardOutput: "mocked output",
-            standardError: DiscardedOutput.OutputType(),
+            standardError: "mocked error",
         )
     }
 }

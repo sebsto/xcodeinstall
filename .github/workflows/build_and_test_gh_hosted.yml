@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 # env:
 #   DEVELOPER_DIR: /Applications/Xcode_15.1.app/Contents/Developer
@@ -12,23 +13,25 @@ on:
 jobs:
 
   build:
+    # disabled because libunxip doesn't compile on Linux
+    if: false 
     runs-on: ubuntu-latest
     container: swift:6.1-noble
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Build
-      run: swift build
+      run: swift build -c release
 
   # disabled until resolved
   # https://github.com/sebsto/xcodeinstall/issues/51
   test:
-    if: true 
+    if: false 
     runs-on: ubuntu-latest
     container: swift:6.1-noble
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Run tests
       run: swift test

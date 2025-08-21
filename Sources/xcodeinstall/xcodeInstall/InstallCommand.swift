@@ -48,7 +48,7 @@ extension XCodeInstall {
             self.env.progressBar.complete(success: false)
         } catch InstallerError.xCodePKGInstallationError {
             display(
-                "🛑 Can not install additional packages. Be sure to run this command as root (sudo xcodinstall)."
+                "🛑 Can not install additional packages."
             )
             self.env.progressBar.complete(success: false)
         } catch InstallerError.unsupportedInstallation {

@@ -12,7 +12,7 @@ import System
 import SystemPackage
 #endif
 
-typealias ShellOutput = CollectedResult<StringOutput<Unicode.UTF8>, DiscardedOutput>
+typealias ShellOutput = CollectedResult<StringOutput<Unicode.UTF8>, StringOutput<Unicode.UTF8>>
 
 extension Executable {
     public static func path(_ path: String) -> Self {
