@@ -76,9 +76,10 @@ final class InstallTest: XCTestCase {
 
         // then
         let runRecorder = MockedEnvironment.runRecorder
-        XCTAssertTrue(runRecorder.containsExecutable("/usr/bin/xip"))
-        XCTAssertTrue(runRecorder.containsArgument("--expand"))
+        XCTAssertTrue(runRecorder.containsExecutable("/usr/sbin/pkgutil"))
+        XCTAssertTrue(runRecorder.containsArgument("--expand-full"))
         XCTAssertTrue(runRecorder.containsArgument(srcFile.path))
+        XCTAssertTrue(runRecorder.containsArgument("Xcode.app"))
     }
 
     func testXIPNoFile() async {

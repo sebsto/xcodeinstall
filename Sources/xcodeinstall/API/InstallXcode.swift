@@ -95,8 +95,8 @@ extension ShellInstaller {
 
         // synchronously uncompress in the download directory
         let result = try await self.env.run(
-            .name(XIPCOMMAND),
-            arguments: ["--expand", filePath],
+            .name(PKGUTILCOMMAND),
+            arguments: ["--expand-full", filePath, "Xcode.app"],
             workingDirectory: .init(env.fileHandler.downloadDirectory().path)
         )
 
