@@ -37,6 +37,7 @@ class ShellInstaller: InstallerProtocol {
     }
 
     // the shell commands we need to install XCode and its command line tools
+    let SUDOCOMMAND = "/usr/bin/sudo"
     let HDIUTILCOMMAND = "/usr/bin/hdiutil"
     let INSTALLERCOMMAND = "/usr/sbin/installer"
 

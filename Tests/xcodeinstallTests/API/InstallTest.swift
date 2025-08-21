@@ -58,6 +58,31 @@ final class InstallTest: XCTestCase {
 
     }
 
+    func testInstallPkgUsesSudo() async throws {
+        // given
+        let mfh = env.fileHandler as! MockedFileHandler
+        mfh.nextFileExist = true
+
+        let srcFile = URL(fileURLWithPath: "/tmp/temp.pkg")
+
+        // when
+        do {
+            let installer = ShellInstaller(env: &env)
+            let _ = try await installer.installPkg(atURL: srcFile)
+        } catch {
+            XCTFail("installPkg generated an error : \(error)")
+        }
+
+        // then
+        let runRecorder = MockedEnvironment.runRecorder
+        XCTAssertTrue(runRecorder.containsExecutable("/usr/bin/sudo"))
+        XCTAssertTrue(runRecorder.containsArgument("/usr/sbin/installer"))
+        XCTAssertTrue(runRecorder.containsArgument(srcFile.path))
+        XCTAssertTrue(runRecorder.containsArgument("-pkg"))
+        XCTAssertTrue(runRecorder.containsArgument("-target"))
+        XCTAssertTrue(runRecorder.containsArgument("/"))
+    }
+    
 //    func testXIP() async {
 //
 //        // given
