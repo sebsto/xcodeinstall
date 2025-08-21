@@ -76,7 +76,7 @@ struct MainCommand: AsyncParsableCommand {
         var runtimeEnv = env
         let xci: XCodeInstall!
         if let region {
-            runtimeEnv.secrets = try AWSSecretsHandler(env: runtimeEnv, region: region)
+            runtimeEnv.secrets = try AWSSecretsHandler(region: region)
             xci = XCodeInstall(log: logger, env: runtimeEnv)
         } else {
             xci = XCodeInstall(log: logger, env: runtimeEnv)
