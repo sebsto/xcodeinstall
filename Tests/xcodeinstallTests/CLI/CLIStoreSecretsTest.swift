@@ -5,6 +5,7 @@
 //  Created by Stormacq, Sebastien on 15/09/2022.
 //
 
+import Foundation
 import Testing
 
 @testable import xcodeinstall
