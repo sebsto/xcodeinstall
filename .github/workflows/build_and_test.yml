@@ -10,12 +10,11 @@ on:
 jobs:
   build:
     runs-on: self-hosted
-
     steps:
     - name: Checkout
       uses: actions/checkout@v5
     - name: Build
-      run: swift build
+      run: swift build -c release
 
   test:
     runs-on: self-hosted
