@@ -13,6 +13,8 @@ on:
 jobs:
 
   build:
+    # disabled because libunxip doesn't compile on Linux
+    if: false 
     runs-on: ubuntu-latest
     container: swift:6.1-noble
 
@@ -20,12 +22,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v5
     - name: Build
-      run: swift build
+      run: swift build -c release
 
   # disabled until resolved
   # https://github.com/sebsto/xcodeinstall/issues/51
   test:
-    if: true 
+    if: false 
     runs-on: ubuntu-latest
     container: swift:6.1-noble
 
