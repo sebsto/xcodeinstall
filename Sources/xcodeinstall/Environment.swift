@@ -115,7 +115,7 @@ struct RuntimeEnvironment: Environment {
             workingDirectory: workingDirectory,
             platformOptions: PlatformOptions(),
             input: .none,
-            output: .string,
-            error: .string)
+            output: .string(limit: 1024, encoding: UTF8.self),
+            error: .string(limit: 1024, encoding: UTF8.self))
     }
 }
