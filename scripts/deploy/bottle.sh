@@ -13,7 +13,7 @@
 echo "\n➕ Get version number \n"
 if [ ! -f VERSION ]; then 
     echo "VERSION file does not exist."
-    echo "It is created by 'scripts/release_sources.sh"
+    echo "It is created by 'scripts/deploy/release_sources.sh"
     exit -1
 fi
 VERSION=$(cat VERSION)
@@ -25,13 +25,13 @@ ROOT_URL="https://github.com/sebsto/xcodeinstall/releases/download/${TAG}"
 
 if [ ! -f VERSION ]; then 
     echo "VERSION file does not exist."
-    echo "It is created by 'scripts/release_sources.sh"
+    echo "It is created by 'scripts/deploy/release_sources.sh"
     exit -1
 fi
 VERSION=$(cat VERSION)
 
 # Supports macOS 13 (Ventura) and later
-OS_NAMES=(arm64_ventura ventura arm64_sonoma sonoma arm64_sequoia sequoia)
+OS_NAMES=(arm64_ventura arm64_sonoma arm64_sequoia ventura sonoma sequoia)
 
 # Semantic version number split into a list using  Ugly, bash 3 compatible syntax
 IFS=" " read -r -a CURRENT_OS_VERSION <<<"$(sw_vers -productVersion | sed 's/\./ /g')"

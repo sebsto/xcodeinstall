@@ -5,18 +5,18 @@ set -o pipefail
 # echo "Did you increment version number before running this script ?"
 # exit -1 
 ######################
-VERSION="0.10.1"
+VERSION="0.11.0"
 ######################
 
 echo $VERSION > VERSION
 TAG=v$VERSION
 
 echo "\n➕ Add new version to source code\n"
-scripts/version.sh
+scripts/deploy/version.sh
 
 echo "\n🏷 Tagging GitHub\n"
 git tag $TAG 
-git push --quiet origin $TAG
+git push --no-verify --quiet origin $TAG
 
 echo "\n📦 Create Source Code Release on GitHub\n"
 gh auth status > /dev/null 2>&1
@@ -34,15 +34,15 @@ echo "\n🍺 Generate brew formula\n"
 # do not use / as separator as it is confused with / from the URL
 sed -E -e "s+URL+url \"$URL\"+g"             \
        -e "s/SHA/sha256 \"$SHA256\"/g"       \
-       scripts/xcodeinstall.template > scripts/xcodeinstall.rb
+       scripts/deploy/xcodeinstall.template > scripts/deploy/xcodeinstall.rb
 
 echo "\n🍺 Pushing new formula\n"
 pushd ../homebrew-macos
 git pull 
-cp ../xcodeinstall/scripts/xcodeinstall.rb .
+cp ../xcodeinstall/scripts/deploy/xcodeinstall.rb .
 git add xcodeinstall.rb 
 git commit --quiet -m "update for $TAG"
-git push --quiet > /dev/null 2>&1
+git push --no-verify --quiet > /dev/null 2>&1
 popd 
 
 

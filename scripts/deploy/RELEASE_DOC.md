@@ -9,9 +9,9 @@ https://github.com/marketplace/actions/homebrew-bump-cask
 
 1. Commit all other changes and push them
 
-2. Update version number in `scripts/release-sources.sh`
+2. Update version number in `scripts/deploy/release-sources.sh`
 
-3. `./scripts/release_sources.sh`
+3. `./scripts/deploy/release_sources.sh`
 
 This script 
 - creates a new version 
@@ -19,12 +19,12 @@ This script
 - creates a GitHub release 
 - creates a brew formula with the new release
 
-4. `./scripts/bottle.sh` 
+4. `./scripts/deploy/bottle.sh` 
 
 This script
 - creates the brew bottles TAR file and the code to add to the formula 
 
-5. `./scripts/release_binaries.sh` 
+5. `./scripts/deploy/release_binaries.sh` 
 
 This script 
 - uploads the bottles to the GitHub Release
@@ -36,7 +36,7 @@ While testing this procedure, it is useful to undo a release.
 
 !! Destructive actions !! 
 
-1. `./scripts/delete_release.sh`  
+1. `./scripts/deploy/delete_release.sh`  
 
 2. `git reset HEAD~1`
 

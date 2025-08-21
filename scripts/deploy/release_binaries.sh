@@ -31,5 +31,5 @@ cp ./scripts/xcodeinstall.rb ../homebrew-macos
 pushd ../homebrew-macos
 git add xcodeinstall.rb 
 git commit --quiet -m "update for $TAG"
-git push --quiet > /dev/null 2>&1
+git push --no-verify --quiet > /dev/null 2>&1
 popd 

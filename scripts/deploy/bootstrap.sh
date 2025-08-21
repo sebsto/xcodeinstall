@@ -6,7 +6,7 @@
 #
 
 main() {
-  scripts/clean.sh
+  scripts/deploy/clean.sh
 
   echo "==> 👢 Bootstrapping"
 

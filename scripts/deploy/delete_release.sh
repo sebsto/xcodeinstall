@@ -5,4 +5,4 @@ TAG=v$VERSION_TO_DELETE
 
 gh release delete $TAG
 git tag -d $TAG
-git push origin --delete $TAG
+git push --no-verify origin --delete $TAG
