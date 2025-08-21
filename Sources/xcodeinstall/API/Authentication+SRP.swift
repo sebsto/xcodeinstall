@@ -10,8 +10,6 @@ import Foundation
 import SRP
 import _CryptoExtras
 
-//import _CryptoExtras
-
 extension AppleAuthenticator {
     func startSRPAuthentication(username: String, password: String) async throws {
 
