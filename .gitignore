@@ -7,7 +7,7 @@ video/*
 test.log
 dist
 Tests/Data/curl.txt
-scripts/xcodeinstall.rb
+scripts/deploy/xcodeinstall.rb
 BOTTLE_BLOCK
 Package.resolved
 

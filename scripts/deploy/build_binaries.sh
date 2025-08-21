@@ -5,7 +5,7 @@ set -o pipefail
 echo "\n➕ Get version number\n"
 if [ ! -f VERSION ]; then 
     echo "VERSION file does not exist."
-    echo "It is created by 'scripts/release_sources.sh"
+    echo "It is created by 'scripts/deploy/release_sources.sh"
     exit -1
 fi
 VERSION=$(cat VERSION)
