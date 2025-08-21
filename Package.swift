@@ -34,7 +34,7 @@ let package = Package(
                 .product(name: "_CryptoExtras", package: "swift-crypto"),
                 .product(name: "Subprocess", package: "swift-subprocess"),
                 .product(name: "SystemPackage", package: "swift-system"),
-                .product(name: "libunxip", package: "unxip")
+                .product(name: "libunxip", package: "unxip"),
             ]
         ),
         .testTarget(
