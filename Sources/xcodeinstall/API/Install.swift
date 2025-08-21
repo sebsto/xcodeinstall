@@ -13,7 +13,7 @@ protocol InstallerProtocol {
     func installCommandLineTools(atPath file: URL) async throws
     func installPkg(atURL pkg: URL) async throws -> ShellOutput
     func installXcode(at src: URL) async throws
-    func uncompressXIP(atURL file: URL) async throws -> ShellOutput
+    func uncompressXIP(atURL file: URL) async throws
     func moveApp(at src: URL) async throws -> String
     func fileMatch(file: URL) async -> Bool
 }
@@ -21,6 +21,7 @@ protocol InstallerProtocol {
 enum InstallerError: Error {
     case unsupportedInstallation
     case fileDoesNotExistOrIncorrect
+    case xCodeUnxipDirectoryDoesntExist
     case xCodeXIPInstallationError
     case xCodeMoveInstallationError
     case xCodePKGInstallationError
@@ -36,8 +37,6 @@ class ShellInstaller: InstallerProtocol {
     }
 
     // the shell commands we need to install XCode and its command line tools
-    let XIPCOMMAND = "/usr/bin/xip"
-    let PKGUTILCOMMAND = "/usr/sbin/pkgutil"
     let HDIUTILCOMMAND = "/usr/bin/hdiutil"
     let INSTALLERCOMMAND = "/usr/sbin/installer"
 

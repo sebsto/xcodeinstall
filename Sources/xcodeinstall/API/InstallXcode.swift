@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+import libunxip
 import Subprocess
 
 // MARK: XCODE
@@ -30,12 +31,14 @@ extension ShellInstaller {
             total: totalSteps,
             text: "Expanding Xcode xip (this might take a while)"
         )
-        result = try await self.uncompressXIP(atURL: src)
-        if !result.terminationStatus.isSuccess {
-            log.error("Can not unXip file with command \(PKGUTILCOMMAND) : \(result)")
+        
+        do {
+            try await self.uncompressXIP(atURL: src)
+        } catch {
+            log.error("Failed to extract XIP file: \(error)")
             throw InstallerError.xCodeXIPInstallationError
         }
-
+        
         // second move file to /Applications
         log.debug("Moving app to destination")
         currentStep += 1
@@ -83,7 +86,7 @@ extension ShellInstaller {
     // expand a XIP file.  There is no way to create XIP file.
     // This code can not be tested without a valid, signed,  Xcode archive
     // https://en.wikipedia.org/wiki/.XIP
-    func uncompressXIP(atURL file: URL) async throws -> ShellOutput {
+    func uncompressXIP(atURL file: URL) async throws {
 
         let filePath = file.path
 
@@ -92,15 +95,21 @@ extension ShellInstaller {
             log.error("File to unXip does not exist : \(filePath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
+        
+        let output = file.deletingLastPathComponent()
+        guard chdir(output.path) == 0 else {
+            log.error("Failed to access output directory at \(output): \(String(cString: strerror(errno)))")
+            throw InstallerError.xCodeUnxipDirectoryDoesntExist
+        }
 
-        // synchronously uncompress in the download directory
-        let result = try await self.env.run(
-            .name(PKGUTILCOMMAND),
-            arguments: ["--expand-full", filePath, "Xcode.app"],
-            workingDirectory: .init(env.fileHandler.downloadDirectory().path)
-        )
-
-        return result
+        // Use unxip library to decompress the XIP file
+        let handle = try FileHandle(forReadingFrom: file)
+        let data = DataReader(descriptor: handle.fileDescriptor)
+        for try await file in Unxip.makeStream(from: .xip(), to: .disk(), input: data) {
+            log.trace("Uncompressing XIP file at \(file.name)")
+            // do nothing at the moment
+            // a future version might report progress to the UI
+        }
     }
 
     func moveApp(at src: URL) async throws -> String {

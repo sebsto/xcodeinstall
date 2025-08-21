@@ -18,7 +18,8 @@ let package = Package(
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-crypto", from: "3.14.0"),
-        .package(url: "https://github.com/apple/swift-system", from: "1.6.0"),     
+        .package(url: "https://github.com/apple/swift-system", from: "1.6.0"),
+        .package(url: "https://github.com/saagarjha/unxip.git", from: "3.2.0"),
         //.package(path: "../CLIlib")
     ],
 
@@ -33,6 +34,7 @@ let package = Package(
                 .product(name: "_CryptoExtras", package: "swift-crypto"),
                 .product(name: "Subprocess", package: "swift-subprocess"),
                 .product(name: "SystemPackage", package: "swift-system"),
+                .product(name: "libunxip", package: "unxip")
             ]
         ),
         .testTarget(
