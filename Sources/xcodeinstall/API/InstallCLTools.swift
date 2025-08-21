@@ -77,7 +77,7 @@ extension ShellInstaller {
         }
 
         // hdiutil mount ./xcode-cli.dmg
-        return try await run(.path(HDIUTILCOMMAND), arguments: ["mount", dmgPath])
+        return try await self.env.run(.path(HDIUTILCOMMAND), arguments: ["mount", dmgPath])
     }
 
     private func unmountDMG(volume: URL) async throws -> ShellOutput {

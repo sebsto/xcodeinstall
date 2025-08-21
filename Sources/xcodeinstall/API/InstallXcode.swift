@@ -32,7 +32,7 @@ extension ShellInstaller {
         )
         result = try await self.uncompressXIP(atURL: src)
         if !result.terminationStatus.isSuccess {
-            log.error("Can not unXip file : \(result)")
+            log.error("Can not unXip file with command \(PKGUTILCOMMAND) : \(result)")
             throw InstallerError.xCodeXIPInstallationError
         }
 
