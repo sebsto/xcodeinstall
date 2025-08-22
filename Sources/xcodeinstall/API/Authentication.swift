@@ -170,7 +170,7 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             validResponse: .range(0..<500)
         )
 
-        try await self.env.secrets!.clearSecrets()
+        try await self.env().secrets!.clearSecrets()
 
     }
 
@@ -218,12 +218,11 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             try await self.saveSession(response: response, session: session)
 
         case 401, 403:
-            // invalid usernameor password
+            // invalid username or password
             throw AuthenticationError.invalidUsernamePassword
 
         case 409:
             // requires two-factors authentication
-            try await self.saveSession(response: response, session: session)
             throw AuthenticationError.requires2FA
 
         case 503:
@@ -239,11 +238,12 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
 
     func saveSession(response: HTTPURLResponse, session: AppleSession) async throws {
         guard let cookies = response.value(forHTTPHeaderField: "Set-Cookie") else {
+            log.debug("No cookies set, just saving the session")
+            _ = try await self.env().secrets!.saveSession(session)
             return
         }
 
         // save session data to reuse in future invocation
-        _ = try await self.env.secrets!.saveCookies(cookies)
-        _ = try await self.env.secrets!.saveSession(session)
+        _ = try await self.env().secrets!.saveCookies(cookies)
     }
 }

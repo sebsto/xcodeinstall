@@ -32,14 +32,14 @@ class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
 
         let fileURL = "https://developer.apple.com/services-account/download?path=\(file.remotePath)"
 
-        let fh = self.env.fileHandler
+        let fh = self.env().fileHandler
         //filehandler is not MainActor-isolated so we need to use Task { } to get the file path
         let filePath = await Task {
             await URL(
                 fileURLWithPath: fh.downloadFilePath(file: file)
             )
         }.value
-        let urlSessionDownload = self.env.urlSessionDownload(
+        let urlSessionDownload = self.env().urlSessionDownload(
             dstFilePath: filePath,
             totalFileSize: file.fileSize,
             startTime: Date.now

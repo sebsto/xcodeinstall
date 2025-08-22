@@ -51,14 +51,17 @@ struct RuntimeEnvironment: Environment {
     
     let region: String?
     let log: Logger
+
     init(region: String? = nil, log: Logger) {
         self.region = region
         self.log = log
+
+        self._authenticator = AppleAuthenticator(log: log)
+        self._downloader = AppleDownloader(log: log)
+        self._fileHandler = FileHandler(log: log)
+        self._secrets = SecretsStorageFile(log: log)
     }
     
-    // Utilities classes
-    var fileHandler: FileHandlerProtocol { FileHandler(log: self.log) }
-
     // CLI related classes
     var display: DisplayProtocol = Display()
     var readLine: ReadLineProtocol = ReadLine()
@@ -66,23 +69,37 @@ struct RuntimeEnvironment: Environment {
     // progress bar
     var progressBar: CLIProgressBarProtocol = CLIProgressBar()
 
+    // Utilities classes
+    var _fileHandler: FileHandlerProtocol 
+    var fileHandler: FileHandlerProtocol { self._fileHandler }
+
     // Secrets - will be overwritten by CLI when using AWS Secrets Manager
     private var _secrets: SecretsHandlerProtocol? = nil
     var secrets: SecretsHandlerProtocol? {
-        get {
-            _secrets ?? SecretsStorageFile(log: log)
-        }
-        set {
-            _secrets = newValue
-         }
+        get { _secrets }
+        set { _secrets = newValue }
     }
 
     // Commands
+    var _authenticator: AppleAuthenticatorProtocol
     var authenticator: AppleAuthenticatorProtocol {
-        AppleAuthenticator(env: self, log: self.log)
+        get {
+             (self._authenticator as? AppleAuthenticator)?.environment = self 
+             return self._authenticator
+        }
+        set {
+            self._authenticator = newValue
+        }
     }
+    var _downloader: AppleDownloaderProtocol
     var downloader: AppleDownloaderProtocol {
-        AppleDownloader(env: self, log: self.log)
+        get {
+            (self._downloader as? AppleDownloader)?.environment = self
+            return self._downloader
+        }
+        set {
+            self._downloader = newValue
+        }
     }
 
     // Network

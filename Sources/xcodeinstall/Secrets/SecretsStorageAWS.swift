@@ -181,13 +181,9 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
 
     func loadSession() async throws -> AppleSession? {
 
-        if let sessionSecret: AppleSessionSecret =
-            try? await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
-        {
-            return sessionSecret.session
-        } else {
-            return nil
-        }
+        let sessionSecret: AppleSessionSecret =
+            try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+        return sessionSecret.session
     }
 
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {

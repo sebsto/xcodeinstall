@@ -134,11 +134,8 @@ struct SecretsStorageFile: SecretsHandlerProtocol {
     func loadSession() async throws -> AppleSession? {
 
         // read the raw file saved on disk
-        if let sessionData = try? Data(contentsOf: sessionPath) {
-            return try AppleSession(fromData: sessionData)
-        } else {
-            return nil
-        }
+        let sessionData = try Data(contentsOf: sessionPath)
+        return try AppleSession(fromData: sessionData)
     }
 
     //MARK: these operations are only valid on SecretsStorageAWS

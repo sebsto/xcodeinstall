@@ -71,16 +71,23 @@ enum ExpectedResponseCode {
 @MainActor
 class HTTPClient {
 
-    let env: Environment
+    var environment: Environment? = nil
     let log: Logger
-    public init(env: Environment, log: Logger) {
-        self.env = env
-        self.log = log
-    }
 
     enum HTTPVerb: String {
         case GET
         case POST
+    }
+
+    public init(log: Logger) {
+        self.log = log
+    }
+
+    public func env() -> Environment {
+        guard let env = self.environment else {
+            fatalError("Environment not set")
+        }
+        return env
     }
 
     // some ID returned by Apple API to authenticate us
@@ -98,10 +105,11 @@ class HTTPClient {
         ]
 
         // reload previous session if it exists
-        let session = try? await self.env.secrets!.loadSession()
+        let session = try? await self.env().secrets!.loadSession()
         if let session {
 
             // session is loaded
+            log.debug("Session data loaded", metadata: ["data": "\(session)"])
             self.session = session
 
         } else {
@@ -120,7 +128,7 @@ class HTTPClient {
         }
 
         // reload cookies if they exist
-        let cookies = try? await self.env.secrets!.loadCookies()
+        let cookies = try? await self.env().secrets!.loadCookies()
         if let cookies {
             // cookies existed, let's add them to our HTTPHeaders
             requestHeaders.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current
@@ -162,7 +170,7 @@ class HTTPClient {
         _log(request: request, to: log)
 
         // send request with that session
-        let (data, response) = try await self.env.urlSessionData.data(for: request, delegate: nil)
+        let (data, response) = try await self.env().urlSessionData.data(for: request, delegate: nil)
         guard let httpResponse = response as? HTTPURLResponse,
             validResponse.isValid(response: httpResponse.statusCode)
         else {
@@ -191,7 +199,7 @@ class HTTPClient {
         var headers = requestHeaders
 
         // reload cookies if they exist
-        let cookies = try? await self.env.secrets!.loadCookies()
+        let cookies = try? await self.env().secrets!.loadCookies()
         if let cookies {
             // cookies existed, let's add them to our HTTPHeaders
             headers.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
@@ -206,7 +214,7 @@ class HTTPClient {
 
         // send request with download session
         // this is asynchronous, monitor progress through delegate
-        return try self.env.urlSessionDownload(dstFilePath: nil, totalFileSize: nil, startTime: nil).downloadTask(
+        return try self.env().urlSessionDownload(dstFilePath: nil, totalFileSize: nil, startTime: nil).downloadTask(
             with: request
         )
     }

@@ -124,7 +124,7 @@ extension XCodeInstall {
     // manage the MFA authentication sequence
     private func startMFAFlow() async throws {
 
-        let auth = self.env.authenticator
+        let auth: any AppleAuthenticatorProtocol = self.env.authenticator
 
         do {
 
