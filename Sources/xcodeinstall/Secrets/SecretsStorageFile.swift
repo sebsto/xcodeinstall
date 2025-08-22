@@ -1,5 +1,5 @@
 //
-//  FileSecretsHandler.swift
+//  SecretsStorageFile.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 14/08/2022.
@@ -15,7 +15,7 @@ import FoundationNetworking
 
 // store secrets on files in $HOME/.xcodeinstaller
 @MainActor
-struct FileSecretsHandler: SecretsHandlerProtocol {
+struct SecretsStorageFile: SecretsHandlerProtocol {
     private let log: Logger
     private var fileManager: FileManager
     private var baseDirectory: URL
@@ -141,11 +141,11 @@ struct FileSecretsHandler: SecretsHandlerProtocol {
         }
     }
 
-    //MARK: these operations are only valid on AWSSecretsHandler
+    //MARK: these operations are only valid on SecretsStorageAWS
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
-        throw AWSSecretsHandlerError.invalidOperation
+        throw SecretsStorageAWSError.invalidOperation
     }
     func storeAppleCredentials(_ credentials: AppleCredentialsSecret) async throws {
-        throw AWSSecretsHandlerError.invalidOperation
+        throw SecretsStorageAWSError.invalidOperation
     }
 }

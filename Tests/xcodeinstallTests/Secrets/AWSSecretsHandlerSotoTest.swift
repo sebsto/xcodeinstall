@@ -1,5 +1,5 @@
 //
-//  AWSSecretsHandlerSotoTest.swift
+//  SecretsStorageAWSSotoTest.swift
 //  xcodeinstallTests
 //
 //  Created by Stormacq, Sebastien on 16/09/2022.
@@ -13,10 +13,10 @@ import XCTest
 
 @testable import xcodeinstall
 
-final class AWSSecretsHandlerSotoTest: XCTestCase {
+final class SecretsStorageAWSSotoTest: XCTestCase {
 
-    var secretHandler: AWSSecretsHandlerSoto?
-    let log = Logger(label: "AWSSecretsHandlerSotoTest")
+    var secretHandler: SecretsStorageAWSSoto?
+    let log = Logger(label: "SecretsStorageAWSSotoTest")
 
     override func setUpWithError() throws {
         // given
@@ -34,8 +34,8 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
             )
 
             secretHandler =
-                try AWSSecretsHandlerSoto.forRegion(region, awsClient: awsClient, smClient: smClient, log: log)
-                as? AWSSecretsHandlerSoto
+                try SecretsStorageAWSSoto.forRegion(region, awsClient: awsClient, smClient: smClient, log: log)
+                as? SecretsStorageAWSSoto
             XCTAssertNotNil(secretHandler)
 
             if TestEnvironment.isUsingLocalstack {
@@ -47,7 +47,7 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
             // then
             // no error
 
-        } catch AWSSecretsHandlerError.invalidRegion(let error) {
+        } catch SecretsStorageAWSError.invalidRegion(let error) {
             XCTAssertEqual(region, error)
         } catch {
             XCTAssert(false, "unexpected error : \(error)")
@@ -62,12 +62,12 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
 
         // when
         do {
-            let _ = try AWSSecretsHandlerSoto.forRegion(region, log: log)
+            let _ = try SecretsStorageAWSSoto.forRegion(region, log: log)
 
             // then
             // no error
 
-        } catch AWSSecretsHandlerError.invalidRegion(let error) {
+        } catch SecretsStorageAWSError.invalidRegion(let error) {
             XCTAssert(false, "region rejected : \(error)")
         } catch {
             XCTAssert(false, "unexpected error : \(error)")
@@ -81,13 +81,13 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
 
         // when
         do {
-            let _ = try AWSSecretsHandlerSoto.forRegion(region, log: log)
+            let _ = try SecretsStorageAWSSoto.forRegion(region, log: log)
 
             // then
             // error
             XCTAssert(false, "an error must be thrown")
 
-        } catch AWSSecretsHandlerError.invalidRegion(let error) {
+        } catch SecretsStorageAWSError.invalidRegion(let error) {
             XCTAssertEqual(region, error)
         } catch {
             XCTAssert(false, "unexpected error : \(error)")

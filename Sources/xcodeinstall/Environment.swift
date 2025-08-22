@@ -70,7 +70,7 @@ struct RuntimeEnvironment: Environment {
     private var _secrets: SecretsHandlerProtocol? = nil
     var secrets: SecretsHandlerProtocol? {
         get {
-            _secrets ?? FileSecretsHandler(log: log)
+            _secrets ?? SecretsStorageFile(log: log)
         }
         set {
             _secrets = newValue

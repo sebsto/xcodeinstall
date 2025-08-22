@@ -124,7 +124,7 @@ extension CLITests {
         let env = MockedEnvironment(readLine: MockedReadLine(["username", "password", "1234"]))
         let authenticator = (env.authenticator as! MockedAppleAuthentication)
         authenticator.nextError = AuthenticationError.requires2FA
-        (self.secretsHandler as! MockedSecretsHandler).nextError = AWSSecretsHandlerError.invalidOperation
+        (self.secretsHandler as! MockedSecretsHandler).nextError = SecretsStorageAWSError.invalidOperation
         let session: MockedURLSession = env.urlSessionData as! MockedURLSession
         session.nextData = getMFATypeOK().data(using: .utf8)
         let headers = ["X-Apple-ID-Session-Id": "dummySessionID", "scnt": "dummySCNT"]

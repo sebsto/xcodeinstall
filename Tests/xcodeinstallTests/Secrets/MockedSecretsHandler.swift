@@ -17,9 +17,9 @@ import FoundationNetworking
 
 @MainActor
 final class MockedSecretsHandler: SecretsHandlerProtocol {
-    var nextError: AWSSecretsHandlerError?
+    var nextError: SecretsStorageAWSError?
     var env: Environment
-    public init(env: inout MockedEnvironment, nextError: AWSSecretsHandlerError? = nil) {
+    public init(env: inout MockedEnvironment, nextError: SecretsStorageAWSError? = nil) {
         self.nextError = nextError
         self.env = env
     }
@@ -61,7 +61,7 @@ final class MockedSecretsHandler: SecretsHandlerProtocol {
 
 }
 
-final class MockedAWSSecretsHandlerSDK: AWSSecretsHandlerSDKProtocol {
+final class MockedSecretsStorageAWSSDK: SecretsStorageAWSSDKProtocol {
 
     private let _regionSet: Mutex<Bool> = .init(false)
     let appleSession: Mutex<AppleSessionSecret>
@@ -72,8 +72,8 @@ final class MockedAWSSecretsHandlerSDK: AWSSecretsHandlerSDKProtocol {
         appleCredentials = .init(AppleCredentialsSecret(username: "", password: ""))
     }
 
-    static func forRegion(_ region: String, log: Logger) throws -> any xcodeinstall.AWSSecretsHandlerSDKProtocol {
-        let mock = try MockedAWSSecretsHandlerSDK()
+    static func forRegion(_ region: String, log: Logger) throws -> any xcodeinstall.SecretsStorageAWSSDKProtocol {
+        let mock = try MockedSecretsStorageAWSSDK()
         mock._regionSet.withLock { $0 = true }
         return mock
     }

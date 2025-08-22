@@ -1,5 +1,5 @@
 //
-//  AWSSecretsHandlerSoto.swift
+//  SecretsStorageAWSSoto.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 04/09/2022.
@@ -11,7 +11,7 @@ import Logging
 import SotoSecretsManager
 
 // use a class to have a chance to call client.shutdown() at deinit
-final class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
+final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
 
     let log: Logger 
     let maxRetries = 3
@@ -25,17 +25,17 @@ final class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
         self.log = log
     } 
 
-    static func forRegion(_ region: String, log: Logger) throws -> AWSSecretsHandlerSDKProtocol {
-        try AWSSecretsHandlerSoto.forRegion(region, awsClient: nil, smClient: nil, log: log)
+    static func forRegion(_ region: String, log: Logger) throws -> SecretsStorageAWSSDKProtocol {
+        try SecretsStorageAWSSoto.forRegion(region, awsClient: nil, smClient: nil, log: log)
     }
     static func forRegion(
         _ region: String,
         awsClient: AWSClient? = nil,
         smClient: SecretsManager? = nil,
         log: Logger
-    ) throws -> AWSSecretsHandlerSDKProtocol {
+    ) throws -> SecretsStorageAWSSDKProtocol {
         guard let awsRegion = Region(awsRegionName: region) else {
-            throw AWSSecretsHandlerError.invalidRegion(region: region)
+            throw SecretsStorageAWSError.invalidRegion(region: region)
         }
         var newAwsClient: AWSClient? = nil
         if awsClient == nil {
@@ -52,7 +52,7 @@ final class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
                 region: awsRegion
             )
         }
-        return AWSSecretsHandlerSoto(awsClient: awsClient ?? newAwsClient!, smClient: smClient ?? newSMClient!, log: log)
+        return SecretsStorageAWSSoto(awsClient: awsClient ?? newAwsClient!, smClient: smClient ?? newSMClient!, log: log)
     }
 
     deinit {

@@ -75,7 +75,7 @@ extension XCodeInstall {
             display("Retrieving Apple Developer Portal credentials...")
             appleCredentials = try await self.env.secrets!.retrieveAppleCredentials()
 
-        } catch AWSSecretsHandlerError.invalidOperation {
+        } catch SecretsStorageAWSError.invalidOperation {
 
             // we have a file secrets handler, prompt for credentials interactively
             appleCredentials = try promptForCredentials()
