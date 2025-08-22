@@ -13,13 +13,17 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.0"),
-        .package(url: "https://github.com/soto-project/soto.git", from: "7.9.0"),
+        // do not use Soto 7.x
+        // it has a transitive dependency on swift-service-context whichs fails to compile 
+        // under the brew sandbox (when creating the bottle) 
+        // see https://github.com/orgs/Homebrew/discussions/59
+        .package(url: "https://github.com/soto-project/soto.git", from: "6.5.2"), 
         .package(url: "https://github.com/sebsto/CLIlib/", branch: "main"),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-crypto", from: "3.14.0"),
         .package(url: "https://github.com/apple/swift-system", from: "1.5.0"),
-        .package(url: "https://github.com/saagarjha/unxip.git", from: "3.2.0"),
+        .package(url: "https://github.com/saagarjha/unxip.git", from: "3.2.0")
         //.package(path: "../CLIlib")
     ],
 
@@ -44,7 +48,7 @@ let package = Package(
             resources: [.process("data/download-list-20220723.json"),
                         .process("data/download-list-20231115.json"),
                         .process("data/download-error.json"),
-                        .process("data/download-unknown-error.json")] //,
+                        .process("data/download-unknown-error.json")]
         )
-    ],
+    ]
 )

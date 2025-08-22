@@ -23,7 +23,8 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
         // when
         do {
             let awsClient = AWSClient(
-                credentialProvider: TestEnvironment.credentialProvider
+                credentialProvider: TestEnvironment.credentialProvider,
+                httpClientProvider: .createNew
             )
             let smClient = SecretsManager(
                 client: awsClient,
