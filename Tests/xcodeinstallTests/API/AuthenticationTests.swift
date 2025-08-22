@@ -24,7 +24,8 @@ struct AuthenticationTests {
         self.env = MockedEnvironment()
         self.env.secrets = MockedSecretsHandler(env: &self.env)
         self.sessionData = env.urlSessionData as? MockedURLSession
-        self.client = HTTPClient(env: env, log: log)
+        self.client = HTTPClient(log: log)
+        self.client.environment = env
         try await env.secrets!.clearSecrets()
     }
 
@@ -39,7 +40,9 @@ struct AuthenticationTests {
     }
 
     func getAppleAuthenticator() -> AppleAuthenticator {
-        AppleAuthenticator(env: env, log: log)
+        let aa = AppleAuthenticator(log: log)
+        aa.environment = self.env
+        return aa
     }
 
     func getHashcashHeaders() -> [String: String] {

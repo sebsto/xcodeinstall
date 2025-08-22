@@ -214,9 +214,7 @@ class HTTPClient {
 
         // send request with download session
         // this is asynchronous, monitor progress through delegate
-        return try self.env().urlSessionDownload(dstFilePath: nil, totalFileSize: nil, startTime: nil).downloadTask(
-            with: request
-        )
+        return try self.env().urlSessionDownload.downloadTask(with: request)
     }
 
     // prepare an URLRequest for a given url, method, body, and headers

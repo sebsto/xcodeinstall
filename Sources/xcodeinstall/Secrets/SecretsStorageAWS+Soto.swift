@@ -193,10 +193,13 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
             log.debug("Secret \(getSecretResponse?.name ?? "nil") retrieved")
 
             guard let secret = getSecretResponse?.secretString else {
+                print("⚠️ no value returned by AWS Secrets Manager secret \(secretId)")
                 log.error("⚠️ no value returned by AWS Secrets Manager secret \(secretId)")
                 return secretId == .appleCredentials
                     ? AppleCredentialsSecret() as! T : AppleSessionSecret() as! T
             }
+
+            print(secret)
 
             switch secretId {
             case .appleCredentials:

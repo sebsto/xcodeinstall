@@ -79,10 +79,10 @@ final class MockedURLSession: URLSessionProtocol {
     func downloadDelegate() -> DownloadDelegate? {
         if delegate == nil {
             delegate = DownloadDelegate(
-                env: MockedEnvironment(),
                 semaphore: MockedDispatchSemaphore(),
                 log: log
             )
+            delegate?.environment = MockedEnvironment()
         }
         return delegate
     }

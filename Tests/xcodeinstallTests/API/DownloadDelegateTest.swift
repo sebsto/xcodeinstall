@@ -31,7 +31,9 @@ class DownloadDelegateTest: XCTestCase {
 
         do {
             try testData.data(using: .utf8)?.write(to: srcUrl)
-            let delegate = DownloadDelegate(env: env, dstFilePath: dstUrl, semaphore: sema, log: log)
+            let delegate = DownloadDelegate(semaphore: sema, log: log)
+            delegate.environment = MockedEnvironment()
+            delegate.dstFilePath = dstUrl
 
             // when
             await delegate.completeTransfer(from: srcUrl)
@@ -57,13 +59,10 @@ class DownloadDelegateTest: XCTestCase {
 
         // given
         let sema = MockedDispatchSemaphore()
-        let delegate = DownloadDelegate(
-            env: env,
-            totalFileSize: 1 * 1024 * 1024 * 1024,  // 1 Gb
-            startTime: Date.init(timeIntervalSinceNow: -60),  // one minute ago
-            semaphore: sema,
-            log: log
-        )
+        let delegate = DownloadDelegate(semaphore: sema, log: log)
+        delegate.environment = env
+        delegate.totalFileSize = 1 * 1024 * 1024 * 1024  // 1 Gb
+        delegate.startTime = Date.init(timeIntervalSinceNow: -60)  // one minute ago
 
         // when
         await delegate.updateTransfer(totalBytesWritten: 500 * 1024 * 1024)  // 500 MB downloaded

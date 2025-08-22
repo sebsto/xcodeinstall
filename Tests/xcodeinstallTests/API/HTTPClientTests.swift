@@ -31,8 +31,9 @@ struct HTTPClientTests {
         self.env = MockedEnvironment()
         self.env.secrets = MockedSecretsHandler(env: &self.env)
         self.sessionData = env.urlSessionData as? MockedURLSession
-        self.sessionDownload = env.urlSessionDownload() as? MockedURLSession
-        self.client = HTTPClient(env: env, log: log)
+        self.sessionDownload = env.urlSessionDownload as? MockedURLSession
+        self.client = HTTPClient(log: log)
+        self.client.environment = env
         try await env.secrets!.clearSecrets()
     }
 

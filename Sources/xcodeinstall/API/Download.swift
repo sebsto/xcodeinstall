@@ -33,20 +33,16 @@ class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
         let fileURL = "https://developer.apple.com/services-account/download?path=\(file.remotePath)"
 
         let fh = self.env().fileHandler
-        //filehandler is not MainActor-isolated so we need to use Task { } to get the file path
-        let filePath = await Task {
-            await URL(
-                fileURLWithPath: fh.downloadFilePath(file: file)
-            )
-        }.value
-        let urlSessionDownload = self.env().urlSessionDownload(
-            dstFilePath: filePath,
-            totalFileSize: file.fileSize,
-            startTime: Date.now
-        )
+        let filePath = await URL(fileURLWithPath: fh.downloadFilePath(file: file))
+        let urlSessionDownload = self.env().urlSessionDownload
         guard let downloadDelegate = urlSessionDownload.downloadDelegate() else {
             fatalError("This method requires an injected download delegate")
         }
+
+        // pass a progress update client to the download delegate to receive progress updates
+        downloadDelegate.totalFileSize = file.fileSize
+        downloadDelegate.dstFilePath = filePath
+        downloadDelegate.startTime = Date.now
 
         // make a call to start the download
         // first call, should send a redirect and an auth cookie
@@ -54,7 +50,7 @@ class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
         if let dlt = self.downloadTask {
             dlt.resume()
             downloadDelegate.sema.wait()
-        }
+        } 
 
         // returns when the download is completed
         return self.downloadTask

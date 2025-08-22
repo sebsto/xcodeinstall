@@ -34,7 +34,7 @@ protocol Environment: Sendable {
     var authenticator: AppleAuthenticatorProtocol { get }
     var downloader: AppleDownloaderProtocol { get }
     var urlSessionData: URLSessionProtocol { get }
-    func urlSessionDownload(dstFilePath: URL?, totalFileSize: Int?, startTime: Date?) -> URLSessionProtocol
+    var urlSessionDownload: URLSessionProtocol { get }
     func run(
         _ executable: Executable,
         arguments: Arguments,
@@ -60,6 +60,9 @@ struct RuntimeEnvironment: Environment {
         self._downloader = AppleDownloader(log: log)
         self._fileHandler = FileHandler(log: log)
         self._secrets = SecretsStorageFile(log: log)
+
+        self.urlSessionData = URLSession.shared
+        self._delegate = DownloadDelegate(semaphore: DispatchSemaphore(value: 0), log: self.log)
     }
     
     // CLI related classes
@@ -70,7 +73,7 @@ struct RuntimeEnvironment: Environment {
     var progressBar: CLIProgressBarProtocol = CLIProgressBar()
 
     // Utilities classes
-    var _fileHandler: FileHandlerProtocol 
+    private var _fileHandler: FileHandlerProtocol 
     var fileHandler: FileHandlerProtocol { self._fileHandler }
 
     // Secrets - will be overwritten by CLI when using AWS Secrets Manager
@@ -81,7 +84,7 @@ struct RuntimeEnvironment: Environment {
     }
 
     // Commands
-    var _authenticator: AppleAuthenticatorProtocol
+    private var _authenticator: AppleAuthenticatorProtocol
     var authenticator: AppleAuthenticatorProtocol {
         get {
              (self._authenticator as? AppleAuthenticator)?.environment = self 
@@ -91,7 +94,7 @@ struct RuntimeEnvironment: Environment {
             self._authenticator = newValue
         }
     }
-    var _downloader: AppleDownloaderProtocol
+    private var _downloader: AppleDownloaderProtocol
     var downloader: AppleDownloaderProtocol {
         get {
             (self._downloader as? AppleDownloader)?.environment = self
@@ -103,22 +106,13 @@ struct RuntimeEnvironment: Environment {
     }
 
     // Network
-    var urlSessionData: URLSessionProtocol = URLSession.shared
-    func urlSessionDownload(
-        dstFilePath: URL? = nil,
-        totalFileSize: Int? = nil,
-        startTime: Date? = nil
-    ) -> URLSessionProtocol {
-        URLSession(
+    let urlSessionData: URLSessionProtocol 
+    private let _delegate: DownloadDelegate
+    var urlSessionDownload: URLSessionProtocol { 
+        self._delegate.environment = self
+        return URLSession(
             configuration: .default,
-            delegate: DownloadDelegate(
-                env: self,
-                dstFilePath: dstFilePath,
-                totalFileSize: totalFileSize,
-                startTime: startTime,
-                semaphore: DispatchSemaphore(value: 0),
-                log: self.log
-            ),
+            delegate: self._delegate,
             delegateQueue: nil
         )
     }

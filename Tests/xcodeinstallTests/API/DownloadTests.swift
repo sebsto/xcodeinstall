@@ -28,17 +28,20 @@ final class DownloadTests {
         // Setup environment for each test
         self.env = MockedEnvironment()
         self.env.secrets = MockedSecretsHandler(env: &self.env)
-        self.client = HTTPClient(env: env, log: log)
+        self.client = HTTPClient(log: log)
+        self.client.environment = env
         try await env.secrets!.clearSecrets()
     }
 
     // MARK: - Helper Methods
     func getAppleDownloader() -> AppleDownloader {
-        AppleDownloader(env: self.env, log: log)
+        let ad = AppleDownloader(log: log)
+        ad.environment = self.env
+        return ad
     }
 
     func setNextURLSessionDownloadTask() {
-        let mockedURLSession = env.urlSessionDownload() as? MockedURLSession
+        let mockedURLSession = env.urlSessionDownload as? MockedURLSession
         #expect(mockedURLSession != nil)
 
         mockedURLSession!.nextURLSessionDownloadTask = MockedURLSessionDownloadTask()
@@ -60,7 +63,7 @@ extension DownloadTests {
     @Test("Test Download Delegate Exists")
     func testHasDownloadDelegate() {
         // Given
-        let sessionDownload = env.urlSessionDownload()
+        let sessionDownload = env.urlSessionDownload
 
         // When
         let delegate = sessionDownload.downloadDelegate()
@@ -100,7 +103,7 @@ extension DownloadTests {
         }
 
         // Verify if semaphore wait() was called
-        if let sema = env.urlSessionDownload().downloadDelegate()?.sema as? MockedDispatchSemaphore {
+        if let sema = env.urlSessionDownload.downloadDelegate()?.sema as? MockedDispatchSemaphore {
             #expect(sema.wasWaitCalled())
         } else {
             Issue.record(

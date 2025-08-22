@@ -33,14 +33,9 @@ struct MockedEnvironment: xcodeinstall.Environment {
 
     var urlSessionData: URLSessionProtocol = MockedURLSession()
 
-    func urlSessionDownload(
-        dstFilePath: URL? = nil,
-        totalFileSize: Int? = nil,
-        startTime: Date? = nil
-    ) -> any xcodeinstall.URLSessionProtocol {
+    var urlSessionDownload: URLSessionProtocol {
         self.urlSessionData
     }
-
 }
 
 @MainActor

@@ -58,7 +58,7 @@ extension XCodeInstall {
 
             // check if the downloaded file is complete
             let fh = self.env.fileHandler
-            let file: URL = await Task { await fh.downloadFileURL(file: fileToDownload) }.value
+            let file: URL = await fh.downloadFileURL(file: fileToDownload)
             let complete = try? self.env.fileHandler.checkFileSize(
                 file: file,
                 fileSize: fileToDownload.fileSize
