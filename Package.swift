@@ -13,7 +13,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.0"),
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.6.0"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.6.4"),
         // do not use Soto 7.x
         // it has a transitive dependency on swift-service-context whichs fails to compile 
         // under the brew sandbox (when creating the bottle) 
