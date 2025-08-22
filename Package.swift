@@ -17,7 +17,7 @@ let package = Package(
         // it has a transitive dependency on swift-service-context whichs fails to compile 
         // under the brew sandbox (when creating the bottle) 
         // see https://github.com/orgs/Homebrew/discussions/59
-        .package(url: "https://github.com/soto-project/soto.git", from: "6.5.2"), 
+        .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"), 
         .package(url: "https://github.com/sebsto/CLIlib/", branch: "main"),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", branch: "main"),
