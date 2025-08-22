@@ -67,11 +67,14 @@ struct RuntimeEnvironment: Environment {
     var progressBar: CLIProgressBarProtocol = CLIProgressBar()
 
     // Secrets - will be overwritten by CLI when using AWS Secrets Manager
+    private var _secrets: SecretsHandlerProtocol? = nil
     var secrets: SecretsHandlerProtocol? {
         get {
-            FileSecretsHandler(log: log)
+            _secrets ?? FileSecretsHandler(log: log)
         }
-        set { /* no op */ }
+        set {
+            _secrets = newValue
+         }
     }
 
     // Commands
