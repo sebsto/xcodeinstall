@@ -215,7 +215,6 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
 
         case 200:
             // we were already authenticated
-
             try await self.saveSession(response: response, session: session)
 
         case 401, 403:
@@ -224,6 +223,7 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
 
         case 409:
             // requires two-factors authentication
+            try await self.saveSession(response: response, session: session)
             throw AuthenticationError.requires2FA
 
         case 503:
