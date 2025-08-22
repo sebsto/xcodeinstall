@@ -1,3 +1,8 @@
+## Currently fails 
+
+https://github.com/orgs/Homebrew/discussions/59
+
+
 ## TODO 
 
 Consider using a github action for this 
