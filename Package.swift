@@ -21,7 +21,8 @@ let package = Package(
         .package(url: "https://github.com/sebsto/CLIlib/", branch: "main"),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", branch: "main"),
-        .package(url: "https://github.com/apple/swift-crypto", from: "3.14.0"),
+        // use main until https://github.com/apple/swift-crypto/commit/2347f20e240cc1e98133c9794507dee7fd65f922#diff-184979a92eddfb7930f0a26f143fd40dae274867fc7398e1bd30291532970ee0 is released
+        .package(url: "https://github.com/apple/swift-crypto", branch: "main"),
         .package(url: "https://github.com/apple/swift-system", from: "1.5.0"),
         .package(url: "https://github.com/saagarjha/unxip.git", from: "3.2.0")
         //.package(path: "../CLIlib")
