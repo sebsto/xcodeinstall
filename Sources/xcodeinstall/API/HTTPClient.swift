@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+import Logging
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -53,6 +54,7 @@ extension URLSessionDownloadTask: URLSessionDownloadTaskProtocol {}
 
 // callers can express expected HTTP Response code either as range, either as specific value
 enum ExpectedResponseCode {
+    case closedRange(ClosedRange<Int>)
     case range(Range<Int>)
     case value(Int)
 
@@ -60,6 +62,8 @@ enum ExpectedResponseCode {
         switch self {
         case .range(let range):
             return range.contains(response)
+        case .closedRange(let closedRange):
+            return closedRange.contains(response)
         case .value(let value):
             return value == response
         }
@@ -71,8 +75,10 @@ enum ExpectedResponseCode {
 class HTTPClient {
 
     let env: Environment
-    public init(env: Environment) {
+    let log: Logger
+    public init(env: Environment, log: Logger) {
         self.env = env
+        self.log = log
     }
 
     enum HTTPVerb: String {
@@ -156,7 +162,7 @@ class HTTPClient {
             withHeaders: requestHeaders
         )
 
-        log(request: request, to: log)
+        _log(request: request, to: log)
 
         // send request with that session
         let (data, response) = try await self.env.urlSessionData.data(for: request, delegate: nil)
@@ -170,7 +176,7 @@ class HTTPClient {
             throw URLError(.badServerResponse)
         }
 
-        log(response: httpResponse, data: data, error: nil, to: log)
+        _log(response: httpResponse, data: data, error: nil, to: log)
 
         return (data, httpResponse)
     }
@@ -199,7 +205,7 @@ class HTTPClient {
         // build the request
         request = self.request(for: url, withHeaders: headers)
 
-        log(request: request, to: log)
+        _log(request: request, to: log)
 
         // send request with download session
         // this is asynchronous, monitor progress through delegate

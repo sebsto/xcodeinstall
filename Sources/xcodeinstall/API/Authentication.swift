@@ -204,7 +204,7 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             "https://appstoreconnect.apple.com/olympus/v1/app/config?hostname=itunesconnect.apple.com"
         let (data, _) = try await apiCall(
             url: url,
-            validResponse: .range(200..<400)  //FIXME: should this be .value(200) ?
+            validResponse: .closedRange(200...401)  //FIXME: should this be .value(200) ?
         )
 
         return try JSONDecoder().decode(AppleServiceKey.self, from: data)
