@@ -15,7 +15,7 @@ final class XCodeInstall {
     let log: Logger
     var env: Environment
 
-    public init(log: Logger = Log.defaultLogger(), env: Environment) {
+    public init(log: Logger, env: Environment) {
         self.log = log
         self.env = env
     }

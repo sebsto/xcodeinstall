@@ -14,17 +14,17 @@ import FoundationNetworking
 #endif
 
 // Using Swift's modern regex syntax
-func filterPassword(_ input: String) -> String {
+func _filterPassword(_ input: String) -> String {
     let regex = /("password":").*?("[\,\}])/
     return input.replacing(regex) { match in
         "\(match.1)*****\(match.2)"
     }
 }
 
-func log(request: URLRequest, to logger: Logger) {
+func _log(request: URLRequest, to logger: Logger) {
 
-    log.debug("\n - - - - - - - - - - OUTGOING - - - - - - - - - - \n")
-    defer { log.debug("\n - - - - - - - - - -  END - - - - - - - - - - \n") }
+    logger.debug("\n - - - - - - - - - - OUTGOING - - - - - - - - - - \n")
+    defer { logger.debug("\n - - - - - - - - - -  END - - - - - - - - - - \n") }
     let urlAsString = request.url?.absoluteString ?? ""
     let urlComponents = URLComponents(string: urlAsString)
     let method = request.httpMethod != nil ? "\(request.httpMethod ?? "")" : ""
@@ -45,10 +45,10 @@ func log(request: URLRequest, to logger: Logger) {
     if let body = request.httpBody {
         output += "\n \(String(data: body, encoding: .utf8) ?? "")"
     }
-    logger.debug("\(filterPassword(output))")
+    logger.debug("\(_filterPassword(output))")
 }
 
-func log(response: HTTPURLResponse?, data: Data?, error: Error?, to logger: Logger) {
+func _log(response: HTTPURLResponse?, data: Data?, error: Error?, to logger: Logger) {
 
     logger.debug("\n - - - - - - - - - - INCOMMING - - - - - - - - - - \n")
     defer { logger.debug("\n - - - - - - - - - -  END - - - - - - - - - - \n") }
@@ -76,5 +76,5 @@ func log(response: HTTPURLResponse?, data: Data?, error: Error?, to logger: Logg
     if error != nil {
         output += "\nError: \(error!.localizedDescription)\n"
     }
-    logger.debug("\(output)")
+    logger.debug("\(_filterPassword(output))")
 }

@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+import Logging
 
 protocol InstallerProtocol {
     func install(file: URL) async throws
@@ -31,9 +32,11 @@ enum InstallerError: Error {
 @MainActor
 class ShellInstaller: InstallerProtocol {
 
+    let log: Logger
     let env: Environment
-    public init(env: inout Environment) {
+    public init(env: inout Environment, log: Logger) {
         self.env = env
+        self.log = log
     }
 
     // the shell commands we need to install XCode and its command line tools

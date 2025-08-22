@@ -7,10 +7,11 @@
 
 import CLIlib
 import Foundation
+import Logging
 
 // the methods I want to mock for unit testing
 @MainActor
-protocol FileHandlerProtocol: Sendable, Decodable {
+protocol FileHandlerProtocol: Sendable {
     func move(from src: URL, to dst: URL) async throws
     func fileExists(file: URL, fileSize: Int) -> Bool
     func checkFileSize(file: URL, fileSize: Int) throws -> Bool
@@ -30,6 +31,11 @@ enum FileHandlerError: Error {
 }
 
 struct FileHandler: FileHandlerProtocol {
+
+    private let log: Logger
+    init(log: Logger) {
+        self.log = log
+    }
 
     private static let baseDirectory = FileManager.default.homeDirectoryForCurrentUser
         .appendingPathComponent(".xcodeinstall")

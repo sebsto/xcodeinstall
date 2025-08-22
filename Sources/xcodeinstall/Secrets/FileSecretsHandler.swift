@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+import Logging
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -15,6 +16,7 @@ import FoundationNetworking
 // store secrets on files in $HOME/.xcodeinstaller
 @MainActor
 struct FileSecretsHandler: SecretsHandlerProtocol {
+    private let log: Logger
     private var fileManager: FileManager
     private var baseDirectory: URL
     private let cookiesPath: URL
@@ -22,10 +24,11 @@ struct FileSecretsHandler: SecretsHandlerProtocol {
     private let newCookiesPath: URL
     private let newSessionPath: URL
 
-    init() {
+    init(log: Logger) {
         self.fileManager = FileManager.default
+        self.log = log
 
-        baseDirectory = FileHandler().baseFilePath()
+        baseDirectory = FileHandler(log: self.log).baseFilePath()
 
         cookiesPath = baseDirectory.appendingPathComponent("cookies")
         sessionPath = baseDirectory.appendingPathComponent("session")

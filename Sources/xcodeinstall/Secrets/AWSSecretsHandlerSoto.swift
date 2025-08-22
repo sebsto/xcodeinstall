@@ -7,30 +7,33 @@
 
 import CLIlib
 import Foundation
+import Logging
 import SotoSecretsManager
 
 // use a class to have a chance to call client.shutdown() at deinit
 final class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
 
+    let log: Logger 
     let maxRetries = 3
 
     let awsClient: AWSClient?  // var for injection
     let smClient: SecretsManager?  // var for injection
 
-    private init(awsClient: AWSClient? = nil, smClient: SecretsManager? = nil) {
+    private init(awsClient: AWSClient? = nil, smClient: SecretsManager? = nil, log: Logger) {
         self.awsClient = awsClient
         self.smClient = smClient
-    }
+        self.log = log
+    } 
 
-    static func forRegion(_ region: String) throws -> AWSSecretsHandlerSDKProtocol {
-        try AWSSecretsHandlerSoto.forRegion(region, awsClient: nil, smClient: nil)
+    static func forRegion(_ region: String, log: Logger) throws -> AWSSecretsHandlerSDKProtocol {
+        try AWSSecretsHandlerSoto.forRegion(region, awsClient: nil, smClient: nil, log: log)
     }
     static func forRegion(
         _ region: String,
         awsClient: AWSClient? = nil,
-        smClient: SecretsManager? = nil
+        smClient: SecretsManager? = nil,
+        log: Logger
     ) throws -> AWSSecretsHandlerSDKProtocol {
-
         guard let awsRegion = Region(awsRegionName: region) else {
             throw AWSSecretsHandlerError.invalidRegion(region: region)
         }
@@ -49,7 +52,7 @@ final class AWSSecretsHandlerSoto: AWSSecretsHandlerSDKProtocol {
                 region: awsRegion
             )
         }
-        return AWSSecretsHandlerSoto(awsClient: awsClient ?? newAwsClient!, smClient: smClient ?? newSMClient!)
+        return AWSSecretsHandlerSoto(awsClient: awsClient ?? newAwsClient!, smClient: smClient ?? newSMClient!, log: log)
     }
 
     deinit {

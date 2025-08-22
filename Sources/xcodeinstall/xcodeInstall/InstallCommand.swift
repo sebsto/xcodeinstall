@@ -12,7 +12,7 @@ extension XCodeInstall {
 
     func install(file: String?) async throws {
 
-        let installer = ShellInstaller(env: &self.env)
+        let installer = ShellInstaller(env: &self.env, log: self.log)
 
         // progress bar to report progress feedback
         let progressBar = self.env.progressBar
@@ -27,7 +27,7 @@ extension XCodeInstall {
             if nil == file {
                 fileToInstall = try promptForFile()
             } else {
-                fileToInstall = FileHandler().downloadDirectory().appendingPathComponent(file!)
+                fileToInstall = FileHandler(log: self.log).downloadDirectory().appendingPathComponent(file!)
             }
             log.debug("Going to attemp to install \(fileToInstall!.path)")
 
@@ -93,6 +93,6 @@ extension XCodeInstall {
             throw CLIError.invalidInput
         }
 
-        return FileHandler().downloadDirectory().appendingPathComponent(installableFiles[num])
+        return FileHandler(log: self.log).downloadDirectory().appendingPathComponent(installableFiles[num])
     }
 }

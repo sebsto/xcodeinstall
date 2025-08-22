@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+import Logging
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -63,7 +64,7 @@ struct AppleSessionSecret: Codable, Secrets {
 
 // the methods that must be implemented by the class encapsulating the SDK we are using
 protocol AWSSecretsHandlerSDKProtocol: Sendable {
-    static func forRegion(_ region: String) throws -> AWSSecretsHandlerSDKProtocol
+    static func forRegion(_ region: String, log: Logger) throws -> AWSSecretsHandlerSDKProtocol
     func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws
     func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T
 }
@@ -76,13 +77,14 @@ protocol AWSSecretsHandlerSDKProtocol: Sendable {
 
 @MainActor
 class AWSSecretsHandler: SecretsHandlerProtocol {
-
+    let log: Logger 
     let awsSDK: AWSSecretsHandlerSDKProtocol
-    public init(sdk: AWSSecretsHandlerSDKProtocol? = nil, region: String = "us-east-1") throws {
+    public init(sdk: AWSSecretsHandlerSDKProtocol? = nil, region: String = "us-east-1", log: Logger) throws {
+        self.log = log
         if let sdk  {
             self.awsSDK = sdk
         } else {
-            self.awsSDK = try AWSSecretsHandlerSoto.forRegion(region)
+            self.awsSDK = try AWSSecretsHandlerSoto.forRegion(region, log: self.log)
         }
     }
 

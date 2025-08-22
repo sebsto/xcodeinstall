@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+import Logging 
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -15,7 +16,8 @@ import FoundationNetworking
 // delegate class to receive download progress
 @MainActor
 final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
-
+    
+    let log: Logger
     var env: Environment
     let dstFilePath: URL?
     let totalFileSize: Int?
@@ -29,12 +31,14 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         dstFilePath: URL? = nil,
         totalFileSize: Int? = nil,
         startTime: Date? = nil,
-        semaphore: DispatchSemaphoreProtocol
+        semaphore: DispatchSemaphoreProtocol,
+        log: Logger
     ) {
         self.env = env
         self.dstFilePath = dstFilePath
         self.totalFileSize = totalFileSize
         self.startTime = startTime
+        self.log = log
         self.sema = semaphore
     }
 

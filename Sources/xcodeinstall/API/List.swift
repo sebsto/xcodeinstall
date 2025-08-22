@@ -30,7 +30,7 @@ extension AppleDownloader {
             let (data, response) = try await apiCall(
                 url: url,
                 method: .POST,
-                validResponse: .range(200..<400)
+                validResponse: .closedRange(200...401)
             )
 
             guard response.statusCode == 200 else {

@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+import Logging
 import Subprocess
 #if canImport(System)
 import System
@@ -49,12 +50,14 @@ protocol Environment: Sendable {
 struct RuntimeEnvironment: Environment {
     
     let region: String?
-    init(region: String? = nil) {
+    let log: Logger
+    init(region: String? = nil, log: Logger) {
         self.region = region
+        self.log = log
     }
-
+    
     // Utilities classes
-    var fileHandler: FileHandlerProtocol = FileHandler()
+    var fileHandler: FileHandlerProtocol { FileHandler(log: self.log) }
 
     // CLI related classes
     var display: DisplayProtocol = Display()
@@ -64,14 +67,19 @@ struct RuntimeEnvironment: Environment {
     var progressBar: CLIProgressBarProtocol = CLIProgressBar()
 
     // Secrets - will be overwritten by CLI when using AWS Secrets Manager
-    var secrets: SecretsHandlerProtocol? = FileSecretsHandler()
+    var secrets: SecretsHandlerProtocol? {
+        get {
+            FileSecretsHandler(log: log)
+        }
+        set { /* no op */ }
+    }
 
     // Commands
     var authenticator: AppleAuthenticatorProtocol {
-        AppleAuthenticator(env: self)
+        AppleAuthenticator(env: self, log: self.log)
     }
     var downloader: AppleDownloaderProtocol {
-        AppleDownloader(env: self)
+        AppleDownloader(env: self, log: self.log)
     }
 
     // Network
@@ -88,7 +96,8 @@ struct RuntimeEnvironment: Environment {
                 dstFilePath: dstFilePath,
                 totalFileSize: totalFileSize,
                 startTime: startTime,
-                semaphore: DispatchSemaphore(value: 0)
+                semaphore: DispatchSemaphore(value: 0),
+                log: self.log
             ),
             delegateQueue: nil
         )
