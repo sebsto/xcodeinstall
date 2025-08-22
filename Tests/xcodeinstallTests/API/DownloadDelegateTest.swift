@@ -14,6 +14,7 @@ import XCTest
 class DownloadDelegateTest: XCTestCase {
 
     let env = MockedEnvironment()
+    let log: Logger = Logger(label: "DownloadDelegateTest")
 
     func testDownloadDelegateCompleteTransfer() async {
 
@@ -23,14 +24,14 @@ class DownloadDelegateTest: XCTestCase {
         let fileHandler = env.fileHandler
         (fileHandler as! MockedFileHandler).nextFileExist = true
 
-        var srcUrl: URL = FileHandler().baseFilePath()
+        var srcUrl: URL = FileHandler(log: log).baseFilePath()
         srcUrl.appendPathComponent("xcodeinstall.source.test")
-        var dstUrl: URL = FileHandler().baseFilePath()
+        var dstUrl: URL = FileHandler(log: log).baseFilePath()
         dstUrl.appendPathComponent("xcodeinstall.destination.test")
 
         do {
             try testData.data(using: .utf8)?.write(to: srcUrl)
-            let delegate = DownloadDelegate(env: env, dstFilePath: dstUrl, semaphore: sema)
+            let delegate = DownloadDelegate(env: env, dstFilePath: dstUrl, semaphore: sema, log: log)
 
             // when
             await delegate.completeTransfer(from: srcUrl)
@@ -60,7 +61,8 @@ class DownloadDelegateTest: XCTestCase {
             env: env,
             totalFileSize: 1 * 1024 * 1024 * 1024,  // 1 Gb
             startTime: Date.init(timeIntervalSinceNow: -60),  // one minute ago
-            semaphore: sema
+            semaphore: sema,
+            log: log
         )
 
         // when

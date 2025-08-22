@@ -1,6 +1,7 @@
 import ArgumentParser
 import CLIlib
 import Foundation
+import Logging
 import Testing
 
 @testable import xcodeinstall
@@ -13,6 +14,7 @@ struct CLITests {
     // some tests might override the environment with more specialized mocks.
     var env = MockedEnvironment()
     var secretsHandler: SecretsHandlerProtocol!
+    let log = Logger(label: "CLITests")
 
     init() async throws {
         self.secretsHandler = MockedSecretsHandler(env: &env)

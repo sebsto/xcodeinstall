@@ -6,6 +6,7 @@
 //
 
 import CLIlib
+import Logging
 import Foundation
 
 @testable import xcodeinstall
@@ -30,6 +31,7 @@ final class MockedURLSessionDownloadTask: URLSessionDownloadTaskProtocol {
 @MainActor
 final class MockedURLSession: URLSessionProtocol {
 
+    let log = Logger(label: "MockedURLSession")
     private(set) var lastURL: URL?
     private(set) var lastRequest: URLRequest?
 
@@ -73,12 +75,13 @@ final class MockedURLSession: URLSessionProtocol {
         return downloadTask
     }
 
-    var delegate: DownloadDelegate?
+    var delegate: DownloadDelegate? = nil
     func downloadDelegate() -> DownloadDelegate? {
         if delegate == nil {
             delegate = DownloadDelegate(
                 env: MockedEnvironment(),
-                semaphore: MockedDispatchSemaphore()
+                semaphore: MockedDispatchSemaphore(),
+                log: log
             )
         }
         return delegate

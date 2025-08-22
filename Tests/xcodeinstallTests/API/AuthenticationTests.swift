@@ -1,4 +1,5 @@
 import Foundation
+import Logging
 import Testing
 
 @testable import xcodeinstall
@@ -11,6 +12,8 @@ import FoundationNetworking
 @MainActor
 struct AuthenticationTests {
 
+    let log = Logger(label: "AuthenticationTests")
+
     // MARK: - Test Environment
     var sessionData: MockedURLSession!
     var client: HTTPClient!
@@ -21,7 +24,7 @@ struct AuthenticationTests {
         self.env = MockedEnvironment()
         self.env.secrets = MockedSecretsHandler(env: &self.env)
         self.sessionData = env.urlSessionData as? MockedURLSession
-        self.client = HTTPClient(env: env)
+        self.client = HTTPClient(env: env, log: log)
         try await env.secrets!.clearSecrets()
     }
 
@@ -36,7 +39,7 @@ struct AuthenticationTests {
     }
 
     func getAppleAuthenticator() -> AppleAuthenticator {
-        AppleAuthenticator(env: env)
+        AppleAuthenticator(env: env, log: log)
     }
 
     func getHashcashHeaders() -> [String: String] {

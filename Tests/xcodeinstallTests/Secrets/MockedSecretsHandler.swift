@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Logging
 import Synchronization
 
 @testable import xcodeinstall
@@ -71,7 +72,7 @@ final class MockedAWSSecretsHandlerSDK: AWSSecretsHandlerSDKProtocol {
         appleCredentials = .init(AppleCredentialsSecret(username: "", password: ""))
     }
 
-    static func forRegion(_ region: String) throws -> any xcodeinstall.AWSSecretsHandlerSDKProtocol {
+    static func forRegion(_ region: String, log: Logger) throws -> any xcodeinstall.AWSSecretsHandlerSDKProtocol {
         let mock = try MockedAWSSecretsHandlerSDK()
         mock._regionSet.withLock { $0 = true }
         return mock

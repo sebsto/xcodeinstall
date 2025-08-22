@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Logging
 import SotoCore
 import SotoSecretsManager
 import XCTest
@@ -15,6 +16,7 @@ import XCTest
 final class AWSSecretsHandlerSotoTest: XCTestCase {
 
     var secretHandler: AWSSecretsHandlerSoto?
+    let log = Logger(label: "AWSSecretsHandlerSotoTest")
 
     override func setUpWithError() throws {
         // given
@@ -32,7 +34,7 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
             )
 
             secretHandler =
-                try AWSSecretsHandlerSoto.forRegion(region, awsClient: awsClient, smClient: smClient)
+                try AWSSecretsHandlerSoto.forRegion(region, awsClient: awsClient, smClient: smClient, log: log)
                 as? AWSSecretsHandlerSoto
             XCTAssertNotNil(secretHandler)
 
@@ -60,7 +62,7 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
 
         // when
         do {
-            let _ = try AWSSecretsHandlerSoto.forRegion(region)
+            let _ = try AWSSecretsHandlerSoto.forRegion(region, log: log)
 
             // then
             // no error
@@ -79,7 +81,7 @@ final class AWSSecretsHandlerSotoTest: XCTestCase {
 
         // when
         do {
-            let _ = try AWSSecretsHandlerSoto.forRegion(region)
+            let _ = try AWSSecretsHandlerSoto.forRegion(region, log: log)
 
             // then
             // error

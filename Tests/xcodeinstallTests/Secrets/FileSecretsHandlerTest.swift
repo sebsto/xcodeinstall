@@ -6,18 +6,20 @@
 //
 
 import Testing
+import Logging
 
 @testable import xcodeinstall
 
 @Suite("FileSecretsHandlerTest", .serialized)
 struct FileSecretsHandlerTest {
 
+    var log = Logger(label: "FileSecretsHandlerTest")
     var secretHandlerTest: SecretsHandlerTestsBase<FileSecretsHandler>?
 
     init() async throws {
         secretHandlerTest = SecretsHandlerTestsBase()
 
-        secretHandlerTest!.secrets = await FileSecretsHandler()
+        secretHandlerTest!.secrets = await FileSecretsHandler(log: log)
         try await secretHandlerTest!.secrets!.clearSecrets()
     }
 

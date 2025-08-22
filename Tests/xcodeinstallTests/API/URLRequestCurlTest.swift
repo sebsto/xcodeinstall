@@ -6,6 +6,7 @@
 //
 
 import Testing
+import Logging
 
 @testable import xcodeinstall
 
@@ -17,10 +18,11 @@ import FoundationNetworking
 @MainActor
 struct URLRequestCurlTest {
 
+    let log = Logger(label: "URLRequestCurlTest")
     var agent: HTTPClient!
 
     init() throws {
-        self.agent = HTTPClient(env: MockedEnvironment())
+        self.agent = HTTPClient(env: MockedEnvironment(), log: log)
     }
 
     @Test("Test URLRequest to cURL")

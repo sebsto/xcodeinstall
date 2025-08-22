@@ -29,8 +29,12 @@ extension MainCommand {
         var name: String?
 
         func run() async throws {
-
+            try await run(with: nil)
+        }
+        
+        func run(with env: Environment?) async throws {
             let xci = try await MainCommand.XCodeInstaller(
+                with: env,
                 for: cloudOption.secretManagerRegion,
                 verbose: globalOptions.verbose
             )

@@ -80,7 +80,7 @@ extension CLITests {
         // when
         await #expect(throws: Never.self) {
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
-            let xci = XCodeInstall(env: env)
+            let xci = XCodeInstall(log: log, env: env)
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
         }
 
@@ -137,7 +137,7 @@ extension CLITests {
 
         // when
         let error = await #expect(throws: AuthenticationError.self) {
-            let xci = XCodeInstall(env: env)
+            let xci = XCodeInstall(log: log, env: env)
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
 

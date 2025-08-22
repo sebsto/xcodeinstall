@@ -39,7 +39,7 @@ extension CLITests {
 
         // when
         await #expect(throws: Never.self) {
-            let xci = XCodeInstall(env: env)
+            let xci = XCodeInstall(log: log, env: env)
             try await xci.download(
                 fileName: nil,
                 force: true,

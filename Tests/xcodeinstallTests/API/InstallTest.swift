@@ -6,6 +6,7 @@
 //
 
 import CLIlib
+import Logging
 import XCTest
 
 @testable import xcodeinstall
@@ -13,6 +14,7 @@ import XCTest
 @MainActor
 final class InstallTest: XCTestCase {
 
+    let log = Logger(label: "InstallTest")
     // private var installer: ShellInstaller
     private var env: Environment = MockedEnvironment()
 
@@ -67,7 +69,7 @@ final class InstallTest: XCTestCase {
 
         // when
         do {
-            let installer = ShellInstaller(env: &env)
+            let installer = ShellInstaller(env: &env, log: log)
             let _ = try await installer.installPkg(atURL: srcFile)
         } catch {
             XCTFail("installPkg generated an error : \(error)")
@@ -117,7 +119,7 @@ final class InstallTest: XCTestCase {
         // when
         // (give a file name that exists, otherwise, it throws an exception)
         do {
-            let installer = ShellInstaller(env: &self.env)
+            let installer = ShellInstaller(env: &self.env, log: log)
             let _ = try await installer.uncompressXIP(atURL: srcFile)
         } catch InstallerError.fileDoesNotExistOrIncorrect {
             // expected use case
@@ -134,7 +136,7 @@ final class InstallTest: XCTestCase {
 
        // when
        do {
-           let installer = ShellInstaller(env: &self.env)
+           let installer = ShellInstaller(env: &self.env, log: log)
            _ = try await installer.moveApp(at: src)
        } catch {
            XCTFail("Move app generated an error : \(error)")
@@ -325,7 +327,7 @@ final class InstallTest: XCTestCase {
         mfh.nextFileExist = true
 
         // when
-        let installer = ShellInstaller(env: &self.env)
+        let installer = ShellInstaller(env: &self.env, log: log)
         let existAndCorrect = installer.fileMatch(file: file)
 
         // then
@@ -342,7 +344,7 @@ final class InstallTest: XCTestCase {
         mfh.nextFileExist = false
 
         // when
-        let installer = ShellInstaller(env: &self.env)
+        let installer = ShellInstaller(env: &self.env, log: log)
         let fileExists = installer.fileMatch(file: file)
 
         // then
@@ -359,7 +361,7 @@ final class InstallTest: XCTestCase {
         mfh.nextFileExist = true
 
         // when
-        let installer = ShellInstaller(env: &self.env)
+        let installer = ShellInstaller(env: &self.env, log: log)
         let fileExists = installer.fileMatch(file: file)
 
         // then
@@ -398,7 +400,7 @@ final class InstallTest: XCTestCase {
 
         // when
         do {
-           let installer = ShellInstaller(env: &self.env)
+           let installer = ShellInstaller(env: &self.env, log: log)
             try await installer.install(file: file)
         } catch InstallerError.CLToolsInstallationError {
             //expected
@@ -421,7 +423,7 @@ final class InstallTest: XCTestCase {
 
         // when
         do {
-            let installer = ShellInstaller(env: &self.env)
+            let installer = ShellInstaller(env: &self.env, log: log)
             try await installer.install(file: file)
 
             // then
@@ -447,7 +449,7 @@ final class InstallTest: XCTestCase {
 
         // when
         do {
-            let installer = ShellInstaller(env: &self.env)
+            let installer = ShellInstaller(env: &self.env, log: log)
             try await installer.install(file: file)
 
             // then

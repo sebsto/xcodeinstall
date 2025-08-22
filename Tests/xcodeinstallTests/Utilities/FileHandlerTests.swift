@@ -1,4 +1,5 @@
 import Foundation
+import Logging
 import Testing
 
 @testable import xcodeinstall
@@ -8,6 +9,7 @@ import Testing
 struct FileHandlerTests {
 
     // MARK: - Test Environment
+    let log: Logger = Logger(label: "FileHandlerTests")
     var fileManager: FileManager
     let test_data: String = "test data éèà€ 🎧"
 
@@ -37,7 +39,7 @@ extension FileHandlerTests {
 
         // When
         let dstFile: URL = self.tempDir().appendingPathComponent("temp2.txt")
-        let fh = FileHandler()
+        let fh = await FileHandler(log: log)
         try await fh.move(from: srcFile, to: dstFile)
 
         // Then
@@ -66,7 +68,7 @@ extension FileHandlerTests {
         let _ = fileManager.createFile(atPath: dstFile.path, contents: test_data2.data(using: .utf8))
 
         // When
-        let fh = FileHandler()
+        let fh = await FileHandler(log: log)
         try await fh.move(from: srcFile, to: dstFile)
 
         // Then
@@ -93,7 +95,7 @@ extension FileHandlerTests {
         let dstFile = URL(fileURLWithPath: "/does_not_exist/tmp.txt")
 
         // When/Then
-        let fh = FileHandler()
+        let fh = await FileHandler(log: log)
         do {
             try await fh.move(from: srcFile, to: dstFile)
             Issue.record("Should have thrown an error")
@@ -114,7 +116,7 @@ extension FileHandlerTests {
         let fileToCheck = createSrcFile()
 
         // When
-        let fh = FileHandler()
+        let fh = FileHandler(log: log)
         let expectedFileSize = test_data.data(using: .utf8)?.count
 
         // Then
@@ -135,7 +137,7 @@ extension FileHandlerTests {
         let fileToCheck = URL(fileURLWithPath: "/does_not_exist/tmp.txt")
 
         // When/Then
-        let fh = FileHandler()
+        let fh = FileHandler(log: log)
         let error = #expect(throws: FileHandlerError.self) {
             _ = try fh.checkFileSize(file: fileToCheck, fileSize: 42)
         }
@@ -149,7 +151,7 @@ extension FileHandlerTests {
         let fileToCheck = createSrcFile()
 
         // When
-        let fh = FileHandler()
+        let fh = FileHandler(log: log)
         let expectedFileSize = test_data.data(using: .utf8)?.count
 
         // Then
@@ -170,7 +172,7 @@ extension FileHandlerTests {
         let fileToCheck = URL(fileURLWithPath: "/does_not_exist/tmp.txt")
 
         // When
-        let fh = FileHandler()
+        let fh = FileHandler(log: log)
         let expectedFileSize = test_data.data(using: .utf8)?.count
 
         // Then

@@ -16,6 +16,7 @@ extension CLITests {
     func testInstall() async throws {
 
         // given
+        let env: MockedEnvironment = MockedEnvironment(progressBar: MockedProgressBar())
         let inst = try parse(
             MainCommand.Install.self,
             [
@@ -46,7 +47,7 @@ extension CLITests {
 
         // given
         let env: MockedEnvironment = MockedEnvironment(readLine: MockedReadLine(["0"]))
-        let xci = XCodeInstall(env: env)
+        let xci = XCodeInstall(log: log, env: env)
 
         // when
         do {

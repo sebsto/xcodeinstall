@@ -158,7 +158,7 @@ extension AuthenticationTests {
         }
     }
 
-    // test authentication returns 401
+    // test authentication returns 403
     @Test("Test srp authentication returns 403")
     func testSRPAuthenticationInvalidUsernamePassword403() async {
 
@@ -185,7 +185,7 @@ extension AuthenticationTests {
         #expect(error == AuthenticationError.invalidUsernamePassword)
     }
 
-    // test authentication returns unhandled http sttaus code
+    // test authentication returns unhandled http status code
     @Test("Test srp authentication returns unhandled http status code")
     func testSRPAuthenticationUnknownStatusCode() async {
 

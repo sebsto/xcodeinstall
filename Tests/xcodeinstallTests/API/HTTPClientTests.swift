@@ -1,4 +1,5 @@
 import Foundation
+import Logging
 import Testing
 
 @testable import xcodeinstall
@@ -23,6 +24,7 @@ struct HTTPClientTests {
     var client: HTTPClient!
     var delegate: DownloadDelegate!
     var env: MockedEnvironment
+    var log = Logger(label: "HTTPClientTests")
 
     init() async throws {
         // Setup environment for each test
@@ -30,7 +32,7 @@ struct HTTPClientTests {
         self.env.secrets = MockedSecretsHandler(env: &self.env)
         self.sessionData = env.urlSessionData as? MockedURLSession
         self.sessionDownload = env.urlSessionDownload() as? MockedURLSession
-        self.client = HTTPClient(env: env)
+        self.client = HTTPClient(env: env, log: log)
         try await env.secrets!.clearSecrets()
     }
 
@@ -96,7 +98,7 @@ extension HTTPClientTests {
         #expect(str != nil)
 
         // When
-        let obfuscated = filterPassword(str!)
+        let obfuscated = _filterPassword(str!)
 
         // Then
         #expect(str != obfuscated)

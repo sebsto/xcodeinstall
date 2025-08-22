@@ -46,7 +46,10 @@ let package = Package(
         ),
         .testTarget(
             name: "xcodeinstallTests",
-            dependencies: ["xcodeinstall"],
+            dependencies: [
+                "xcodeinstall",
+                .product(name: "Logging", package: "swift-log")
+            ],
             // https://stackoverflow.com/questions/47177036/use-resources-in-unit-tests-with-swift-package-manager
             resources: [.process("data/download-list-20220723.json"),
                         .process("data/download-list-20231115.json"),

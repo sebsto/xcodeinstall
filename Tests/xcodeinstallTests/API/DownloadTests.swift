@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import Logging
 
 @testable import xcodeinstall
 
@@ -19,6 +20,7 @@ import FoundationEssentials
 final class DownloadTests {
 
     // MARK: - Test Environment
+    let log = Logger(label: "DownloadTests")
     var client: HTTPClient!
     var env: MockedEnvironment
 
@@ -26,13 +28,13 @@ final class DownloadTests {
         // Setup environment for each test
         self.env = MockedEnvironment()
         self.env.secrets = MockedSecretsHandler(env: &self.env)
-        self.client = HTTPClient(env: env)
+        self.client = HTTPClient(env: env, log: log)
         try await env.secrets!.clearSecrets()
     }
 
     // MARK: - Helper Methods
     func getAppleDownloader() -> AppleDownloader {
-        AppleDownloader(env: self.env)
+        AppleDownloader(env: self.env, log: log)
     }
 
     func setNextURLSessionDownloadTask() {
