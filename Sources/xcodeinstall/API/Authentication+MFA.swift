@@ -193,7 +193,7 @@ extension AppleAuthenticator {
 
         let (data, _) = try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth",
-            validResponse: .closedRange(200...401)
+            validResponse: .range(200..<400)
         )
 
         return data

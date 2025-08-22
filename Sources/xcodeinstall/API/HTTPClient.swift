@@ -54,7 +54,6 @@ extension URLSessionDownloadTask: URLSessionDownloadTaskProtocol {}
 
 // callers can express expected HTTP Response code either as range, either as specific value
 enum ExpectedResponseCode {
-    case closedRange(ClosedRange<Int>)
     case range(Range<Int>)
     case value(Int)
 
@@ -62,8 +61,6 @@ enum ExpectedResponseCode {
         switch self {
         case .range(let range):
             return range.contains(response)
-        case .closedRange(let closedRange):
-            return closedRange.contains(response)
         case .value(let value):
             return value == response
         }
