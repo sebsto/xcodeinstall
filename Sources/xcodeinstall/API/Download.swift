@@ -10,17 +10,13 @@ import Foundation
 
 protocol AppleDownloaderProtocol: Sendable {
     func list(force: Bool) async throws -> DownloadList
-    func download(file: DownloadList.File) async throws -> URLSessionDownloadTaskProtocol?
+    func download(file: DownloadList.File) async throws -> AsyncStream<DownloadProgress>
 }
 
 @MainActor
 class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
 
-    // control the progress of the download
-    // not private for testability
-    var downloadTask: URLSessionDownloadTaskProtocol?
-
-    func download(file: DownloadList.File) async throws -> URLSessionDownloadTaskProtocol? {
+    func download(file: DownloadList.File) async throws -> AsyncStream<DownloadProgress> {
 
         guard !file.remotePath.isEmpty,
             !file.filename.isEmpty,
@@ -34,27 +30,13 @@ class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
 
         let fh = self.env().fileHandler
         let filePath = await URL(fileURLWithPath: fh.downloadFilePath(file: file))
-        let urlSessionDownload = self.env().urlSessionDownload
-        guard let downloadDelegate = urlSessionDownload.downloadDelegate() else {
-            fatalError("This method requires an injected download delegate")
-        }
+        let downloadTarget = DownloadTarget(totalFileSize: file.fileSize, dstFilePath: filePath, startTime: Date.now)
 
-        // pass a progress update client to the download delegate to receive progress updates
-        downloadDelegate.totalFileSize = file.fileSize
-        downloadDelegate.dstFilePath = filePath
-        downloadDelegate.startTime = Date.now
+        let downloadManager = self.env().downloadManager
+        downloadManager.downloadTarget = downloadTarget
+        downloadManager.env = self.env()
 
-        // make a call to start the download
-        // first call, should send a redirect and an auth cookie
-        self.downloadTask = try await downloadCall(url: fileURL, requestHeaders: ["Accept": "*/*"])
-        if let dlt = self.downloadTask {
-            dlt.resume()
-            downloadDelegate.sema.wait()
-        }
-
-        // returns when the download is completed
-        return self.downloadTask
-
+        return try await downloadManager.download(from: fileURL)
     }
 
 }

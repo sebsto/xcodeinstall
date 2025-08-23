@@ -68,6 +68,10 @@ struct FileHandler: FileHandlerProtocol {
             }
 
             let dstUrl = URL(fileURLWithPath: dst.path)
+            print("-----")
+            print("src: \(src)")
+            print("dst: \(dstUrl)")
+            print("-----")
             try FileManager.default.moveItem(at: src, to: dstUrl)
 
         } catch {
