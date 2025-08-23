@@ -25,6 +25,8 @@ extension AppleDownloader {
         }
 
         if downloadList == nil {
+            // need to download the list from Apple
+            log.debug("Downloading list from Apple...")
             let url =
                 "https://developer.apple.com/services-account/QH65B2/downloadws/listDownloads.action"
             let (data, response) = try await apiCall(
