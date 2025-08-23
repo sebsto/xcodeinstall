@@ -20,7 +20,6 @@ extension XCodeInstall {
     ) async throws {
 
         let download = self.env.downloader
-
         var fileToDownload: DownloadList.File
         do {
 
@@ -77,7 +76,6 @@ extension XCodeInstall {
             } else {
                 display("✅ \(fileName ?? "file") downloaded")
             }
-
         } catch DownloadError.zeroOrMoreThanOneFileToDownload(let count) {
             display("🛑 There are \(count) files to download " + "for this component. Not implemented.")
         } catch DownloadError.authenticationRequired {

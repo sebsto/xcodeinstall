@@ -11,8 +11,7 @@ import Foundation
 @testable import xcodeinstall
 
 // used to test Installer component (see InstallerTest)
-@MainActor
-final class MockedFileHandler: FileHandlerProtocol {
+final class MockedFileHandler: FileHandlerProtocol, @unchecked Sendable {
 
     var moveSrc: URL? = nil
     var moveDst: URL? = nil

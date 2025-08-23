@@ -30,7 +30,11 @@ struct MockedEnvironment: xcodeinstall.Environment {
     var awsSDK: SecretsStorageAWSSDKProtocol? = nil
 
     var authenticator: AppleAuthenticatorProtocol = MockedAppleAuthentication()
-    var downloader: AppleDownloaderProtocol = MockedAppleDownloader()
+    var downloader: AppleDownloaderProtocol {
+        var mockedDownloader = MockedAppleDownloader()
+        mockedDownloader.environment = self
+        return mockedDownloader
+    }
 
     var urlSessionData: URLSessionProtocol = MockedURLSession()
 
