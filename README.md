@@ -4,7 +4,7 @@
 
 ![Test coverage](https://raw.githubusercontent.com/sebsto/xcodeinstall/refs/heads/main/Tests/coverage.svg)
 
-![language](https://img.shields.io/badge/swift-5.9-blue)
+![language](https://img.shields.io/badge/swift-6.1-blue)
 ![platform](https://img.shields.io/badge/platform-macOS-green)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
