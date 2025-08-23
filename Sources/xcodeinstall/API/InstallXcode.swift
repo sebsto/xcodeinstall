@@ -7,8 +7,8 @@
 
 import CLIlib
 import Foundation
-import libunxip
 import Subprocess
+import libunxip
 
 // MARK: XCODE
 // XCode installation functions
@@ -31,14 +31,14 @@ extension ShellInstaller {
             total: totalSteps,
             text: "Expanding Xcode xip (this might take a while)"
         )
-        
+
         do {
             try await self.uncompressXIP(atURL: src)
         } catch {
             log.error("Failed to extract XIP file: \(error)")
             throw InstallerError.xCodeXIPInstallationError
         }
-        
+
         // second move file to /Applications
         log.debug("Moving app to destination")
         currentStep += 1
@@ -95,7 +95,7 @@ extension ShellInstaller {
             log.error("File to unXip does not exist : \(filePath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
-        
+
         let output = file.deletingLastPathComponent()
         guard chdir(output.path) == 0 else {
             log.error("Failed to access output directory at \(output): \(String(cString: strerror(errno)))")

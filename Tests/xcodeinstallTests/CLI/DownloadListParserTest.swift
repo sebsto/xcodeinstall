@@ -5,11 +5,11 @@
 //  Created by Stormacq, Sebastien on 04/08/2022.
 //
 
-
+import Foundation
 import Testing
+
 @testable import xcodeinstall
 
-import Foundation
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #endif

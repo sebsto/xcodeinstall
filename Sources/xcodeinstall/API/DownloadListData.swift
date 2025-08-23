@@ -24,7 +24,7 @@ enum DownloadError: Error, Equatable {
         case (.authenticationRequired, .authenticationRequired):
             return true
         case let (.unknownError(code1, _), .unknownError(code2, _)):
-            return code1 == code2 
+            return code1 == code2
         case let (.parsingError(error1), .parsingError(error2)):
             if error1 == nil || error2 == nil {
                 return true
@@ -45,7 +45,7 @@ enum DownloadError: Error, Equatable {
         case (.needToAcceptTermsAndCondition, .needToAcceptTermsAndCondition):
             return true
         case let (.accountneedUpgrade(code1, _), .accountneedUpgrade(code2, _)):
-            return code1 == code2 
+            return code1 == code2
         default:
             return false
         }

@@ -13,7 +13,7 @@ import SotoSecretsManager
 // use a class to have a chance to call client.shutdown() at deinit
 final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
 
-    let log: Logger 
+    let log: Logger
     let maxRetries = 3
 
     let awsClient: AWSClient?  // var for injection
@@ -23,7 +23,7 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
         self.awsClient = awsClient
         self.smClient = smClient
         self.log = log
-    } 
+    }
 
     static func forRegion(_ region: String, log: Logger) throws -> SecretsStorageAWSSDKProtocol {
         try SecretsStorageAWSSoto.forRegion(region, awsClient: nil, smClient: nil, log: log)
@@ -52,7 +52,11 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
                 region: awsRegion
             )
         }
-        return SecretsStorageAWSSoto(awsClient: awsClient ?? newAwsClient!, smClient: smClient ?? newSMClient!, log: log)
+        return SecretsStorageAWSSoto(
+            awsClient: awsClient ?? newAwsClient!,
+            smClient: smClient ?? newSMClient!,
+            log: log
+        )
     }
 
     deinit {
@@ -193,13 +197,10 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
             log.debug("Secret \(getSecretResponse?.name ?? "nil") retrieved")
 
             guard let secret = getSecretResponse?.secretString else {
-                print("⚠️ no value returned by AWS Secrets Manager secret \(secretId)")
                 log.error("⚠️ no value returned by AWS Secrets Manager secret \(secretId)")
                 return secretId == .appleCredentials
                     ? AppleCredentialsSecret() as! T : AppleSessionSecret() as! T
             }
-
-            print(secret)
 
             switch secretId {
             case .appleCredentials:

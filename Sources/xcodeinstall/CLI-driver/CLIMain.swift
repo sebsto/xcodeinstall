@@ -75,10 +75,10 @@ struct MainCommand: AsyncParsableCommand {
         }
 
         var runtimeEnv: any Environment = (env == nil ? RuntimeEnvironment(region: region, log: logger) : env!)
-        
+
         let xci: XCodeInstall!
         if let region {
-            // overwrite the secret storage 
+            // overwrite the secret storage
             runtimeEnv.secrets = try SecretsStorageAWS(region: region, log: logger)
             xci = XCodeInstall(log: logger, env: runtimeEnv)
         } else {

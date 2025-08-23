@@ -77,11 +77,11 @@ protocol SecretsStorageAWSSDKProtocol: Sendable {
 
 @MainActor
 class SecretsStorageAWS: SecretsHandlerProtocol {
-    let log: Logger 
+    let log: Logger
     let awsSDK: SecretsStorageAWSSDKProtocol
     public init(sdk: SecretsStorageAWSSDKProtocol? = nil, region: String = "us-east-1", log: Logger) throws {
         self.log = log
-        if let sdk  {
+        if let sdk {
             self.awsSDK = sdk
         } else {
             self.awsSDK = try SecretsStorageAWSSoto.forRegion(region, log: self.log)
@@ -114,7 +114,7 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
 
             // read existing cookies and session
             let existingSession: AppleSessionSecret =
-            try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+                try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
 
             // append the new cookies and return the whole new thing
             result = try await mergeCookies(
@@ -159,7 +159,7 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
 
             // read existing cookies and session
             let existingSession: AppleSessionSecret =
-            try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
+                try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleSessionToken)
 
             // create a new session secret object with existing cookies and new session
             let newSessionSecret = AppleSessionSecret(

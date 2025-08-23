@@ -94,8 +94,8 @@ final class SecretsStorageAWSSotoTest: XCTestCase {
         }
     }
 
-#if os(macOS)
-// [CI] on Linux fails because there is no AWS credentials provider configured
+    #if os(macOS)
+    // [CI] on Linux fails because there is no AWS credentials provider configured
     func testCreateSecret() async {
 
         // given
@@ -112,6 +112,5 @@ final class SecretsStorageAWSSotoTest: XCTestCase {
         }
 
     }
-#endif
+    #endif
 }
-

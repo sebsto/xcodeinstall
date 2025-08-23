@@ -31,7 +31,7 @@ extension MainCommand {
         func run() async throws {
             try await run(with: nil)
         }
-        
+
         func run(with env: Environment?) async throws {
             let xci = try await MainCommand.XCodeInstaller(
                 with: env,

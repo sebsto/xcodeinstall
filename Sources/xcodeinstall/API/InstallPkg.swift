@@ -23,6 +23,9 @@ extension ShellInstaller {
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 
-        return try await self.env.run(.path(SUDOCOMMAND), arguments: [INSTALLERCOMMAND, "-pkg", pkgPath, "-target", "/"])
+        return try await self.env.run(
+            .path(SUDOCOMMAND),
+            arguments: [INSTALLERCOMMAND, "-pkg", pkgPath, "-target", "/"]
+        )
     }
 }

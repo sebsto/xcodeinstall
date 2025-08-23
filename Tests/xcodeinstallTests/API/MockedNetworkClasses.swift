@@ -6,8 +6,8 @@
 //
 
 import CLIlib
-import Logging
 import Foundation
+import Logging
 
 @testable import xcodeinstall
 

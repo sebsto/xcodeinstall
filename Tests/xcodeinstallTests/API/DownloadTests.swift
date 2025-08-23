@@ -1,10 +1,8 @@
 import Foundation
-import Testing
 import Logging
+import Testing
 
 @testable import xcodeinstall
-
-import Foundation
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -49,9 +47,9 @@ final class DownloadTests {
     }
 
     func setSessionData(data: Data?, response: HTTPURLResponse?) {
-            #expect(self.env.urlSessionData as? MockedURLSession != nil)
-            (self.env.urlSessionData as? MockedURLSession)?.nextData = data
-            (self.env.urlSessionData as? MockedURLSession)?.nextResponse = response
+        #expect(self.env.urlSessionData as? MockedURLSession != nil)
+        (self.env.urlSessionData as? MockedURLSession)?.nextData = data
+        (self.env.urlSessionData as? MockedURLSession)?.nextResponse = response
 
     }
 }

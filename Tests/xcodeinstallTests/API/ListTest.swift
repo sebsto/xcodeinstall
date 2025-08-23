@@ -5,11 +5,10 @@
 //  Created by Stormacq, Sebastien on 22/08/2022.
 //
 
+import Foundation
 import Testing
 
 @testable import xcodeinstall
-
-import Foundation
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -53,7 +52,8 @@ extension DownloadTests {
         }
     }
 
-    @Test("Test list force with parsing error"
+    @Test(
+        "Test list force with parsing error"
         //   ,.enabled(if: false)
     )
     func testListForceParsingError() async throws {
@@ -71,7 +71,7 @@ extension DownloadTests {
             // then
             // an exception must be thrown
 
-        } 
+        }
         #expect(error == DownloadError.parsingError(error: nil))
     }
 
@@ -98,7 +98,7 @@ extension DownloadTests {
     @Test("Test list force with unknown error")
     func testListForceUnknownError() async throws {
 
-        let error = await #expect(throws: DownloadError.self){
+        let error = await #expect(throws: DownloadError.self) {
 
             // given
             let (listData, urlResponse) = try self.prepareResponse(withDataFile: .downloadUnknownError)
@@ -111,7 +111,7 @@ extension DownloadTests {
             // then
             //an exception must be thrown
 
-        } 
+        }
         #expect(error == DownloadError.unknownError(errorCode: 9999, errorMessage: "Unknown error"))
     }
 
@@ -131,8 +131,8 @@ extension DownloadTests {
             // then
             //an exception must be thrown
 
-        } 
-        
+        }
+
         #expect(error == DownloadError.invalidResponse)
     }
 
@@ -156,8 +156,8 @@ extension DownloadTests {
             // then
             //an exception must be thrown
 
-        } 
-        
+        }
+
         #expect(error == DownloadError.invalidResponse)
     }
 
@@ -181,9 +181,16 @@ extension DownloadTests {
             // then
             //an exception must be thrown
 
-        } 
-        
-        #expect(error == DownloadError.accountneedUpgrade(errorCode: 2170, errorMessage: "Your developer account needs to be updated.  Please visit Apple Developer Registration."))
+        }
+
+        #expect(
+            error
+                == DownloadError.accountneedUpgrade(
+                    errorCode: 2170,
+                    errorMessage:
+                        "Your developer account needs to be updated.  Please visit Apple Developer Registration."
+                )
+        )
     }
 
     func prepareResponse(

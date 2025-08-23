@@ -9,8 +9,8 @@ clean:
 all: clean format build test
 
 format:
-	swift format --recursive -i Sources/*
-	swift format --recursive -i Tests/*
+	swift format --recursive -i Sources
+	swift format --recursive -i Tests
 	
 test-coverage:
 	swift test --enable-code-coverage

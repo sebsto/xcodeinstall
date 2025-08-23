@@ -7,14 +7,15 @@
 
 import CLIlib
 import Foundation
-@testable import Subprocess // to be able to call internal init() functions
+
+@testable import Subprocess  // to be able to call internal init() functions
+@testable import xcodeinstall
+
 #if canImport(System)
 import System
 #else
 import SystemPackage
 #endif
-
-@testable import xcodeinstall
 
 struct MockedEnvironment: xcodeinstall.Environment {
 
@@ -41,12 +42,12 @@ struct MockedEnvironment: xcodeinstall.Environment {
 @MainActor
 final class MockedRunRecorder: InputProtocol, OutputProtocol {
     func write(with writer: Subprocess.StandardInputWriter) async throws {
-        
+
     }
 
     var lastExecutable: Executable?
     var lastArguments: Arguments = []
-    
+
     func containsExecutable(_ command: String) -> Bool {
         lastExecutable?.description.contains(command) ?? false
     }
@@ -54,30 +55,31 @@ final class MockedRunRecorder: InputProtocol, OutputProtocol {
         lastArguments.description.contains(argument)
     }
     func isEmpty() -> Bool {
-//        print(lastExecutable?.description)
-        return lastExecutable == nil || lastExecutable?.description.isEmpty == true
+        //        print(lastExecutable?.description)
+        lastExecutable == nil || lastExecutable?.description.isEmpty == true
     }
-    
+
 }
 
 extension MockedEnvironment {
     static var runRecorder = MockedRunRecorder()
 
-    func run (
+    func run(
         _ executable: Executable,
         arguments: Arguments,
-    ) async throws -> ShellOutput  {
-        return try await run(executable,
-                   arguments: arguments,
-                   workingDirectory: nil
+    ) async throws -> ShellOutput {
+        try await run(
+            executable,
+            arguments: arguments,
+            workingDirectory: nil
         )
     }
-    func run (
+    func run(
         _ executable: Executable,
         arguments: Arguments,
         workingDirectory: FilePath?,
-    ) async throws -> ShellOutput  {
-        
+    ) async throws -> ShellOutput {
+
         MockedEnvironment.runRecorder.lastExecutable = executable
         MockedEnvironment.runRecorder.lastArguments = arguments
 

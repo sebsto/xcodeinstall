@@ -84,38 +84,38 @@ final class InstallTest: XCTestCase {
         XCTAssertTrue(runRecorder.containsArgument("-target"))
         XCTAssertTrue(runRecorder.containsArgument("/"))
     }
-    
-//    func testXIP() async {
-//
-//        // given
-//        let mfh = env.fileHandler as! MockedFileHandler
-//        mfh.nextFileExist = true
-//
-//        let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
-//
-//        // when
-//        do {
-//            let installer = ShellInstaller(env: &env)
-//            let _ = try await installer.uncompressXIP(atURL: srcFile)
-//        } catch {
-//            XCTFail("uncompressXIP generated an error : \(error)")
-//        }
-//
-//        // then
-//        let runRecorder = MockedEnvironment.runRecorder
-//        XCTAssertTrue(runRecorder.containsExecutable("/usr/sbin/pkgutil"))
-//        XCTAssertTrue(runRecorder.containsArgument("--expand-full"))
-//        XCTAssertTrue(runRecorder.containsArgument(srcFile.path))
-//        XCTAssertTrue(runRecorder.containsArgument("Xcode.app"))
-//    }
+
+    //    func testXIP() async {
+    //
+    //        // given
+    //        let mfh = env.fileHandler as! MockedFileHandler
+    //        mfh.nextFileExist = true
+    //
+    //        let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
+    //
+    //        // when
+    //        do {
+    //            let installer = ShellInstaller(env: &env)
+    //            let _ = try await installer.uncompressXIP(atURL: srcFile)
+    //        } catch {
+    //            XCTFail("uncompressXIP generated an error : \(error)")
+    //        }
+    //
+    //        // then
+    //        let runRecorder = MockedEnvironment.runRecorder
+    //        XCTAssertTrue(runRecorder.containsExecutable("/usr/sbin/pkgutil"))
+    //        XCTAssertTrue(runRecorder.containsArgument("--expand-full"))
+    //        XCTAssertTrue(runRecorder.containsArgument(srcFile.path))
+    //        XCTAssertTrue(runRecorder.containsArgument("Xcode.app"))
+    //    }
 
     func testXIPNoFile() async {
-        
+
         // given
         (env.fileHandler as! MockedFileHandler).nextFileExist = false
-        
+
         let srcFile = URL(fileURLWithPath: "/tmp/temp.xip")
-        
+
         // when
         // (give a file name that exists, otherwise, it throws an exception)
         do {
@@ -123,31 +123,31 @@ final class InstallTest: XCTestCase {
             let _ = try await installer.uncompressXIP(atURL: srcFile)
         } catch InstallerError.fileDoesNotExistOrIncorrect {
             // expected use case
-            
+
             // then
         } catch {
             XCTFail("uncompressXIP generated an unknown error : \(error)")
         }
-    }   
-   func testMoveApp() async {
-       // given
-       let src = URL(fileURLWithPath: "/Users/stormacq/.xcodeinstall/Downloads/Xcode 14 beta 5.app")
-       let dst = URL(fileURLWithPath: "/Applications/Xcode 14 beta 5.app")
+    }
+    func testMoveApp() async {
+        // given
+        let src = URL(fileURLWithPath: "/Users/stormacq/.xcodeinstall/Downloads/Xcode 14 beta 5.app")
+        let dst = URL(fileURLWithPath: "/Applications/Xcode 14 beta 5.app")
 
-       // when
-       do {
-           let installer = ShellInstaller(env: &self.env, log: log)
-           _ = try await installer.moveApp(at: src)
-       } catch {
-           XCTFail("Move app generated an error : \(error)")
-       }
+        // when
+        do {
+            let installer = ShellInstaller(env: &self.env, log: log)
+            _ = try await installer.moveApp(at: src)
+        } catch {
+            XCTFail("Move app generated an error : \(error)")
+        }
 
-       // then
-       let mfh = env.fileHandler as! MockedFileHandler
-       XCTAssertEqual(mfh.moveSrc?.path, src.path)
-       XCTAssertEqual(mfh.moveDst?.path, dst.path)
+        // then
+        let mfh = env.fileHandler as! MockedFileHandler
+        XCTAssertEqual(mfh.moveSrc?.path, src.path)
+        XCTAssertEqual(mfh.moveDst?.path, dst.path)
 
-   }
+    }
 
     func testFindInDownloadListFileExists() {
 
@@ -317,7 +317,7 @@ final class InstallTest: XCTestCase {
         )
     }
 
-    func testFileMatchDownloadListExistsAndFileExists() throws{
+    func testFileMatchDownloadListExistsAndFileExists() throws {
 
         // given
         try createDownloadList()
@@ -368,27 +368,27 @@ final class InstallTest: XCTestCase {
         XCTAssertTrue(fileExists)
     }
 
-//    func testInstallXcode() async {
-//
-//        // given
-//        let file = URL(fileURLWithPath: "/tmp/Xcode 14 beta.xip")
-//
-//        // when
-//        do {
-//
-//            let installer = ShellInstaller(env: &self.env)
-//            try await installer.install(file: file)
-//            XCTAssert(false)
-//        } catch InstallerError.xCodeMoveInstallationError {
-//            //expected
-//        } catch {
-//            // check no error is thrown
-//            print("\(error)")
-//            XCTAssert(false)
-//        }
-//
-//        // then
-//    }
+    //    func testInstallXcode() async {
+    //
+    //        // given
+    //        let file = URL(fileURLWithPath: "/tmp/Xcode 14 beta.xip")
+    //
+    //        // when
+    //        do {
+    //
+    //            let installer = ShellInstaller(env: &self.env)
+    //            try await installer.install(file: file)
+    //            XCTAssert(false)
+    //        } catch InstallerError.xCodeMoveInstallationError {
+    //            //expected
+    //        } catch {
+    //            // check no error is thrown
+    //            print("\(error)")
+    //            XCTAssert(false)
+    //        }
+    //
+    //        // then
+    //    }
 
     #if os(macOS)
     // on linux, hdiutil is not available. This test fails with
@@ -400,7 +400,7 @@ final class InstallTest: XCTestCase {
 
         // when
         do {
-           let installer = ShellInstaller(env: &self.env, log: log)
+            let installer = ShellInstaller(env: &self.env, log: log)
             try await installer.install(file: file)
         } catch InstallerError.CLToolsInstallationError {
             //expected

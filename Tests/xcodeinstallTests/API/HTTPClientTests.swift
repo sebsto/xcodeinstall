@@ -4,8 +4,6 @@ import Testing
 
 @testable import xcodeinstall
 
-import Foundation
-
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -113,7 +111,12 @@ extension HTTPClientTests {
 
         self.sessionData.nextData = Data()
         // Create a mock URLResponse that works on both platforms
-        self.sessionData.nextResponse = URLResponse(url: URL(string: "http://dummy")!, mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
+        self.sessionData.nextResponse = URLResponse(
+            url: URL(string: "http://dummy")!,
+            mimeType: nil,
+            expectedContentLength: 0,
+            textEncodingName: nil
+        )
 
         // When
         let request = client.request(for: url)

@@ -5,12 +5,12 @@
 //  Created by Stormacq, Sebastien on 04/08/2022.
 //
 
-import Testing
+import Foundation
 import Logging
+import Testing
 
 @testable import xcodeinstall
 
-import Foundation
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -36,7 +36,9 @@ struct URLRequestCurlTest {
             "Header2": "value2",
         ]
         let data = "test data".data(using: .utf8)
-        let cookie = HTTPCookie(properties: [.name: "cookieName", .value: "cookieValue", .path: "/", .originURL: URL(string: url)!])
+        let cookie = HTTPCookie(properties: [
+            .name: "cookieName", .value: "cookieValue", .path: "/", .originURL: URL(string: url)!,
+        ])
         if let cookie {
             headers.merge(HTTPCookie.requestHeaderFields(with: [cookie])) { (current, _) in current }
         }
@@ -65,7 +67,9 @@ struct URLRequestCurlTest {
             "Header2": "value2",
         ]
         let data = "test data".data(using: .utf8)
-        let cookie = HTTPCookie(properties: [.name: "cookieName", .value: "cookieValue", .path: "/", .originURL: URL(string: url)!])
+        let cookie = HTTPCookie(properties: [
+            .name: "cookieName", .value: "cookieValue", .path: "/", .originURL: URL(string: url)!,
+        ])
         if let cookie {
             headers.merge(HTTPCookie.requestHeaderFields(with: [cookie])) { (current, _) in current }
         }

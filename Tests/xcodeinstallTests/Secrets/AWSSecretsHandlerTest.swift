@@ -5,8 +5,8 @@
 //  Created by Stormacq, Sebastien on 05/08/2022.
 //
 
-import Testing
 import Logging
+import Testing
 
 @testable import xcodeinstall
 

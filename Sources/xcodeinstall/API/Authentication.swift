@@ -189,7 +189,7 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         }
     }
 
-    // by OOP design it should be private. 
+    // by OOP design it should be private.
     internal func getAppleServicekey() async throws -> AppleServiceKey {
 
         /*

@@ -5,11 +5,10 @@
 //  Created by Stormacq, Sebastien on 21/07/2022.
 //
 
+import Foundation
 import Testing
 
 @testable import xcodeinstall
-
-import Foundation
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking

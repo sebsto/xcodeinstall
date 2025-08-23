@@ -6,11 +6,10 @@
 //
 
 import ArgumentParser
+import Foundation
 import Testing
 
 @testable import xcodeinstall
-
-import Foundation
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
