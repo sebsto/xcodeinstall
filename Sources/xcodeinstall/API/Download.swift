@@ -50,7 +50,7 @@ class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
         if let dlt = self.downloadTask {
             dlt.resume()
             downloadDelegate.sema.wait()
-        } 
+        }
 
         // returns when the download is completed
         return self.downloadTask

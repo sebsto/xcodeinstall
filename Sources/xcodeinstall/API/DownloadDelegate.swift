@@ -7,7 +7,7 @@
 
 import CLIlib
 import Foundation
-import Logging 
+import Logging
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -16,7 +16,7 @@ import FoundationNetworking
 // delegate class to receive download progress
 @MainActor
 final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
-    
+
     let log: Logger
     var environment: Environment?
 
@@ -39,7 +39,7 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
             fatalError("Developer forgot to set the environment")
         }
         return e
-    }   
+    }
 
     nonisolated func urlSession(
         _ session: URLSession,

@@ -9,6 +9,7 @@ import CLIlib
 import Foundation
 import Logging
 import Subprocess
+
 #if canImport(System)
 import System
 #else
@@ -48,7 +49,7 @@ protocol Environment: Sendable {
 
 @MainActor
 struct RuntimeEnvironment: Environment {
-    
+
     let region: String?
     let log: Logger
 
@@ -64,7 +65,7 @@ struct RuntimeEnvironment: Environment {
         self.urlSessionData = URLSession.shared
         self._delegate = DownloadDelegate(semaphore: DispatchSemaphore(value: 0), log: self.log)
     }
-    
+
     // CLI related classes
     var display: DisplayProtocol = Display()
     var readLine: ReadLineProtocol = ReadLine()
@@ -73,7 +74,7 @@ struct RuntimeEnvironment: Environment {
     var progressBar: CLIProgressBarProtocol = CLIProgressBar()
 
     // Utilities classes
-    private var _fileHandler: FileHandlerProtocol 
+    private var _fileHandler: FileHandlerProtocol
     var fileHandler: FileHandlerProtocol { self._fileHandler }
 
     // Secrets - will be overwritten by CLI when using AWS Secrets Manager
@@ -87,8 +88,8 @@ struct RuntimeEnvironment: Environment {
     private var _authenticator: AppleAuthenticatorProtocol
     var authenticator: AppleAuthenticatorProtocol {
         get {
-             (self._authenticator as? AppleAuthenticator)?.environment = self 
-             return self._authenticator
+            (self._authenticator as? AppleAuthenticator)?.environment = self
+            return self._authenticator
         }
         set {
             self._authenticator = newValue
@@ -106,9 +107,9 @@ struct RuntimeEnvironment: Environment {
     }
 
     // Network
-    let urlSessionData: URLSessionProtocol 
+    let urlSessionData: URLSessionProtocol
     private let _delegate: DownloadDelegate
-    var urlSessionDownload: URLSessionProtocol { 
+    var urlSessionDownload: URLSessionProtocol {
         self._delegate.environment = self
         return URLSession(
             configuration: .default,
@@ -117,20 +118,21 @@ struct RuntimeEnvironment: Environment {
         )
     }
 
-    func run (
+    func run(
         _ executable: Executable,
         arguments: Arguments,
-    ) async throws -> ShellOutput  {
-        return try await run(executable,
-                   arguments: arguments,
-                   workingDirectory: nil
+    ) async throws -> ShellOutput {
+        try await run(
+            executable,
+            arguments: arguments,
+            workingDirectory: nil
         )
     }
-    func run (
+    func run(
         _ executable: Executable,
         arguments: Arguments,
         workingDirectory: FilePath?,
-    ) async throws -> ShellOutput  {
+    ) async throws -> ShellOutput {
         try await Subprocess.run(
             executable,
             arguments: arguments,
@@ -139,6 +141,7 @@ struct RuntimeEnvironment: Environment {
             platformOptions: PlatformOptions(),
             input: .none,
             output: .string(limit: 1024, encoding: UTF8.self),
-            error: .string(limit: 1024, encoding: UTF8.self))
+            error: .string(limit: 1024, encoding: UTF8.self)
+        )
     }
 }
