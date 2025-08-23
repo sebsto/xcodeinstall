@@ -21,7 +21,8 @@ extension CLITests {
         let mockedRL = MockedReadLine(["0"])
         let mockedFH = MockedFileHandler()
         mockedFH.nextFileCorrect = true
-        let env = MockedEnvironment(fileHandler: mockedFH, readLine: mockedRL)
+        let mockedPB = MockedProgressBar()
+        let env = MockedEnvironment(fileHandler: mockedFH, readLine: mockedRL, progressBar: mockedPB)
 
         let download = try parse(
             MainCommand.Download.self,
@@ -36,20 +37,6 @@ extension CLITests {
                 "--date-published",
             ]
         )
-
-        // when
-        await #expect(throws: Never.self) {
-            let xci = XCodeInstall(log: log, env: env)
-            try await xci.download(
-                fileName: nil,
-                force: true,
-                xCodeOnly: true,
-                majorVersion: "14",
-                sortMostRecentFirst: true,
-                datePublished: true
-            )
-        }
-
         // test parsing of commandline arguments
         #expect(download.globalOptions.verbose)
         #expect(download.downloadListOptions.force)
@@ -57,6 +44,19 @@ extension CLITests {
         #expect(download.downloadListOptions.xCodeVersion == "14")
         #expect(download.downloadListOptions.mostRecentFirst)
         #expect(download.downloadListOptions.datePublished)
+
+        // when
+        await #expect(throws: Never.self) {
+            let xci = XCodeInstall(log: log, env: env)
+            try await xci.download(
+                fileName: nil,
+                force: false,
+                xCodeOnly: true,
+                majorVersion: "14",
+                sortMostRecentFirst: true,
+                datePublished: true
+            )
+        }
 
         // verify if progressbar define() was called
         if let progress = env.progressBar as? MockedProgressBar {
@@ -67,6 +67,7 @@ extension CLITests {
 
         // mocked list succeeded
         assertDisplay(env: env, "✅ file downloaded")
+
     }
 
     @Test("Test Download with correct file name")

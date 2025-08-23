@@ -79,10 +79,8 @@ struct DownloadListParser {
             let file = download.files[0]
 
             let fileCopy = file
-            let downloadFile: URL = await Task {
-                await fileHandler.downloadFileURL(file: fileCopy)
-            }.value
-            let exists = await fileHandler.fileExists(file: downloadFile, fileSize: file.fileSize)
+            let downloadFile: URL = await fileHandler.downloadFileURL(file: fileCopy)
+            let exists = fileHandler.fileExists(file: downloadFile, fileSize: file.fileSize)
 
             // create a copy of the file to be used in the list
             let newFile = DownloadList.File.init(from: file, existInCache: exists)

@@ -404,10 +404,8 @@ final class InstallTest: XCTestCase {
             try await installer.install(file: file)
         } catch InstallerError.CLToolsInstallationError {
             //expected
-            print("======== CLToolsInstallationError")
         } catch {
             // check no error is thrown
-            print("======== \(error)")
             XCTAssert(false)
         }
     }

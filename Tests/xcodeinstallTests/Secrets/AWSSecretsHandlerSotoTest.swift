@@ -105,10 +105,11 @@ final class SecretsStorageAWSSotoTest: XCTestCase {
         // when
         do {
             try await secretHandler!.updateSecret(secretId: .appleCredentials, newValue: credentials)
+        } catch _ as CredentialProviderError {
+            // ignore
+            // it allows to run the test on machines not configured for AWS
         } catch {
-            if ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == nil {
-                XCTAssert(false, "unexpected error : \(error)")
-            }
+            XCTFail("unexpected exception : \(error)")
         }
 
     }

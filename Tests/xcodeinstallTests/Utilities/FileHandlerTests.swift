@@ -39,8 +39,8 @@ extension FileHandlerTests {
 
         // When
         let dstFile: URL = self.tempDir().appendingPathComponent("temp2.txt")
-        let fh = await FileHandler(log: log)
-        try await fh.move(from: srcFile, to: dstFile)
+        let fh = FileHandler(log: log)
+        try fh.move(from: srcFile, to: dstFile)
 
         // Then
         // srcFile does not exist

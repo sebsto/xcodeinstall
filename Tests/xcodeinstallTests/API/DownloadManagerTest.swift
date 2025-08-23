@@ -9,18 +9,16 @@ struct MockDownloadManager: DownloadManagerProtocol {
 
     func download(from url: URL) -> AsyncStream<DownloadProgress> {
         AsyncStream { continuation in
-            Task {
-                if shouldFail {
-                    continuation.finish()
-                    return
-                }
-
-                for progress in mockProgress {
-                    continuation.yield(progress)
-                    try? await Task.sleep(nanoseconds: 100_000_000)  // 0.1s delay
-                }
+            if shouldFail {
                 continuation.finish()
+                return
             }
+
+            for progress in mockProgress {
+                continuation.yield(progress)
+                // try? await Task.sleep(nanoseconds: 100_000_000)  // 0.1s delay
+            }
+            continuation.finish()
         }
     }
 }
@@ -30,10 +28,11 @@ struct DownloadManagerTest {
     @Test("Test Download Manager progress")
     func testDownloadManager() async throws {
         var mockManager = MockDownloadManager()
+        let now = Date()
         mockManager.mockProgress = [
-            DownloadProgress(bytesWritten: 25, totalBytes: 100),
-            DownloadProgress(bytesWritten: 50, totalBytes: 100),
-            DownloadProgress(bytesWritten: 100, totalBytes: 100),
+            DownloadProgress(bytesWritten: 25, totalBytes: 100, startTime: now),
+            DownloadProgress(bytesWritten: 50, totalBytes: 100, startTime: now),
+            DownloadProgress(bytesWritten: 100, totalBytes: 100, startTime: now),
         ]
 
         var receivedProgress: [DownloadProgress] = []

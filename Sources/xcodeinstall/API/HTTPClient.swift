@@ -14,14 +14,14 @@ import FoundationNetworking
 #endif
 
 /*
-    This fil contains code to make our APICall testable.
+    This file contains code to make our APICall testable.
 
     Inspired from https://masilotti.com/testing-nsurlsession-input/
  */
 
 // make URLSession testable by abstracting its protocol
 // it allows to use the real URLSession or a mock interchangably
-@MainActor
+// @MainActor
 protocol URLSessionProtocol: Sendable {
     func data(
         for request: URLRequest,
@@ -29,28 +29,10 @@ protocol URLSessionProtocol: Sendable {
     ) async throws -> (
         Data, URLResponse
     )
-    func downloadTask(with request: URLRequest) throws -> URLSessionDownloadTaskProtocol
-    func downloadDelegate() -> DownloadDelegate?
 }
 
 // make the real URLSession implements our new protocol to make the compiler happy
-extension URLSession: URLSessionProtocol {
-    func downloadTask(with request: URLRequest) throws -> URLSessionDownloadTaskProtocol {
-        downloadTask(with: request) as URLSessionDownloadTask
-    }
-    func downloadDelegate() -> DownloadDelegate? {
-        self.delegate as? DownloadDelegate
-    }
-}
-
-// make URLSessionDownloadTask testable by abstracting its protocol
-@MainActor
-protocol URLSessionDownloadTaskProtocol: Sendable {
-    func resume()
-}
-
-// make the real URLSessionDownloadTask implemnet our protocol to keep the compiler happy
-extension URLSessionDownloadTask: URLSessionDownloadTaskProtocol {}
+extension URLSession: URLSessionProtocol {}
 
 // callers can express expected HTTP Response code either as range, either as specific value
 enum ExpectedResponseCode {
@@ -67,17 +49,17 @@ enum ExpectedResponseCode {
     }
 }
 
+enum HTTPVerb: String {
+    case GET
+    case POST
+}
+
 // provide common code for all network clients
 @MainActor
 class HTTPClient {
 
     var environment: Environment? = nil
     let log: Logger
-
-    enum HTTPVerb: String {
-        case GET
-        case POST
-    }
 
     public init(log: Logger) {
         self.log = log
@@ -184,37 +166,6 @@ class HTTPClient {
         _log(response: httpResponse, data: data, error: nil, to: log)
 
         return (data, httpResponse)
-    }
-
-    // generic Download CALL method
-    // this is used by download API calls
-    func downloadCall(
-        url: String,
-        requestHeaders: [String: String] = [:]
-    ) async throws -> (
-        URLSessionDownloadTaskProtocol
-    ) {
-
-        let request: URLRequest
-        var headers = requestHeaders
-
-        // reload cookies if they exist
-        let cookies = try? await self.env().secrets!.loadCookies()
-        if let cookies {
-            // cookies existed, let's add them to our HTTPHeaders
-            headers.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
-        } else {
-            log.debug("⚠️ I could not load cookies (this is normal the first time you authenticate)")
-        }
-
-        // build the request
-        request = self.request(for: url, withHeaders: headers)
-
-        _log(request: request, to: log)
-
-        // send request with download session
-        // this is asynchronous, monitor progress through delegate
-        return try self.env().urlSessionDownload.downloadTask(with: request)
     }
 
     // prepare an URLRequest for a given url, method, body, and headers

@@ -17,16 +17,6 @@ import Logging
 import FoundationNetworking
 #endif
 
-// mocked URLSessionDownloadTask
-@MainActor
-final class MockedURLSessionDownloadTask: URLSessionDownloadTaskProtocol {
-
-    var wasResumeCalled: Bool = false
-    func resume() {
-        wasResumeCalled = true
-    }
-}
-
 // mocked URLSession to be used during test
 @MainActor
 final class MockedURLSession: URLSessionProtocol {
@@ -38,8 +28,6 @@ final class MockedURLSession: URLSessionProtocol {
     var nextData: Data?
     var nextError: Error?
     var nextResponse: URLResponse?
-
-    var nextURLSessionDownloadTask: URLSessionDownloadTaskProtocol?
 
     func data(for request: URLRequest, delegate: URLSessionTaskDelegate? = nil) async throws -> (Data, URLResponse) {
 
@@ -59,33 +47,6 @@ final class MockedURLSession: URLSessionProtocol {
         return (data, response)
     }
 
-    func downloadTask(with request: URLRequest) throws -> URLSessionDownloadTaskProtocol {
-
-        guard let downloadTask = nextURLSessionDownloadTask else {
-            throw MockError.invalidMockData
-        }
-
-        lastURL = request.url
-        lastRequest = request
-
-        if nextError != nil {
-            throw nextError!
-        }
-
-        return downloadTask
-    }
-
-    var delegate: DownloadDelegate? = nil
-    func downloadDelegate() -> DownloadDelegate? {
-        if delegate == nil {
-            delegate = DownloadDelegate(
-                semaphore: MockedDispatchSemaphore(),
-                log: log
-            )
-            delegate?.environment = MockedEnvironment()
-        }
-        return delegate
-    }
 }
 
 @MainActor
@@ -116,51 +77,70 @@ final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
     func twoFactorAuthentication(pin: String) async throws {}
 }
 
+@MainActor
 struct MockedAppleDownloader: AppleDownloaderProtocol {
-    var sema: DispatchSemaphoreProtocol = MockedDispatchSemaphore()
-    var downloadDelegate: DownloadDelegate?
+    var environment: Environment?
 
-    func delegate() -> DownloadDelegate {
-        self.downloadDelegate!
-    }
     func list(force: Bool) async throws -> DownloadList {
-        let listData = try loadTestData(file: .downloadList)
-        let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
+        if !force {
+            let listData = try loadTestData(file: .downloadList)
+            let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
+            return list
+        }
 
-        guard let _ = list.downloads else {
+        // For forced list, check mocked URLSession data
+        guard let env = environment,
+            let mockedSession = env.urlSessionData as? MockedURLSession,
+            let data = mockedSession.nextData,
+            let response = mockedSession.nextResponse as? HTTPURLResponse
+        else {
             throw MockError.invalidMockData
         }
-        return list
-    }
-    func download(file: DownloadList.File) async throws -> URLSessionDownloadTaskProtocol? {
-        // should create a file with matching size
-        let dlt = MockedURLSessionDownloadTask()
-        return dlt
-    }
-}
 
-@MainActor
-final class MockedDispatchSemaphore: DispatchSemaphoreProtocol {
-    var _wasWaitCalled = false
-    var _wasSignalCalled = false
+        // Check response status code first
+        guard response.statusCode == 200 else {
+            throw DownloadError.invalidResponse
+        }
 
-    // reset flag when called
-    func wasWaitCalled() -> Bool {
-        let wwc = _wasWaitCalled
-        _wasWaitCalled = false
-        return wwc
+        // Check for cookies (except for specific test cases)
+        let hasCookies = response.value(forHTTPHeaderField: "Set-Cookie") != nil
+
+        // Try to decode the response first to check if it's valid JSON
+        let downloadList: DownloadList
+        do {
+            downloadList = try JSONDecoder().decode(DownloadList.self, from: data)
+        } catch {
+            // If JSON parsing fails, throw parsing error
+            throw DownloadError.parsingError(error: nil)
+        }
+
+        // Now check for cookies after successful JSON parsing
+        if !hasCookies && downloadList.resultCode == 0 {
+            throw DownloadError.invalidResponse
+        }
+
+        // Check result code for various error conditions
+        switch downloadList.resultCode {
+        case 0:
+            return downloadList
+        case 1100:
+            throw DownloadError.authenticationRequired
+        case 2170:
+            throw DownloadError.accountneedUpgrade(
+                errorCode: downloadList.resultCode,
+                errorMessage: downloadList.userString ?? "Your developer account needs to be updated"
+            )
+        default:
+            throw DownloadError.unknownError(
+                errorCode: downloadList.resultCode,
+                errorMessage: downloadList.userString ?? "Unknown error"
+            )
+        }
     }
 
-    // reset flag when called
-    func wasSignalCalled() -> Bool {
-        let wsc = _wasSignalCalled
-        _wasSignalCalled = false
-        return wsc
-    }
+    func download(file: DownloadList.File) async throws -> AsyncStream<DownloadProgress> {
+        let dm = MockDownloadManager()
+        return dm.download(from: URL(string: file.filename)!)
 
-    func wait() { _wasWaitCalled = true }
-    func signal() -> Int {
-        _wasSignalCalled = true
-        return 0
     }
 }

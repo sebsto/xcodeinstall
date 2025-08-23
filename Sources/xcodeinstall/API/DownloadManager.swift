@@ -5,67 +5,181 @@ protocol DownloadManagerProtocol: Sendable {
     func download(from url: URL) -> AsyncStream<DownloadProgress>
 }
 
-@MainActor
-class DownloadManager: NSObject, URLSessionDownloadDelegate {
+struct DownloadTarget: Sendable {
+    let totalFileSize: Int
+    let dstFilePath: URL
+    let startTime: Date
 
-    let log: Logger
-    public init(logger: Logger) {
-        self.log = logger
-    }
-    private var continuation: AsyncStream<DownloadProgress>.Continuation?
-
-    func download(from url: URL) -> AsyncStream<DownloadProgress> {
-        AsyncStream { continuation in
-            self.continuation = continuation
-
-            let session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
-            let task = session.downloadTask(with: url)
-            task.resume()
-        }
-    }
-
-    // URLSessionDownloadDelegate methods
-    nonisolated func urlSession(
-        _ session: URLSession,
-        downloadTask: URLSessionDownloadTask,
-        didWriteData bytesWritten: Int64,
-        totalBytesWritten: Int64,
-        totalBytesExpectedToWrite: Int64
-    ) {
-        let progress = DownloadProgress(
-            bytesWritten: totalBytesWritten,
-            totalBytes: totalBytesExpectedToWrite
-        )
-        Task { await continuation?.yield(progress) }
-    }
-
-    nonisolated func urlSession(
-        _ session: URLSession,
-        downloadTask: URLSessionDownloadTask,
-        didFinishDownloadingTo location: URL
-    ) {
-
-        do {
-            let destinationURL = URL(fileURLWithPath: "/path/to/save/file.zip")
-
-            // Create directory if it doesn't exist
-            try FileManager.default.createDirectory(
-                at: destinationURL.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-            )
-
-            // Move file from temporary location to final destination
-            try FileManager.default.moveItem(at: location, to: destinationURL)
-
-        } catch {
-            log.error("🛑 Error moving downloaded file: \(error)")
-        }
-        Task { await continuation?.finish() }
+    init(totalFileSize: Int, dstFilePath: URL, startTime: Date = Date.now) {
+        self.totalFileSize = totalFileSize
+        self.dstFilePath = dstFilePath
+        self.startTime = startTime
     }
 }
 
 struct DownloadProgress: Sendable {
     let bytesWritten: Int64
     let totalBytes: Int64
+    let startTime: Date
     var percentage: Double { Double(bytesWritten) / Double(totalBytes) }
+    var bandwidth: Double {
+        let elapsed = 0 - startTime.timeIntervalSinceNow
+        return elapsed > 0 ? Double(bytesWritten) / Double(elapsed) / 1024 / 1024 : 0
+    }
+}
+
+@MainActor
+class DownloadManager {
+
+    var env: Environment? = nil
+    var downloadTarget: DownloadTarget? = nil
+    private let log: Logger
+
+    public init(env: Environment? = nil, downloadTarget: DownloadTarget? = nil, logger: Logger) {
+        self.env = env
+        self.downloadTarget = downloadTarget
+        self.log = logger
+    }
+
+    func download(from url: String) async throws -> AsyncStream<DownloadProgress> {
+
+        guard let downloadTarget = self.downloadTarget else {
+            fatalError("Developer forgot to set the download target")
+        }
+
+        guard let env = self.env else {
+            fatalError("Developer forgot to set the environment")
+        }
+
+        var request: URLRequest
+        var headers: [String: String] = ["Accept": "*/*"]
+
+        // reload cookies if they exist
+        let cookies = try? await env.secrets!.loadCookies()
+        if let cookies {
+            // cookies existed, let's add them to our HTTPHeaders
+            headers.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
+        } else {
+            log.debug("⚠️ I could not load cookies")
+            throw DownloadError.authenticationRequired
+        }
+
+        // build the request
+        request = self.request(for: url, withHeaders: headers)
+        _log(request: request, to: log)
+
+        // create the download task, start it , and start streaming its progress
+        return AsyncStream { continuation in
+            let delegate = DownloadDelegate(
+                target: downloadTarget,
+                continuation: continuation,
+                fileHandler: env.fileHandler,
+                log: self.log
+            )
+            let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
+            let task = session.downloadTask(with: request)
+            task.resume()
+        }
+    }
+
+    // prepare an URLRequest for a given url, method, body, and headers
+    // https://softwareengineering.stackexchange.com/questions/100959/how-do-you-unit-test-private-methods
+    internal func request(
+        for url: String,
+        method: HTTPVerb = .GET,
+        withBody body: Data? = nil,
+        withHeaders headers: [String: String]? = nil
+    ) -> URLRequest {
+
+        // create the request
+        let url = URL(string: url)!
+        var request = URLRequest(url: url)
+
+        // add HTTP verb
+        request.httpMethod = method.rawValue
+
+        // add body
+        if let body {
+            request.httpBody = body
+        }
+
+        // add headers
+        if let headers {
+            for (key, value) in headers {
+                request.addValue(value, forHTTPHeaderField: key)
+            }
+        }
+
+        return request
+    }
+}
+
+// MARK: Download Delegate functions
+final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
+
+    private let downloadTarget: DownloadTarget
+    private let continuation: AsyncStream<DownloadProgress>.Continuation
+    private let log: Logger
+    private let fileHandler: FileHandlerProtocol
+    init(
+        target: DownloadTarget,
+        continuation: AsyncStream<DownloadProgress>.Continuation,
+        fileHandler: FileHandlerProtocol,
+        log: Logger
+    ) {
+        self.downloadTarget = target
+        self.continuation = continuation
+        self.log = log
+        self.fileHandler = fileHandler
+    }
+    // URLSessionDownloadDelegate methods
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didWriteData bytesWritten: Int64,
+        totalBytesWritten: Int64,
+        totalBytesExpectedToWrite: Int64
+    ) {
+        let total =
+            totalBytesExpectedToWrite <= 0 ? Int64(self.downloadTarget.totalFileSize) : totalBytesExpectedToWrite
+        let progress = DownloadProgress(
+            bytesWritten: totalBytesWritten,
+            totalBytes: total,
+            startTime: self.downloadTarget.startTime
+        )
+        continuation.yield(progress)
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didFinishDownloadingTo location: URL
+    ) {
+        do {
+            let dst = self.downloadTarget.dstFilePath
+            log.debug("Finished downloading at \(location)\nMoving to \(dst)")
+
+            try self.fileHandler.move(from: location, to: dst)
+
+        } catch {
+            log.error("🛑 Error moving downloaded file: \(error)")
+        }
+        continuation.finish()
+
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest
+    ) async -> URLRequest? {
+        request
+    }
+
+    func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
+        // how to report error to user ?
+        log.error("error \(String(describing: error))")
+        continuation.finish()
+    }
 }

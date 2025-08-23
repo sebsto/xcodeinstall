@@ -24,10 +24,10 @@ extension DownloadTests {
     func testListNoForce() async throws {
 
         // given
-        let ad = getAppleDownloader()
+        let downloader = env.downloader
 
         // when
-        let result: DownloadList? = try await ad.list(force: false)
+        let result: DownloadList? = try await downloader.list(force: false)
 
         // then
         #expect(result != nil)
@@ -43,8 +43,8 @@ extension DownloadTests {
             self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = self.getAppleDownloader()
-            let result = try await ad.list(force: true)
+            let downloader = self.env.downloader
+            let result = try await downloader.list(force: true)
 
             // then
             #expect(result.downloads != nil)
@@ -65,8 +65,8 @@ extension DownloadTests {
             self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = self.getAppleDownloader()
-            let _ = try await ad.list(force: true)
+            let downloader = self.env.downloader
+            let _ = try await downloader.list(force: true)
 
             // then
             // an exception must be thrown
@@ -85,8 +85,8 @@ extension DownloadTests {
             self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = self.getAppleDownloader()
-            let _ = try await ad.list(force: true)
+            let downloader = self.env.downloader
+            let _ = try await downloader.list(force: true)
 
             // then
             //an exception must be thrown
@@ -105,8 +105,8 @@ extension DownloadTests {
             self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = self.getAppleDownloader()
-            let _ = try await ad.list(force: true)
+            let downloader = self.env.downloader
+            let _ = try await downloader.list(force: true)
 
             // then
             //an exception must be thrown
@@ -125,8 +125,8 @@ extension DownloadTests {
             self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = self.getAppleDownloader()
-            let _ = try await ad.list(force: true)
+            let downloader = self.env.downloader
+            let _ = try await downloader.list(force: true)
 
             // then
             //an exception must be thrown
@@ -150,8 +150,8 @@ extension DownloadTests {
             self.setSessionData(data: listData, response: urlResponse)
 
             // when
-            let ad = self.getAppleDownloader()
-            let _ = try await ad.list(force: true)
+            let downloader = self.env.downloader
+            let _ = try await downloader.list(force: true)
 
             // then
             //an exception must be thrown
@@ -175,8 +175,8 @@ extension DownloadTests {
             self.setSessionData(data: response.data(using: .utf8), response: urlResponse)
 
             // when
-            let ad = self.getAppleDownloader()
-            let _ = try await ad.list(force: true)
+            let downloader = self.env.downloader
+            let _ = try await downloader.list(force: true)
 
             // then
             //an exception must be thrown

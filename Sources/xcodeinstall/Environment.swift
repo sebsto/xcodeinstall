@@ -35,7 +35,7 @@ protocol Environment: Sendable {
     var authenticator: AppleAuthenticatorProtocol { get }
     var downloader: AppleDownloaderProtocol { get }
     var urlSessionData: URLSessionProtocol { get }
-    var urlSessionDownload: URLSessionProtocol { get }
+    var downloadManager: DownloadManager { get }
     func run(
         _ executable: Executable,
         arguments: Arguments,
@@ -63,7 +63,7 @@ struct RuntimeEnvironment: Environment {
         self._secrets = SecretsStorageFile(log: log)
 
         self.urlSessionData = URLSession.shared
-        self._delegate = DownloadDelegate(semaphore: DispatchSemaphore(value: 0), log: self.log)
+        self.downloadManager = DownloadManager(logger: self.log)
     }
 
     // CLI related classes
@@ -108,15 +108,7 @@ struct RuntimeEnvironment: Environment {
 
     // Network
     let urlSessionData: URLSessionProtocol
-    private let _delegate: DownloadDelegate
-    var urlSessionDownload: URLSessionProtocol {
-        self._delegate.environment = self
-        return URLSession(
-            configuration: .default,
-            delegate: self._delegate,
-            delegateQueue: nil
-        )
-    }
+    let downloadManager: DownloadManager
 
     func run(
         _ executable: Executable,

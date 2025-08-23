@@ -21,7 +21,6 @@ extension CLITests {
             [
                 "list",
                 "--verbose",
-                "--force",
                 "--only-xcode",
                 "--xcode-version",
                 "14",
@@ -36,7 +35,6 @@ extension CLITests {
 
         // test parsing of commandline arguments
         #expect(list.globalOptions.verbose)
-        #expect(list.downloadListOptions.force)
         #expect(list.downloadListOptions.onlyXcode)
         #expect(list.downloadListOptions.xCodeVersion == "14")
         #expect(list.downloadListOptions.mostRecentFirst)

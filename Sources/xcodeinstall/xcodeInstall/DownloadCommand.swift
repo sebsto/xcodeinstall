@@ -20,7 +20,6 @@ extension XCodeInstall {
     ) async throws {
 
         let download = self.env.downloader
-
         var fileToDownload: DownloadList.File
         do {
 
@@ -54,7 +53,16 @@ extension XCodeInstall {
                 message: "Downloading \(fileToDownload.displayName ?? fileToDownload.filename)"
             )
 
-            _ = try await download.download(file: fileToDownload)
+            for await progress in try await download.download(file: fileToDownload) {
+                var text = "\(progress.bytesWritten/1024/1024) MB"
+                text += String(format: " / %.2f MBs", progress.bandwidth)
+                progressBar.update(
+                    step: Int(progress.bytesWritten / 1024),
+                    total: Int(progress.totalBytes / 1024),
+                    text: text
+                )
+            }
+            progressBar.complete(success: true)
 
             // check if the downloaded file is complete
             let fh = self.env.fileHandler
@@ -65,15 +73,14 @@ extension XCodeInstall {
             )
             if !(complete ?? false) {
                 display("🛑 Downloaded file has incorrect size, it might be incomplete or corrupted")
+            } else {
+                display("✅ \(fileName ?? "file") downloaded")
             }
-            display("✅ \(fileName ?? "file") downloaded")
-
         } catch DownloadError.zeroOrMoreThanOneFileToDownload(let count) {
             display("🛑 There are \(count) files to download " + "for this component. Not implemented.")
         } catch DownloadError.authenticationRequired {
-
-            // error message has been printed already
-
+            display("🛑 Session expired, you neeed to re-authenticate.")
+            display("You can authenticate with the command: xcodeinstall authenticate")
         } catch CLIError.invalidInput {
             display("🛑 Invalid input")
         } catch DownloadError.unknownFile(let fileName) {
