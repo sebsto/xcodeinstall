@@ -122,7 +122,7 @@ extension ShellInstaller {
 
         log.debug("Going to move \n \(src) to \n \(appURL)")
         // move synchronously
-        try await self.env.fileHandler.move(from: src, to: appURL)
+        try self.env.fileHandler.move(from: src, to: appURL)
 
         return appURL.path
     }

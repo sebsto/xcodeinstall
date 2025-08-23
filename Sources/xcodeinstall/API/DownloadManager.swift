@@ -9,7 +9,7 @@ struct DownloadTarget: Sendable {
     let totalFileSize: Int
     let dstFilePath: URL
     let startTime: Date
-    
+
     init(totalFileSize: Int, dstFilePath: URL, startTime: Date = Date.now) {
         self.totalFileSize = totalFileSize
         self.dstFilePath = dstFilePath
@@ -42,7 +42,7 @@ class DownloadManager {
     }
 
     func download(from url: String) async throws -> AsyncStream<DownloadProgress> {
-        
+
         guard let downloadTarget = self.downloadTarget else {
             fatalError("Developer forgot to set the download target")
         }
@@ -53,7 +53,7 @@ class DownloadManager {
 
         var request: URLRequest
         var headers: [String: String] = ["Accept": "*/*"]
-        
+
         // reload cookies if they exist
         let cookies = try? await env.secrets!.loadCookies()
         if let cookies {
@@ -70,11 +70,16 @@ class DownloadManager {
 
         // create the download task, start it , and start streaming its progress
         return AsyncStream { continuation in
-            let delegate = DownloadDelegate(target: downloadTarget, continuation: continuation, fileHandler: env.fileHandler, log: self.log)
+            let delegate = DownloadDelegate(
+                target: downloadTarget,
+                continuation: continuation,
+                fileHandler: env.fileHandler,
+                log: self.log
+            )
             let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
             let task = session.downloadTask(with: request)
             task.resume()
-        } 
+        }
     }
 
     // prepare an URLRequest for a given url, method, body, and headers
@@ -116,7 +121,12 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
     private let continuation: AsyncStream<DownloadProgress>.Continuation
     private let log: Logger
     private let fileHandler: FileHandlerProtocol
-    init(target: DownloadTarget, continuation: AsyncStream<DownloadProgress>.Continuation, fileHandler: FileHandlerProtocol, log: Logger) {
+    init(
+        target: DownloadTarget,
+        continuation: AsyncStream<DownloadProgress>.Continuation,
+        fileHandler: FileHandlerProtocol,
+        log: Logger
+    ) {
         self.downloadTarget = target
         self.continuation = continuation
         self.log = log
@@ -130,8 +140,8 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         totalBytesWritten: Int64,
         totalBytesExpectedToWrite: Int64
     ) {
-        print("Downloaded \(bytesWritten) bytes, total \(totalBytesWritten) of \(totalBytesExpectedToWrite) bytes")
-        let total = totalBytesExpectedToWrite <= 0 ? Int64(self.downloadTarget.totalFileSize) : totalBytesExpectedToWrite
+        let total =
+            totalBytesExpectedToWrite <= 0 ? Int64(self.downloadTarget.totalFileSize) : totalBytesExpectedToWrite
         let progress = DownloadProgress(
             bytesWritten: totalBytesWritten,
             totalBytes: total,
@@ -145,18 +155,17 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         downloadTask: URLSessionDownloadTask,
         didFinishDownloadingTo location: URL
     ) {
-        Task {
-            do {
-                let dst = self.downloadTarget.dstFilePath 
-                log.debug("Finished downloading at \(location)\nMoving to \(dst)")
+        do {
+            let dst = self.downloadTarget.dstFilePath
+            log.debug("Finished downloading at \(location)\nMoving to \(dst)")
 
-                try await self.fileHandler.move(from: location, to: dst)
+            try self.fileHandler.move(from: location, to: dst)
 
-            } catch {
-                log.error("🛑 Error moving downloaded file: \(error)")
-            }
-            continuation.finish()
+        } catch {
+            log.error("🛑 Error moving downloaded file: \(error)")
         }
+        continuation.finish()
+
     }
 
     func urlSession(
@@ -165,12 +174,12 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         willPerformHTTPRedirection response: HTTPURLResponse,
         newRequest request: URLRequest
     ) async -> URLRequest? {
-        return request
+        request
     }
 
     func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
         // how to report error to user ?
         log.error("error \(String(describing: error))")
-        continuation.finish() 
+        continuation.finish()
     }
 }
