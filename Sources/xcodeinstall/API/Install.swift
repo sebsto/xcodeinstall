@@ -29,7 +29,6 @@ enum InstallerError: Error {
     case CLToolsInstallationError
 }
 
-@MainActor
 class ShellInstaller: InstallerProtocol {
 
     let log: Logger

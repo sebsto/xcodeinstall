@@ -13,6 +13,7 @@ import Testing
 @testable import xcodeinstall
 
 @Suite("SRPKeysTestCase")
+@MainActor
 struct SRPKeysTestCase {
     @Test func base64() async throws {
         // given

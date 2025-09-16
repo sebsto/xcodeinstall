@@ -30,7 +30,6 @@ final class MockedReadLine: ReadLineProtocol {
 
     var input: [String] = []
 
-    init() {}
     init(_ input: [String]) {
         self.input = input.reversed()
     }

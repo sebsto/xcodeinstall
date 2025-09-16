@@ -11,7 +11,6 @@ import Foundation
 import Logging
 
 // Install implementation
-@MainActor
 extension MainCommand {
 
     struct Install: AsyncParsableCommand {

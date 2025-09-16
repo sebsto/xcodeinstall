@@ -12,7 +12,7 @@ import SotoSecretsManager
 import XCTest
 
 @testable import xcodeinstall
-
+@MainActor
 final class SecretsStorageAWSSotoTest: XCTestCase {
 
     var secretHandler: SecretsStorageAWSSoto?
@@ -32,7 +32,13 @@ final class SecretsStorageAWSSotoTest: XCTestCase {
                 client: awsClient,
                 endpoint: TestEnvironment.getEndPoint()
             )
-
+            
+//            try  MainActor.run {
+//                self.secretHandler =
+//                    try SecretsStorageAWSSoto.forRegion(region, awsClient: awsClient, smClient: smClient, log: self.log)
+//                    as? SecretsStorageAWSSoto
+//                XCTAssertNotNil(self.secretHandler)
+//            }
             secretHandler =
                 try SecretsStorageAWSSoto.forRegion(region, awsClient: awsClient, smClient: smClient, log: log)
                 as? SecretsStorageAWSSoto

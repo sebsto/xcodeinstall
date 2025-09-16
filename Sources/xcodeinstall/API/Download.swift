@@ -13,7 +13,6 @@ protocol AppleDownloaderProtocol: Sendable {
     func download(file: DownloadList.File) async throws -> AsyncStream<DownloadProgress>
 }
 
-@MainActor
 class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
 
     func download(file: DownloadList.File) async throws -> AsyncStream<DownloadProgress> {

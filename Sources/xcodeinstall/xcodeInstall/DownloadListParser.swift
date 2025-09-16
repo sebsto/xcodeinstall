@@ -7,7 +7,6 @@
 
 import Foundation
 
-@MainActor
 struct DownloadListParser {
 
     let env: Environment
@@ -80,13 +79,13 @@ struct DownloadListParser {
 
             let fileCopy = file
             let downloadFile: URL = await fileHandler.downloadFileURL(file: fileCopy)
-            let exists = fileHandler.fileExists(file: downloadFile, fileSize: file.fileSize)
+            let exists = await fileHandler.fileExists(file: downloadFile, fileSize: file.fileSize)
 
             // create a copy of the file to be used in the list
-            let newFile = DownloadList.File.init(from: file, existInCache: exists)
+            let newFile = await DownloadList.File.init(from: file, existInCache: exists)
 
             // create a copy of the download to be used in the list
-            let newDownload = DownloadList.Download(
+            let newDownload = await DownloadList.Download(
                 from: download,
                 replaceWith: newFile
             )

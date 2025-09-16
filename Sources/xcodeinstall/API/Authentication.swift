@@ -144,7 +144,6 @@ protocol AppleAuthenticatorProtocol: Sendable {
 }
 
 //FIXME: TODO: split into two classes : UsernamePasswordAuthenticator and SRPAuthenticator
-@MainActor
 class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
 
     func startAuthentication(

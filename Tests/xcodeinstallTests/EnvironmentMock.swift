@@ -17,16 +17,31 @@ import System
 import SystemPackage
 #endif
 
-struct MockedEnvironment: xcodeinstall.Environment {
+@MainActor
+final class MockedEnvironment: xcodeinstall.Environment {
+
+    init(
+        fileHandler: FileHandlerProtocol = MockedFileHandler(),
+        readLine: ReadLineProtocol = MockedReadLine([]),
+        progressBar: CLIProgressBarProtocol = MockedProgressBar()
+    ) {
+        self.fileHandler = fileHandler
+        self.readLine = readLine
+        self.progressBar = progressBar
+    }
 
     var fileHandler: FileHandlerProtocol = MockedFileHandler()
 
     var display: DisplayProtocol = MockedDisplay()
-    var readLine: ReadLineProtocol = MockedReadLine()
+    var readLine: ReadLineProtocol = MockedReadLine([])
     var progressBar: CLIProgressBarProtocol = MockedProgressBar()
 
     // this has to be injected by the caller (it contains a reference to the env
     var secrets: SecretsHandlerProtocol? = nil
+    func setSecretsHandler(_ newValue: SecretsHandlerProtocol) {
+        self.secrets = newValue
+    }
+
     var awsSDK: SecretsStorageAWSSDKProtocol? = nil
 
     var authenticator: AppleAuthenticatorProtocol = MockedAppleAuthentication()

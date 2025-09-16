@@ -14,7 +14,6 @@ import FoundationNetworking
 #endif
 
 // store secrets on files in $HOME/.xcodeinstaller
-@MainActor
 struct SecretsStorageFile: SecretsHandlerProtocol {
     private let log: Logger
     private var fileManager: FileManager

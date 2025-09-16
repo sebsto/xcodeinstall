@@ -9,7 +9,7 @@ import Logging
 import Testing
 
 @testable import xcodeinstall
-
+@MainActor
 struct SecretsStorageAWSTest {
 
     var secretHandlerTest: SecretsHandlerTestsBase<SecretsStorageAWS>? = nil
@@ -22,7 +22,7 @@ struct SecretsStorageAWSTest {
         let AWS_REGION = "us-east-1"
 
         let mockedSDK = try MockedSecretsStorageAWSSDK.forRegion(AWS_REGION, log: log)
-        secretHandlerTest!.secrets = try await SecretsStorageAWS(sdk: mockedSDK, log: log)
+        secretHandlerTest!.secrets = try SecretsStorageAWS(sdk: mockedSDK, log: log)
         try await secretHandlerTest!.secrets!.clearSecrets()
     }
 

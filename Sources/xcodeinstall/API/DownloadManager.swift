@@ -1,6 +1,7 @@
 import Foundation
 import Logging
 
+@MainActor
 protocol DownloadManagerProtocol: Sendable {
     func download(from url: URL) -> AsyncStream<DownloadProgress>
 }
@@ -28,7 +29,6 @@ struct DownloadProgress: Sendable {
     }
 }
 
-@MainActor
 class DownloadManager {
 
     var env: Environment? = nil

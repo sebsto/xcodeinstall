@@ -21,6 +21,7 @@ protocol SecretsHandlerTestsProtocol {
     func testLoadSessionNoExist() async
 }
 
+@MainActor
 struct SecretsHandlerTestsBase<T: SecretsHandlerProtocol> {
 
     var secrets: T?

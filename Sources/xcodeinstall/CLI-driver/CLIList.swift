@@ -45,7 +45,6 @@ extension MainCommand {
 
     }
 
-    @MainActor
     struct List: AsyncParsableCommand {
 
         nonisolated static let configuration =

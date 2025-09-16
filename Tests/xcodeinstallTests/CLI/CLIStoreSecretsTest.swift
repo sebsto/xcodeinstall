@@ -23,11 +23,11 @@ extension CLITests {
 
         // given
         let mockedRL = MockedReadLine(["username", "password"])
-        var env: Environment = MockedEnvironment(readLine: mockedRL)
+        let env: Environment = MockedEnvironment(readLine: mockedRL)
         // use the real AWS Secrets Handler, but with a mocked SDK
         let mockedSDK = try MockedSecretsStorageAWSSDK.forRegion("us-east-1", log: log)
         let secretsHandler = try SecretsStorageAWS(sdk: mockedSDK, log: log)
-        env.secrets = secretsHandler
+        env.setSecretsHandler(secretsHandler)
 
         let storeSecrets = try parse(
             MainCommand.StoreSecrets.self,

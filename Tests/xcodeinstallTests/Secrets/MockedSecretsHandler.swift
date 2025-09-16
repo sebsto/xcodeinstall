@@ -61,6 +61,7 @@ final class MockedSecretsHandler: SecretsHandlerProtocol {
 
 }
 
+@MainActor
 final class MockedSecretsStorageAWSSDK: SecretsStorageAWSSDKProtocol {
 
     private let _regionSet: Mutex<Bool> = .init(false)

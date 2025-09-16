@@ -11,7 +11,7 @@ import Logging
 
 // the methods I want to mock for unit testing
 protocol FileHandlerProtocol: Sendable {
-    func move(from src: URL, to dst: URL) throws
+    nonisolated func move(from src: URL, to dst: URL) throws
     func fileExists(file: URL, fileSize: Int) -> Bool
     func checkFileSize(file: URL, fileSize: Int) throws -> Bool
     func downloadedFiles() throws -> [String]
@@ -59,7 +59,7 @@ struct FileHandler: FileHandlerProtocol {
         return FileHandler.baseDirectory
     }
 
-    func move(from src: URL, to dst: URL) throws {
+    nonisolated func move(from src: URL, to dst: URL) throws {
         do {
             if FileManager.default.fileExists(atPath: dst.path) {
                 log.debug("⚠️ File \(dst) exists, I am overwriting it")

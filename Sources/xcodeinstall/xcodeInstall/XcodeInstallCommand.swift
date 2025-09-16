@@ -9,7 +9,6 @@ import CLIlib
 import Foundation
 import Logging
 
-@MainActor
 final class XCodeInstall {
 
     let log: Logger

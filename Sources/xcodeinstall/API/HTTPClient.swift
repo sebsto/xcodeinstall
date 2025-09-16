@@ -21,7 +21,6 @@ import FoundationNetworking
 
 // make URLSession testable by abstracting its protocol
 // it allows to use the real URLSession or a mock interchangably
-// @MainActor
 protocol URLSessionProtocol: Sendable {
     func data(
         for request: URLRequest,
@@ -55,7 +54,6 @@ enum HTTPVerb: String {
 }
 
 // provide common code for all network clients
-@MainActor
 class HTTPClient {
 
     var environment: Environment? = nil

@@ -1,7 +1,9 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+
+let swiftSettings: [SwiftSetting] = [.defaultIsolation(MainActor.self)]
 
 let package = Package(
     name: "xcodeinstall",
@@ -12,7 +14,7 @@ let package = Package(
         .executable(name: "xcodeinstall", targets: ["xcodeinstall"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.6.1"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.6.4"),
         // do not use Soto 7.x
         // it has a transitive dependency on swift-service-context whichs fails to compile 
@@ -22,8 +24,7 @@ let package = Package(
         .package(url: "https://github.com/sebsto/CLIlib/", branch: "main"),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", branch: "main"),
-        // use main until https://github.com/apple/swift-crypto/commit/2347f20e240cc1e98133c9794507dee7fd65f922#diff-184979a92eddfb7930f0a26f143fd40dae274867fc7398e1bd30291532970ee0 is released
-        .package(url: "https://github.com/apple/swift-crypto", branch: "main"),
+        .package(url: "https://github.com/apple/swift-crypto", from: "3.15.0"),
         .package(url: "https://github.com/apple/swift-system", from: "1.5.0"),
         .package(url: "https://github.com/saagarjha/unxip.git", from: "3.2.0")
         //.package(path: "../CLIlib")
@@ -42,7 +43,8 @@ let package = Package(
                 .product(name: "Subprocess", package: "swift-subprocess"),
                 .product(name: "SystemPackage", package: "swift-system"),
                 .product(name: "libunxip", package: "unxip"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "xcodeinstallTests",
@@ -54,7 +56,10 @@ let package = Package(
             resources: [.process("data/download-list-20220723.json"),
                         .process("data/download-list-20231115.json"),
                         .process("data/download-error.json"),
-                        .process("data/download-unknown-error.json")]
+                        .process("data/download-unknown-error.json")
+            ],
+            //TODO: to enable when all tests will be migrated to swift-testing
+            // swiftSettings: swiftSettings
         )
     ]
 )

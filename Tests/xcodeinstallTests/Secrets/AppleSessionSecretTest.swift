@@ -12,7 +12,7 @@ import XCTest
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-
+@MainActor
 final class AppleSessionSecretTest: XCTestCase {
 
     override func setUpWithError() throws {

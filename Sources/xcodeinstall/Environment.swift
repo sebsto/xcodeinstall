@@ -24,14 +24,14 @@ import FoundationNetworking
 
  a global struct to give access to classes for which I wrote tests.
  this global object allows me to simplify dependency injection */
-
 @MainActor
 protocol Environment: Sendable {
     var fileHandler: FileHandlerProtocol { get }
     var display: DisplayProtocol { get }
     var readLine: ReadLineProtocol { get }
     var progressBar: CLIProgressBarProtocol { get }
-    var secrets: SecretsHandlerProtocol? { get set }
+    var secrets: SecretsHandlerProtocol? { get }
+    func setSecretsHandler(_ newValue: SecretsHandlerProtocol)
     var authenticator: AppleAuthenticatorProtocol { get }
     var downloader: AppleDownloaderProtocol { get }
     var urlSessionData: URLSessionProtocol { get }
@@ -47,8 +47,7 @@ protocol Environment: Sendable {
     ) async throws -> ShellOutput
 }
 
-@MainActor
-struct RuntimeEnvironment: Environment {
+final class RuntimeEnvironment: Environment {
 
     let region: String?
     let log: Logger
@@ -81,9 +80,12 @@ struct RuntimeEnvironment: Environment {
     private var _secrets: SecretsHandlerProtocol? = nil
     var secrets: SecretsHandlerProtocol? {
         get { _secrets }
-        set { _secrets = newValue }
     }
-
+    // provide an actor isolated setter
+    func setSecretsHandler(_ newValue: SecretsHandlerProtocol) {
+        self._secrets = newValue
+    }
+    
     // Commands
     private var _authenticator: AppleAuthenticatorProtocol
     var authenticator: AppleAuthenticatorProtocol {

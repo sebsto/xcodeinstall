@@ -6,6 +6,7 @@ import Testing
 
 // MARK: - File Handler Tests
 @Suite("FileHandlerTests", .serialized)
+@MainActor
 struct FileHandlerTests {
 
     // MARK: - Test Environment

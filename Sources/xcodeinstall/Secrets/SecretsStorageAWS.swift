@@ -63,6 +63,7 @@ struct AppleSessionSecret: Codable, Secrets {
 }
 
 // the methods that must be implemented by the class encapsulating the SDK we are using
+@MainActor
 protocol SecretsStorageAWSSDKProtocol: Sendable {
     static func forRegion(_ region: String, log: Logger) throws -> SecretsStorageAWSSDKProtocol
     func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws
@@ -75,7 +76,6 @@ protocol SecretsStorageAWSSDKProtocol: Sendable {
 // secretsmanager:GetSecretValue
 // secretsmanager:PutSecretValue
 
-@MainActor
 class SecretsStorageAWS: SecretsHandlerProtocol {
     let log: Logger
     let awsSDK: SecretsStorageAWSSDKProtocol
