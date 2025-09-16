@@ -16,7 +16,7 @@ jobs:
     # disabled because libunxip doesn't compile on Linux
     if: false 
     runs-on: ubuntu-latest
-    container: swift:6.1-noble
+    container: swift:6.2-noble
 
     steps:
     - name: Checkout
@@ -29,7 +29,7 @@ jobs:
   test:
     if: false 
     runs-on: ubuntu-latest
-    container: swift:6.1-noble
+    container: swift:6.2-noble
 
     steps:
     - uses: actions/checkout@v5
