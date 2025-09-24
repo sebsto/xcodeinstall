@@ -14,7 +14,6 @@ import Testing
 import FoundationEssentials
 #endif
 
-@MainActor
 @Suite("DownloadListParser Tests")
 struct DownloadListParserTest {
 

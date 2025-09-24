@@ -19,7 +19,6 @@ import FoundationNetworking
 import FoundationEssentials
 #endif
 
-@MainActor
 extension CLITests {
 
     func testSignout() async throws {

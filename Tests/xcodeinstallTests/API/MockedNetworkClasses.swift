@@ -11,8 +11,6 @@ import Logging
 
 @testable import xcodeinstall
 
-// import Synchronization
-
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
@@ -78,7 +76,7 @@ final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
 }
 
 @MainActor
-struct MockedAppleDownloader: AppleDownloaderProtocol {
+final class MockedAppleDownloader: AppleDownloaderProtocol {
     var environment: Environment?
 
     func list(force: Bool) async throws -> DownloadList {

@@ -5,24 +5,16 @@
 //  Created by Stormacq, Sebastien on 15/09/2022.
 //
 
-import XCTest
+import Testing
 
 @testable import xcodeinstall
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
-@MainActor
-final class AppleSessionSecretTest: XCTestCase {
+struct AppleSessionSecretTest {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
+    @Test("Test From String")
     func testFromString() {
 
         // given and when
@@ -44,15 +36,16 @@ final class AppleSessionSecretTest: XCTestCase {
         )
 
         // then
-        XCTAssertNotNil(ass)
+        #expect(ass != nil)
 
         let c = ass?.cookies()
-        XCTAssertEqual(c?.count, 2)
+        #expect(c?.count == 2)
 
         let s = ass?.session
-        XCTAssertNotNil(s)
+        #expect(s != nil)
     }
 
+    @Test("Test From Object")
     func testFromObject() {
 
         // given
@@ -69,15 +62,15 @@ final class AppleSessionSecretTest: XCTestCase {
 
         // then
         let c = ass.cookies()
-        XCTAssertNotNil(c)
-        XCTAssertEqual(c.count, 2)
+        #expect(c.count == 2)
 
-        XCTAssertNoThrow(try ass.string())
+        let _ = #expect(throws: Never.self) {
+            try ass.string()
+        }
         if let a = try? ass.string() {
-            XCTAssertNotNil(a)
-            XCTAssertTrue(a.contains("scnt12345"))
+            #expect(a.contains("scnt12345"))
         } else {
-            XCTAssert(false)
+            Issue.record("Failed to get string representation")
         }
     }
 

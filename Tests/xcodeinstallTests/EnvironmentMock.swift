@@ -17,7 +17,6 @@ import System
 import SystemPackage
 #endif
 
-@MainActor
 final class MockedEnvironment: xcodeinstall.Environment {
 
     init(
@@ -46,7 +45,7 @@ final class MockedEnvironment: xcodeinstall.Environment {
 
     var authenticator: AppleAuthenticatorProtocol = MockedAppleAuthentication()
     var downloader: AppleDownloaderProtocol {
-        var mockedDownloader = MockedAppleDownloader()
+        let mockedDownloader = MockedAppleDownloader()
         mockedDownloader.environment = self
         return mockedDownloader
     }
@@ -58,8 +57,7 @@ final class MockedEnvironment: xcodeinstall.Environment {
     }
 }
 
-@MainActor
-final class MockedRunRecorder: InputProtocol, OutputProtocol {
+struct MockedRunRecorder: InputProtocol, OutputProtocol {
     func write(with writer: Subprocess.StandardInputWriter) async throws {
 
     }

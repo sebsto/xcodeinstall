@@ -13,7 +13,6 @@ import Testing
 @testable import xcodeinstall
 
 @Suite("SRPKeysTestCase")
-@MainActor
 struct SRPKeysTestCase {
     @Test func base64() async throws {
         // given
@@ -128,8 +127,7 @@ struct SRPKeysTestCase {
         #expect(hexString.uppercased() == "000102030405060708090A0B0C0D0E0F")
     }
 }
-
-class DateFormatterMock: DateFormatter, @unchecked Sendable {
+nonisolated final class DateFormatterMock: DateFormatter, @unchecked Sendable {
     override func string(from: Date) -> String {
         "20230223170600"
     }

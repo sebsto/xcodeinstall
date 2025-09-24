@@ -8,7 +8,8 @@ import Testing
 
 // MARK: - CLI Tests Base
 @MainActor
-struct CLITests {
+@Suite("CLI Tests")
+final class CLITests {
 
     // MARK: - Test Environment
     // some tests might override the environment with more specialized mocks.
@@ -46,7 +47,6 @@ struct CLITests {
 }
 
 // MARK: - Basic CLI Tests
-@MainActor
 extension CLITests {
 
     @Test("Test CLI Display Assertion")

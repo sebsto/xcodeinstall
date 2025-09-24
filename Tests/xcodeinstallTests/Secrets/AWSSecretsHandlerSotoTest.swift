@@ -9,18 +9,18 @@ import Foundation
 import Logging
 import SotoCore
 import SotoSecretsManager
-import XCTest
+import Testing
 
 @testable import xcodeinstall
-@MainActor
-final class SecretsStorageAWSSotoTest: XCTestCase {
+@Suite("Secrets Storage AWS Soto")
+struct SecretsStorageAWSSotoTest {
 
     var secretHandler: SecretsStorageAWSSoto?
     let log = Logger(label: "SecretsStorageAWSSotoTest")
 
-    override func setUpWithError() throws {
+    init() throws {
         // given
-        let region = "us-east-1"
+        let region = "eu-central-1"
 
         // when
         do {
@@ -33,16 +33,10 @@ final class SecretsStorageAWSSotoTest: XCTestCase {
                 endpoint: TestEnvironment.getEndPoint()
             )
             
-//            try  MainActor.run {
-//                self.secretHandler =
-//                    try SecretsStorageAWSSoto.forRegion(region, awsClient: awsClient, smClient: smClient, log: self.log)
-//                    as? SecretsStorageAWSSoto
-//                XCTAssertNotNil(self.secretHandler)
-//            }
             secretHandler =
                 try SecretsStorageAWSSoto.forRegion(region, awsClient: awsClient, smClient: smClient, log: log)
                 as? SecretsStorageAWSSoto
-            XCTAssertNotNil(secretHandler)
+            #expect(secretHandler != nil)
 
             if TestEnvironment.isUsingLocalstack {
                 print("Connecting to Localstack")
@@ -54,58 +48,49 @@ final class SecretsStorageAWSSotoTest: XCTestCase {
             // no error
 
         } catch SecretsStorageAWSError.invalidRegion(let error) {
-            XCTAssertEqual(region, error)
+            #expect(region == error)
         } catch {
-            XCTAssert(false, "unexpected error : \(error)")
+            Issue.record("unexpected error : \(error)")
         }
 
     }
 
+    @Test("Test Init With Correct Region")
     func testInitWithCorrectRegion() {
 
         // given
-        let region = "us-east-1"
+        let region = "eu-central-1"
 
         // when
-        do {
+        let _ = #expect(throws: Never.self) {
             let _ = try SecretsStorageAWSSoto.forRegion(region, log: log)
-
-            // then
-            // no error
-
-        } catch SecretsStorageAWSError.invalidRegion(let error) {
-            XCTAssert(false, "region rejected : \(error)")
-        } catch {
-            XCTAssert(false, "unexpected error : \(error)")
         }
     }
 
+    @Test("Test Init With Incorrect Region")
     func testInitWithIncorrectRegion() {
 
         // given
         let region = "invalid"
 
         // when
-        do {
+        let error = #expect(throws: SecretsStorageAWSError.self) {
             let _ = try SecretsStorageAWSSoto.forRegion(region, log: log)
-
-            // then
-            // error
-            XCTAssert(false, "an error must be thrown")
-
-        } catch SecretsStorageAWSError.invalidRegion(let error) {
-            XCTAssertEqual(region, error)
-        } catch {
-            XCTAssert(false, "unexpected error : \(error)")
+        }
+        if case let .invalidRegion(errorRegion) = error {
+            #expect(region == errorRegion)
+        } else {
+            Issue.record("Expected invalidRegion error")
         }
     }
 
     #if os(macOS)
     // [CI] on Linux fails because there is no AWS credentials provider configured
+    @Test("Test Create Secret")
     func testCreateSecret() async {
 
         // given
-        XCTAssertNotNil(secretHandler)
+        #expect(secretHandler != nil)
         let credentials = AppleCredentialsSecret(username: "username", password: "password")
 
         // when
@@ -115,7 +100,7 @@ final class SecretsStorageAWSSotoTest: XCTestCase {
             // ignore
             // it allows to run the test on machines not configured for AWS
         } catch {
-            XCTFail("unexpected exception : \(error)")
+            Issue.record("unexpected exception : \(error)")
         }
 
     }

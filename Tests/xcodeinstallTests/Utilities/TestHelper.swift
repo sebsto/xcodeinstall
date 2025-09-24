@@ -31,7 +31,6 @@ func loadTestData(file: TestData) throws -> Data {
     try Data(contentsOf: urlForTestData(file: file))
 }
 
-@MainActor
 func createDownloadList() throws {
 
     let fm = FileManager.default
@@ -51,7 +50,6 @@ func createDownloadList() throws {
     XCTAssertNoThrow(try fm.copyItem(at: testFilePath, to: FileHandler(log: log).downloadListPath()))
 }
 
-@MainActor
 func deleteDownloadList() {
 
     let fm = FileManager.default

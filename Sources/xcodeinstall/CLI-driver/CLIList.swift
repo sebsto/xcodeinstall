@@ -35,7 +35,7 @@ extension MainCommand {
             name: [.customLong("xcode-version"), .short],
             help: "Filter on provided Xcode version number"
         )
-        var xCodeVersion: String = "16"
+        var xCodeVersion: String = "26"
 
         @Flag(name: .shortAndLong, help: "Sort by most recent releases first")
         var mostRecentFirst: Bool = false

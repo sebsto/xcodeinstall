@@ -19,7 +19,7 @@ struct SecretsStorageFileTest {
     init() async throws {
         secretHandlerTest = SecretsHandlerTestsBase()
 
-        secretHandlerTest!.secrets = await SecretsStorageFile(log: log)
+        secretHandlerTest!.secrets = SecretsStorageFile(log: log)
         try await secretHandlerTest!.secrets!.clearSecrets()
     }
 

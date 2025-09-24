@@ -9,7 +9,6 @@ import Logging
 import Testing
 
 @testable import xcodeinstall
-@MainActor
 struct SecretsStorageAWSTest {
 
     var secretHandlerTest: SecretsHandlerTestsBase<SecretsStorageAWS>? = nil

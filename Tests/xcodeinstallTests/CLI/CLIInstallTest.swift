@@ -9,7 +9,6 @@ import Testing
 
 @testable import xcodeinstall
 
-@MainActor
 extension CLITests {
 
     @Test("Test Install Command")

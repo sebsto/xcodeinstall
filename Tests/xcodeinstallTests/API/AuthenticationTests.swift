@@ -9,8 +9,7 @@ import FoundationNetworking
 #endif
 
 // MARK: - Authentication Tests
-@MainActor
-struct AuthenticationTests {
+final class AuthenticationTests {
 
     let log = Logger(label: "AuthenticationTests")
 
@@ -58,7 +57,6 @@ struct AuthenticationTests {
 }
 
 // MARK: - Test Cases
-@MainActor
 extension AuthenticationTests {
 
     @Test("Test Apple Service Key Retrieval")
@@ -143,7 +141,6 @@ extension AuthenticationTests {
 }
 
 // MARK: - Authentication Flow Tests
-@MainActor
 extension AuthenticationTests {
 
     @Test("Test Authentication with Invalid Credentials (401)")

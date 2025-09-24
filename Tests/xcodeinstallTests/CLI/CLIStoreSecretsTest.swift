@@ -11,7 +11,6 @@ import Testing
 
 @testable import xcodeinstall
 
-@MainActor
 extension CLITests {
 
     // on CI Linux, there is no AWS credentials configured
@@ -33,7 +32,7 @@ extension CLITests {
             MainCommand.StoreSecrets.self,
             [
                 "storesecrets",
-                "-s", "us-east-1",
+                "-s", "eu-central-1",
                 "--verbose",
             ]
         )

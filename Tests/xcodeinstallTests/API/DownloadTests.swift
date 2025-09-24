@@ -13,7 +13,6 @@ import FoundationEssentials
 #endif
 
 // MARK: - Download Tests
-@MainActor
 @Suite("DownloadTests")
 final class DownloadTests {
 
@@ -42,7 +41,6 @@ final class DownloadTests {
 }
 
 // MARK: - Test Cases
-@MainActor
 extension DownloadTests {
 
     @Test("Test Download Manager Creation")

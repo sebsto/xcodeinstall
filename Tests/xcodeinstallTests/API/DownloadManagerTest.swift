@@ -2,7 +2,6 @@ import Foundation
 import Testing
 
 @testable import xcodeinstall
-@MainActor
 struct MockDownloadManager: DownloadManagerProtocol {
     var mockProgress: [DownloadProgress] = []
     var shouldFail = false
@@ -24,7 +23,6 @@ struct MockDownloadManager: DownloadManagerProtocol {
 }
 
 @Suite("DownloadManager")
-@MainActor
 struct DownloadManagerTest {
     @Test("Test Download Manager progress")
     func testDownloadManager() async throws {

@@ -58,8 +58,7 @@ let package = Package(
                         .process("data/download-error.json"),
                         .process("data/download-unknown-error.json")
             ],
-            //TODO: to enable when all tests will be migrated to swift-testing
-            // swiftSettings: swiftSettings
+            swiftSettings: swiftSettings
         )
     ]
 )

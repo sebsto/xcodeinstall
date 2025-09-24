@@ -72,7 +72,6 @@ final class MockedFileHandler: FileHandlerProtocol, @unchecked Sendable {
     }
 }
 
-@MainActor
 class MockedProgressBar: CLIProgressBarProtocol {
 
     var isComplete = false

@@ -13,7 +13,6 @@ import FoundationEssentials
 #endif
 
 // MARK: - Test Suite Setup
-@MainActor
 struct HTTPClientTests {
 
     // MARK: - Test Environment
@@ -47,7 +46,6 @@ struct HTTPClientTests {
 }
 
 // MARK: - Test Cases
-@MainActor
 extension HTTPClientTests {
 
     @Test("Test HTTP Request Creation")

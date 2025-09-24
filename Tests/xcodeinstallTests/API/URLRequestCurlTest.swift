@@ -15,7 +15,6 @@ import Testing
 import FoundationNetworking
 #endif
 
-@MainActor
 struct URLRequestCurlTest {
 
     let log = Logger(label: "URLRequestCurlTest")
