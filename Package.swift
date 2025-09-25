@@ -8,7 +8,7 @@ let swiftSettings: [SwiftSetting] = [.defaultIsolation(MainActor.self)]
 let package = Package(
     name: "xcodeinstall",
     platforms: [
-        .macOS(.v26)
+        .macOS(.v15)
     ],
     products: [
         .executable(name: "xcodeinstall", targets: ["xcodeinstall"])

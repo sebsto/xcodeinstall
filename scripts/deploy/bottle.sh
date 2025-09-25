@@ -41,13 +41,7 @@ CURRENT_OS_VERSION_MINOR=${CURRENT_OS_VERSION[1]}
 echo "CURRENT_OS_VERSION_MAJOR: $CURRENT_OS_VERSION_MAJOR"
 echo "CURRENT_OS_VERSION_MINOR: $CURRENT_OS_VERSION_MINOR"
 
-if [[ ${CURRENT_OS_VERSION_MAJOR} == "12" ]]; then
-  if [[ "x86_64" == "$(uname -m)" ]]; then
-    CURRENT_PLATFORM=monterey
-  else
-    CURRENT_PLATFORM=arm64_monterey
-  fi
-elif [[ ${CURRENT_OS_VERSION_MAJOR} == "13" ]]; then
+if [[ ${CURRENT_OS_VERSION_MAJOR} == "13" ]]; then
   if [[ "x86_64" == "$(uname -m)" ]]; then
     CURRENT_PLATFORM=ventura
   else
@@ -64,6 +58,12 @@ elif [[ ${CURRENT_OS_VERSION_MAJOR} == "15" ]]; then
     CURRENT_PLATFORM=sequoia
   else
     CURRENT_PLATFORM=arm64_sequoia
+  fi
+elif [[ ${CURRENT_OS_VERSION_MAJOR} == "26" ]]; then
+  if [[ "x86_64" == "$(uname -m)" ]]; then
+    CURRENT_PLATFORM=tahoe
+  else
+    CURRENT_PLATFORM=arm64_tahoe
   fi
 else
   echo "Unsupported macOS version. This script requires Monterey or better."
