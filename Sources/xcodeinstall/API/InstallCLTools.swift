@@ -6,8 +6,13 @@
 //
 
 import CLIlib
-import Foundation
 import Subprocess
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif 
 
 // MARK: Command Line Tools
 // Command Line Tools installation functions

@@ -6,8 +6,13 @@
 //
 
 import CLIlib
-import Foundation
 import Logging
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif 
 
 // the methods I want to mock for unit testing
 protocol FileHandlerProtocol: Sendable {

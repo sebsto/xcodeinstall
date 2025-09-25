@@ -15,7 +15,11 @@ under MIT License
 // - Generates an SVG of a coverage badge that can be used in the README
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 let inputPath = CommandLine.arguments[1]
 let outputPath = CommandLine.arguments[2]

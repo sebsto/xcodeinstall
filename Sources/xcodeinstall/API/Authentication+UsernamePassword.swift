@@ -5,7 +5,11 @@
 //  Created by Stormacq, Sebastien on 30/10/2024.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 extension AppleAuthenticator {
     func startUserPasswordAuthentication(username: String, password: String) async throws {

@@ -5,7 +5,11 @@
 //  Created by Stormacq, Sebastien on 17/05/2025.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 extension Collection where Element: Sendable {
     func asyncMap<T: Sendable>(

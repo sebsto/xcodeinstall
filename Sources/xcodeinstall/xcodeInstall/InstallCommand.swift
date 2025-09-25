@@ -6,7 +6,11 @@
 //
 
 import CLIlib
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 extension XCodeInstall {
 

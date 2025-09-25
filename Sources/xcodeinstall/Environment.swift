@@ -6,7 +6,6 @@
 //
 
 import CLIlib
-import Foundation
 import Logging
 import Subprocess
 
@@ -18,6 +17,12 @@ import SystemPackage
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
+#endif
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else 
+import Foundation
 #endif
 
 /**

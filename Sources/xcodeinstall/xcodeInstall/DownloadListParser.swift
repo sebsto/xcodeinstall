@@ -5,7 +5,11 @@
 //  Created by Stormacq, Sebastien on 24/07/2022.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 struct DownloadListParser {
 

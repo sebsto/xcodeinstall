@@ -14,7 +14,12 @@
 // https://github.com/jkandzi/Progress.swift/blob/master/Sources/Progress.swift
 
 import CLIlib
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 protocol CLIProgressBarProtocol: ProgressUpdateProtocol {
     func define(animationType: ProgressBarType, message: String)

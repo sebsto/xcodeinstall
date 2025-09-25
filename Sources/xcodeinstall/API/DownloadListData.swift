@@ -5,7 +5,11 @@
 //  Created by Stormacq, Sebastien on 21/08/2022.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 enum DownloadError: Error, Equatable {
     case authenticationRequired

@@ -6,9 +6,14 @@
 //
 
 import CLIlib
-import Foundation
 import Logging
 import SotoSecretsManager
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif 
 
 // use a class to have a chance to call client.shutdown() at deinit
 final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {

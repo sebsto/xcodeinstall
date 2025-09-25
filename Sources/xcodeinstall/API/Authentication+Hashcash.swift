@@ -7,7 +7,12 @@
 
 import CLIlib
 import Crypto
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 extension AppleAuthenticator {
     func checkHashcash() async throws -> String {

@@ -6,8 +6,13 @@
 //
 
 import CLIlib
-import Foundation
 import Subprocess
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif 
 
 // MARK: PKG
 // generic PKG installation function

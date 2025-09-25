@@ -5,7 +5,11 @@
 //  Created by Stormacq, Sebastien on 28/08/2022.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 enum SupportedInstallation {
     case xCode

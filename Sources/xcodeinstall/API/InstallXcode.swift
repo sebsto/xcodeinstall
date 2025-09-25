@@ -6,9 +6,14 @@
 //
 
 import CLIlib
-import Foundation
 import Subprocess
 import libunxip
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif 
 
 // MARK: XCODE
 // XCode installation functions

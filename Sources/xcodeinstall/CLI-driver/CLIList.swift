@@ -7,8 +7,13 @@
 
 import ArgumentParser
 import CLIlib
-import Foundation
 import Logging
+
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif 
 
 // list implementation
 extension MainCommand {

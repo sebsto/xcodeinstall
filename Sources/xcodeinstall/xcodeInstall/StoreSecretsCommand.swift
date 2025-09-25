@@ -5,7 +5,11 @@
 //  Created by Stormacq, Sebastien on 05/09/2022.
 //
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 extension XCodeInstall {
 

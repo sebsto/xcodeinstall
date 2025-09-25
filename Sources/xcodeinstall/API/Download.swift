@@ -6,7 +6,11 @@
 //
 
 import CLIlib
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif 
 
 protocol AppleDownloaderProtocol: Sendable {
     func list(force: Bool) async throws -> DownloadList
