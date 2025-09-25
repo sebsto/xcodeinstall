@@ -102,21 +102,31 @@ struct DownloadListParser {
         // map returns a [String] each containing a line to display
         let result: String = list.enumerated().map { (index, download) in
             var line: String = ""
-            let file = download.files[0]
 
-            // swiftlint:disable line_length
-            line +=
-                "[\(String(format: "%02d", index))] \(download.name) (\(file.fileSize/1024/1024) Mb) \(file.existInCache ? "(*)" : "")"
+            if download.files.count == 1 {
+                let file = download.files[0]
+                // swiftlint:disable line_length
+                line +=
+                "[\(String(format: "%02d", index))] \(download.name) [\"\(file.filename)\" (\(file.fileSize/1024/1024) Mb)] \(file.existInCache ? "(*)" : "")"
 
-            if withDate {
-                if let date = download.datePublished {
-                    let das = date.toDate()
-                    line += " (published on \(das?.formatted(date: .numeric, time: .omitted) ?? ""))"
-                } else {
-                    let das = download.dateCreated.toDate()
-                    line += " (created on \(das?.formatted(date: .numeric, time: .omitted) ?? ""))"
+                if withDate {
+                    if let date = download.datePublished {
+                        let das = date.toDate()
+                        line += " (published on \(das?.formatted(date: .numeric, time: .omitted) ?? ""))"
+                    } else {
+                        let das = download.dateCreated.toDate()
+                        line += " (created on \(das?.formatted(date: .numeric, time: .omitted) ?? ""))"
+                    }
                 }
+            } else {
+                line += "[\(String(format: "%02d", index))] \(download.name)"
+                
+                download.files.forEach { file in
+                    line += "\n     |__ \(file.filename) (\(file.fileSize/1024/1024) Mb) \(file.existInCache ? "(*)" : "")"
+                }
+
             }
+            
             return line
         }
         // join all strings in [] with a \n

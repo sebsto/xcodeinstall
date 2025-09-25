@@ -10,12 +10,12 @@ import Foundation
 
 protocol AppleDownloaderProtocol: Sendable {
     func list(force: Bool) async throws -> DownloadList
-    func download(file: DownloadList.File) async throws -> AsyncStream<DownloadProgress>
+    func download(file: DownloadList.File) async throws -> AsyncThrowingStream<DownloadProgress, Error>
 }
 
 class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
 
-    func download(file: DownloadList.File) async throws -> AsyncStream<DownloadProgress> {
+    func download(file: DownloadList.File) async throws -> AsyncThrowingStream<DownloadProgress, Error> {
 
         guard !file.remotePath.isEmpty,
             !file.filename.isEmpty,

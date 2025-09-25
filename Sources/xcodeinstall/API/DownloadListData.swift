@@ -14,7 +14,6 @@ enum DownloadError: Error, Equatable {
     case noDownloadsInDownloadList
     case invalidFileSpec
     case invalidResponse
-    case zeroOrMoreThanOneFileToDownload(count: Int)
     case unknownFile(file: String)
     case needToAcceptTermsAndCondition
     case accountneedUpgrade(errorCode: Int, errorMessage: String)
@@ -38,8 +37,6 @@ enum DownloadError: Error, Equatable {
             return true
         case (.invalidResponse, .invalidResponse):
             return true
-        case let (.zeroOrMoreThanOneFileToDownload(count1), .zeroOrMoreThanOneFileToDownload(count2)):
-            return count1 == count2
         case let (.unknownFile(file1), .unknownFile(file2)):
             return file1 == file2
         case (.needToAcceptTermsAndCondition, .needToAcceptTermsAndCondition):

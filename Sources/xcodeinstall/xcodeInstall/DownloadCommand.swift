@@ -53,7 +53,7 @@ extension XCodeInstall {
                 message: "Downloading \(fileToDownload.displayName ?? fileToDownload.filename)"
             )
 
-            for await progress in try await download.download(file: fileToDownload) {
+            for try await progress in try await download.download(file: fileToDownload) {
                 var text = "\(progress.bytesWritten/1024/1024) MB"
                 text += String(format: " / %.2f MBs", progress.bandwidth)
                 progressBar.update(
@@ -76,8 +76,6 @@ extension XCodeInstall {
             } else {
                 display("✅ \(fileName ?? "file") downloaded")
             }
-        } catch DownloadError.zeroOrMoreThanOneFileToDownload(let count) {
-            display("🛑 There are \(count) files to download " + "for this component. Not implemented.")
         } catch DownloadError.authenticationRequired {
             display("🛑 Session expired, you neeed to re-authenticate.")
             display("You can authenticate with the command: xcodeinstall authenticate")
@@ -106,8 +104,30 @@ extension XCodeInstall {
             datePublished: datePublished
         )
 
+        // this is used when debugging
+//        return parsedList[31].files[1]
+        
+        let num = try askUser(prompt: "⌨️  Which one do you want to download? ")
+        
+        if parsedList[num].files.count == 1 {
+            return parsedList[num].files[0]
+        } else {
+            // there is more than one file for this download, ask the user which one to download
+            var line = "\nThere is more than one file for this download:\n"
+                        
+            parsedList[num].files.enumerated().forEach { index, file in
+                line += "   |__ [\(String(format: "%02d", index))] \(file.filename) (\(file.fileSize/1024/1024) Mb)\n"
+            }
+            line += "\n ⌨️  Which one do you want to download? "
+
+            let fileNum = try askUser(prompt: line)
+            return parsedList[num].files[fileNum]
+        }
+    }
+    
+    private func askUser(prompt: String) throws -> Int {
         let response: String? = self.env.readLine.readLine(
-            prompt: "⌨️  Which one do you want to download? ",
+            prompt: prompt,
             silent: false
         )
         guard let number = response,
@@ -119,11 +139,6 @@ extension XCodeInstall {
             }
             throw CLIError.invalidInput
         }
-
-        if parsedList[num].files.count == 1 {
-            return parsedList[num].files[0]
-        } else {
-            throw DownloadError.zeroOrMoreThanOneFileToDownload(count: parsedList[num].files.count)
-        }
+        return num
     }
 }

@@ -136,7 +136,7 @@ final class MockedAppleDownloader: AppleDownloaderProtocol {
         }
     }
 
-    func download(file: DownloadList.File) async throws -> AsyncStream<DownloadProgress> {
+    func download(file: DownloadList.File) async throws -> AsyncThrowingStream<DownloadProgress, Error> {
         let dm = MockDownloadManager()
         return dm.download(from: URL(string: file.filename)!)
 

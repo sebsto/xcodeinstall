@@ -3,7 +3,7 @@ import Logging
 
 @MainActor
 protocol DownloadManagerProtocol: Sendable {
-    func download(from url: URL) -> AsyncStream<DownloadProgress>
+    func download(from url: URL) -> AsyncThrowingStream<DownloadProgress, Error>
 }
 
 struct DownloadTarget: Sendable {
@@ -41,7 +41,7 @@ class DownloadManager {
         self.log = logger
     }
 
-    func download(from url: String) async throws -> AsyncStream<DownloadProgress> {
+    func download(from url: String) async throws -> AsyncThrowingStream<DownloadProgress, Error> {
 
         guard let downloadTarget = self.downloadTarget else {
             fatalError("Developer forgot to set the download target")
@@ -69,7 +69,7 @@ class DownloadManager {
         _log(request: request, to: log)
 
         // create the download task, start it , and start streaming its progress
-        return AsyncStream { continuation in
+        return AsyncThrowingStream { continuation in
             let delegate = DownloadDelegate(
                 target: downloadTarget,
                 continuation: continuation,
@@ -118,12 +118,12 @@ class DownloadManager {
 final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
 
     private let downloadTarget: DownloadTarget
-    private let continuation: AsyncStream<DownloadProgress>.Continuation
+    private let continuation: AsyncThrowingStream<DownloadProgress, Error>.Continuation
     private let log: Logger
     private let fileHandler: FileHandlerProtocol
     init(
         target: DownloadTarget,
-        continuation: AsyncStream<DownloadProgress>.Continuation,
+        continuation: AsyncThrowingStream<DownloadProgress, Error>.Continuation,
         fileHandler: FileHandlerProtocol,
         log: Logger
     ) {
@@ -156,15 +156,23 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         didFinishDownloadingTo location: URL
     ) {
         do {
+            // Check if the downloaded file contains an XML error
+            if let data = try? Data(contentsOf: location),
+               let content = String(data: data, encoding: .utf8),
+               (content.contains("<Error>") || content.contains("AccessDenied") || content.contains("Sign in to your Apple Account")) {
+                throw DownloadError.authenticationRequired
+            }
+            
             let dst = self.downloadTarget.dstFilePath
             log.debug("Finished downloading at \(location)\nMoving to \(dst)")
 
             try self.fileHandler.move(from: location, to: dst)
+            continuation.finish()
 
         } catch {
             log.error("🛑 Error moving downloaded file: \(error)")
+            continuation.finish(throwing: error)
         }
-        continuation.finish()
 
     }
 
@@ -174,12 +182,15 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         willPerformHTTPRedirection response: HTTPURLResponse,
         newRequest request: URLRequest
     ) async -> URLRequest? {
-        request
+        log.debug("Redirected")
+        return request
     }
 
-    func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
-        // how to report error to user ?
-        log.error("error \(String(describing: error))")
-        continuation.finish()
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
+        if let e = error {
+            log.error("Error when downloading : \(String(describing: error))")
+            continuation.finish(throwing: e)
+        }
     }
+
 }

@@ -6,10 +6,10 @@ struct MockDownloadManager: DownloadManagerProtocol {
     var mockProgress: [DownloadProgress] = []
     var shouldFail = false
 
-    func download(from url: URL) -> AsyncStream<DownloadProgress> {
-        AsyncStream { continuation in
+    func download(from url: URL) -> AsyncThrowingStream<DownloadProgress, Error> {
+        AsyncThrowingStream { continuation in
             if shouldFail {
-                continuation.finish()
+                continuation.finish() //FIXME: throw an error
                 return
             }
 
@@ -35,7 +35,7 @@ struct DownloadManagerTest {
         ]
 
         var receivedProgress: [DownloadProgress] = []
-        for await progress in mockManager.download(from: URL(string: "test")!) {
+        for try await progress in mockManager.download(from: URL(string: "test")!) {
             receivedProgress.append(progress)
         }
 
