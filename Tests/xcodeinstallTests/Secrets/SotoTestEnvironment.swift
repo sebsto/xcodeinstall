@@ -8,7 +8,6 @@
 import Dispatch
 import Foundation
 import SotoCore
-import XCTest
 
 /// Provide various test environment variables
 struct TestEnvironment {
