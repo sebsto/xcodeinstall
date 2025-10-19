@@ -74,9 +74,11 @@ class Xcodeinstall < Formula
     sha256 cellar: :any_skip_relocation, arm64_ventura: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, arm64_sequoia: "$BOTTLE_SHA"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, ventura: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, sonoma: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, sequoia: "$BOTTLE_SHA"
+    sha256 cellar: :any_skip_relocation, tahoe: "$BOTTLE_SHA"
   end
 
   def install
