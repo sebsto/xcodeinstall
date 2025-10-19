@@ -359,10 +359,10 @@ final class InstallTest {
     }
 
     @Test("Test File Match Download List Does Not Exist And File Exists")
-    func testFileMatchDownloadListDoesNotExistAndFileExists() {
+    func testFileMatchDownloadListDoesNotExistAndFileExists() throws {
 
         //given
-        deleteDownloadList()
+        try deleteDownloadList()
         let file = URL(fileURLWithPath: "/test/Xcode 14 beta.xip")
 
         let mfh = env.fileHandler as! MockedFileHandler

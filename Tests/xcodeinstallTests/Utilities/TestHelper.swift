@@ -7,7 +7,6 @@
 
 import Foundation
 import Logging
-import XCTest
 
 @testable import xcodeinstall
 
@@ -32,32 +31,28 @@ func loadTestData(file: TestData) throws -> Data {
 }
 
 func createDownloadList() throws {
-
     let fm = FileManager.default
-
     let log = Logger(label: "TEST createDownloadList")
-    // copy test file at destination
-
+    
     // delete file at destination if it exists
-    if fm.fileExists(atPath: FileHandler(log: log).downloadListPath().path) {
-        XCTAssertNoThrow(try fm.removeItem(at: FileHandler(log: log).downloadListPath()))
+    let downloadListPath = FileHandler(log: log).downloadListPath()
+    if fm.fileExists(atPath: downloadListPath.path) {
+        try fm.removeItem(at: downloadListPath)
     }
-    // get the source URL
-    guard let testFilePath = try? urlForTestData(file: .downloadList) else {
-        fatalError("Can not retrieve url for \(TestData.downloadList.rawValue)")
-    }
-    // copy source to destination
-    XCTAssertNoThrow(try fm.copyItem(at: testFilePath, to: FileHandler(log: log).downloadListPath()))
+    
+    // get the source URL and copy to destination
+    let testFilePath = try urlForTestData(file: .downloadList)
+    try fm.copyItem(at: testFilePath, to: downloadListPath)
 }
 
-func deleteDownloadList() {
-
+func deleteDownloadList() throws {
     let fm = FileManager.default
-
     let log = Logger(label: "TEST deleteDownloadList")
+    
     // remove test file from destination
-    if fm.fileExists(atPath: FileHandler(log: log).downloadListPath().path) {
-        XCTAssertNoThrow(try fm.removeItem(at: FileHandler(log: log).downloadListPath()))
+    let downloadListPath = FileHandler(log: log).downloadListPath()
+    if fm.fileExists(atPath: downloadListPath.path) {
+        try fm.removeItem(at: downloadListPath)
     }
 }
 
