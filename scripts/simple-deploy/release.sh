@@ -32,7 +32,29 @@ git tag "$TAG"
 git push --no-verify origin main "$TAG"
 
 gh release create "$TAG" --generate-notes
-gh release upload "$TAG" .build/apple/Products/Release/xcodeinstall
+
+# Create bottle files
+echo "📦 Creating bottle files"
+mkdir -p bottles
+
+# Create bottles for each platform
+for platform in arm64_ventura arm64_sonoma arm64_sequoia ventura sonoma sequoia; do
+    bottle_name="xcodeinstall-$VERSION.$platform.bottle.tar.gz"
+    mkdir -p "xcodeinstall/$VERSION/bin"
+    mkdir -p "xcodeinstall/$VERSION/.brew"
+    cp .build/apple/Products/Release/xcodeinstall "xcodeinstall/$VERSION/bin/"
+    cp LICENSE "xcodeinstall/$VERSION/" 2>/dev/null || true
+    cp README.md "xcodeinstall/$VERSION/" 2>/dev/null || true
+    echo '{"homebrew_version":"4.0.0","used_options":[],"unused_options":[],"built_as_bottle":true,"poured_from_bottle":false,"loaded_from_api":true,"installed_as_dependency":false,"installed_on_request":true,"changed_files":[],"time":null,"source_modified_time":null,"compiler":"clang","aliases":[],"runtime_dependencies":[],"source":{"tap":"sebsto/macos","spec":"stable","versions":{"stable":"'$VERSION'","version_scheme":0}}}' > "xcodeinstall/$VERSION/INSTALL_RECEIPT.json"
+    tar -czf "bottles/$bottle_name" xcodeinstall
+    rm -rf xcodeinstall
+done
+
+# Get bottle SHA256
+BOTTLE_SHA=$(shasum -a 256 "bottles/xcodeinstall-$VERSION.arm64_ventura.bottle.tar.gz" | awk '{print $1}')
+
+# Upload bottles
+gh release upload "$TAG" bottles/*
 
 # 4. Generate Homebrew formula
 echo "🍺 Generating Homebrew formula"
@@ -49,17 +71,16 @@ class Xcodeinstall < Formula
 
   bottle do
     root_url "https://github.com/sebsto/xcodeinstall/releases/download/$TAG"
-    sha256 cellar: :any_skip_relocation, arm64_ventura: "$(shasum -a 256 .build/apple/Products/Release/xcodeinstall | awk '{print $1}')"
-    sha256 cellar: :any_skip_relocation, arm64_sonoma: "$(shasum -a 256 .build/apple/Products/Release/xcodeinstall | awk '{print $1}')"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "$(shasum -a 256 .build/apple/Products/Release/xcodeinstall | awk '{print $1}')"
-    sha256 cellar: :any_skip_relocation, ventura: "$(shasum -a 256 .build/apple/Products/Release/xcodeinstall | awk '{print $1}')"
-    sha256 cellar: :any_skip_relocation, sonoma: "$(shasum -a 256 .build/apple/Products/Release/xcodeinstall | awk '{print $1}')"
-    sha256 cellar: :any_skip_relocation, sequoia: "$(shasum -a 256 .build/apple/Products/Release/xcodeinstall | awk '{print $1}')"
+    sha256 cellar: :any_skip_relocation, arm64_ventura: "$BOTTLE_SHA"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma: "$BOTTLE_SHA"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "$BOTTLE_SHA"
+    sha256 cellar: :any_skip_relocation, ventura: "$BOTTLE_SHA"
+    sha256 cellar: :any_skip_relocation, sonoma: "$BOTTLE_SHA"
+    sha256 cellar: :any_skip_relocation, sequoia: "$BOTTLE_SHA"
   end
 
   def install
-    system "swift", "build", "--configuration", "release", "--arch", "arm64", "--arch", "x86_64", "--disable-sandbox"
-    bin.install ".build/apple/Products/Release/xcodeinstall"
+    bin.install "xcodeinstall"
   end
 
   test do
