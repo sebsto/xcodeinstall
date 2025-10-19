@@ -14,7 +14,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v5
     - name: Build
-      run: swift build -c release
+      run: xcodebuild -scheme xcodeinstall -destination "platform=macOS"
+      # disabled until the libswiftCompatibilitySpan.dylib issue is solved
+      # https://github.com/swiftlang/swift/issues/84379
+      # https://github.com/swiftlang/swift-package-manager/issues/9163
+      # run: swift build -c release
 
   test:
     runs-on: self-hosted
@@ -22,4 +26,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v5
     - name: Run tests
-      run: swift test
+      run: xcodebuild test -scheme xcodeinstall -destination 'platform=macOS'
+      # disabled until the libswiftCompatibilitySpan.dylib issue is solved
+      # https://github.com/swiftlang/swift/issues/84379
+      # https://github.com/swiftlang/swift-package-manager/issues/9163
+      # run: swift test
