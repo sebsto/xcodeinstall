@@ -37,21 +37,24 @@ gh release create "$TAG" --generate-notes
 echo "📦 Creating bottle files"
 mkdir -p bottles
 
-# Create bottles for each platform
-for platform in arm64_ventura arm64_sonoma arm64_sequoia arm64_tahoe ventura sonoma sequoia tahoe; do
-    bottle_name="xcodeinstall-$VERSION.$platform.bottle.tar.gz"
-    mkdir -p "xcodeinstall/$VERSION/bin"
-    mkdir -p "xcodeinstall/$VERSION/.brew"
-    cp .build/apple/Products/Release/xcodeinstall "xcodeinstall/$VERSION/bin/"
-    cp LICENSE "xcodeinstall/$VERSION/" 2>/dev/null || true
-    cp README.md "xcodeinstall/$VERSION/" 2>/dev/null || true
-    echo '{"homebrew_version":"4.0.0","used_options":[],"unused_options":[],"built_as_bottle":true,"poured_from_bottle":false,"loaded_from_api":true,"installed_as_dependency":false,"installed_on_request":true,"changed_files":[],"time":null,"source_modified_time":null,"compiler":"clang","aliases":[],"runtime_dependencies":[],"source":{"tap":"sebsto/macos","spec":"stable","versions":{"stable":"'$VERSION'","version_scheme":0}}}' > "xcodeinstall/$VERSION/INSTALL_RECEIPT.json"
-    tar -czf "bottles/$bottle_name" xcodeinstall
-    rm -rf xcodeinstall
-done
+# Create one bottle and reuse it for all platforms
+bottle_name="xcodeinstall-$VERSION.arm64_ventura.bottle.tar.gz"
+mkdir -p "xcodeinstall/$VERSION/bin"
+mkdir -p "xcodeinstall/$VERSION/.brew"
+cp .build/apple/Products/Release/xcodeinstall "xcodeinstall/$VERSION/bin/"
+cp LICENSE "xcodeinstall/$VERSION/" 2>/dev/null || true
+cp README.md "xcodeinstall/$VERSION/" 2>/dev/null || true
+echo '{"homebrew_version":"4.0.0","used_options":[],"unused_options":[],"built_as_bottle":true,"poured_from_bottle":false,"loaded_from_api":true,"installed_as_dependency":false,"installed_on_request":true,"changed_files":[],"time":null,"source_modified_time":null,"compiler":"clang","aliases":[],"runtime_dependencies":[],"source":{"tap":"sebsto/macos","spec":"stable","versions":{"stable":"'$VERSION'","version_scheme":0}}}' > "xcodeinstall/$VERSION/INSTALL_RECEIPT.json"
+tar -czf "bottles/$bottle_name" xcodeinstall
+rm -rf xcodeinstall
 
 # Get bottle SHA256
-BOTTLE_SHA=$(shasum -a 256 "bottles/xcodeinstall-$VERSION.arm64_ventura.bottle.tar.gz" | awk '{print $1}')
+BOTTLE_SHA=$(shasum -a 256 "bottles/$bottle_name" | awk '{print $1}')
+
+# Copy the same bottle for all platforms
+for platform in arm64_sonoma arm64_sequoia arm64_tahoe sonoma sequoia tahoe; do
+    cp "bottles/$bottle_name" "bottles/xcodeinstall-$VERSION.$platform.bottle.tar.gz"
+done
 
 # Upload bottles
 gh release upload "$TAG" bottles/*

@@ -1,7 +1,13 @@
 #!/bin/sh -e
 
-VERSION_TO_DELETE=$(cat VERSION)
-TAG=v$VERSION_TO_DELETE
+VERSION="$1"
+if [ -z "$VERSION" ]; then
+    echo "Usage: $0 <version>"
+    echo "Example: $0 0.15.0"
+    exit 1
+fi
+TAG="v$VERSION"
+echo "🚀 Deleting version $VERSION"
 
 gh release delete $TAG
 git tag -d $TAG
