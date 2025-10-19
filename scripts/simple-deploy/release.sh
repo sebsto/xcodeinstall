@@ -38,7 +38,7 @@ echo "📦 Creating bottle files"
 mkdir -p bottles
 
 # Create bottles for each platform
-for platform in arm64_ventura arm64_sonoma arm64_sequoia ventura sonoma sequoia; do
+for platform in arm64_ventura arm64_sonoma arm64_sequoia arm64_tahoe ventura sonoma sequoia tahoe; do
     bottle_name="xcodeinstall-$VERSION.$platform.bottle.tar.gz"
     mkdir -p "xcodeinstall/$VERSION/bin"
     mkdir -p "xcodeinstall/$VERSION/.brew"
@@ -101,5 +101,7 @@ if [ -d "../homebrew-macos" ]; then
 else
     echo "⚠️  ../homebrew-macos directory not found. Please copy xcodeinstall.rb manually."
 fi
+
+rm -rf bottles
 
 echo "✅ Release $VERSION completed!"
