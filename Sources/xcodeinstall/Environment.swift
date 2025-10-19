@@ -139,8 +139,8 @@ final class RuntimeEnvironment: Environment {
             workingDirectory: workingDirectory,
             platformOptions: PlatformOptions(),
             input: .none,
-            output: .string(limit: 1024, encoding: UTF8.self),
-            error: .string(limit: 1024, encoding: UTF8.self)
+            output: .string(limit: 2048, encoding: UTF8.self),
+            error: .string(limit: 2048, encoding: UTF8.self)
         )
     }
 }
