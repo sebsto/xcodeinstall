@@ -86,7 +86,8 @@ struct SecretsStorageAWSSotoTest {
 
     #if os(macOS)
     // [CI] on Linux fails because there is no AWS credentials provider configured
-    @Test("Test Create Secret")
+    // Use a Mock Soto provider instead
+    @Test("Test Create Secret", .disabled())
     func testCreateSecret() async {
 
         // given
