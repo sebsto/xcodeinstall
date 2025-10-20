@@ -27,7 +27,6 @@ struct SecretsStorageAWSSotoTest {
         do {
             let awsClient = AWSClient(
                 credentialProvider: TestEnvironment.credentialProvider,
-                httpClientProvider: .createNew
             )
             let smClient = SecretsManager(
                 client: awsClient,
