@@ -5,7 +5,7 @@
 Solution : install as a Launch Dameon
 
 ```sh
-RUNNER_NAME=actions.runner.sebsto-xcodeinstall
+RUNNER_NAME=actions.runner.xcodeinstall
 sudo cp .github/workflows/action-runner.plist /Library/LaunchDaemons/$RUNNER_NAME.plist
 sudo chown root:wheel /Library/LaunchDaemons/$RUNNER_NAME.plist 
 sudo /bin/launchctl load /Library/LaunchDaemons/$RUNNER_NAME.plist
