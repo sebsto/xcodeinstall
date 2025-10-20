@@ -12,7 +12,7 @@ import Subprocess
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 // MARK: PKG
 // generic PKG installation function

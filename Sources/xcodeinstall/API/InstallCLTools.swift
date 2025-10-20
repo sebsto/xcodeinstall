@@ -12,7 +12,7 @@ import Subprocess
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 // MARK: Command Line Tools
 // Command Line Tools installation functions

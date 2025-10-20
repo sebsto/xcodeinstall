@@ -12,6 +12,7 @@ import SotoSecretsManager
 import Testing
 
 @testable import xcodeinstall
+
 @Suite("Secrets Storage AWS Soto")
 struct SecretsStorageAWSSotoTest {
 
@@ -32,7 +33,7 @@ struct SecretsStorageAWSSotoTest {
                 client: awsClient,
                 endpoint: TestEnvironment.getEndPoint()
             )
-            
+
             secretHandler =
                 try SecretsStorageAWSSoto.forRegion(region, awsClient: awsClient, smClient: smClient, log: log)
                 as? SecretsStorageAWSSoto

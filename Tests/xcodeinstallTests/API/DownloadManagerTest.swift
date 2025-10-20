@@ -2,6 +2,7 @@ import Foundation
 import Testing
 
 @testable import xcodeinstall
+
 struct MockDownloadManager: DownloadManagerProtocol {
     var mockProgress: [DownloadProgress] = []
     var shouldFail = false
@@ -9,7 +10,7 @@ struct MockDownloadManager: DownloadManagerProtocol {
     func download(from url: URL) -> AsyncThrowingStream<DownloadProgress, Error> {
         AsyncThrowingStream { continuation in
             if shouldFail {
-                continuation.finish() //FIXME: throw an error
+                continuation.finish()  //FIXME: throw an error
                 return
             }
 

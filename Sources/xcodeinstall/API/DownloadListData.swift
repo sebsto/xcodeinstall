@@ -9,7 +9,7 @@
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 enum DownloadError: Error, Equatable {
     case authenticationRequired

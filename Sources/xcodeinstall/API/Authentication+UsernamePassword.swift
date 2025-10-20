@@ -9,7 +9,7 @@
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 extension AppleAuthenticator {
     func startUserPasswordAuthentication(username: String, password: String) async throws {

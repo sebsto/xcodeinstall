@@ -6,11 +6,12 @@
 //
 
 import CLIlib
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 extension XCodeInstall {
 
@@ -71,14 +72,14 @@ extension XCodeInstall {
 
         // list files ready to install
         let installableFiles = try self.env.fileHandler.downloadedFiles().filter({ fileName in
-            return fileName.hasSuffix(".xip") || fileName.hasSuffix(".dmg")
+            fileName.hasSuffix(".xip") || fileName.hasSuffix(".dmg")
         })
 
         display("")
         display("👉 Here is the list of available files to install:")
         display("")
         let printableList = installableFiles.enumerated().map({ (index, fileName) in
-            return "[\(String(format: "%02d", index))] \(fileName)"
+            "[\(String(format: "%02d", index))] \(fileName)"
         }).joined(separator: "\n")
         display(printableList)
         display("\(installableFiles.count) items")

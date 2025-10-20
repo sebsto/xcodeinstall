@@ -13,7 +13,7 @@ import SotoSecretsManager
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 // use a class to have a chance to call client.shutdown() at deinit
 final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {

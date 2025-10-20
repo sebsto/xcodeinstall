@@ -12,7 +12,7 @@ import Crypto
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 extension AppleAuthenticator {
     func checkHashcash() async throws -> String {

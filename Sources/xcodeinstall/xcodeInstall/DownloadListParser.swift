@@ -9,7 +9,7 @@
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 struct DownloadListParser {
 
@@ -111,7 +111,7 @@ struct DownloadListParser {
                 let file = download.files[0]
                 // swiftlint:disable line_length
                 line +=
-                "[\(String(format: "%02d", index))] \(download.name) [\"\(file.filename)\" (\(file.fileSize/1024/1024) Mb)] \(file.existInCache ? "(*)" : "")"
+                    "[\(String(format: "%02d", index))] \(download.name) [\"\(file.filename)\" (\(file.fileSize/1024/1024) Mb)] \(file.existInCache ? "(*)" : "")"
 
                 if withDate {
                     if let date = download.datePublished {
@@ -124,13 +124,14 @@ struct DownloadListParser {
                 }
             } else {
                 line += "[\(String(format: "%02d", index))] \(download.name)"
-                
+
                 download.files.forEach { file in
-                    line += "\n     |__ \(file.filename) (\(file.fileSize/1024/1024) Mb) \(file.existInCache ? "(*)" : "")"
+                    line +=
+                        "\n     |__ \(file.filename) (\(file.fileSize/1024/1024) Mb) \(file.existInCache ? "(*)" : "")"
                 }
 
             }
-            
+
             return line
         }
         // join all strings in [] with a \n

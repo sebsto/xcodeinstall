@@ -6,13 +6,14 @@
 //
 
 import Crypto
+import SRP
+import _CryptoExtras
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
-#endif 
-import SRP
-import _CryptoExtras
+#endif
 
 extension AppleAuthenticator {
     func startSRPAuthentication(username: String, password: String) async throws {

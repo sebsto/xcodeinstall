@@ -6,11 +6,12 @@
 //
 
 import CLIlib
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking

@@ -13,7 +13,7 @@ import Logging
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 // download implementation
 extension MainCommand {

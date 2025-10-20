@@ -13,7 +13,7 @@ import libunxip
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 // MARK: XCODE
 // XCode installation functions
@@ -54,7 +54,7 @@ extension ShellInstaller {
         )
         // find .app file
         let appFile = try env.fileHandler.downloadedFiles().filter({ fileName in
-            return fileName.hasSuffix(".app")
+            fileName.hasSuffix(".app")
         })
         if appFile.count != 1 {
             log.error(

@@ -12,7 +12,7 @@ import Logging
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 final class XCodeInstall {
 

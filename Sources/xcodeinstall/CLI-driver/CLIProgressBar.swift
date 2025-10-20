@@ -19,7 +19,7 @@ import CLIlib
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 protocol CLIProgressBarProtocol: ProgressUpdateProtocol {
     func define(animationType: ProgressBarType, message: String)

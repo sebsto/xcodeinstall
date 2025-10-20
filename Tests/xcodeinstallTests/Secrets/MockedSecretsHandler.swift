@@ -15,7 +15,7 @@ import Synchronization
 import FoundationNetworking
 #endif
 
-@MainActor 
+@MainActor
 final class MockedSecretsHandler: SecretsHandlerProtocol {
     var nextError: SecretsStorageAWSError?
     var env: Environment

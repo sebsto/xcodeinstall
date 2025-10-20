@@ -18,16 +18,16 @@ struct FileHandlerTests {
     }
 
     // MARK: - Helper Methods
-    
+
     /// Executes body with a URL to a temporary directory that will be deleted after
     /// the closure finishes executing.
     func withTemporaryDirectory<T>(_ body: (URL) throws -> T) throws -> T {
-      let tempDirURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-      try fileManager.createDirectory(at: tempDirURL, withIntermediateDirectories: true)
-      defer {
-        try? fileManager.removeItem(at: tempDirURL)
-      }
-      return try body(tempDirURL)
+        let tempDirURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try fileManager.createDirectory(at: tempDirURL, withIntermediateDirectories: true)
+        defer {
+            try? fileManager.removeItem(at: tempDirURL)
+        }
+        return try body(tempDirURL)
     }
 
     private func createSrcFile(inDirectory tempDirectory: URL) throws -> URL {
@@ -50,18 +50,18 @@ extension FileHandlerTests {
             let dstFile: URL = url.appendingPathComponent("temp2.txt")
             let fh = FileHandler(log: log)
             try fh.move(from: srcFile, to: dstFile)
-            
+
             // Then
             // srcFile does not exist
             #expect(!fileManager.fileExists(atPath: srcFile.path))
-            
+
             // dstFile exists
             #expect(fileManager.fileExists(atPath: dstFile.path))
-            
+
             // dstFile contains "test data"
             let data: String = try String(contentsOf: dstFile, encoding: .utf8)
             #expect(data == test_data)
-            
+
             // Cleanup
             try fileManager.removeItem(at: dstFile)
         }
@@ -77,22 +77,22 @@ extension FileHandlerTests {
             // dst exists and has a different content
             let dstFile: URL = url.appendingPathComponent("temp2.txt")
             let _ = fileManager.createFile(atPath: dstFile.path, contents: test_data2.data(using: .utf8))
-            
+
             // When
             let fh = FileHandler(log: log)
             try fh.move(from: srcFile, to: dstFile)
-            
+
             // Then
             // srcFile does not exist
             #expect(!fileManager.fileExists(atPath: srcFile.path))
-            
+
             // dstFile exists
             #expect(fileManager.fileExists(atPath: dstFile.path))
-            
+
             // dstFile contains "test data" (overwritten)
             let data: String = try String(contentsOf: dstFile, encoding: .utf8)
             #expect(data == test_data)
-            
+
             // Cleanup
             try fileManager.removeItem(at: dstFile)
         }
@@ -103,10 +103,10 @@ extension FileHandlerTests {
         try withTemporaryDirectory { url in
             // Given
             let srcFile = try createSrcFile(inDirectory: url)
-            
+
             // dst file does not exist in an invalid location
             let dstFile = URL(fileURLWithPath: "/does_not_exist/tmp.txt")
-            
+
             // When/Then
             let fh = FileHandler(log: log)
             do {
@@ -117,7 +117,7 @@ extension FileHandlerTests {
                 #expect(fileManager.fileExists(atPath: srcFile.path))
                 #expect(!fileManager.fileExists(atPath: dstFile.path))
             }
-            
+
             // Cleanup
             try? fileManager.removeItem(at: srcFile)
         }
@@ -129,18 +129,18 @@ extension FileHandlerTests {
         try withTemporaryDirectory { url in
             // Given
             let fileToCheck = try createSrcFile(inDirectory: url)
-            
+
             // When
             let fh = FileHandler(log: log)
             let expectedFileSize = test_data.data(using: .utf8)?.count
-            
+
             // Then
             #expect(expectedFileSize != nil)
             if let expectedFileSize = expectedFileSize {
                 let result = try fh.checkFileSize(file: fileToCheck, fileSize: expectedFileSize)
                 #expect(result)
             }
-            
+
             // Cleanup
             try fileManager.removeItem(at: fileToCheck)
         }
@@ -164,21 +164,21 @@ extension FileHandlerTests {
     @MainActor
     func testFileExistsYes() throws {
         try withTemporaryDirectory { url in
-            
+
             // Given
             let fileToCheck = try createSrcFile(inDirectory: url)
-            
+
             // When
             let fh = FileHandler(log: log)
             let expectedFileSize = test_data.data(using: .utf8)?.count
-            
+
             // Then
             #expect(expectedFileSize != nil)
             if let expectedFileSize = expectedFileSize {
                 let exists = fh.fileExists(file: fileToCheck, fileSize: expectedFileSize)
                 #expect(exists)
             }
-            
+
             // Cleanup
             try fileManager.removeItem(at: fileToCheck)
         }
