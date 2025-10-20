@@ -3,10 +3,10 @@
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>actions.runner.sebsto-xcodeinstall.xcodeinstall</string>
+    <string>actions.runner.xcodeinstall</string>
     <key>ProgramArguments</key>
     <array>
-      <string>/Users/ec2-user/actions-runner-xcodeinstall/runsvc.sh</string>
+      <string>/Users/ec2-user/actions-runner-xcodeinstall/run.sh</string>
     </array>
     <key>UserName</key>
     <string>ec2-user</string>
@@ -15,9 +15,9 @@
     <key>RunAtLoad</key>
     <true/>    
     <key>StandardOutPath</key>
-    <string>/Users/ec2-user/Library/Logs/actions.runner.sebsto-xcodeinstall.xcodeinstall/stdout.log</string>
+    <string>/Users/ec2-user/actions-runner-xcodeinstall/stdout.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/ec2-user/Library/Logs/actions.runner.sebsto-xcodeinstall.xcodeinstall/stderr.log</string>
+    <string>/Users/ec2-user/actions-runner-xcodeinstall/stderr.log</string>
     <key>EnvironmentVariables</key>
     <dict> 
       <key>ACTIONS_RUNNER_SVC</key>
