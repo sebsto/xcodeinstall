@@ -21,14 +21,12 @@ import FoundationNetworking
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
-#else 
+#else
 import Foundation
 #endif
 
-/**
-
- a global struct to give access to classes for which I wrote tests.
- this global object allows me to simplify dependency injection */
+// a global struct to give access to classes for which I wrote tests.
+// this global object allows me to simplify dependency injection
 protocol Environment: Sendable {
     var fileHandler: FileHandlerProtocol { get }
     var display: DisplayProtocol { get }
@@ -89,7 +87,7 @@ final class RuntimeEnvironment: Environment {
     func setSecretsHandler(_ newValue: SecretsHandlerProtocol) {
         self._secrets = newValue
     }
-    
+
     // Commands
     private var _authenticator: AppleAuthenticatorProtocol
     var authenticator: AppleAuthenticatorProtocol {
@@ -138,8 +136,8 @@ final class RuntimeEnvironment: Environment {
             workingDirectory: workingDirectory,
             platformOptions: PlatformOptions(),
             input: .none,
-            output: .string(limit: 1024, encoding: UTF8.self),
-            error: .string(limit: 1024, encoding: UTF8.self)
+            output: .string(limit: 2048, encoding: UTF8.self),
+            error: .string(limit: 2048, encoding: UTF8.self)
         )
     }
 }

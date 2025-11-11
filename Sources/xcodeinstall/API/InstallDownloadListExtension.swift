@@ -9,7 +9,7 @@
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 // MARK: Extensions - DownloadList
 // not fileprivate to allow testing
@@ -35,7 +35,7 @@ extension DownloadList {
         // or file otherwise.
         // for example : [nil, file, nil, nil]
         let result: [File?] = list.compactMap { element -> File? in
-            return comparison(element)
+            comparison(element)
         }
         // then remove all nil values
         //        .filter { file in

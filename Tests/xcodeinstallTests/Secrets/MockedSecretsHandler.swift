@@ -15,7 +15,7 @@ import Synchronization
 import FoundationNetworking
 #endif
 
-@MainActor 
+@MainActor
 final class MockedSecretsHandler: SecretsHandlerProtocol {
     var nextError: SecretsStorageAWSError?
     var env: Environment
@@ -61,6 +61,7 @@ final class MockedSecretsHandler: SecretsHandlerProtocol {
 
 }
 
+@available(macOS 15.0, *)
 final class MockedSecretsStorageAWSSDK: SecretsStorageAWSSDKProtocol {
 
     private let _regionSet: Mutex<Bool> = .init(false)

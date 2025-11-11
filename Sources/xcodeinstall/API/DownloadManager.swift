@@ -4,7 +4,7 @@ import Logging
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 #if canImport(FoundationNetworking)
 import FoundationNetworking
@@ -166,11 +166,13 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
         do {
             // Check if the downloaded file contains an XML error
             if let data = try? Data(contentsOf: location),
-               let content = String(data: data, encoding: .utf8),
-               (content.contains("<Error>") || content.contains("AccessDenied") || content.contains("Sign in to your Apple Account")) {
+                let content = String(data: data, encoding: .utf8),
+                content.contains("<Error>") || content.contains("AccessDenied")
+                    || content.contains("Sign in to your Apple Account")
+            {
                 throw DownloadError.authenticationRequired
             }
-            
+
             let dst = self.downloadTarget.dstFilePath
             log.debug("Finished downloading at \(location)\nMoving to \(dst)")
 

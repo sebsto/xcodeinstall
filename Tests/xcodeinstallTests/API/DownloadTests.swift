@@ -47,7 +47,7 @@ extension DownloadTests {
     func testDownloadManagerCreation() {
         // Given & When
         let dm = getDownloadManager()
-        
+
         // Then
         #expect(dm.env != nil)
     }
@@ -58,10 +58,10 @@ extension DownloadTests {
         let dm = getDownloadManager()
         let testURL = "https://example.com/test.xip"
         let headers = ["Authorization": "Bearer token"]
-        
+
         // When
         let request = dm.request(for: testURL, withHeaders: headers)
-        
+
         // Then
         #expect(request.url?.absoluteString == testURL)
         #expect(request.httpMethod == "GET")
@@ -74,10 +74,10 @@ extension DownloadTests {
         let dm = getDownloadManager()
         let dstPath = URL(fileURLWithPath: "/tmp/test.xip")
         let target = DownloadTarget(totalFileSize: 1000, dstFilePath: dstPath)
-        
+
         // When
         dm.downloadTarget = target
-        
+
         // Then
         #expect(dm.downloadTarget?.totalFileSize == 1000)
         #expect(dm.downloadTarget?.dstFilePath == dstPath)

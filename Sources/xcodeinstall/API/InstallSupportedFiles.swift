@@ -9,7 +9,7 @@
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 enum SupportedInstallation {
     case xCode
@@ -49,7 +49,7 @@ enum SupportedInstallation {
 
         // then remove all unsupported values
         let result: [SupportedInstallation] = tempResult.filter { installationType in
-            return installationType != .unsuported
+            installationType != .unsuported
         }
 
         // at this stage we should have 0 or 1 value left

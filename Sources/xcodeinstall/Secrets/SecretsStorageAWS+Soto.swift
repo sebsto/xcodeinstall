@@ -13,7 +13,7 @@ import SotoSecretsManager
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 // use a class to have a chance to call client.shutdown() at deinit
 final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
@@ -46,8 +46,7 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
         if awsClient == nil {
             newAwsClient = AWSClient(
                 credentialProvider: .selector(.environment, .ec2, .configFile()),
-                retryPolicy: .jitter(),
-                httpClientProvider: .createNew
+                retryPolicy: .jitter()
             )
         }
         var newSMClient: SecretsManager?

@@ -33,13 +33,13 @@ func loadTestData(file: TestData) throws -> Data {
 func createDownloadList() throws {
     let fm = FileManager.default
     let log = Logger(label: "TEST createDownloadList")
-    
+
     // delete file at destination if it exists
     let downloadListPath = FileHandler(log: log).downloadListPath()
     if fm.fileExists(atPath: downloadListPath.path) {
         try fm.removeItem(at: downloadListPath)
     }
-    
+
     // get the source URL and copy to destination
     let testFilePath = try urlForTestData(file: .downloadList)
     try fm.copyItem(at: testFilePath, to: downloadListPath)
@@ -48,7 +48,7 @@ func createDownloadList() throws {
 func deleteDownloadList() throws {
     let fm = FileManager.default
     let log = Logger(label: "TEST deleteDownloadList")
-    
+
     // remove test file from destination
     let downloadListPath = FileHandler(log: log).downloadListPath()
     if fm.fileExists(atPath: downloadListPath.path) {

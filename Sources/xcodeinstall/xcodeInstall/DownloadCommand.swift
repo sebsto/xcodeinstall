@@ -9,7 +9,7 @@
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 extension XCodeInstall {
 
@@ -109,16 +109,16 @@ extension XCodeInstall {
         )
 
         // this is used when debugging
-//        return parsedList[31].files[1]
-        
+        //        return parsedList[31].files[1]
+
         let num = try askUser(prompt: "⌨️  Which one do you want to download? ")
-        
+
         if parsedList[num].files.count == 1 {
             return parsedList[num].files[0]
         } else {
             // there is more than one file for this download, ask the user which one to download
             var line = "\nThere is more than one file for this download:\n"
-                        
+
             parsedList[num].files.enumerated().forEach { index, file in
                 line += "   |__ [\(String(format: "%02d", index))] \(file.filename) (\(file.fileSize/1024/1024) Mb)\n"
             }
@@ -128,7 +128,7 @@ extension XCodeInstall {
             return parsedList[num].files[fileNum]
         }
     }
-    
+
     private func askUser(prompt: String) throws -> Int {
         let response: String? = self.env.readLine.readLine(
             prompt: prompt,

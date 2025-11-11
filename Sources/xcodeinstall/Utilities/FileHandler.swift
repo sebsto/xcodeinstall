@@ -12,7 +12,7 @@ import Logging
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 // the methods I want to mock for unit testing
 protocol FileHandlerProtocol: Sendable {

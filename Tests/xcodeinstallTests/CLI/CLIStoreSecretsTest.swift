@@ -17,6 +17,7 @@ extension CLITests {
     // this test throws "No credential provider found" of type CredentialProviderError
     #if os(macOS)
     // fails on CI CD, disable temporarily
+    @available(macOS 15.0, *)
     @Test("Test Store Secrets", .enabled(if: ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == nil))
     func testStoreSecrets() async throws {
 

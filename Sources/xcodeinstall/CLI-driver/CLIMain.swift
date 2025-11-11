@@ -13,7 +13,7 @@ import Logging
 import FoundationEssentials
 #else
 import Foundation
-#endif 
+#endif
 
 enum CLIError: Error {
     case invalidInput
@@ -80,7 +80,7 @@ struct MainCommand: AsyncParsableCommand {
 
         let xci: XCodeInstall!
         let runtimeEnv: any Environment = (env == nil ? await RuntimeEnvironment(region: region, log: logger) : env!)
-        
+
         if let region {
             // overwrite the secret storage
             let secretStorage = try await SecretsStorageAWS(region: region, log: logger)

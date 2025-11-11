@@ -391,9 +391,14 @@ I listed a couple of ideas below.
 
 ## List of ideas 
 
+- improve UX: 
+   - manage multiple versions of xcode (rename xcode.app to xcode-version.app and use symlinks)
+   - use -f by default when no local cache is found, 
+   - download the latest xcode version by default 
+   - capture stderr and stdout of subprocess to emit on the logger 
 - add a CloudWatch Log backend to Logging framework 
 - add possibility to emit SNS notifications on error, such as Session Expired
-- clean room implementation of progres sbar to remove dependency on Swift Tools Core library 
+[x] clean room implementation of progres sbar to remove dependency on Swift Tools Core library 
 
 ## Credits 
 
