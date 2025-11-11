@@ -10,7 +10,6 @@ import Foundation
 import FoundationNetworking
 #endif
 
-@MainActor
 protocol DownloadManagerProtocol: Sendable {
     func download(from url: URL) -> AsyncThrowingStream<DownloadProgress, Error>
 }

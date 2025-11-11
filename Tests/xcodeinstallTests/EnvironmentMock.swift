@@ -17,6 +17,7 @@ import System
 import SystemPackage
 #endif
 
+@MainActor
 final class MockedEnvironment: xcodeinstall.Environment {
 
     init(

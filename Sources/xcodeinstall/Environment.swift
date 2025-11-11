@@ -29,7 +29,6 @@ import Foundation
 
  a global struct to give access to classes for which I wrote tests.
  this global object allows me to simplify dependency injection */
-@MainActor
 protocol Environment: Sendable {
     var fileHandler: FileHandlerProtocol { get }
     var display: DisplayProtocol { get }

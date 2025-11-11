@@ -3,7 +3,11 @@
 
 import PackageDescription
 
-let swiftSettings: [SwiftSetting] = [.defaultIsolation(MainActor.self)]
+let swiftSettings: [SwiftSetting] = [
+    .defaultIsolation(MainActor.self),
+    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+    .enableUpcomingFeature("InferIsolatedConformances")
+]
 
 let package = Package(
     name: "xcodeinstall",
