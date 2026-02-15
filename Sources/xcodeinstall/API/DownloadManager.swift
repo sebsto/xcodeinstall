@@ -45,6 +45,14 @@ struct DownloadManager {
         self.log = logger
     }
 
+    /// Downloads a file, returning a stream of progress updates.
+    ///
+    /// Uses URLSession's optimized download task (not byte-by-byte streaming)
+    /// for pure structured concurrency — no Task, no Task.detached.
+    /// Progress is observed via KVO on the task's Progress object.
+    /// The consumer's `for try await` drives the stream: each iteration
+    /// receives a progress update from the KVO observer. The main actor
+    /// suspends cooperatively at each await.
     func download(
         from url: String,
         target downloadTarget: DownloadTarget,
@@ -52,38 +60,57 @@ struct DownloadManager {
         fileHandler: FileHandlerProtocol
     ) async throws -> AsyncThrowingStream<DownloadProgress, Error> {
 
-        var request: URLRequest
         var headers: [String: String] = ["Accept": "*/*"]
 
-        // reload cookies if they exist
         let cookies = try? await secrets.loadCookies()
         if let cookies {
-            // cookies existed, let's add them to our HTTPHeaders
             headers.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
         } else {
             log.debug("⚠️ I could not load cookies")
             throw DownloadError.authenticationRequired
         }
 
-        // build the request
-        request = self.request(for: url, withHeaders: headers)
+        let request = self.request(for: url, withHeaders: headers)
         _log(request: request, to: log)
 
-        // create the download task, start it , and start streaming its progress
+        let totalBytes = Int64(downloadTarget.totalFileSize)
+        let dstPath = downloadTarget.dstFilePath
+        let startTime = downloadTarget.startTime
+        let capturedLog = self.log
+
+        // The continuation-based stream: KVO progress callbacks and delegate
+        // completion drive the stream. No Task needed — the URLSession download
+        // task runs on its own background queue and feeds progress into the
+        // continuation. The consumer pulls progress via `for try await`.
         return AsyncThrowingStream { continuation in
-            let delegate = DownloadDelegate(
-                target: downloadTarget,
+
+            let handler = DownloadDelegate(
                 continuation: continuation,
+                totalBytes: totalBytes,
+                startTime: startTime,
+                dstPath: dstPath,
                 fileHandler: fileHandler,
-                log: self.log
+                log: capturedLog
             )
-            let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
+
+            // Create a dedicated session with our delegate.
+            // The session retains the delegate for its lifetime.
+            let session = URLSession(
+                configuration: .default,
+                delegate: handler,
+                delegateQueue: nil  // URLSession creates its own serial queue
+            )
+
             let task = session.downloadTask(with: request)
             task.resume()
+
+            continuation.onTermination = { _ in
+                task.cancel()
+                session.invalidateAndCancel()
+            }
         }
     }
 
-    // prepare an URLRequest for a given url, method, body, and headers
     internal func request(
         for url: String,
         method: HTTPVerb = .GET,
@@ -91,19 +118,14 @@ struct DownloadManager {
         withHeaders headers: [String: String]? = nil
     ) -> URLRequest {
 
-        // create the request
         let url = URL(string: url)!
         var request = URLRequest(url: url)
-
-        // add HTTP verb
         request.httpMethod = method.rawValue
 
-        // add body
         if let body {
             request.httpBody = body
         }
 
-        // add headers
         if let headers {
             for (key, value) in headers {
                 request.addValue(value, forHTTPHeaderField: key)
@@ -114,86 +136,113 @@ struct DownloadManager {
     }
 }
 
-
-// MARK: Download Delegate functions
-final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
-
-    private let downloadTarget: DownloadTarget
+/// Handles URLSessionDownloadTask completion and progress observation.
+/// Bridges the delegate callbacks into an AsyncThrowingStream continuation.
+///
+/// The download is started via `downloadTask(with:)` which returns immediately.
+/// Progress is observed via KVO (synchronous, no isolation issues).
+/// Completion is handled via `urlSession(_:task:didCompleteWithError:)`.
+/// File move is handled via `urlSession(_:downloadTask:didFinishDownloadingTo:)`.
+///
+/// All delegate methods are `nonisolated` — they run on URLSession's background
+/// serial queue, not on MainActor. No async callbacks, no isolation conflicts.
+private final class DownloadDelegate: NSObject,
+    URLSessionDownloadDelegate 
+{
+    // Safety invariant: all properties are either:
+    // - set once in init and never mutated (continuation, totalBytes, startTime, dstPath, fileHandler, log)
+    // - only accessed from URLSession's serial delegate queue (progressObservation, tempFileURL)
     private let continuation: AsyncThrowingStream<DownloadProgress, Error>.Continuation
-    private let log: Logger
+    private let totalBytes: Int64
+    private let startTime: Date
+    private let dstPath: URL
     private let fileHandler: FileHandlerProtocol
+    private let log: Logger
+    // Only accessed from URLSession's serial delegate queue — no data race.
+    nonisolated(unsafe) private var progressObservation: NSKeyValueObservation?
+
     init(
-        target: DownloadTarget,
         continuation: AsyncThrowingStream<DownloadProgress, Error>.Continuation,
+        totalBytes: Int64,
+        startTime: Date,
+        dstPath: URL,
         fileHandler: FileHandlerProtocol,
         log: Logger
     ) {
-        self.downloadTarget = target
         self.continuation = continuation
-        self.log = log
+        self.totalBytes = totalBytes
+        self.startTime = startTime
+        self.dstPath = dstPath
         self.fileHandler = fileHandler
-    }
-    // URLSessionDownloadDelegate methods
-    func urlSession(
-        _ session: URLSession,
-        downloadTask: URLSessionDownloadTask,
-        didWriteData bytesWritten: Int64,
-        totalBytesWritten: Int64,
-        totalBytesExpectedToWrite: Int64
-    ) {
-        let total =
-            totalBytesExpectedToWrite <= 0 ? Int64(self.downloadTarget.totalFileSize) : totalBytesExpectedToWrite
-        let progress = DownloadProgress(
-            bytesWritten: totalBytesWritten,
-            totalBytes: total,
-            startTime: self.downloadTarget.startTime
-        )
-        continuation.yield(progress)
+        self.log = log
+        super.init()
     }
 
+    // Called synchronously when the task is created — sets up KVO progress observation.
+    func urlSession(_ session: URLSession, didCreateTask task: URLSessionTask) {
+        let cont = continuation
+        let total = totalBytes
+        let start = startTime
+        progressObservation = task.progress.observe(\.fractionCompleted, options: [.new]) { _, change in
+            if let fraction = change.newValue {
+                let written = Int64(fraction * Double(total))
+                cont.yield(
+                    DownloadProgress(bytesWritten: written, totalBytes: total, startTime: start)
+                )
+            }
+        }
+    }
+
+    // Called when the download file is ready — save the temp URL for moving.
     func urlSession(
         _ session: URLSession,
         downloadTask: URLSessionDownloadTask,
         didFinishDownloadingTo location: URL
     ) {
-        do {
-            // Check if the downloaded file contains an XML error
+        log.debug("HTTP response: \(downloadTask.response.map { ($0 as? HTTPURLResponse)?.statusCode ?? -1 } ?? -1)")
+
+        // Check for error pages in small downloads
+        let attrs = try? FileManager.default.attributesOfItem(atPath: location.path)
+        let fileSize = (attrs?[.size] as? Int64) ?? 0
+        if fileSize < 10_000 {
             if let data = try? Data(contentsOf: location),
                 let content = String(data: data, encoding: .utf8),
                 content.contains("<Error>") || content.contains("AccessDenied")
                     || content.contains("Sign in to your Apple Account")
             {
-                throw DownloadError.authenticationRequired
+                try? FileManager.default.removeItem(at: location)
+                continuation.finish(throwing: DownloadError.authenticationRequired)
+                return
             }
-
-            let dst = self.downloadTarget.dstFilePath
-            log.debug("Finished downloading at \(location)\nMoving to \(dst)")
-
-            try self.fileHandler.move(from: location, to: dst)
-            continuation.finish()
-
-        } catch {
-            log.error("🛑 Error moving downloaded file: \(error)")
-            continuation.finish(throwing: error)
         }
 
+        // Move the file to the destination
+        do {
+            try fileHandler.move(from: location, to: dstPath)
+        } catch {
+            log.error("🛑 Failed to move downloaded file: \(error)")
+            continuation.finish(throwing: error)
+            return
+        }
+
+        // No need to yield final progress here — KVO already emitted the 100% update.
+        // Yielding again would cause the progress bar to render the final line twice.
+        continuation.finish()
     }
 
+    // Called when the task completes (success or failure).
     func urlSession(
         _ session: URLSession,
         task: URLSessionTask,
-        willPerformHTTPRedirection response: HTTPURLResponse,
-        newRequest request: URLRequest
-    ) async -> URLRequest? {
-        log.debug("Redirected")
-        return request
-    }
+        didCompleteWithError error: (any Error)?
+    ) {
+        progressObservation?.invalidate()
+        progressObservation = nil
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
-        if let e = error {
-            log.error("Error when downloading : \(String(describing: error))")
-            continuation.finish(throwing: e)
+        if let error {
+            log.error("🛑 Download error: \(error)")
+            continuation.finish(throwing: error)
         }
+        // If no error, didFinishDownloadingTo already handled completion.
     }
-
 }
