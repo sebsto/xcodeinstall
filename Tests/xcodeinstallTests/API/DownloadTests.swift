@@ -29,7 +29,9 @@ final class DownloadTests {
 
     // MARK: - Helper Methods
     func getDownloadManager() -> DownloadManager {
-        let dm = DownloadManager(env: env, logger: log)
+        let dm = DownloadManager(logger: log)
+        dm.secrets = env.secrets
+        dm.fileHandler = env.fileHandler
         return dm
     }
 
@@ -49,7 +51,7 @@ extension DownloadTests {
         let dm = getDownloadManager()
 
         // Then
-        #expect(dm.env != nil)
+        #expect(dm.secrets != nil)
     }
 
     @Test("Test Request Building")
@@ -87,6 +89,6 @@ extension DownloadTests {
 // MARK: - Mock Extensions
 extension MockedEnvironment {
     var downloadManager: DownloadManager {
-        DownloadManager(env: self, logger: Logger(label: "MockedDownloadManager"))
+        DownloadManager(logger: Logger(label: "MockedDownloadManager"))
     }
 }

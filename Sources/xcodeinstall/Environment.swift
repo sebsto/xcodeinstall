@@ -58,13 +58,29 @@ final class RuntimeEnvironment: Environment {
         self.region = region
         self.log = log
 
-        self._authenticator = AppleAuthenticator(log: log)
-        self._downloader = AppleDownloader(log: log)
-        self._fileHandler = FileHandler(log: log)
-        self._secrets = SecretsStorageFile(log: log)
+        let fileHandler = FileHandler(log: log)
+        let secrets = SecretsStorageFile(log: log)
+        let urlSession = URLSession.shared
+        let downloadManager = DownloadManager(logger: log)
 
-        self.urlSessionData = URLSession.shared
-        self.downloadManager = DownloadManager(logger: self.log)
+        self._fileHandler = fileHandler
+        self._secrets = secrets
+        self.urlSessionData = urlSession
+        self.downloadManager = downloadManager
+
+        // construct authenticator and downloader with their actual dependencies
+        self._authenticator = AppleAuthenticator(
+            secrets: secrets,
+            urlSession: urlSession,
+            log: log
+        )
+        self._downloader = AppleDownloader(
+            secrets: secrets,
+            urlSession: urlSession,
+            fileHandler: fileHandler,
+            downloadManager: downloadManager,
+            log: log
+        )
     }
 
     // CLI related classes
@@ -83,31 +99,35 @@ final class RuntimeEnvironment: Environment {
     var secrets: SecretsHandlerProtocol? {
         get { _secrets }
     }
-    // provide an actor isolated setter
+    // provide a setter — also rebuilds authenticator/downloader with the new secrets
     func setSecretsHandler(_ newValue: SecretsHandlerProtocol) {
         self._secrets = newValue
+
+        // rebuild authenticator and downloader so they use the new secrets
+        self._authenticator = AppleAuthenticator(
+            secrets: newValue,
+            urlSession: urlSessionData,
+            log: log
+        )
+        self._downloader = AppleDownloader(
+            secrets: newValue,
+            urlSession: urlSessionData,
+            fileHandler: _fileHandler,
+            downloadManager: downloadManager,
+            log: log
+        )
     }
 
     // Commands
     private var _authenticator: AppleAuthenticatorProtocol
     var authenticator: AppleAuthenticatorProtocol {
-        get {
-            (self._authenticator as? AppleAuthenticator)?.environment = self
-            return self._authenticator
-        }
-        set {
-            self._authenticator = newValue
-        }
+        get { self._authenticator }
+        set { self._authenticator = newValue }
     }
     private var _downloader: AppleDownloaderProtocol
     var downloader: AppleDownloaderProtocol {
-        get {
-            (self._downloader as? AppleDownloader)?.environment = self
-            return self._downloader
-        }
-        set {
-            self._downloader = newValue
-        }
+        get { self._downloader }
+        set { self._downloader = newValue }
     }
 
     // Network

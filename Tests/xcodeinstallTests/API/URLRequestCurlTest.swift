@@ -21,8 +21,9 @@ struct URLRequestCurlTest {
     var agent: HTTPClient!
 
     init() throws {
-        self.agent = HTTPClient(log: log)
-        self.agent.environment = MockedEnvironment()
+        var env = MockedEnvironment()
+        env.secrets = MockedSecretsHandler(env: &env)
+        self.agent = HTTPClient(secrets: env.secrets!, urlSession: env.urlSessionData, log: log)
     }
 
     @Test("Test URLRequest to cURL")

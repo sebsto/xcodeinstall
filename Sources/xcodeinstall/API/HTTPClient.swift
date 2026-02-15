@@ -56,18 +56,14 @@ enum HTTPVerb: String {
 // provide common code for all network clients
 class HTTPClient {
 
-    var environment: Environment? = nil
+    let secrets: SecretsHandlerProtocol
+    let urlSession: URLSessionProtocol
     let log: Logger
 
-    public init(log: Logger) {
+    public init(secrets: SecretsHandlerProtocol, urlSession: URLSessionProtocol, log: Logger) {
+        self.secrets = secrets
+        self.urlSession = urlSession
         self.log = log
-    }
-
-    public func env() -> Environment {
-        guard let env = self.environment else {
-            fatalError("Environment not set")
-        }
-        return env
     }
 
     // some ID returned by Apple API to authenticate us
@@ -85,7 +81,7 @@ class HTTPClient {
         ]
 
         // reload previous session if it exists
-        let session = try? await self.env().secrets!.loadSession()
+        let session = try? await self.secrets.loadSession()
         if let session {
 
             // session is loaded
@@ -108,7 +104,7 @@ class HTTPClient {
         }
 
         // reload cookies if they exist
-        let cookies = try? await self.env().secrets!.loadCookies()
+        let cookies = try? await self.secrets.loadCookies()
         if let cookies {
             // cookies existed, let's add them to our HTTPHeaders
             requestHeaders.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current
@@ -150,7 +146,7 @@ class HTTPClient {
         _log(request: request, to: log)
 
         // send request with that session
-        let (data, response) = try await self.env().urlSessionData.data(for: request, delegate: nil)
+        let (data, response) = try await self.urlSession.data(for: request, delegate: nil)
         guard let httpResponse = response as? HTTPURLResponse,
             validResponse.isValid(response: httpResponse.statusCode)
         else {

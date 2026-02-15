@@ -174,7 +174,7 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             validResponse: .range(0..<500)
         )
 
-        try await self.env().secrets!.clearSecrets()
+        try await self.secrets.clearSecrets()
 
     }
 
@@ -243,11 +243,11 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
     func saveSession(response: HTTPURLResponse, session: AppleSession) async throws {
         guard let cookies = response.value(forHTTPHeaderField: "Set-Cookie") else {
             log.debug("No cookies set, just saving the session")
-            _ = try await self.env().secrets!.saveSession(session)
+            _ = try await self.secrets.saveSession(session)
             return
         }
 
         // save session data to reuse in future invocation
-        _ = try await self.env().secrets!.saveCookies(cookies)
+        _ = try await self.secrets.saveCookies(cookies)
     }
 }
