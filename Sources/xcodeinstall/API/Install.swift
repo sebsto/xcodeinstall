@@ -37,9 +37,13 @@ enum InstallerError: Error {
 class ShellInstaller: InstallerProtocol {
 
     let log: Logger
-    let env: Environment
-    public init(env: inout Environment, log: Logger) {
-        self.env = env
+    let fileHandler: FileHandlerProtocol
+    let progressBar: CLIProgressBarProtocol
+    let shellExecutor: any ShellExecuting
+    public init(fileHandler: FileHandlerProtocol, progressBar: CLIProgressBarProtocol, shellExecutor: any ShellExecuting, log: Logger) {
+        self.fileHandler = fileHandler
+        self.progressBar = progressBar
+        self.shellExecutor = shellExecutor
         self.log = log
     }
 
@@ -117,17 +121,17 @@ class ShellInstaller: InstallerProtocol {
         //    if there is a download list cache AND file is present in list AND size DOES NOT match => False
         // all other cases return true (we can try to install even if their is no cached download list)
 
-        var match = self.env.fileHandler.fileExists(file: file, fileSize: 0)
+        var match = self.fileHandler.fileExists(file: file, fileSize: 0)
 
         if !match {
             return false
         }
 
         // find file in downloadlist (if the cached download list exists)
-        if let dll = try? self.env.fileHandler.loadDownloadList() {
+        if let dll = try? self.fileHandler.loadDownloadList() {
             if let dlFile = dll.find(fileName: file.lastPathComponent) {
                 // compare download list cached sized with actual size
-                match = self.env.fileHandler.fileExists(file: file, fileSize: dlFile.fileSize)
+                match = self.fileHandler.fileExists(file: file, fileSize: dlFile.fileSize)
             }
         }
         return match

@@ -23,7 +23,7 @@ extension ShellInstaller {
         let filePath = file.path
 
         // check if file exists
-        guard self.env.fileHandler.fileExists(file: file, fileSize: 0) else {
+        guard self.fileHandler.fileExists(file: file, fileSize: 0) else {
             log.error("Command line disk image does not exist : \(filePath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
@@ -37,7 +37,7 @@ extension ShellInstaller {
         // first mount the disk image
         log.debug("Mounting disk image \(file.lastPathComponent)")
         currentStep += 1
-        self.env.progressBar.update(step: currentStep, total: totalSteps, text: "Mounting disk image...")
+        self.progressBar.update(step: currentStep, total: totalSteps, text: "Mounting disk image...")
         result = try await self.mountDMG(atURL: file)
         if !result.terminationStatus.isSuccess {
             log.error("Can not mount disk image : \(filePath)\n\(String(describing: result))")
@@ -50,7 +50,7 @@ extension ShellInstaller {
         let pkgPath = pkg.path
         log.debug("Installing pkg \(pkgPath)")
         currentStep += 1
-        self.env.progressBar.update(step: currentStep, total: totalSteps, text: "Installing package...")
+        self.progressBar.update(step: currentStep, total: totalSteps, text: "Installing package...")
         result = try await self.installPkg(atURL: pkg)
         if !result.terminationStatus.isSuccess {
             log.error("Can not install package : \(pkgPath)\n\(String(describing: result))")
@@ -61,7 +61,7 @@ extension ShellInstaller {
         let mountedDiskImage = URL(fileURLWithPath: "/Volumes/Command Line Developer Tools")
         log.debug("Unmounting volume \(mountedDiskImage)")
         currentStep += 1
-        self.env.progressBar.update(step: currentStep, total: totalSteps, text: "Unmounting volume...")
+        self.progressBar.update(step: currentStep, total: totalSteps, text: "Unmounting volume...")
         result = try await self.unmountDMG(volume: mountedDiskImage)
         if !result.terminationStatus.isSuccess {
             log.error(
@@ -76,18 +76,18 @@ extension ShellInstaller {
         let dmgPath = dmg.path
 
         // check if file exists
-        guard self.env.fileHandler.fileExists(file: dmg, fileSize: 0) else {
+        guard self.fileHandler.fileExists(file: dmg, fileSize: 0) else {
             log.error("Disk Image does not exist : \(dmgPath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 
         // hdiutil mount ./xcode-cli.dmg
-        return try await self.env.run(.path(HDIUTILCOMMAND), arguments: ["mount", dmgPath])
+        return try await self.shellExecutor.run(.path(HDIUTILCOMMAND), arguments: ["mount", dmgPath])
     }
 
     private func unmountDMG(volume: URL) async throws -> ShellOutput {
 
         // hdiutil unmount /Volumes/Command\ Line\ Developer\ Tools/
-        try await self.env.run(.path(HDIUTILCOMMAND), arguments: ["unmount", volume.path])
+        try await self.shellExecutor.run(.path(HDIUTILCOMMAND), arguments: ["unmount", volume.path])
     }
 }

@@ -23,12 +23,12 @@ extension ShellInstaller {
         let pkgPath = pkg.path
 
         // check if file exists
-        guard self.env.fileHandler.fileExists(file: pkg, fileSize: 0) else {
+        guard self.fileHandler.fileExists(file: pkg, fileSize: 0) else {
             log.error("Package does not exist : \(pkgPath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
 
-        return try await self.env.run(
+        return try await self.shellExecutor.run(
             .path(SUDOCOMMAND),
             arguments: [INSTALLERCOMMAND, "-pkg", pkgPath, "-target", "/"]
         )

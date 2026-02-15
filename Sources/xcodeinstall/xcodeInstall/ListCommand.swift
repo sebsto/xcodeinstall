@@ -33,7 +33,7 @@ extension XCodeInstall {
             display("✅ Done")
 
             let parser = DownloadListParser(
-                env: self.env,
+                fileHandler: self.env.fileHandler,
                 xCodeOnly: xCodeOnly,
                 majorVersion: majorVersion,
                 sortMostRecentFirst: sortMostRecentFirst

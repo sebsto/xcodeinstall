@@ -25,18 +25,28 @@ import FoundationEssentials
 import Foundation
 #endif
 
-// a global struct to give access to classes for which I wrote tests.
-// this global object allows me to simplify dependency injection
-protocol Environment: Sendable {
+// MARK: - Focused dependency protocols
+
+/// File system operations (download list cache, file existence checks, move)
+protocol FileHandling: Sendable {
     var fileHandler: FileHandlerProtocol { get }
+}
+
+/// CLI user interaction (display messages, read input, progress bars)
+protocol CLIInterface: Sendable {
     var display: DisplayProtocol { get }
     var readLine: ReadLineProtocol { get }
     var progressBar: CLIProgressBarProtocol { get }
+}
+
+/// Secrets storage (cookies, sessions, credentials)
+protocol SecretStoring: Sendable {
     var secrets: SecretsHandlerProtocol? { get }
     func setSecretsHandler(_ newValue: SecretsHandlerProtocol)
-    var authenticator: AppleAuthenticatorProtocol { get }
-    var downloader: AppleDownloaderProtocol { get }
-    var urlSessionData: URLSessionProtocol { get }
+}
+
+/// Shell command execution
+protocol ShellExecuting: Sendable {
     func run(
         _ executable: Executable,
         arguments: Arguments,
@@ -47,6 +57,22 @@ protocol Environment: Sendable {
         arguments: Arguments,
     ) async throws -> ShellOutput
 }
+
+/// Network operations (authentication, downloads)
+protocol Networking: Sendable {
+    var authenticator: AppleAuthenticatorProtocol { get }
+    var downloader: AppleDownloaderProtocol { get }
+    var urlSessionData: URLSessionProtocol { get }
+}
+
+// MARK: - Composed Environment protocol
+
+/// Full environment — composes all focused protocols.
+/// Existing code that needs the full bag of dependencies can still use this.
+/// New or refactored code should prefer the focused protocols above.
+protocol Environment: FileHandling, CLIInterface, SecretStoring, ShellExecuting, Networking {}
+
+// MARK: - Runtime implementation
 
 final class RuntimeEnvironment: Environment {
 

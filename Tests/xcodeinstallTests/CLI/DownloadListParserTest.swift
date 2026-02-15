@@ -72,7 +72,7 @@ struct DownloadListParserTest {
         let downloads = list.downloads
         #expect(downloads != nil)
 
-        let dlp = DownloadListParser(env: env, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
+        let dlp = DownloadListParser(fileHandler: env.fileHandler, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
         let filteredList = try dlp.parse(list: list)
 
         // then
@@ -92,7 +92,7 @@ struct DownloadListParserTest {
         let downloads = list.downloads
         #expect(downloads != nil)
 
-        let dlp = DownloadListParser(env: env, xCodeOnly: false, majorVersion: "13", sortMostRecentFirst: true)
+        let dlp = DownloadListParser(fileHandler: env.fileHandler, xCodeOnly: false, majorVersion: "13", sortMostRecentFirst: true)
         let filteredList = try dlp.parse(list: list)
 
         // then
@@ -129,7 +129,7 @@ struct DownloadListParserTest {
         let downloads = list.downloads
         #expect(downloads != nil)
 
-        let dlp = DownloadListParser(env: env, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
+        let dlp = DownloadListParser(fileHandler: env.fileHandler, xCodeOnly: true, majorVersion: "13", sortMostRecentFirst: true)
         let filteredList = try dlp.parse(list: list)
 
         return (filteredList, dlp)
