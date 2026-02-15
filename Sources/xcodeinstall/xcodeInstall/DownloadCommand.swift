@@ -76,21 +76,23 @@ extension XCodeInstall {
                 fileSize: fileToDownload.fileSize
             )
             if !(complete ?? false) {
-                display("🛑 Downloaded file has incorrect size, it might be incomplete or corrupted")
+                display("Downloaded file has incorrect size, it might be incomplete or corrupted", style: .error())
             } else {
-                display("✅ \(fileName ?? "file") downloaded")
+                display("\(fileName ?? "file") downloaded", style: .success)
             }
         } catch DownloadError.authenticationRequired {
-            display("🛑 Session expired, you neeed to re-authenticate.")
-            display("You can authenticate with the command: xcodeinstall authenticate")
+            display(
+                "Session expired, you need to re-authenticate.",
+                style: .error(nextSteps: ["xcodeinstall authenticate"])
+            )
         } catch CLIError.invalidInput {
-            display("🛑 Invalid input")
+            display("Invalid input", style: .error())
         } catch DownloadError.unknownFile(let fileName) {
-            display("🛑 Unknown file name : \(fileName)")
+            display("Unknown file name : \(fileName)", style: .error())
         } catch let error as SecretsStorageAWSError {
-            display("🛑 AWS Error: \(error.localizedDescription)")
+            display("AWS Error: \(error.localizedDescription)", style: .error())
         } catch {
-            display("🛑 Unexpected error : \(error)")
+            display("Unexpected error : \(error)", style: .error())
         }
     }
 
@@ -113,7 +115,7 @@ extension XCodeInstall {
         // this is used when debugging
         //        return parsedList[31].files[1]
 
-        let num = try askUser(prompt: "⌨️  Which one do you want to download? ")
+        let num = try askUser(prompt: "Which one do you want to download? ")
 
         if parsedList[num].files.count == 1 {
             return parsedList[num].files[0]
@@ -124,7 +126,7 @@ extension XCodeInstall {
             parsedList[num].files.enumerated().forEach { index, file in
                 line += "   |__ [\(String(format: "%02d", index))] \(file.filename) (\(file.fileSize/1024/1024) Mb)\n"
             }
-            line += "\n ⌨️  Which one do you want to download? "
+            line += "\n Which one do you want to download? "
 
             let fileNum = try askUser(prompt: line)
             return parsedList[num].files[fileNum]

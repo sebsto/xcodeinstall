@@ -33,6 +33,8 @@ final class NooraDisplay: DisplayProtocol {
             noora.warning(WarningAlert(stringLiteral: msg))
         case .info:
             noora.info(InfoAlert(stringLiteral: msg))
+        case .security:
+            print("🔐 \(msg)", terminator: terminator)
         }
     }
 }
