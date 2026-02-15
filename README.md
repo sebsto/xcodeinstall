@@ -19,7 +19,7 @@ This is a command line utility to download and install Xcode in headless mode (f
 
 `xcodeinstall` is a command line utility to download and install Xcode from the terminal only. It may work interactively or unattended. In **interactive mode**, it prompts you for your Apple Developer account username, password and MFA code.  In **unattended mode**, it fetches your Apple Developer username and password from AWS Secrets Manager. (Instructions to configure this are below).
 
-When **MFA is configured** (which we highly recommend), a human interaction is required to enter the MFA code sent to your device.  This step cannot be automated.
+When **MFA is configured** on your Apple developer account (which we highly recommend), a human interaction is required to enter the MFA code sent to your device.  This step cannot be automated.
 
 The Apple Developer Portal username and password ARE NOT STORED on the local volume. They are used to interact with Apple's Developer Portal API and collect a session token.  The session token is stored in `$HOME/.xcodeinstall` or on AWS Secrets Manager.
 
