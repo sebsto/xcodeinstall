@@ -11,6 +11,8 @@ import FoundationEssentials
 import Foundation
 #endif
 
+import SotoSecretsManager
+
 extension XCodeInstall {
 
     func authenticate(with authenticationMethod: AuthenticationMethod) async throws {
@@ -82,10 +84,24 @@ extension XCodeInstall {
             display("Retrieving Apple Developer Portal credentials...")
             appleCredentials = try await self.deps.secrets!.retrieveAppleCredentials()
 
+            // empty credentials means the secret exists but has no real values
+            if appleCredentials.username.isEmpty || appleCredentials.password.isEmpty {
+                display("Apple credentials secret exists but is empty.")
+                appleCredentials = try await promptAndStoreCredentials()
+            }
+
         } catch SecretsStorageAWSError.invalidOperation {
 
             // we have a file secrets handler, prompt for credentials interactively
             appleCredentials = try promptForCredentials()
+
+        } catch let error as SotoSecretsManager.SecretsManagerErrorType
+            where error == .resourceNotFoundException
+        {
+            // the apple credentials secret doesn't exist yet in AWS Secrets Manager
+            // prompt the user and create it transparently
+            display("Apple credentials not found in AWS Secrets Manager, capturing them now...")
+            appleCredentials = try await promptAndStoreCredentials()
 
         } catch {
 
@@ -94,6 +110,14 @@ extension XCodeInstall {
         }
 
         return appleCredentials
+    }
+
+    /// Prompt for credentials and store them in the secrets backend
+    private func promptAndStoreCredentials() async throws -> AppleCredentialsSecret {
+        let credentials: AppleCredentialsSecret = try promptForCredentials()
+        try await self.deps.secrets!.storeAppleCredentials(credentials)
+        display("✅ Credentials stored in AWS Secrets Manager")
+        return credentials
     }
 
     // prompt user for apple developer portal credentials interactively

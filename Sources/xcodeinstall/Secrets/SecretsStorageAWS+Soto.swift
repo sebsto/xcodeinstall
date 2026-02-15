@@ -233,6 +233,12 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
                 return try AppleSessionSecret(fromString: secret) as! T
             }
 
+        } catch let error as SotoSecretsManager.SecretsManagerErrorType
+            where error == .resourceNotFoundException
+        {
+            log.debug("Secret \(secretId.rawValue) does not exist in AWS Secrets Manager")
+            throw error
+
         } catch {
             log.error("Unexpected error while retrieving secrets\n\(error)")
             throw wrapCredentialError(error)
