@@ -71,6 +71,7 @@ struct MockedRunRecorder: InputProtocol, OutputProtocol {
 
 // MARK: - MockedEnvironment convenience wrapper
 
+// this is our builder for test fixtures
 @MainActor
 final class MockedEnvironment {
 
