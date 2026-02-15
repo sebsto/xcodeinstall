@@ -28,9 +28,11 @@ extension CLITests {
             ]
         )
 
+        let deps = env.toDeps(log: log)
+
         // when
 
-        await #expect(throws: Never.self) { try await list.run(with: env) }
+        await #expect(throws: Never.self) { try await list.run(with: deps) }
 
         // test parsing of commandline arguments
         #expect(list.globalOptions.verbose)

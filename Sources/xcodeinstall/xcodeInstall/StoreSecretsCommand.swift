@@ -15,7 +15,7 @@ extension XCodeInstall {
 
     func storeSecrets() async throws {
 
-        let secretsHandler = self.env.secrets!
+        let secretsHandler = self.deps.secrets!
         do {
             // separate func for testability
             let input = try promptForCredentials()
@@ -42,7 +42,7 @@ extension XCodeInstall {
         )
 
         guard
-            let username = self.env.readLine.readLine(
+            let username = self.deps.readLine.readLine(
                 prompt: "⌨️  Enter your Apple ID username: ",
                 silent: false
             )
@@ -51,7 +51,7 @@ extension XCodeInstall {
         }
 
         guard
-            let password = self.env.readLine.readLine(
+            let password = self.deps.readLine.readLine(
                 prompt: "⌨️  Enter your Apple ID password: ",
                 silent: true
             )

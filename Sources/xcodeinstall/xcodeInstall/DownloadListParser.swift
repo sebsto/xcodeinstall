@@ -13,13 +13,13 @@ import Foundation
 
 struct DownloadListParser {
 
-    let env: Environment
+    let fileHandler: FileHandlerProtocol
     let xCodeOnly: Bool
     let majorVersion: String
     let sortMostRecentFirst: Bool
 
-    init(env: Environment, xCodeOnly: Bool = true, majorVersion: String = "13", sortMostRecentFirst: Bool = false) {
-        self.env = env
+    init(fileHandler: FileHandlerProtocol, xCodeOnly: Bool = true, majorVersion: String = "13", sortMostRecentFirst: Bool = false) {
+        self.fileHandler = fileHandler
         self.xCodeOnly = xCodeOnly
         self.majorVersion = majorVersion
         self.sortMostRecentFirst = sortMostRecentFirst
@@ -76,14 +76,14 @@ struct DownloadListParser {
     func enrich(list: [DownloadList.Download]) async -> [DownloadList.Download] {
 
         await list.asyncMap { download in
-            let fileHandler = await self.env.fileHandler
+            let fh = self.fileHandler
 
             // swiftlint:disable identifier_name
             let file = download.files[0]
 
             let fileCopy = file
-            let downloadFile: URL = await fileHandler.downloadFileURL(file: fileCopy)
-            let exists = await fileHandler.fileExists(file: downloadFile, fileSize: file.fileSize)
+            let downloadFile: URL = await fh.downloadFileURL(file: fileCopy)
+            let exists = await fh.fileExists(file: downloadFile, fileSize: file.fileSize)
 
             // create a copy of the file to be used in the list
             let newFile = await DownloadList.File.init(from: file, existInCache: exists)

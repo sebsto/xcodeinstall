@@ -31,7 +31,7 @@ extension ShellInstaller {
         log.debug("Decompressing files")
         // run synchronously as there is no output for this operation
         currentStep += 1
-        self.env.progressBar.update(
+        self.progressBar.update(
             step: currentStep,
             total: totalSteps,
             text: "Expanding Xcode xip (this might take a while)"
@@ -47,13 +47,13 @@ extension ShellInstaller {
         // second move file to /Applications
         log.debug("Moving app to destination")
         currentStep += 1
-        self.env.progressBar.update(
+        self.progressBar.update(
             step: currentStep,
             total: totalSteps,
             text: "Moving Xcode to /Applications"
         )
         // find .app file
-        let appFile = try env.fileHandler.downloadedFiles().filter({ fileName in
+        let appFile = try fileHandler.downloadedFiles().filter({ fileName in
             fileName.hasSuffix(".app")
         })
         if appFile.count != 1 {
@@ -64,7 +64,7 @@ extension ShellInstaller {
         }
 
         let installedFile =
-            try await self.moveApp(at: self.env.fileHandler.downloadDirectory().appendingPathComponent(appFile[0]))
+            try await self.moveApp(at: self.fileHandler.downloadDirectory().appendingPathComponent(appFile[0]))
 
         // /Applications/Xcode.app/Contents/Resources/Packages/
 
@@ -72,7 +72,7 @@ extension ShellInstaller {
         for pkg in PKGTOINSTALL {
             log.debug("Installing package \(pkg)")
             currentStep += 1
-            self.env.progressBar.update(
+            self.progressBar.update(
                 step: currentStep,
                 total: totalSteps,
                 text: "Installing additional packages... \(pkg)"
@@ -96,7 +96,7 @@ extension ShellInstaller {
         let filePath = file.path
 
         // not necessary, file existence has been checked before
-        guard self.env.fileHandler.fileExists(file: file, fileSize: 0) else {
+        guard self.fileHandler.fileExists(file: file, fileSize: 0) else {
             log.error("File to unXip does not exist : \(filePath)")
             throw InstallerError.fileDoesNotExistOrIncorrect
         }
@@ -127,7 +127,7 @@ extension ShellInstaller {
 
         log.debug("Going to move \n \(src) to \n \(appURL)")
         // move synchronously
-        try self.env.fileHandler.move(from: src, to: appURL)
+        try self.fileHandler.move(from: src, to: appURL)
 
         return appURL.path
     }

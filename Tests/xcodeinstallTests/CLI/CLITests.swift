@@ -19,6 +19,7 @@ final class CLITests {
 
     init() async throws {
         self.secretsHandler = MockedSecretsHandler(env: &env)
+        self.env.secrets = self.secretsHandler
         try await self.secretsHandler.clearSecrets()
     }
 
@@ -27,7 +28,12 @@ final class CLITests {
         try MainCommand.parseAsRoot(arguments) as! A
     }
 
-    func assertDisplay(env: Environment, _ msg: String) {
+    func assertDisplay(deps: AppDependencies, _ msg: String) {
+        let actual = (deps.display as! MockedDisplay).string
+        #expect(actual == "\(msg)\n")
+    }
+
+    func assertDisplay(env: MockedEnvironment, _ msg: String) {
         let actual = (env.display as! MockedDisplay).string
         #expect(actual == "\(msg)\n")
     }
@@ -36,7 +42,12 @@ final class CLITests {
         assertDisplay(env: self.env, msg)
     }
 
-    func assertDisplayStartsWith(env: Environment, _ msg: String) {
+    func assertDisplayStartsWith(deps: AppDependencies, _ msg: String) {
+        let actual = (deps.display as! MockedDisplay).string
+        #expect(actual.starts(with: msg))
+    }
+
+    func assertDisplayStartsWith(env: MockedEnvironment, _ msg: String) {
         let actual = (env.display as! MockedDisplay).string
         #expect(actual.starts(with: msg))
     }

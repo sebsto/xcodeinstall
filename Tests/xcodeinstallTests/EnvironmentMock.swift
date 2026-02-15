@@ -7,6 +7,7 @@
 
 import CLIlib
 import Foundation
+import Logging
 
 @testable import Subprocess  // to be able to call internal init() functions
 @testable import xcodeinstall
@@ -17,45 +18,35 @@ import System
 import SystemPackage
 #endif
 
+// MARK: - MockedShell for recording shell calls in tests
+
 @MainActor
-final class MockedEnvironment: xcodeinstall.Environment {
+final class MockedShell: ShellExecuting {
+    static var runRecorder = MockedRunRecorder()
 
-    init(
-        fileHandler: FileHandlerProtocol = MockedFileHandler(),
-        readLine: ReadLineProtocol = MockedReadLine([]),
-        progressBar: CLIProgressBarProtocol = MockedProgressBar()
-    ) {
-        self.fileHandler = fileHandler
-        self.readLine = readLine
-        self.progressBar = progressBar
+    nonisolated func run(
+        _ executable: Executable,
+        arguments: Arguments
+    ) async throws -> ShellOutput {
+        try await run(executable, arguments: arguments, workingDirectory: nil)
     }
 
-    var fileHandler: FileHandlerProtocol = MockedFileHandler()
+    nonisolated func run(
+        _ executable: Executable,
+        arguments: Arguments,
+        workingDirectory: FilePath?
+    ) async throws -> ShellOutput {
+        await MainActor.run {
+            MockedShell.runRecorder.lastExecutable = executable
+            MockedShell.runRecorder.lastArguments = arguments
+        }
 
-    var display: DisplayProtocol = MockedDisplay()
-    var readLine: ReadLineProtocol = MockedReadLine([])
-    var progressBar: CLIProgressBarProtocol = MockedProgressBar()
-
-    // this has to be injected by the caller (it contains a reference to the env
-    var secrets: SecretsHandlerProtocol? = nil
-    func setSecretsHandler(_ newValue: SecretsHandlerProtocol) {
-        self.secrets = newValue
-    }
-
-    var awsSDK: SecretsStorageAWSSDKProtocol? = nil
-
-    var authenticator: AppleAuthenticatorProtocol = MockedAppleAuthentication()
-    var downloader: AppleDownloaderProtocol {
-        let mockedDownloader = MockedAppleDownloader()
-        mockedDownloader.urlSession = self.urlSessionData
-        mockedDownloader.secrets = self.secrets
-        return mockedDownloader
-    }
-
-    var urlSessionData: URLSessionProtocol = MockedURLSession()
-
-    var urlSessionDownload: URLSessionProtocol {
-        self.urlSessionData
+        return CollectedResult(
+            processIdentifier: ProcessIdentifier(value: 9999),
+            terminationStatus: TerminationStatus.exited(0),
+            standardOutput: "mocked output",
+            standardError: "mocked error"
+        )
     }
 }
 
@@ -74,40 +65,65 @@ struct MockedRunRecorder: InputProtocol, OutputProtocol {
         lastArguments.description.contains(argument)
     }
     func isEmpty() -> Bool {
-        //        print(lastExecutable?.description)
         lastExecutable == nil || lastExecutable?.description.isEmpty == true
     }
-
 }
 
-extension MockedEnvironment {
-    static var runRecorder = MockedRunRecorder()
+// MARK: - MockedEnvironment convenience wrapper
 
-    func run(
-        _ executable: Executable,
-        arguments: Arguments,
-    ) async throws -> ShellOutput {
-        try await run(
-            executable,
-            arguments: arguments,
-            workingDirectory: nil
-        )
+// this is our builder for test fixtures
+@MainActor
+final class MockedEnvironment {
+
+    let fileHandler: FileHandlerProtocol
+    var display: DisplayProtocol
+    var readLine: ReadLineProtocol
+    var progressBar: CLIProgressBarProtocol
+    var secrets: SecretsHandlerProtocol?
+    var authenticator: AppleAuthenticatorProtocol
+    var urlSessionData: URLSessionProtocol
+    let shell: MockedShell
+    var awsSDK: SecretsStorageAWSSDKProtocol?
+
+    init(
+        fileHandler: FileHandlerProtocol = MockedFileHandler(),
+        readLine: ReadLineProtocol = MockedReadLine([]),
+        progressBar: CLIProgressBarProtocol = MockedProgressBar()
+    ) {
+        self.fileHandler = fileHandler
+        self.readLine = readLine
+        self.progressBar = progressBar
+        self.display = MockedDisplay()
+        self.authenticator = MockedAppleAuthentication()
+        self.urlSessionData = MockedURLSession()
+        self.shell = MockedShell()
     }
-    func run(
-        _ executable: Executable,
-        arguments: Arguments,
-        workingDirectory: FilePath?,
-    ) async throws -> ShellOutput {
 
-        MockedEnvironment.runRecorder.lastExecutable = executable
-        MockedEnvironment.runRecorder.lastArguments = arguments
+    /// Computed property that wires up the mocked downloader with current session/secrets
+    var downloader: AppleDownloaderProtocol {
+        let mockedDownloader = MockedAppleDownloader()
+        mockedDownloader.urlSession = self.urlSessionData
+        mockedDownloader.secrets = self.secrets
+        return mockedDownloader
+    }
 
-        // Return a dummy CollectedResult
-        return CollectedResult(
-            processIdentifier: ProcessIdentifier(value: 9999),
-            terminationStatus: TerminationStatus.exited(0),
-            standardOutput: "mocked output",
-            standardError: "mocked error",
+    var urlSessionDownload: URLSessionProtocol {
+        self.urlSessionData
+    }
+
+    /// Build an AppDependencies from this mock's current state
+    func toDeps(log: Logger = Logger(label: "test")) -> AppDependencies {
+        return AppDependencies(
+            fileHandler: self.fileHandler,
+            display: self.display,
+            readLine: self.readLine,
+            progressBar: self.progressBar,
+            secrets: self.secrets,
+            authenticator: self.authenticator,
+            downloader: self.downloader,
+            urlSessionData: self.urlSessionData,
+            shell: self.shell,
+            log: log
         )
     }
 }

@@ -24,13 +24,14 @@ extension CLITests {
     func testSignout() async throws {
 
         // given
+        let deps = env.toDeps(log: log)
 
         // when
         await #expect(throws: Never.self) {
 
             // verify no exception is thrown
             let signout = try parse(MainCommand.Signout.self, ["signout"])
-            try await signout.run(with: env)
+            try await signout.run(with: deps)
 
         }
 
@@ -54,14 +55,16 @@ extension CLITests {
             headerFields: headers
         )
 
+        let deps = env.toDeps(log: log)
+
         // when
         await #expect(throws: Never.self) {
             let auth = try parse(MainCommand.Authenticate.self, ["authenticate"])
-            try await auth.run(with: env)
+            try await auth.run(with: deps)
         }
 
         // mocked authentication succeeded
-        assertDisplay("✅ Authenticated.")
+        assertDisplay(env: env, "✅ Authenticated.")
 
         // two prompts have been proposed
         // print((env.readLine as! MockedReadLine).input)
@@ -75,14 +78,16 @@ extension CLITests {
         let env = MockedEnvironment(readLine: MockedReadLine(["username", "password"]))
         (env.authenticator as! MockedAppleAuthentication).nextError = AuthenticationError.invalidUsernamePassword
 
+        let deps = env.toDeps(log: log)
+
         // when
         await #expect(throws: Never.self) {
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
-            let xci = XCodeInstall(log: log, env: env)
+            let xci = XCodeInstall(log: log, deps: deps)
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
         }
 
-        assertDisplay("🛑 Invalid username or password.")
+        assertDisplay(env: env, "🛑 Invalid username or password.")
 
     }
 
@@ -133,9 +138,11 @@ extension CLITests {
             headerFields: headers
         )
 
+        let deps = env.toDeps(log: log)
+
         // when
         let error = await #expect(throws: AuthenticationError.self) {
-            let xci = XCodeInstall(log: log, env: env)
+            let xci = XCodeInstall(log: log, deps: deps)
             _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
 
@@ -149,7 +156,7 @@ extension CLITests {
         // all inputs have been consumed
         #expect((env.readLine as! MockedReadLine).input.count == 0)
 
-        assertDisplay("✅ Authenticated with MFA.")
+        assertDisplay(env: env, "✅ Authenticated with MFA.")
 
     }
 

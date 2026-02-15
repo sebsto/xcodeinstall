@@ -44,9 +44,11 @@ extension CLITests {
         #expect(download.downloadListOptions.mostRecentFirst)
         #expect(download.downloadListOptions.datePublished)
 
+        let deps = env.toDeps(log: log)
+
         // when
         await #expect(throws: Never.self) {
-            let xci = XCodeInstall(log: log, env: env)
+            let xci = XCodeInstall(log: log, deps: deps)
             try await xci.download(
                 fileName: nil,
                 force: false,
@@ -85,9 +87,11 @@ extension CLITests {
             ]
         )
 
+        let deps = env.toDeps(log: log)
+
         // when
         await #expect(throws: Never.self) {
-            try await download.run(with: env)
+            try await download.run(with: deps)
         }
 
         // test parsing of commandline arguments
@@ -118,9 +122,11 @@ extension CLITests {
             ]
         )
 
+        let deps = env.toDeps(log: log)
+
         // when
         await #expect(throws: Never.self) {
-            try await download.run(with: env)
+            try await download.run(with: deps)
         }
 
         // test parsing of commandline arguments

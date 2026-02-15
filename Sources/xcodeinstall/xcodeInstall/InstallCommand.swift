@@ -17,10 +17,10 @@ extension XCodeInstall {
 
     func install(file: String?) async throws {
 
-        let installer = ShellInstaller(env: &self.env, log: self.log)
+        let installer = ShellInstaller(fileHandler: self.deps.fileHandler, progressBar: self.deps.progressBar, shellExecutor: self.deps.shell, log: self.log)
 
         // progress bar to report progress feedback
-        let progressBar = self.env.progressBar
+        let progressBar = self.deps.progressBar
         progressBar.define(
             animationType: .countingProgressAnimationMultiLine,
             message: "Installing..."
@@ -37,41 +37,41 @@ extension XCodeInstall {
             log.debug("Going to attemp to install \(fileToInstall!.path)")
 
             try await installer.install(file: fileToInstall!)
-            self.env.progressBar.complete(success: true)
+            self.deps.progressBar.complete(success: true)
             display("✅ \(fileToInstall!) installed")
         } catch CLIError.invalidInput {
             display("🛑 Invalid input")
-            self.env.progressBar.complete(success: false)
+            self.deps.progressBar.complete(success: false)
         } catch FileHandlerError.noDownloadedList {
             display("⚠️ There is no downloaded file to be installed")
-            self.env.progressBar.complete(success: false)
+            self.deps.progressBar.complete(success: false)
         } catch InstallerError.xCodeXIPInstallationError {
             display("🛑 Can not expand XIP file. Is there enough space on / ? (16GiB required)")
-            self.env.progressBar.complete(success: false)
+            self.deps.progressBar.complete(success: false)
         } catch InstallerError.xCodeMoveInstallationError {
             display("🛑 Can not move Xcode to /Applications")
-            self.env.progressBar.complete(success: false)
+            self.deps.progressBar.complete(success: false)
         } catch InstallerError.xCodePKGInstallationError {
             display(
                 "🛑 Can not install additional packages."
             )
-            self.env.progressBar.complete(success: false)
+            self.deps.progressBar.complete(success: false)
         } catch InstallerError.unsupportedInstallation {
             display(
                 "🛑 Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)"
             )
-            self.env.progressBar.complete(success: false)
+            self.deps.progressBar.complete(success: false)
         } catch {
             display("🛑 Error while installing \(String(describing: fileToInstall!))")
             log.debug("\(error)")
-            self.env.progressBar.complete(success: false)
+            self.deps.progressBar.complete(success: false)
         }
     }
 
     func promptForFile() throws -> URL {
 
         // list files ready to install
-        let installableFiles = try self.env.fileHandler.downloadedFiles().filter({ fileName in
+        let installableFiles = try self.deps.fileHandler.downloadedFiles().filter({ fileName in
             fileName.hasSuffix(".xip") || fileName.hasSuffix(".dmg")
         })
 
@@ -84,7 +84,7 @@ extension XCodeInstall {
         display(printableList)
         display("\(installableFiles.count) items")
 
-        let response: String? = self.env.readLine.readLine(
+        let response: String? = self.deps.readLine.readLine(
             prompt: "⌨️  Which one do you want to install? ",
             silent: false
         )
