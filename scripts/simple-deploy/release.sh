@@ -97,7 +97,7 @@ EOF
 # 5. Update homebrew tap
 echo "📦 Updating Homebrew tap"
 if [ -d "../homebrew-macos" ]; then
-    cp xcodeinstall.rb ../homebrew-macos/
+    mv xcodeinstall.rb ../homebrew-macos/
     cd ../homebrew-macos
     git add xcodeinstall.rb
     git commit -m "Update xcodeinstall to $VERSION"
