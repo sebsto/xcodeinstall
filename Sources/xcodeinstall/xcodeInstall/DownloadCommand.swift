@@ -31,7 +31,7 @@ extension XCodeInstall {
             if fileName != nil {
 
                 // search matching filename in the download list cache
-                let list = try await download.list(force: force)
+                let (list, _) = try await download.list(force: force)
                 if let result = list.find(fileName: fileName!) {
                     fileToDownload = result
                 } else {

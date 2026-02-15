@@ -27,12 +27,13 @@ extension DownloadTests {
         let downloader = env.downloader
 
         // when
-        let result: DownloadList? = try await downloader.list(force: false)
+        let (result, source): (DownloadList?, ListSource) = try await downloader.list(force: false)
 
         // then
         #expect(result != nil)
         #expect(result?.downloads != nil)
         #expect(result!.downloads!.count > 0)
+        #expect(source == .cache)
     }
 
     @Test("Test list force")
@@ -44,11 +45,12 @@ extension DownloadTests {
 
             // when
             let downloader = self.env.downloader
-            let result = try await downloader.list(force: true)
+            let (result, source) = try await downloader.list(force: true)
 
             // then
             #expect(result.downloads != nil)
             #expect(result.downloads!.count == 1127)
+            #expect(source == .network)
         }
     }
 

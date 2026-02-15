@@ -14,7 +14,7 @@ extension AppleDownloader {
     // https://developer.apple.com
     // POST /services-account/QH65B2/downloadws/listDownloads.action
     //
-    func list(force: Bool) async throws -> DownloadList {
+    func list(force: Bool) async throws -> (DownloadList, ListSource) {
 
         var downloadList: DownloadList?
 
@@ -23,8 +23,12 @@ extension AppleDownloader {
             downloadList = try? self.fileHandler.loadDownloadList()
         }
 
-        if downloadList == nil {
-            // need to download the list from Apple
+        if let cachedList = downloadList {
+            return (cachedList, .cache)
+        }
+
+        // need to download the list from Apple
+        do {
             log.debug("Downloading list from Apple...")
             let url =
                 "https://developer.apple.com/services-account/QH65B2/downloadws/listDownloads.action"
@@ -92,7 +96,7 @@ extension AppleDownloader {
         guard let dList = downloadList else {
             throw DownloadError.noDownloadsInDownloadList
         }
-        return dList
+        return (dList, .network)
 
     }
 }

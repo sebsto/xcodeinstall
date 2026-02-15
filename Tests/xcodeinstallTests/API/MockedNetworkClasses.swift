@@ -106,11 +106,11 @@ final class MockedAppleDownloader: AppleDownloaderProtocol {
     var urlSession: URLSessionProtocol?
     var secrets: SecretsHandlerProtocol?
 
-    func list(force: Bool) async throws -> DownloadList {
+    func list(force: Bool) async throws -> (DownloadList, ListSource) {
         if !force {
             let listData = try loadTestData(file: .downloadList)
             let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
-            return list
+            return (list, .cache)
         }
 
         // For forced list, check mocked URLSession data
@@ -146,7 +146,7 @@ final class MockedAppleDownloader: AppleDownloaderProtocol {
         // Check result code for various error conditions
         switch downloadList.resultCode {
         case 0:
-            return downloadList
+            return (downloadList, .network)
         case 1100:
             throw DownloadError.authenticationRequired
         case 2170:
