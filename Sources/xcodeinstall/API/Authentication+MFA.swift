@@ -215,7 +215,10 @@ extension AppleAuthenticator {
             phoneNumber: PhoneId(id: phoneId),
             mode: "sms"
         )
-        let requestHeader = ["X-Apple-Id-Session-Id": session.xAppleIdSessionId!]
+        guard let sessionId = session.xAppleIdSessionId else {
+            throw AuthenticationError.missingHTTPHeaders("X-Apple-Id-Session-Id")
+        }
+        let requestHeader = ["X-Apple-Id-Session-Id": sessionId]
 
         let (_, response) = try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth/verify/phone/securitycode",
@@ -255,7 +258,10 @@ extension AppleAuthenticator {
 
         let codeType = "trusteddevice"
         let body = TFABody(securityCode: TFACode(code: pin))
-        let requestHeader = ["X-Apple-Id-Session-Id": session.xAppleIdSessionId!]
+        guard let sessionId = session.xAppleIdSessionId else {
+            throw AuthenticationError.missingHTTPHeaders("X-Apple-Id-Session-Id")
+        }
+        let requestHeader = ["X-Apple-Id-Session-Id": sessionId]
 
         let (_, response) = try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth/verify/\(codeType)/securitycode",  // swiftlint:disable:this line_length
