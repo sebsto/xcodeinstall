@@ -23,13 +23,20 @@ extension XCodeInstall {
 
         let download = self.deps.downloader
 
-        display("Loading list of available downloads ", terminator: "")
-        display(
-            "\(force ? "forced download from Apple Developer Portal" : "fetched from cache in \(self.deps.fileHandler.baseFilePath())")"
-        )  // swiftlint:disable:this line_length
+        display("Loading list of available downloads...")
 
         do {
-            let list = try await download.list(force: force)
+            let (list, source) = try await download.list(force: force)
+            switch source {
+            case .cache:
+                display("Fetched from cache in \(self.deps.fileHandler.baseFilePath())")
+            case .network:
+                if !force {
+                    display("No cache found, downloaded from Apple Developer Portal")
+                } else {
+                    display("Forced download from Apple Developer Portal")
+                }
+            }
             display("Done", style: .success)
 
             let parser = DownloadListParser(
