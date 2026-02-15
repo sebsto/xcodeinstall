@@ -66,7 +66,7 @@ import FoundationNetworking
 
 struct MFAType: Codable {
 
-    struct PhoneNumber: Codable {
+    struct PhoneNumber: Codable, Sendable {
         let numberWithDialCode: String?
         let pushMode: String?
         let obfuscatedNumber: String?
@@ -116,9 +116,10 @@ extension AppleAuthenticator {
     // call MFAType API and return the number of digit required for PIN
     func handleTwoFactorAuthentication() async throws -> Int {
 
-        guard let data = try? await getMFAType(),
-            let mfaType = try? JSONDecoder().decode(MFAType?.self, from: data)
-        else {
+        let mfaType: MFAType
+        do {
+            mfaType = try await getMFAType()
+        } catch {
             throw AuthenticationError.canNotReadMFATypes
         }
 
@@ -139,6 +140,108 @@ extension AppleAuthenticator {
 
         return securityCodeLength
 
+    }
+
+    /// Parse the MFA type response from Apple and build a list of MFA options
+    func buildMFAOptions(from mfaType: MFAType) -> [MFAOption] {
+        var options: [MFAOption] = []
+        let codeLength = mfaType.securityCode?.length ?? 6
+
+        let isThrottled = mfaType.securityCode?.tooManyCodesSent == true
+            || mfaType.securityCode?.securityCodeCooldown == true
+            || mfaType.securityCode?.securityCodeLocked == true
+
+        if isThrottled {
+            log.warning(
+                "⚠️ Apple is throttling verification codes. Trusted device codes may not arrive. Try SMS instead."
+            )
+        }
+
+        // Trusted device is an option unless codes are being throttled
+        if !isThrottled,
+           let phoneNumbers = mfaType.trustedPhoneNumbers, !phoneNumbers.isEmpty
+        {
+            options.append(.trustedDevice(codeLength: codeLength))
+        }
+
+        // Add SMS options for each trusted phone number (unless hidden)
+        if mfaType.hideSendSMSCodeOption != true,
+           let phones = mfaType.trustedPhoneNumbers
+        {
+            for phone in phones {
+                options.append(.sms(phoneNumber: phone, codeLength: codeLength))
+            }
+        }
+
+        // If throttled but SMS is also hidden, still offer trusted device as last resort
+        if options.isEmpty,
+           let phoneNumbers = mfaType.trustedPhoneNumbers, !phoneNumbers.isEmpty
+        {
+            options.append(.trustedDevice(codeLength: codeLength))
+        }
+
+        return options
+    }
+
+    /// Request Apple to send an SMS code to the given phone number
+    func requestSMSCode(phoneId: Int) async throws {
+        struct PhoneId: Codable { let id: Int }
+        struct SMSRequest: Codable {
+            let phoneNumber: PhoneId
+            let mode: String
+        }
+
+        let body = SMSRequest(phoneNumber: PhoneId(id: phoneId), mode: "sms")
+        let (_, _) = try await apiCall(
+            url: "https://idmsa.apple.com/appleauth/auth/verify/phone",
+            method: .POST,
+            body: try JSONEncoder().encode(body),
+            validResponse: .range(200..<300)
+        )
+    }
+
+    /// Verify an SMS code received on the given phone number
+    func verifySMSCode(_ code: String, phoneId: Int) async throws {
+        struct PhoneId: Codable { let id: Int }
+        struct SecurityCode: Codable { let code: String }
+        struct SMSVerify: Codable {
+            let securityCode: SecurityCode
+            let phoneNumber: PhoneId
+            let mode: String
+        }
+
+        let body = SMSVerify(
+            securityCode: SecurityCode(code: code),
+            phoneNumber: PhoneId(id: phoneId),
+            mode: "sms"
+        )
+        let requestHeader = ["X-Apple-Id-Session-Id": session.xAppleIdSessionId!]
+
+        let (_, response) = try await apiCall(
+            url: "https://idmsa.apple.com/appleauth/auth/verify/phone/securitycode",
+            method: .POST,
+            body: try JSONEncoder().encode(body),
+            headers: requestHeader,
+            validResponse: .range(200..<413)
+        )
+
+        switch response.statusCode {
+        case 400:
+            throw AuthenticationError.invalidPinCode
+        case 412:
+            if let location = response.value(forHTTPHeaderField: "Location") {
+                throw AuthenticationError.accountNeedsRepair(location: location, repairToken: "secret")
+            } else {
+                throw AuthenticationError.accountNeedsRepair(
+                    location: "no location HTTP header",
+                    repairToken: "secret"
+                )
+            }
+        case 200, 204:
+            try await self.saveSession(response: response, session: session)
+        default:
+            throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)
+        }
     }
 
     func twoFactorAuthentication(pin: String) async throws {
@@ -194,14 +297,18 @@ extension AppleAuthenticator {
 
     }
 
-    private func getMFAType() async throws -> Data? {
+    func getMFAType() async throws -> MFAType {
 
         let (data, _) = try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth",
             validResponse: .range(200..<400)
         )
 
-        return data
+        guard let mfaType = try? JSONDecoder().decode(MFAType.self, from: data) else {
+            throw AuthenticationError.canNotReadMFATypes
+        }
+
+        return mfaType
 
     }
 }

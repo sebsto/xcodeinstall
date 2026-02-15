@@ -83,8 +83,20 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
         return error
     }
 
+    private var isShutdown = false
+
+    func shutdown() async throws {
+        guard !isShutdown else { return }
+        isShutdown = true
+        try await self.awsClient?.shutdown()
+    }
+
     deinit {
-        try? self.awsClient?.syncShutdown()
+        // Async shutdown should have been called already.
+        // syncShutdown here is a last-resort safety net — silently ignore failures.
+        if !isShutdown {
+            try? self.awsClient?.syncShutdown()
+        }
     }
 
     // MARK: private functions - AWS SecretsManager Call using Soto SDK

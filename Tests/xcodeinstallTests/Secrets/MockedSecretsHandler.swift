@@ -114,4 +114,6 @@ final class MockedSecretsStorageAWSSDK: SecretsStorageAWSSDKProtocol {
             return appleSession.withLock { $0 as! T }
         }
     }
+
+    func shutdown() async throws {}
 }
