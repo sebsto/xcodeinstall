@@ -29,12 +29,12 @@ extension XCodeInstall {
             let (list, source) = try await download.list(force: force)
             switch source {
             case .cache:
-                display("Fetched from cache in \(self.deps.fileHandler.baseFilePath())")
+                display("Fetched from cache in \(self.deps.fileHandler.baseFilePath())", style: .info)
             case .network:
                 if !force {
-                    display("No cache found, downloaded from Apple Developer Portal")
+                    display("No cache found, downloaded from Apple Developer Portal", style: .info)
                 } else {
-                    display("Forced download from Apple Developer Portal")
+                    display("Forced download from Apple Developer Portal", style: .info)
                 }
             }
             display("Done", style: .success)
@@ -52,7 +52,7 @@ extension XCodeInstall {
 
             display("")
             display("Here is the list of available downloads:", style: .info)
-            display("Files marked with (*) are already downloaded in \(self.deps.fileHandler.baseFilePath()) ")
+            display("  Files marked with (*) are already downloaded in \(self.deps.fileHandler.baseFilePath()) ")
             display("")
             let string = parser.prettyPrint(list: enrichedList, withDate: datePublished)
             display(string)
