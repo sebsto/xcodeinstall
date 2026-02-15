@@ -33,6 +33,12 @@ extension MainCommand {
         )
         var secretManagerRegion: String
 
+        @Option(
+            name: [.customLong("profile"), .customShort("p")],
+            help: "The AWS profile name to use for authentication (from ~/.aws/credentials and ~/.aws/config)"
+        )
+        var profileName: String?
+
         func run() async throws {
             try await run(with: nil)
         }
@@ -41,6 +47,7 @@ extension MainCommand {
             let xci = try await MainCommand.XCodeInstaller(
                 with: deps,
                 for: secretManagerRegion,
+                profileName: profileName,
                 verbose: globalOptions.verbose
             )
 

@@ -24,6 +24,9 @@ extension XCodeInstall {
             try await secretsHandler.storeAppleCredentials(credentials)
             display("✅ Credentials are securely stored")
 
+        } catch let error as SecretsStorageAWSError {
+            display("🛑 AWS Error: \(error.localizedDescription)")
+            throw error
         } catch {
             display("🛑 Unexpected error : \(error)")
             throw error

@@ -67,6 +67,7 @@ extension MainCommand {
             let xci = try await MainCommand.XCodeInstaller(
                 with: deps,
                 for: cloudOption.secretManagerRegion,
+                profileName: cloudOption.profileName,
                 verbose: globalOptions.verbose
             )
 

@@ -84,11 +84,11 @@ extension XCodeInstall {
                 )
                 throw error
             }
+        } catch let error as SecretsStorageAWSError {
+            display("🛑 AWS Error: \(error.localizedDescription)")
+            throw error
         } catch {
             display("🛑 Unexpected error : \(error)")
-            display(
-                "Please file an error repor at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title="
-            )
             throw error
         }
 

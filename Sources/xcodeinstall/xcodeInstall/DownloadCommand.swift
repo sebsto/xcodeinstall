@@ -87,6 +87,8 @@ extension XCodeInstall {
             display("🛑 Invalid input")
         } catch DownloadError.unknownFile(let fileName) {
             display("🛑 Unknown file name : \(fileName)")
+        } catch let error as SecretsStorageAWSError {
+            display("🛑 AWS Error: \(error.localizedDescription)")
         } catch {
             display("🛑 Unexpected error : \(error)")
         }

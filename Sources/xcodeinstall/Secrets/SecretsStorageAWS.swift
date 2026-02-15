@@ -19,10 +19,32 @@ import FoundationNetworking
 #endif
 
 // the errors thrown by the SecretsManager class
-enum SecretsStorageAWSError: Error {
+enum SecretsStorageAWSError: Error, LocalizedError {
     case invalidRegion(region: String)
     case secretDoesNotExist(secretname: String)
     case invalidOperation  // when trying to retrieve secrets Apple credentials from file
+    case noCredentialProvider(profileName: String?, underlyingError: Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidRegion(let region):
+            return "Invalid AWS region: '\(region)'"
+        case .secretDoesNotExist(let secretname):
+            return "AWS secret '\(secretname)' does not exist"
+        case .invalidOperation:
+            return "Invalid operation for the current secrets storage backend"
+        case .noCredentialProvider(let profileName, let underlyingError):
+            if let profileName {
+                return "No AWS credentials found for profile '\(profileName)'. "
+                    + "Verify the profile exists in ~/.aws/credentials or ~/.aws/config. "
+                    + "Underlying error: \(underlyingError)"
+            } else {
+                return "No AWS credential provider found. "
+                    + "Configure credentials via environment variables, ~/.aws/credentials, or an EC2 instance profile. "
+                    + "Underlying error: \(underlyingError)"
+            }
+        }
+    }
 }
 
 // the names we are using to store the secrets
@@ -69,7 +91,7 @@ struct AppleSessionSecret: Codable, Secrets {
 
 // the methods that must be implemented by the class encapsulating the SDK we are using
 protocol SecretsStorageAWSSDKProtocol {
-    static func forRegion(_ region: String, log: Logger) throws -> SecretsStorageAWSSDKProtocol
+    static func forRegion(_ region: String, profileName: String?, log: Logger) throws -> SecretsStorageAWSSDKProtocol
     func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws
     func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T
 }
@@ -83,12 +105,12 @@ protocol SecretsStorageAWSSDKProtocol {
 class SecretsStorageAWS: SecretsHandlerProtocol {
     let log: Logger
     let awsSDK: SecretsStorageAWSSDKProtocol
-    public init(sdk: SecretsStorageAWSSDKProtocol? = nil, region: String = "us-east-1", log: Logger) throws {
+    public init(sdk: SecretsStorageAWSSDKProtocol? = nil, region: String = "us-east-1", profileName: String? = nil, log: Logger) throws {
         self.log = log
         if let sdk {
             self.awsSDK = sdk
         } else {
-            self.awsSDK = try SecretsStorageAWSSoto.forRegion(region, log: self.log)
+            self.awsSDK = try SecretsStorageAWSSoto.forRegion(region, profileName: profileName, log: self.log)
         }
     }
 
