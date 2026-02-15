@@ -16,7 +16,10 @@ import Foundation
 final class NooraReadLine: ReadLineProtocol {
     func readLine(prompt: String, silent: Bool) -> String? {
         if silent {
-            return String(cString: getpass(prompt))
+            guard let password = getpass(prompt) else {
+                return nil
+            }
+            return String(cString: password)
         } else {
             print(prompt, terminator: "")
             return Swift.readLine()
