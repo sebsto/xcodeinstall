@@ -6,6 +6,7 @@
 //
 
 import CLIlib
+import Logging
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -20,6 +21,21 @@ protocol AppleDownloaderProtocol: Sendable {
 
 class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
 
+    let fileHandler: FileHandlerProtocol
+    let downloadManager: DownloadManager
+
+    init(
+        secrets: SecretsHandlerProtocol,
+        urlSession: URLSessionProtocol,
+        fileHandler: FileHandlerProtocol,
+        downloadManager: DownloadManager,
+        log: Logger
+    ) {
+        self.fileHandler = fileHandler
+        self.downloadManager = downloadManager
+        super.init(secrets: secrets, urlSession: urlSession, log: log)
+    }
+
     func download(file: DownloadList.File) async throws -> AsyncThrowingStream<DownloadProgress, Error> {
 
         guard !file.remotePath.isEmpty,
@@ -32,13 +48,12 @@ class AppleDownloader: HTTPClient, AppleDownloaderProtocol {
 
         let fileURL = "https://developer.apple.com/services-account/download?path=\(file.remotePath)"
 
-        let fh = self.env().fileHandler
-        let filePath = await URL(fileURLWithPath: fh.downloadFilePath(file: file))
+        let filePath = await URL(fileURLWithPath: fileHandler.downloadFilePath(file: file))
         let downloadTarget = DownloadTarget(totalFileSize: file.fileSize, dstFilePath: filePath, startTime: Date.now)
 
-        let downloadManager = self.env().downloadManager
         downloadManager.downloadTarget = downloadTarget
-        downloadManager.env = self.env()
+        downloadManager.secrets = self.secrets
+        downloadManager.fileHandler = self.fileHandler
 
         return try await downloadManager.download(from: fileURL)
     }

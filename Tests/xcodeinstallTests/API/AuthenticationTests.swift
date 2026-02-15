@@ -23,8 +23,7 @@ final class AuthenticationTests {
         self.env = MockedEnvironment()
         self.env.secrets = MockedSecretsHandler(env: &self.env)
         self.sessionData = env.urlSessionData as? MockedURLSession
-        self.client = HTTPClient(log: log)
-        self.client.environment = env
+        self.client = HTTPClient(secrets: env.secrets!, urlSession: env.urlSessionData, log: log)
         try await env.secrets!.clearSecrets()
     }
 
@@ -39,8 +38,7 @@ final class AuthenticationTests {
     }
 
     func getAppleAuthenticator() -> AppleAuthenticator {
-        let aa = AppleAuthenticator(log: log)
-        aa.environment = self.env
+        let aa = AppleAuthenticator(secrets: env.secrets!, urlSession: env.urlSessionData, log: log)
         return aa
     }
 

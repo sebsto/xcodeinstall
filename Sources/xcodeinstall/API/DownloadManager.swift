@@ -39,13 +39,12 @@ struct DownloadProgress: Sendable {
 
 class DownloadManager {
 
-    var env: Environment? = nil
+    var secrets: SecretsHandlerProtocol? = nil
+    var fileHandler: FileHandlerProtocol? = nil
     var downloadTarget: DownloadTarget? = nil
     private let log: Logger
 
-    public init(env: Environment? = nil, downloadTarget: DownloadTarget? = nil, logger: Logger) {
-        self.env = env
-        self.downloadTarget = downloadTarget
+    public init(logger: Logger) {
         self.log = logger
     }
 
@@ -55,15 +54,19 @@ class DownloadManager {
             fatalError("Developer forgot to set the download target")
         }
 
-        guard let env = self.env else {
-            fatalError("Developer forgot to set the environment")
+        guard let secrets = self.secrets else {
+            fatalError("Developer forgot to set secrets on DownloadManager")
+        }
+
+        guard let fileHandler = self.fileHandler else {
+            fatalError("Developer forgot to set fileHandler on DownloadManager")
         }
 
         var request: URLRequest
         var headers: [String: String] = ["Accept": "*/*"]
 
         // reload cookies if they exist
-        let cookies = try? await env.secrets!.loadCookies()
+        let cookies = try? await secrets.loadCookies()
         if let cookies {
             // cookies existed, let's add them to our HTTPHeaders
             headers.merge(HTTPCookie.requestHeaderFields(with: cookies)) { (current, _) in current }
@@ -81,7 +84,7 @@ class DownloadManager {
             let delegate = DownloadDelegate(
                 target: downloadTarget,
                 continuation: continuation,
-                fileHandler: env.fileHandler,
+                fileHandler: fileHandler,
                 log: self.log
             )
             let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)

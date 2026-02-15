@@ -77,7 +77,8 @@ final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
 
 @MainActor
 final class MockedAppleDownloader: AppleDownloaderProtocol {
-    var environment: Environment?
+    var urlSession: URLSessionProtocol?
+    var secrets: SecretsHandlerProtocol?
 
     func list(force: Bool) async throws -> DownloadList {
         if !force {
@@ -87,8 +88,7 @@ final class MockedAppleDownloader: AppleDownloaderProtocol {
         }
 
         // For forced list, check mocked URLSession data
-        guard let env = environment,
-            let mockedSession = env.urlSessionData as? MockedURLSession,
+        guard let mockedSession = urlSession as? MockedURLSession,
             let data = mockedSession.nextData,
             let response = mockedSession.nextResponse as? HTTPURLResponse
         else {

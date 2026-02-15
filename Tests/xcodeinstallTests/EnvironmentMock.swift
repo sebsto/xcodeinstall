@@ -47,7 +47,8 @@ final class MockedEnvironment: xcodeinstall.Environment {
     var authenticator: AppleAuthenticatorProtocol = MockedAppleAuthentication()
     var downloader: AppleDownloaderProtocol {
         let mockedDownloader = MockedAppleDownloader()
-        mockedDownloader.environment = self
+        mockedDownloader.urlSession = self.urlSessionData
+        mockedDownloader.secrets = self.secrets
         return mockedDownloader
     }
 
