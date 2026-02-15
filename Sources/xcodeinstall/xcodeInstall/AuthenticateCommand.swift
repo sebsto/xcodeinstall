@@ -64,6 +64,9 @@ extension XCodeInstall {
                 "🛑 \(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available."
             )
 
+        } catch let error as SecretsStorageAWSError {
+            display("🛑 AWS Error: \(error.localizedDescription)")
+
         } catch {
             display("🛑 Unexpected Error : \(error)")
         }

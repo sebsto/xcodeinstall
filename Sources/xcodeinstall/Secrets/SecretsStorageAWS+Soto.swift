@@ -20,13 +20,15 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
 
     let log: Logger
     let maxRetries = 3
+    let profileName: String?
 
     let awsClient: AWSClient?  // var for injection
     let smClient: SecretsManager?  // var for injection
 
-    private init(awsClient: AWSClient? = nil, smClient: SecretsManager? = nil, log: Logger) {
+    private init(awsClient: AWSClient? = nil, smClient: SecretsManager? = nil, profileName: String? = nil, log: Logger) {
         self.awsClient = awsClient
         self.smClient = smClient
+        self.profileName = profileName
         self.log = log
     }
 
@@ -65,8 +67,20 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
         return SecretsStorageAWSSoto(
             awsClient: awsClient ?? newAwsClient!,
             smClient: smClient ?? newSMClient!,
+            profileName: profileName,
             log: log
         )
+    }
+
+    /// Wraps CredentialProviderError with profile context for better diagnostics
+    private func wrapCredentialError(_ error: Error) -> Error {
+        if error is CredentialProviderError {
+            return SecretsStorageAWSError.noCredentialProvider(
+                profileName: profileName,
+                underlyingError: error
+            )
+        }
+        return error
     }
 
     deinit {
@@ -193,7 +207,7 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
 
         } catch {
             log.error("Unexpected error while updating secrets\n\(error)")
-            throw error
+            throw wrapCredentialError(error)
         }
     }
 
@@ -221,7 +235,7 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
 
         } catch {
             log.error("Unexpected error while retrieving secrets\n\(error)")
-            throw error
+            throw wrapCredentialError(error)
 
         }
 
