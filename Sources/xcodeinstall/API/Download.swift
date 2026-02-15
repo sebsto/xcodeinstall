@@ -13,8 +13,13 @@ import FoundationEssentials
 import Foundation
 #endif
 
+enum ListSource {
+    case cache
+    case network
+}
+
 protocol AppleDownloaderProtocol: Sendable {
-    func list(force: Bool) async throws -> DownloadList
+    func list(force: Bool) async throws -> (DownloadList, ListSource)
     func download(file: DownloadList.File) async throws -> AsyncThrowingStream<DownloadProgress, Error>
 }
 
