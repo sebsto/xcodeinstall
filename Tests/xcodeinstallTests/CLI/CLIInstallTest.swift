@@ -16,6 +16,7 @@ extension CLITests {
 
         // given
         let env: MockedEnvironment = MockedEnvironment(progressBar: MockedProgressBar())
+        let deps = env.toDeps(log: log)
         let inst = try parse(
             MainCommand.Install.self,
             [
@@ -27,7 +28,7 @@ extension CLITests {
         )
 
         // when
-        await #expect(throws: Never.self) { try await inst.run(with: env) }
+        await #expect(throws: Never.self) { try await inst.run(with: deps) }
 
         // test parsing of commandline arguments
         #expect(inst.globalOptions.verbose)
@@ -46,7 +47,8 @@ extension CLITests {
 
         // given
         let env: MockedEnvironment = MockedEnvironment(readLine: MockedReadLine(["0"]))
-        let xci = XCodeInstall(log: log, env: env)
+        let deps = env.toDeps(log: log)
+        let xci = XCodeInstall(log: log, deps: deps)
 
         // when
         do {

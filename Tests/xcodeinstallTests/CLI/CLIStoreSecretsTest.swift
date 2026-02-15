@@ -23,11 +23,14 @@ extension CLITests {
 
         // given
         let mockedRL = MockedReadLine(["username", "password"])
-        let env: Environment = MockedEnvironment(readLine: mockedRL)
+        let env = MockedEnvironment(readLine: mockedRL)
         // use the real AWS Secrets Handler, but with a mocked SDK
         let mockedSDK = try MockedSecretsStorageAWSSDK.forRegion("us-east-1", log: log)
         let secretsHandler = try SecretsStorageAWS(sdk: mockedSDK, log: log)
-        env.setSecretsHandler(secretsHandler)
+        env.secrets = secretsHandler
+
+        var deps = env.toDeps(log: log)
+        deps.secrets = secretsHandler
 
         let storeSecrets = try parse(
             MainCommand.StoreSecrets.self,
@@ -40,7 +43,7 @@ extension CLITests {
 
         // when
         do {
-            try await storeSecrets.run(with: env)
+            try await storeSecrets.run(with: deps)
         } catch _ as CredentialProviderError {
             // ignore
             // it allows to run the test on machines not configured for AWS
@@ -64,7 +67,8 @@ extension CLITests {
         // given
         let mockedRL = MockedReadLine(["username", "password"])
         let env = MockedEnvironment(readLine: mockedRL)
-        let xci = XCodeInstall(log: log, env: env)
+        let deps = env.toDeps(log: log)
+        let xci = XCodeInstall(log: log, deps: deps)
 
         // when
         do {

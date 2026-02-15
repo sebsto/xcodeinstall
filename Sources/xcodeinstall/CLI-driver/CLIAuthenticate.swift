@@ -31,10 +31,10 @@ extension MainCommand {
             try await run(with: nil)
         }
 
-        func run(with env: Environment?) async throws {
+        func run(with deps: AppDependencies?) async throws {
 
             let xci = try await MainCommand.XCodeInstaller(
-                with: env,
+                with: deps,
                 for: cloudOption.secretManagerRegion,
                 verbose: globalOptions.verbose,
             )
@@ -53,10 +53,10 @@ extension MainCommand {
             try await run(with: nil)
         }
 
-        func run(with env: Environment?) async throws {
+        func run(with deps: AppDependencies?) async throws {
 
             let xci = try await MainCommand.XCodeInstaller(
-                with: env,
+                with: deps,
                 for: cloudOption.secretManagerRegion,
                 verbose: globalOptions.verbose
             )

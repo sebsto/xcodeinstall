@@ -66,7 +66,7 @@ struct MainCommand: AsyncParsableCommand {
     )
 
     public static func XCodeInstaller(
-        with env: (any Environment)? = nil,
+        with deps: AppDependencies? = nil,
         for region: String? = nil,
         verbose: Bool
     ) async throws -> XCodeInstall {
@@ -78,18 +78,40 @@ struct MainCommand: AsyncParsableCommand {
             logger.logLevel = .error
         }
 
-        let xci: XCodeInstall!
-        let runtimeEnv: any Environment = (env == nil ? await RuntimeEnvironment(region: region, log: logger) : env!)
+        if let deps {
+            return await XCodeInstall(log: logger, deps: deps)
+        }
+
+        let fileHandler = await FileHandler(log: logger)
+        let urlSession = URLSession.shared
+
+        var secrets: SecretsHandlerProtocol
+        var authenticator: AppleAuthenticatorProtocol
+        var downloader: AppleDownloaderProtocol
 
         if let region {
-            // overwrite the secret storage
-            let secretStorage = try await SecretsStorageAWS(region: region, log: logger)
-            await runtimeEnv.setSecretsHandler(secretStorage)
-            xci = await XCodeInstall(log: logger, env: runtimeEnv)
+            let awsSecrets = try await SecretsStorageAWS(region: region, log: logger)
+            secrets = awsSecrets
         } else {
-            // the env creates a file-based secrets storage by default
-            xci = await XCodeInstall(log: logger, env: runtimeEnv)
+            secrets = await SecretsStorageFile(log: logger)
         }
-        return xci
+
+        authenticator = await AppleAuthenticator(secrets: secrets, urlSession: urlSession, log: logger)
+        downloader = await AppleDownloader(secrets: secrets, urlSession: urlSession, fileHandler: fileHandler, log: logger)
+
+        let deps = await AppDependencies(
+            fileHandler: fileHandler,
+            display: Display(),
+            readLine: ReadLine(),
+            progressBar: CLIProgressBar(),
+            secrets: secrets,
+            authenticator: authenticator,
+            downloader: downloader,
+            urlSessionData: urlSession,
+            shell: SystemShell(),
+            log: logger
+        )
+
+        return await XCodeInstall(log: logger, deps: deps)
     }
 }

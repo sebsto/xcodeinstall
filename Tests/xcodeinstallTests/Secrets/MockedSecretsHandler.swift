@@ -5,6 +5,7 @@
 //  Created by Stormacq, Sebastien on 15/09/2022.
 //
 
+import CLIlib
 import Foundation
 import Logging
 import Synchronization
@@ -18,10 +19,15 @@ import FoundationNetworking
 @MainActor
 final class MockedSecretsHandler: SecretsHandlerProtocol {
     var nextError: SecretsStorageAWSError?
-    var env: Environment
-    public init(env: inout MockedEnvironment, nextError: SecretsStorageAWSError? = nil) {
+    var readLine: ReadLineProtocol
+    public init(readLine: ReadLineProtocol, nextError: SecretsStorageAWSError? = nil) {
         self.nextError = nextError
-        self.env = env
+        self.readLine = readLine
+    }
+
+    /// Convenience init that extracts readLine from a MockedEnvironment
+    public convenience init(env: inout MockedEnvironment, nextError: SecretsStorageAWSError? = nil) {
+        self.init(readLine: env.readLine, nextError: nextError)
     }
 
     func clearSecrets() async throws {
@@ -48,15 +54,13 @@ final class MockedSecretsHandler: SecretsHandlerProtocol {
         if let nextError = nextError {
             throw nextError
         }
-        guard let rl = env.readLine as? MockedReadLine else {
+        guard let rl = readLine as? MockedReadLine else {
             fatalError("Invalid Mocked Environment")
         }
 
         return AppleCredentialsSecret(username: rl.readLine(prompt: "")!, password: rl.readLine(prompt: "")!)
     }
     func storeAppleCredentials(_ credentials: xcodeinstall.AppleCredentialsSecret) async throws {
-        //TODO: how can we set region on env.awsSDK ? We just have a copy of the env here
-        // print("set region !!!")
     }
 
 }

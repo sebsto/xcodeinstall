@@ -15,12 +15,12 @@ extension XCodeInstall {
 
     func authenticate(with authenticationMethod: AuthenticationMethod) async throws {
 
-        let auth = self.env.authenticator
+        let auth = self.deps.authenticator
 
         do {
 
             // delete previous session, if any
-            try await self.env.secrets!.clearSecrets()
+            try await self.deps.secrets!.clearSecrets()
             let appleCredentials = try await retrieveAppleCredentials()
 
             if authenticationMethod == .usernamePassword {
@@ -77,7 +77,7 @@ extension XCodeInstall {
         do {
             // first try on AWS Secrets Manager
             display("Retrieving Apple Developer Portal credentials...")
-            appleCredentials = try await self.env.secrets!.retrieveAppleCredentials()
+            appleCredentials = try await self.deps.secrets!.retrieveAppleCredentials()
 
         } catch SecretsStorageAWSError.invalidOperation {
 
@@ -105,7 +105,7 @@ extension XCodeInstall {
         )
 
         guard
-            let username = self.env.readLine.readLine(
+            let username = self.deps.readLine.readLine(
                 prompt: "⌨️  Enter your Apple ID username: ",
                 silent: false
             )
@@ -114,7 +114,7 @@ extension XCodeInstall {
         }
 
         guard
-            let password = self.env.readLine.readLine(
+            let password = self.deps.readLine.readLine(
                 prompt: "⌨️  Enter your Apple ID password: ",
                 silent: true
             )
@@ -128,7 +128,7 @@ extension XCodeInstall {
     // manage the MFA authentication sequence
     private func startMFAFlow() async throws {
 
-        let auth: any AppleAuthenticatorProtocol = self.env.authenticator
+        let auth: any AppleAuthenticatorProtocol = self.deps.authenticator
 
         do {
 
@@ -136,7 +136,7 @@ extension XCodeInstall {
             assert(codeLength > 0)
 
             let prompt = "🔐 Two factors authentication is enabled, enter your 2FA code: "
-            guard let pinCode = self.env.readLine.readLine(prompt: prompt, silent: false) else {
+            guard let pinCode = self.deps.readLine.readLine(prompt: prompt, silent: false) else {
                 throw CLIError.invalidInput
             }
             try await auth.twoFactorAuthentication(pin: pinCode)

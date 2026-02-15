@@ -17,17 +17,17 @@ import Foundation
 final class XCodeInstall {
 
     let log: Logger
-    var env: Environment
+    var deps: AppDependencies
 
-    public init(log: Logger, env: Environment) {
+    public init(log: Logger, deps: AppDependencies) {
         self.log = log
-        self.env = env
+        self.deps = deps
     }
 
     // display a message to the user
     // avoid having to replicate the \n torough the code
     func display(_ msg: String, terminator: String = "\n") {
-        self.env.display.display(msg, terminator: terminator)
+        self.deps.display.display(msg, terminator: terminator)
     }
 
 }

@@ -21,11 +21,11 @@ extension XCodeInstall {
         datePublished: Bool
     ) async throws -> [DownloadList.Download] {
 
-        let download = self.env.downloader
+        let download = self.deps.downloader
 
         display("Loading list of available downloads ", terminator: "")
         display(
-            "\(force ? "forced download from Apple Developer Portal" : "fetched from cache in \(self.env.fileHandler.baseFilePath())")"
+            "\(force ? "forced download from Apple Developer Portal" : "fetched from cache in \(self.deps.fileHandler.baseFilePath())")"
         )  // swiftlint:disable:this line_length
 
         do {
@@ -33,7 +33,7 @@ extension XCodeInstall {
             display("✅ Done")
 
             let parser = DownloadListParser(
-                fileHandler: self.env.fileHandler,
+                fileHandler: self.deps.fileHandler,
                 xCodeOnly: xCodeOnly,
                 majorVersion: majorVersion,
                 sortMostRecentFirst: sortMostRecentFirst
@@ -45,7 +45,7 @@ extension XCodeInstall {
 
             display("")
             display("👉 Here is the list of available downloads:")
-            display("Files marked with (*) are already downloaded in \(self.env.fileHandler.baseFilePath()) ")
+            display("Files marked with (*) are already downloaded in \(self.deps.fileHandler.baseFilePath()) ")
             display("")
             let string = parser.prettyPrint(list: enrichedList, withDate: datePublished)
             display(string)
