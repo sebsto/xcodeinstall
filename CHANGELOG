@@ -1,3 +1,11 @@
+## version 0.15
+
+- add `--profile` (`-p`) option to specify an AWS profile name from `~/.aws/credentials` or `~/.aws/config`
+- add support for `aws login` (SSO) style credentials in the credential provider chain
+- automatically prompt and store Apple credentials in Secrets Manager when they don't exist yet (no need to run `storesecrets` first)
+- improved error messages when AWS credentials are not found or profile name is invalid
+- update README
+
 ## version 0.3
 
 - Build scripts now produce a fat binary (multiple commits)
