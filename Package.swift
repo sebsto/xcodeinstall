@@ -28,7 +28,7 @@ let package = Package(
         // .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"), 
         .package(url: "https://github.com/soto-project/soto.git", from: "7.10.0"), 
         
-        .package(url: "https://github.com/sebsto/CLIlib/", branch: "main"),
+        .package(url: "https://github.com/tuist/Noora", .upToNextMajor(from: "0.15.0")),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
         
         // disable "SubprocessSpan" until Swift 6.2.1 is resolved
@@ -49,7 +49,7 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "SotoSecretsManager", package: "soto"),
                 .product(name: "SRP", package: "swift-srp"),
-                .product(name: "CLIlib", package: "CLIlib"),
+                .product(name: "Noora", package: "Noora"),
                 .product(name: "_CryptoExtras", package: "swift-crypto"),
                 .product(name: "Subprocess", package: "swift-subprocess"),
                 .product(name: "SystemPackage", package: "swift-system"),
