@@ -19,7 +19,7 @@ extension XCodeInstall {
 
         display("Signing out...")
         try await auth.signout()
-        display("✅ Signed out.")
+        display("Signed out.", style: .success)
 
     }
 }

@@ -19,6 +19,7 @@ enum DisplayStyle {
     case error(nextSteps: [String] = [])
     case warning
     case info
+    case security
 }
 
 @MainActor

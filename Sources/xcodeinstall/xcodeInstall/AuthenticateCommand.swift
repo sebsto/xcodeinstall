@@ -37,11 +37,11 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
             switch option {
             case .trustedDevice(let len):
                 codeLength = len
-                prompt = "🔐 Enter your \(codeLength)-digit 2FA code: "
+                prompt = "Enter your \(codeLength)-digit 2FA code: "
             case .sms(let phone, let len):
                 codeLength = len
                 let phoneDesc = phone.obfuscatedNumber ?? "unknown"
-                prompt = "🔐 Enter the \(codeLength)-digit code sent to \(phoneDesc): "
+                prompt = "Enter the \(codeLength)-digit code sent to \(phoneDesc): "
             }
 
             guard let code = deps.readLine.readLine(prompt: prompt, silent: false) else {
@@ -51,7 +51,7 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
         }
 
         // Multiple options — present a menu
-        display("🔐 Choose verification method:")
+        display("Choose verification method:", style: .security)
         for (i, option) in options.enumerated() {
             switch option {
             case .trustedDevice:
@@ -74,7 +74,7 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
 
         switch selected {
         case .trustedDevice(let codeLength):
-            let prompt = "🔐 Enter your \(codeLength)-digit 2FA code: "
+            let prompt = "Enter your \(codeLength)-digit 2FA code: "
             guard let code = deps.readLine.readLine(prompt: prompt, silent: false) else {
                 throw CLIError.invalidInput
             }
@@ -90,6 +90,10 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
 
     private func display(_ msg: String, terminator: String = "\n") {
         deps.display.display(msg, terminator: terminator)
+    }
+
+    private func display(_ msg: String, style: DisplayStyle) {
+        deps.display.display(msg, style: style)
     }
 
     private func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
@@ -110,7 +114,7 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
                 display("Apple credentials secret exists but is empty.")
                 appleCredentials = try promptForCredentials(storingToAWS: true)
                 try await secrets.storeAppleCredentials(appleCredentials)
-                display("✅ Credentials stored in AWS Secrets Manager")
+                display("Credentials stored in AWS Secrets Manager", style: .security)
             }
 
         } catch SecretsStorageAWSError.invalidOperation {
@@ -126,7 +130,7 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
             display("Apple credentials not found in AWS Secrets Manager, capturing them now...")
             appleCredentials = try promptForCredentials(storingToAWS: true)
             try await secrets.storeAppleCredentials(appleCredentials)
-            display("✅ Credentials stored in AWS Secrets Manager")
+            display("Credentials stored in AWS Secrets Manager", style: .security)
 
         } catch {
 
@@ -143,22 +147,24 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
                 """
                 Your Apple ID credentials will be securely stored in AWS Secrets Manager
                 for future authentication.
-                """
+                """,
+                style: .security
             )
         } else {
             display(
                 """
-                ⚠️⚠️ We prompt you for your Apple ID username, password, and two factors authentication code.
-                These values are not stored anywhere. They are used to get an Apple session ID. ⚠️⚠️
+                We prompt you for your Apple ID username, password, and two factors authentication code.
+                These values are not stored anywhere. They are used to get an Apple session ID.
 
                 Alternatively, you may store your credentials on AWS Secrets Manager
-                """
+                """,
+                style: .security
             )
         }
 
         guard
             let username = deps.readLine.readLine(
-                prompt: "⌨️  Enter your Apple ID username: ",
+                prompt: "Enter your Apple ID username: ",
                 silent: false
             )
         else {
@@ -167,7 +173,7 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
 
         guard
             let password = deps.readLine.readLine(
-                prompt: "⌨️  Enter your Apple ID password: ",
+                prompt: "Enter your Apple ID password: ",
                 silent: true
             )
         else {
@@ -198,47 +204,50 @@ extension XCodeInstall {
                 display("Authenticating...")
             }
             try await auth.authenticate(with: authenticationMethod, delegate: delegate)
-            display("✅ Authenticated.")
+            display("Authenticated.", style: .success)
 
         } catch AuthenticationError.invalidUsernamePassword {
 
             // handle invalid username or password
-            display("🛑 Invalid username or password.")
+            display("Invalid username or password.", style: .error())
 
         } catch AuthenticationError.requires2FATrustedPhoneNumber {
 
             display(
                 """
-                🔐 Two factors authentication is enabled but no verification methods are available.
+                Two factors authentication is enabled but no verification methods are available.
                 Please ensure you have trusted devices or phone numbers configured:
                 https://support.apple.com/en-us/HT204915
-                """
+                """,
+                style: .security
             )
 
         } catch AuthenticationError.serviceUnavailable {
 
             // service unavailable means that the authentication method requested is not available
-            display("🛑 Requested authentication method is not available. Try with SRP.")
+            display("Requested authentication method is not available. Try with SRP.", style: .error())
 
         } catch AuthenticationError.unableToRetrieveAppleServiceKey(let error) {
 
             // handle connection errors
             display(
-                "🛑 Can not connect to Apple Developer Portal.\nOriginal error : \(error?.localizedDescription ?? "nil")"
+                "Can not connect to Apple Developer Portal.\nOriginal error : \(error?.localizedDescription ?? "nil")",
+                style: .error()
             )
 
         } catch AuthenticationError.notImplemented(let feature) {
 
             // handle not yet implemented errors
             display(
-                "🛑 \(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available."
+                "\(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available.",
+                style: .error()
             )
 
         } catch let error as SecretsStorageAWSError {
-            display("🛑 AWS Error: \(error.localizedDescription)")
+            display("AWS Error: \(error.localizedDescription)", style: .error())
 
         } catch {
-            display("🛑 Unexpected Error : \(error)")
+            display("Unexpected Error : \(error)", style: .error())
         }
     }
 

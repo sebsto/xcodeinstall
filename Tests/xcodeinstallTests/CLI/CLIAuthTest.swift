@@ -36,7 +36,7 @@ extension CLITests {
 
         }
 
-        assertDisplay("✅ Signed out.")
+        assertDisplay("Signed out.")
     }
 
     @Test("Test Authenticate")
@@ -66,7 +66,7 @@ extension CLITests {
         }
 
         // mocked authentication succeeded
-        assertDisplay(env: env, "✅ Authenticated.")
+        assertDisplay(env: env, "Authenticated.")
 
         // two prompts have been proposed (username + password via delegate)
         #expect((env.readLine as! MockedReadLine).input.count == 0)
@@ -89,7 +89,7 @@ extension CLITests {
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
         }
 
-        assertDisplay(env: env, "🛑 Invalid username or password.")
+        assertDisplay(env: env, "Invalid username or password.")
 
     }
 
@@ -121,7 +121,7 @@ extension CLITests {
         // all inputs have been consumed (username, password, MFA code)
         #expect((env.readLine as! MockedReadLine).input.count == 0)
 
-        assertDisplay(env: env, "✅ Authenticated.")
+        assertDisplay(env: env, "Authenticated.")
     }
 
     @Test("Test Authenticate MFA Trusted Phone Number Error")
@@ -146,7 +146,7 @@ extension CLITests {
 
         assertDisplayStartsWith(
             env: env,
-            "🔐 Two factors authentication is enabled"
+            "Two factors authentication is enabled"
         )
     }
 

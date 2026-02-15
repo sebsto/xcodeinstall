@@ -19,7 +19,6 @@ struct HTTPClientTests {
     var sessionData: MockedURLSession!
     var sessionDownload: MockedURLSession!
     var client: HTTPClient!
-    var delegate: DownloadDelegate!
     var env: MockedEnvironment
     var log = Logger(label: "HTTPClientTests")
 

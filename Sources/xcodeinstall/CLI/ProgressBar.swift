@@ -33,17 +33,18 @@ class StringBuffer: OutputBuffer {
 extension FileHandle: OutputBuffer {
 
     func write(_ text: String) {
-        guard let data = text.data(using: .utf8) else { return }
+        guard let textData = text.data(using: .utf8) else { return }
 
-        let backslashR = "\r".data(using: .utf8)!
-
-        write(backslashR)
-        write(data)
+        // Combine \r + text into a single write to avoid recursive calls
+        var payload = Data()
+        payload.append(0x0D)  // \r — carriage return to beginning of line
+        payload.append(textData)
+        self.write(payload)
     }
 
     func clear() {
-        let clearLineString = "\u{001B}[2K \r"
-        write(clearLineString)
+        guard let data = "\u{001B}[2K\r".data(using: .utf8) else { return }
+        self.write(data)
     }
 }
 

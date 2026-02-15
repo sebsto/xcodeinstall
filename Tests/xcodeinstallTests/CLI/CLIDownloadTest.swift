@@ -67,7 +67,7 @@ extension CLITests {
         }
 
         // mocked list succeeded
-        assertDisplay(env: env, "✅ file downloaded")
+        assertDisplay(env: env, "file downloaded")
 
     }
 
@@ -103,7 +103,7 @@ extension CLITests {
         #expect(!download.downloadListOptions.datePublished)
 
         // mocked list succeeded
-        assertDisplay("✅ \(fileName) downloaded")
+        assertDisplay("\(fileName) downloaded")
     }
 
     @Test("Test Download with incorrect file name")
@@ -138,7 +138,7 @@ extension CLITests {
         #expect(!download.downloadListOptions.datePublished)
 
         // mocked list succeeded
-        assertDisplay("🛑 Unknown file name : xxx.xip")
+        assertDisplay("Unknown file name : xxx.xip")
     }
 
 }

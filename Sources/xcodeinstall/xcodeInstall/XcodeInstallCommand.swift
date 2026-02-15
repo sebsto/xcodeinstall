@@ -29,4 +29,8 @@ final class XCodeInstall {
         self.deps.display.display(msg, terminator: terminator)
     }
 
+    func display(_ msg: String, style: DisplayStyle) {
+        self.deps.display.display(msg, style: style)
+    }
+
 }

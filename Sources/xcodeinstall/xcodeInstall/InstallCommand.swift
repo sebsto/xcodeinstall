@@ -37,31 +37,33 @@ extension XCodeInstall {
 
             try await installer.install(file: fileToInstall!)
             self.deps.progressBar.complete(success: true)
-            display("✅ \(fileToInstall!) installed")
+            display("\(fileToInstall!) installed", style: .success)
         } catch CLIError.invalidInput {
-            display("🛑 Invalid input")
+            display("Invalid input", style: .error())
             self.deps.progressBar.complete(success: false)
         } catch FileHandlerError.noDownloadedList {
-            display("⚠️ There is no downloaded file to be installed")
+            display("There is no downloaded file to be installed", style: .warning)
             self.deps.progressBar.complete(success: false)
         } catch InstallerError.xCodeXIPInstallationError {
-            display("🛑 Can not expand XIP file. Is there enough space on / ? (16GiB required)")
+            display("Can not expand XIP file. Is there enough space on / ? (16GiB required)", style: .error())
             self.deps.progressBar.complete(success: false)
         } catch InstallerError.xCodeMoveInstallationError {
-            display("🛑 Can not move Xcode to /Applications")
+            display("Can not move Xcode to /Applications", style: .error())
             self.deps.progressBar.complete(success: false)
         } catch InstallerError.xCodePKGInstallationError {
             display(
-                "🛑 Can not install additional packages."
+                "Can not install additional packages.",
+                style: .error()
             )
             self.deps.progressBar.complete(success: false)
         } catch InstallerError.unsupportedInstallation {
             display(
-                "🛑 Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)"
+                "Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)",
+                style: .error()
             )
             self.deps.progressBar.complete(success: false)
         } catch {
-            display("🛑 Error while installing \(String(describing: fileToInstall!))")
+            display("Error while installing \(String(describing: fileToInstall!))", style: .error())
             log.debug("\(error)")
             self.deps.progressBar.complete(success: false)
         }
@@ -75,7 +77,7 @@ extension XCodeInstall {
         })
 
         display("")
-        display("👉 Here is the list of available files to install:")
+        display("Here is the list of available files to install:", style: .info)
         display("")
         let printableList = installableFiles.enumerated().map({ (index, fileName) in
             "[\(String(format: "%02d", index))] \(fileName)"
@@ -84,7 +86,7 @@ extension XCodeInstall {
         display("\(installableFiles.count) items")
 
         let response: String? = self.deps.readLine.readLine(
-            prompt: "⌨️  Which one do you want to install? ",
+            prompt: "Which one do you want to install? ",
             silent: false
         )
         guard let number = response,

@@ -22,13 +22,13 @@ extension XCodeInstall {
             let credentials = AppleCredentialsSecret(username: input[0], password: input[1])
 
             try await secretsHandler.storeAppleCredentials(credentials)
-            display("✅ Credentials are securely stored")
+            display("Credentials are securely stored", style: .security)
 
         } catch let error as SecretsStorageAWSError {
-            display("🛑 AWS Error: \(error.localizedDescription)")
+            display("AWS Error: \(error.localizedDescription)", style: .error())
             throw error
         } catch {
-            display("🛑 Unexpected error : \(error)")
+            display("Unexpected error : \(error)", style: .error())
             throw error
         }
 
@@ -41,12 +41,13 @@ extension XCodeInstall {
             This command captures your Apple ID username and password and store them securely in AWS Secrets Manager.
             It allows this command to authenticate automatically, as long as no MFA is prompted.
 
-            """
+            """,
+            style: .security
         )
 
         guard
             let username = self.deps.readLine.readLine(
-                prompt: "⌨️  Enter your Apple ID username: ",
+                prompt: "Enter your Apple ID username: ",
                 silent: false
             )
         else {
@@ -55,7 +56,7 @@ extension XCodeInstall {
 
         guard
             let password = self.deps.readLine.readLine(
-                prompt: "⌨️  Enter your Apple ID password: ",
+                prompt: "Enter your Apple ID password: ",
                 silent: true
             )
         else {
