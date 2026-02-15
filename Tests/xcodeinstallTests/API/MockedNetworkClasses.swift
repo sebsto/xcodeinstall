@@ -54,6 +54,33 @@ final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
     var nextMFAError: AuthenticationError?
     var session: AppleSession?
 
+    func authenticate(
+        with method: AuthenticationMethod,
+        delegate: AuthenticationDelegate
+    ) async throws {
+        // Get credentials from delegate (consumes readline inputs)
+        let (_, _) = try await delegate.requestCredentials()
+
+        if let error = nextError {
+            if error == .requires2FA {
+                // Simulate the authenticator driving MFA internally
+                if let mfaError = nextMFAError {
+                    throw mfaError
+                }
+                let options: [MFAOption] = [.trustedDevice(codeLength: 6)]
+                let (chosen, _) = try await delegate.requestMFACode(options: options)
+
+                // If SMS was chosen, simulate sending SMS and asking for code again
+                if case .sms(let phone, let codeLength) = chosen {
+                    let (_, _) = try await delegate.requestMFACode(options: [.sms(phoneNumber: phone, codeLength: codeLength)])
+                }
+                // MFA succeeded (mock doesn't actually verify)
+                return
+            }
+            throw error
+        }
+    }
+
     func startAuthentication(
         with authenticationMethod: AuthenticationMethod,
         username: String,

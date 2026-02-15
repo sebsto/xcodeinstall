@@ -94,6 +94,7 @@ protocol SecretsStorageAWSSDKProtocol {
     static func forRegion(_ region: String, profileName: String?, log: Logger) throws -> SecretsStorageAWSSDKProtocol
     func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws
     func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T
+    func shutdown() async throws
 }
 
 // permissions needed
@@ -115,6 +116,10 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
     }
 
     // MARK: protocol implementation
+
+    func shutdown() async throws {
+        try await awsSDK.shutdown()
+    }
 
     // I do not delete the secrets because there is a 30 days deletion policy
     // https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_DeleteSecret.html

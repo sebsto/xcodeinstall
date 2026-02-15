@@ -290,4 +290,204 @@ extension AuthenticationTests {
         }
         """
     }
+
+    private func getMFATypeWithHiddenSMS() -> String {
+        """
+         {
+           "trustedPhoneNumbers" : [ {
+             "numberWithDialCode" : "+33 •• •• •• •• 88",
+             "pushMode" : "sms",
+             "obfuscatedNumber" : "•• •• •• •• 88",
+             "lastTwoDigits" : "88",
+             "id" : 2
+           } ],
+           "securityCode" : {
+             "length" : 6,
+             "tooManyCodesSent" : false,
+             "tooManyCodesValidated" : false,
+             "securityCodeLocked" : false,
+             "securityCodeCooldown" : false
+           },
+           "authenticationType" : "hsa2",
+           "hideSendSMSCodeOption" : true,
+           "hsa2Account" : true,
+           "restrictedAccount" : false,
+           "managedAccount" : false
+         }
+        """
+    }
+
+    // MARK: - SMS MFA Tests
+
+    @Test("buildMFAOptions includes SMS options for each phone number")
+    func testBuildMFAOptionsIncludesSMS() async {
+        let data = getMFATypeOK().data(using: .utf8)!
+        let mfaType = try! JSONDecoder().decode(MFAType.self, from: data)
+
+        let authenticator = getAppleAuthenticator()
+        let options = authenticator.buildMFAOptions(from: mfaType)
+
+        // Should have trustedDevice + 1 SMS option (one phone number in test data)
+        #expect(options.count == 2)
+
+        // First option is trusted device
+        if case .trustedDevice(let codeLength) = options[0] {
+            #expect(codeLength == 6)
+        } else {
+            Issue.record("First option should be trustedDevice")
+        }
+
+        // Second option is SMS
+        if case .sms(let phone, let codeLength) = options[1] {
+            #expect(codeLength == 6)
+            #expect(phone.id == 2)
+            #expect(phone.lastTwoDigits == "88")
+        } else {
+            Issue.record("Second option should be sms")
+        }
+    }
+
+    @Test("buildMFAOptions hides SMS when hideSendSMSCodeOption is true")
+    func testBuildMFAOptionsHidesSMS() async {
+        let data = getMFATypeWithHiddenSMS().data(using: .utf8)!
+        let mfaType = try! JSONDecoder().decode(MFAType.self, from: data)
+
+        let authenticator = getAppleAuthenticator()
+        let options = authenticator.buildMFAOptions(from: mfaType)
+
+        // Should only have trustedDevice, no SMS
+        #expect(options.count == 1)
+        if case .trustedDevice(let codeLength) = options[0] {
+            #expect(codeLength == 6)
+        } else {
+            Issue.record("Only option should be trustedDevice")
+        }
+    }
+
+    @Test("buildMFAOptions defaults code length to 6 when securityCode is missing")
+    func testBuildMFAOptionsDefaultCodeLength() async {
+        let data = getMFATypeNoSecurityCode().data(using: .utf8)!
+        let mfaType = try! JSONDecoder().decode(MFAType.self, from: data)
+
+        let authenticator = getAppleAuthenticator()
+        let options = authenticator.buildMFAOptions(from: mfaType)
+
+        // Should have trustedDevice + 1 SMS (securityCode is nil, defaults to 6)
+        #expect(options.count == 2)
+
+        if case .trustedDevice(let codeLength) = options[0] {
+            #expect(codeLength == 6)
+        } else {
+            Issue.record("First option should be trustedDevice")
+        }
+
+        if case .sms(_, let codeLength) = options[1] {
+            #expect(codeLength == 6)
+        } else {
+            Issue.record("Second option should be sms")
+        }
+    }
+
+    @Test("requestSMSCode sends correct API request")
+    func testRequestSMSCode() async {
+        let url = "https://dummy"
+
+        self.sessionData.nextData = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )
+
+        let authenticator = getAppleAuthenticator()
+        authenticator.session = getAppleSession()
+
+        let _ = await #expect(throws: Never.self) {
+            try await authenticator.requestSMSCode(phoneId: 2)
+        }
+    }
+
+    @Test("verifySMSCode succeeds with 200 status")
+    func testVerifySMSCodeSuccess() async {
+        let url = "https://dummy"
+
+        self.sessionData.nextData = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )
+
+        let authenticator = getAppleAuthenticator()
+        authenticator.session = getAppleSession()
+
+        let _ = await #expect(throws: Never.self) {
+            try await authenticator.verifySMSCode("123456", phoneId: 2)
+        }
+    }
+
+    @Test("verifySMSCode throws invalidPinCode on 400 status")
+    func testVerifySMSCodeInvalidPin() async {
+        let url = "https://dummy"
+
+        self.sessionData.nextData = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 400,
+            httpVersion: nil,
+            headerFields: nil
+        )
+
+        let authenticator = getAppleAuthenticator()
+        authenticator.session = getAppleSession()
+
+        let error = await #expect(throws: AuthenticationError.self) {
+            try await authenticator.verifySMSCode("000000", phoneId: 2)
+        }
+        #expect(error == AuthenticationError.invalidPinCode)
+    }
+
+    @Test("verifySMSCode throws accountNeedsRepair on 412 status")
+    func testVerifySMSCodeAccountNeedsRepair() async {
+        let url = "https://dummy"
+
+        self.sessionData.nextData = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 412,
+            httpVersion: nil,
+            headerFields: ["Location": "https://repair.apple.com"]
+        )
+
+        let authenticator = getAppleAuthenticator()
+        authenticator.session = getAppleSession()
+
+        let error = await #expect(throws: AuthenticationError.self) {
+            try await authenticator.verifySMSCode("123456", phoneId: 2)
+        }
+        #expect(error == AuthenticationError.accountNeedsRepair(location: "https://repair.apple.com", repairToken: "secret"))
+    }
+
+    @Test("verifySMSCode throws unexpectedHTTPReturnCode on unknown status")
+    func testVerifySMSCodeUnexpectedStatus() async {
+        let url = "https://dummy"
+
+        self.sessionData.nextData = Data()
+        self.sessionData.nextResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 300,
+            httpVersion: nil,
+            headerFields: nil
+        )
+
+        let authenticator = getAppleAuthenticator()
+        authenticator.session = getAppleSession()
+
+        let error = await #expect(throws: AuthenticationError.self) {
+            try await authenticator.verifySMSCode("123456", phoneId: 2)
+        }
+        #expect(error == AuthenticationError.unexpectedHTTPReturnCode(code: 300))
+    }
 }

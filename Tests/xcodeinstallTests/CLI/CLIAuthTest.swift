@@ -21,6 +21,7 @@ import FoundationEssentials
 
 extension CLITests {
 
+    @Test("Test Signout")
     func testSignout() async throws {
 
         // given
@@ -38,6 +39,7 @@ extension CLITests {
         assertDisplay("✅ Signed out.")
     }
 
+    @Test("Test Authenticate")
     func testAuthenticate() async throws {
 
         // given
@@ -66,12 +68,12 @@ extension CLITests {
         // mocked authentication succeeded
         assertDisplay(env: env, "✅ Authenticated.")
 
-        // two prompts have been proposed
-        // print((env.readLine as! MockedReadLine).input)
+        // two prompts have been proposed (username + password via delegate)
         #expect((env.readLine as! MockedReadLine).input.count == 0)
 
     }
 
+    @Test("Test Authenticate Invalid User Or Password")
     func testAuthenticateInvalidUserOrpassword() async throws {
 
         // given
@@ -91,29 +93,6 @@ extension CLITests {
 
     }
 
-    //    func testAuthenticateMFATrustedDevice() async throws {
-    //
-    //        // given
-    //        let mockedReadline = MockedReadLine(["username", "password"])
-    //        let xci = xcodeinstall(input: mockedReadline,
-    //                               nextError: AuthenticationError.requires2FA,
-    //                               nextMFAError: AuthenticationError.requires2FATrustedDevice)
-    //
-    //        // when
-    //        do {
-    //            _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
-    //            try await xci.authenticate()
-    //
-    //        } catch {
-    //            // then
-    //            XCTAssert(false, "unexpected exception : \(error)")
-    //        }
-    //
-    //        print((mockedDisplay as! MockedDisplay).string)
-    //        assertDisplayStartsWith("🔐 Two factors authentication is enabled, with 4 digit code and trusted devices.")
-    //
-    //    }
-
     func getAppleSession() -> AppleSession {
         AppleSession(
             itcServiceKey: AppleServiceKey(authServiceUrl: "url", authServiceKey: "key"),
@@ -121,43 +100,54 @@ extension CLITests {
             scnt: "scnt"
         )
     }
-    func testAuthenticateMFATrustedPhoneNumber() async throws {
 
-        // given
-        let env = MockedEnvironment(readLine: MockedReadLine(["username", "password", "1234"]))
+    @Test("Test Authenticate MFA Trusted Device via Delegate")
+    func testAuthenticateMFATrustedDevice() async throws {
+
+        // given — username, password, and MFA code
+        let env = MockedEnvironment(readLine: MockedReadLine(["username", "password", "123456"]))
         let authenticator = (env.authenticator as! MockedAppleAuthentication)
         authenticator.nextError = AuthenticationError.requires2FA
-        (self.secretsHandler as! MockedSecretsHandler).nextError = SecretsStorageAWSError.invalidOperation
-        let session: MockedURLSession = env.urlSessionData as! MockedURLSession
-        session.nextData = getMFATypeOK().data(using: .utf8)
-        let headers = ["X-Apple-ID-Session-Id": "dummySessionID", "scnt": "dummySCNT"]
-        session.nextResponse = HTTPURLResponse(
-            url: URL(string: "https://dummy")!,
-            statusCode: 200,
-            httpVersion: nil,
-            headerFields: headers
-        )
+        // no MFA error — the mock will call delegate.requestMFACode and succeed
 
         let deps = env.toDeps(log: log)
 
         // when
-        let error = await #expect(throws: AuthenticationError.self) {
+        await #expect(throws: Never.self) {
             let xci = XCodeInstall(log: log, deps: deps)
-            _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
-
-        }
-        if case let .unexpectedHTTPReturnCode(code) = error {
-            #expect(code == 500, "Unexpected HTTP return code : \(code)")
-        } else {
-            Issue.record("unexpected exception : \(String(describing: error))")
         }
 
-        // all inputs have been consumed
+        // all inputs have been consumed (username, password, MFA code)
         #expect((env.readLine as! MockedReadLine).input.count == 0)
 
-        assertDisplay(env: env, "✅ Authenticated with MFA.")
+        assertDisplay(env: env, "✅ Authenticated.")
+    }
 
+    @Test("Test Authenticate MFA Trusted Phone Number Error")
+    func testAuthenticateMFATrustedPhoneNumber() async throws {
+
+        // given — username, password (MFA will fail with trustedPhoneNumber error)
+        let env = MockedEnvironment(readLine: MockedReadLine(["username", "password"]))
+        let authenticator = (env.authenticator as! MockedAppleAuthentication)
+        authenticator.nextError = AuthenticationError.requires2FA
+        authenticator.nextMFAError = AuthenticationError.requires2FATrustedPhoneNumber
+
+        let deps = env.toDeps(log: log)
+
+        // when
+        await #expect(throws: Never.self) {
+            let xci = XCodeInstall(log: log, deps: deps)
+            try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
+        }
+
+        // username and password consumed by delegate.requestCredentials()
+        #expect((env.readLine as! MockedReadLine).input.count == 0)
+
+        assertDisplayStartsWith(
+            env: env,
+            "🔐 Two factors authentication is enabled"
+        )
     }
 
     private func getMFATypeOK() -> String {

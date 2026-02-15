@@ -13,72 +13,88 @@ import Foundation
 
 import SotoSecretsManager
 
-extension XCodeInstall {
+// MARK: - CLIAuthenticationDelegate
 
-    func authenticate(with authenticationMethod: AuthenticationMethod) async throws {
+struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
+    let deps: AppDependencies
 
-        let auth = self.deps.authenticator
+    func requestCredentials() async throws -> (username: String, password: String) {
+        let creds = try await retrieveAppleCredentials()
+        return (creds.username, creds.password)
+    }
 
-        do {
+    func requestMFACode(options: [MFAOption]) async throws -> (option: MFAOption, code: String) {
+        guard !options.isEmpty else {
+            throw CLIError.invalidInput
+        }
 
-            // delete previous session, if any
-            try await self.deps.secrets!.clearSecrets()
-            let appleCredentials = try await retrieveAppleCredentials()
+        // Single option — just prompt for the code
+        if options.count == 1 {
+            let option = options[0]
+            let codeLength: Int
+            let prompt: String
 
-            if authenticationMethod == .usernamePassword {
-                display("Authenticating with username and password (likely to fail) ...")
-            } else {
-                display("Authenticating...")
+            switch option {
+            case .trustedDevice(let len):
+                codeLength = len
+                prompt = "🔐 Enter your \(codeLength)-digit 2FA code: "
+            case .sms(let phone, let len):
+                codeLength = len
+                let phoneDesc = phone.obfuscatedNumber ?? "unknown"
+                prompt = "🔐 Enter the \(codeLength)-digit code sent to \(phoneDesc): "
             }
-            try await auth.startAuthentication(
-                with: authenticationMethod,
-                username: appleCredentials.username,
-                password: appleCredentials.password
-            )
-            display("✅ Authenticated.")
 
-        } catch AuthenticationError.invalidUsernamePassword {
+            guard let code = deps.readLine.readLine(prompt: prompt, silent: false) else {
+                throw CLIError.invalidInput
+            }
+            return (option, code)
+        }
 
-            // handle invalid username or password
-            display("🛑 Invalid username or password.")
+        // Multiple options — present a menu
+        display("🔐 Choose verification method:")
+        for (i, option) in options.enumerated() {
+            switch option {
+            case .trustedDevice:
+                display("  \(i + 1). Trusted device")
+            case .sms(let phone, _):
+                let phoneDesc = phone.numberWithDialCode ?? phone.obfuscatedNumber ?? "unknown"
+                display("  \(i + 1). SMS to \(phoneDesc)")
+            }
+        }
 
-        } catch AuthenticationError.requires2FA {
+        guard let choiceStr = deps.readLine.readLine(prompt: "Choice: ", silent: false),
+              let choice = Int(choiceStr),
+              choice > 0,
+              choice <= options.count
+        else {
+            throw CLIError.invalidInput
+        }
 
-            // handle two factors authentication
-            try await startMFAFlow()
+        let selected = options[choice - 1]
 
-        } catch AuthenticationError.serviceUnavailable {
-
-            // service unavailable means that the authentication method requested is not available
-            display("🛑 Requested authentication method is not available. Try with SRP.")
-
-        } catch AuthenticationError.unableToRetrieveAppleServiceKey(let error) {
-
-            // handle connection errors
-            display(
-                "🛑 Can not connect to Apple Developer Portal.\nOriginal error : \(error?.localizedDescription ?? "nil")"
-            )
-
-        } catch AuthenticationError.notImplemented(let feature) {
-
-            // handle not yet implemented errors
-            display(
-                "🛑 \(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available."
-            )
-
-        } catch let error as SecretsStorageAWSError {
-            display("🛑 AWS Error: \(error.localizedDescription)")
-
-        } catch {
-            display("🛑 Unexpected Error : \(error)")
+        switch selected {
+        case .trustedDevice(let codeLength):
+            let prompt = "🔐 Enter your \(codeLength)-digit 2FA code: "
+            guard let code = deps.readLine.readLine(prompt: prompt, silent: false) else {
+                throw CLIError.invalidInput
+            }
+            return (selected, code)
+        case .sms:
+            // Return empty code — the authenticator will send the SMS
+            // and call requestMFACode again with just this SMS option
+            return (selected, "")
         }
     }
 
-    // retrieve apple developer portal credentials.
-    // either from AWS Secrets Manager, either interactively
+    // MARK: - Credential retrieval (moved from XCodeInstall)
+
+    private func display(_ msg: String, terminator: String = "\n") {
+        deps.display.display(msg, terminator: terminator)
+    }
+
     private func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
 
-        guard let secrets = self.deps.secrets else {
+        guard let secrets = deps.secrets else {
             // no secrets backend configured, prompt interactively
             return try promptForCredentials()
         }
@@ -121,7 +137,6 @@ extension XCodeInstall {
         return appleCredentials
     }
 
-    // prompt user for apple developer portal credentials interactively
     private func promptForCredentials(storingToAWS: Bool = false) throws -> AppleCredentialsSecret {
         if storingToAWS {
             display(
@@ -142,7 +157,7 @@ extension XCodeInstall {
         }
 
         guard
-            let username = self.deps.readLine.readLine(
+            let username = deps.readLine.readLine(
                 prompt: "⌨️  Enter your Apple ID username: ",
                 silent: false
             )
@@ -151,7 +166,7 @@ extension XCodeInstall {
         }
 
         guard
-            let password = self.deps.readLine.readLine(
+            let password = deps.readLine.readLine(
                 prompt: "⌨️  Enter your Apple ID password: ",
                 silent: true
             )
@@ -161,34 +176,69 @@ extension XCodeInstall {
 
         return AppleCredentialsSecret(username: username, password: password)
     }
+}
 
-    // manage the MFA authentication sequence
-    private func startMFAFlow() async throws {
+// MARK: - XCodeInstall authenticate command
 
-        let auth: any AppleAuthenticatorProtocol = self.deps.authenticator
+extension XCodeInstall {
+
+    func authenticate(with authenticationMethod: AuthenticationMethod) async throws {
+
+        let auth = self.deps.authenticator
+        let delegate = CLIAuthenticationDelegate(deps: self.deps)
 
         do {
 
-            let codeLength = try await auth.handleTwoFactorAuthentication()
-            assert(codeLength > 0)
+            // delete previous session, if any
+            try await self.deps.secrets?.clearSecrets()
 
-            let prompt = "🔐 Two factors authentication is enabled, enter your 2FA code: "
-            guard let pinCode = self.deps.readLine.readLine(prompt: prompt, silent: false) else {
-                throw CLIError.invalidInput
+            if authenticationMethod == .usernamePassword {
+                display("Authenticating with username and password (likely to fail) ...")
+            } else {
+                display("Authenticating...")
             }
-            try await auth.twoFactorAuthentication(pin: pinCode)
-            display("✅ Authenticated with MFA.")
+            try await auth.authenticate(with: authenticationMethod, delegate: delegate)
+            display("✅ Authenticated.")
+
+        } catch AuthenticationError.invalidUsernamePassword {
+
+            // handle invalid username or password
+            display("🛑 Invalid username or password.")
 
         } catch AuthenticationError.requires2FATrustedPhoneNumber {
 
             display(
                 """
-                🔐 Two factors authentication is enabled, with 4 digits code and trusted phone numbers.
-                This tool does not support SMS MFA at the moment. Please enable 2 factors authentication
-                with trusted devices as described here: https://support.apple.com/en-us/HT204915
+                🔐 Two factors authentication is enabled but no verification methods are available.
+                Please ensure you have trusted devices or phone numbers configured:
+                https://support.apple.com/en-us/HT204915
                 """
             )
 
+        } catch AuthenticationError.serviceUnavailable {
+
+            // service unavailable means that the authentication method requested is not available
+            display("🛑 Requested authentication method is not available. Try with SRP.")
+
+        } catch AuthenticationError.unableToRetrieveAppleServiceKey(let error) {
+
+            // handle connection errors
+            display(
+                "🛑 Can not connect to Apple Developer Portal.\nOriginal error : \(error?.localizedDescription ?? "nil")"
+            )
+
+        } catch AuthenticationError.notImplemented(let feature) {
+
+            // handle not yet implemented errors
+            display(
+                "🛑 \(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available."
+            )
+
+        } catch let error as SecretsStorageAWSError {
+            display("🛑 AWS Error: \(error.localizedDescription)")
+
+        } catch {
+            display("🛑 Unexpected Error : \(error)")
         }
     }
 

@@ -64,9 +64,16 @@ protocol SecretsHandlerProtocol: Sendable {
 
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret
     func storeAppleCredentials(_ credentials: AppleCredentialsSecret) async throws
+
+    /// Gracefully shut down any underlying resources (e.g. AWS clients).
+    /// Default implementation is a no-op for backends that don't need it.
+    func shutdown() async throws
 }
 
 extension SecretsHandlerProtocol {
+
+    // Default no-op for backends that don't need cleanup
+    func shutdown() async throws {}
 
     ///
     /// Merge given cookies with the one stored already

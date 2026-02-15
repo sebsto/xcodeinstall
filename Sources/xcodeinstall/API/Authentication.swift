@@ -128,13 +128,37 @@ struct AppleSession: Codable, Equatable {
     }
 }
 
+// MARK: - AuthenticationDelegate
+
+/// Verification methods the user can choose from
+enum MFAOption: Sendable {
+    case trustedDevice(codeLength: Int)
+    case sms(phoneNumber: MFAType.PhoneNumber, codeLength: Int)
+}
+
+/// Delegate that the authenticator calls when it needs user interaction
+protocol AuthenticationDelegate: Sendable {
+    /// Called when credentials are needed (username/password)
+    func requestCredentials() async throws -> (username: String, password: String)
+
+    /// Called when MFA is required. Presents available options and returns the chosen option + code.
+    func requestMFACode(options: [MFAOption]) async throws -> (option: MFAOption, code: String)
+}
+
 /**
  Manage authentication with an Apple ID
  */
 
 protocol AppleAuthenticatorProtocol: Sendable {
 
-    // standard authentication methods
+    /// Runs the full authentication flow, including MFA if needed.
+    /// Uses the delegate for any user interaction.
+    func authenticate(
+        with method: AuthenticationMethod,
+        delegate: AuthenticationDelegate
+    ) async throws
+
+    // legacy methods — kept for backward compatibility
     func startAuthentication(
         with: AuthenticationMethod,
         username: String,
@@ -150,6 +174,44 @@ protocol AppleAuthenticatorProtocol: Sendable {
 
 //FIXME: TODO: split into two classes : UsernamePasswordAuthenticator and SRPAuthenticator
 class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
+
+    func authenticate(
+        with method: AuthenticationMethod,
+        delegate: AuthenticationDelegate
+    ) async throws {
+        let (username, password) = try await delegate.requestCredentials()
+
+        do {
+            try await startAuthentication(with: method, username: username, password: password)
+        } catch AuthenticationError.requires2FA {
+            try await performMFA(delegate: delegate)
+        }
+    }
+
+    private func performMFA(delegate: AuthenticationDelegate) async throws {
+        let mfaType = try await getMFAType()
+        let options = buildMFAOptions(from: mfaType)
+
+        guard !options.isEmpty else {
+            throw AuthenticationError.requires2FATrustedPhoneNumber
+        }
+
+        let (chosen, code) = try await delegate.requestMFACode(options: options)
+
+        switch chosen {
+        case .trustedDevice:
+            try await twoFactorAuthentication(pin: code)
+        case .sms(let phone, let codeLength):
+            guard let phoneId = phone.id else {
+                throw AuthenticationError.requires2FATrustedPhoneNumber
+            }
+            // Send the SMS
+            try await requestSMSCode(phoneId: phoneId)
+            // Ask for the code (the delegate will prompt the user for the code they received)
+            let (_, smsCode) = try await delegate.requestMFACode(options: [.sms(phoneNumber: phone, codeLength: codeLength)])
+            try await verifySMSCode(smsCode, phoneId: phoneId)
+        }
+    }
 
     func startAuthentication(
         with authenticationMethod: AuthenticationMethod,

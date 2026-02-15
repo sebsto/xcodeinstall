@@ -63,6 +63,10 @@ extension MainCommand {
                 verbose: globalOptions.verbose
             )
             try await xci.signout()
+
+            // Gracefully shut down AWS client before process exits
+            // to avoid RotatingCredentialProvider crash during deallocation
+            try? await xci.deps.secrets?.shutdown()
         }
     }
 
