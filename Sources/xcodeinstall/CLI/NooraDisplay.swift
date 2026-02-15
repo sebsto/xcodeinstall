@@ -19,7 +19,8 @@ final class NooraDisplay: DisplayProtocol {
     func display(_ msg: String, terminator: String, style: DisplayStyle) {
         switch style {
         case .normal:
-            print(msg, terminator: terminator)
+            let styledText: TerminalText = TerminalText("\(msg)\(terminator)")
+            noora.passthrough(styledText, pipeline: .output)            
         case .success:
             noora.success(SuccessAlert(stringLiteral: msg))
         case .error(let nextSteps):
@@ -34,7 +35,8 @@ final class NooraDisplay: DisplayProtocol {
         case .info:
             noora.info(InfoAlert(stringLiteral: msg))
         case .security:
-            print("🔐 \(msg)", terminator: terminator)
+            let styledText: TerminalText = TerminalText("🔐 \(msg)\(terminator)")
+            noora.passthrough(styledText, pipeline: .output)            
         }
     }
 }
