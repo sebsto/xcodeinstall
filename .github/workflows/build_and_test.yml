@@ -20,7 +20,7 @@ jobs:
     runs-on: self-hosted
     steps:
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: Build
       run: xcodebuild -scheme xcodeinstall -destination "platform=macOS" | /opt/homebrew/bin/xcbeautify
       # disabled until the libswiftCompatibilitySpan.dylib issue is solved (with swift 6.2.1, Xcode 26.1)
@@ -33,7 +33,7 @@ jobs:
     runs-on: self-hosted
     steps:
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: Run tests
       run: xcodebuild test -scheme xcodeinstall -destination 'platform=macOS,arch=arm64' | /opt/homebrew/bin/xcbeautify
       # disabled until the libswiftCompatibilitySpan.dylib issue is solved (with swift 6.2.1, Xcode 26.1)
