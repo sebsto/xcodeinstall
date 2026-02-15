@@ -37,7 +37,6 @@ protocol Environment: Sendable {
     var authenticator: AppleAuthenticatorProtocol { get }
     var downloader: AppleDownloaderProtocol { get }
     var urlSessionData: URLSessionProtocol { get }
-    var downloadManager: DownloadManager { get }
     func run(
         _ executable: Executable,
         arguments: Arguments,
@@ -61,12 +60,10 @@ final class RuntimeEnvironment: Environment {
         let fileHandler = FileHandler(log: log)
         let secrets = SecretsStorageFile(log: log)
         let urlSession = URLSession.shared
-        let downloadManager = DownloadManager(logger: log)
 
         self._fileHandler = fileHandler
         self._secrets = secrets
         self.urlSessionData = urlSession
-        self.downloadManager = downloadManager
 
         // construct authenticator and downloader with their actual dependencies
         self._authenticator = AppleAuthenticator(
@@ -78,7 +75,6 @@ final class RuntimeEnvironment: Environment {
             secrets: secrets,
             urlSession: urlSession,
             fileHandler: fileHandler,
-            downloadManager: downloadManager,
             log: log
         )
     }
@@ -113,7 +109,6 @@ final class RuntimeEnvironment: Environment {
             secrets: newValue,
             urlSession: urlSessionData,
             fileHandler: _fileHandler,
-            downloadManager: downloadManager,
             log: log
         )
     }
@@ -132,7 +127,6 @@ final class RuntimeEnvironment: Environment {
 
     // Network
     let urlSessionData: URLSessionProtocol
-    let downloadManager: DownloadManager
 
     func run(
         _ executable: Executable,

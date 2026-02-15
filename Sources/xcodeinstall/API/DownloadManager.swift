@@ -37,30 +37,20 @@ struct DownloadProgress: Sendable {
     }
 }
 
-class DownloadManager {
+struct DownloadManager {
 
-    var secrets: SecretsHandlerProtocol? = nil
-    var fileHandler: FileHandlerProtocol? = nil
-    var downloadTarget: DownloadTarget? = nil
     private let log: Logger
 
     public init(logger: Logger) {
         self.log = logger
     }
 
-    func download(from url: String) async throws -> AsyncThrowingStream<DownloadProgress, Error> {
-
-        guard let downloadTarget = self.downloadTarget else {
-            fatalError("Developer forgot to set the download target")
-        }
-
-        guard let secrets = self.secrets else {
-            fatalError("Developer forgot to set secrets on DownloadManager")
-        }
-
-        guard let fileHandler = self.fileHandler else {
-            fatalError("Developer forgot to set fileHandler on DownloadManager")
-        }
+    func download(
+        from url: String,
+        target downloadTarget: DownloadTarget,
+        secrets: SecretsHandlerProtocol,
+        fileHandler: FileHandlerProtocol
+    ) async throws -> AsyncThrowingStream<DownloadProgress, Error> {
 
         var request: URLRequest
         var headers: [String: String] = ["Accept": "*/*"]
@@ -94,7 +84,6 @@ class DownloadManager {
     }
 
     // prepare an URLRequest for a given url, method, body, and headers
-    // https://softwareengineering.stackexchange.com/questions/100959/how-do-you-unit-test-private-methods
     internal func request(
         for url: String,
         method: HTTPVerb = .GET,
@@ -124,6 +113,7 @@ class DownloadManager {
         return request
     }
 }
+
 
 // MARK: Download Delegate functions
 final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
@@ -171,7 +161,7 @@ final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
             if let data = try? Data(contentsOf: location),
                 let content = String(data: data, encoding: .utf8),
                 content.contains("<Error>") || content.contains("AccessDenied")
-                    || content.contains("Sign in to your Apple Account")
+                    || content.contains("Sign in to your Apple Account")
             {
                 throw DownloadError.authenticationRequired
             }

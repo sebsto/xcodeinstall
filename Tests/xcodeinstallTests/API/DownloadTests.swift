@@ -29,10 +29,7 @@ final class DownloadTests {
 
     // MARK: - Helper Methods
     func getDownloadManager() -> DownloadManager {
-        let dm = DownloadManager(logger: log)
-        dm.secrets = env.secrets
-        dm.fileHandler = env.fileHandler
-        return dm
+        DownloadManager(logger: log)
     }
 
     func setSessionData(data: Data?, response: HTTPURLResponse?) {
@@ -50,8 +47,9 @@ extension DownloadTests {
         // Given & When
         let dm = getDownloadManager()
 
-        // Then
-        #expect(dm.secrets != nil)
+        // Then — struct is always valid, just verify we can build a request
+        let request = dm.request(for: "https://example.com")
+        #expect(request.url?.absoluteString == "https://example.com")
     }
 
     @Test("Test Request Building")
@@ -73,22 +71,11 @@ extension DownloadTests {
     @Test("Test Download Target Configuration")
     func testDownloadTargetConfiguration() {
         // Given
-        let dm = getDownloadManager()
         let dstPath = URL(fileURLWithPath: "/tmp/test.xip")
         let target = DownloadTarget(totalFileSize: 1000, dstFilePath: dstPath)
 
-        // When
-        dm.downloadTarget = target
-
         // Then
-        #expect(dm.downloadTarget?.totalFileSize == 1000)
-        #expect(dm.downloadTarget?.dstFilePath == dstPath)
-    }
-}
-
-// MARK: - Mock Extensions
-extension MockedEnvironment {
-    var downloadManager: DownloadManager {
-        DownloadManager(logger: Logger(label: "MockedDownloadManager"))
+        #expect(target.totalFileSize == 1000)
+        #expect(target.dstFilePath == dstPath)
     }
 }
