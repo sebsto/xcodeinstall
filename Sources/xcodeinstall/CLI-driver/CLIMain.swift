@@ -6,7 +6,6 @@
 //
 
 import ArgumentParser
-import CLIlib
 import Logging
 
 #if canImport(FoundationEssentials)
@@ -108,8 +107,8 @@ struct MainCommand: AsyncParsableCommand {
 
         let deps = await AppDependencies(
             fileHandler: fileHandler,
-            display: Display(),
-            readLine: ReadLine(),
+            display: NooraDisplay(),
+            readLine: NooraReadLine(),
             progressBar: CLIProgressBar(),
             secrets: secrets,
             authenticator: authenticator,

@@ -5,7 +5,6 @@
 //  Created by Stormacq, Sebastien on 04/09/2022.
 //
 
-import CLIlib
 import Logging
 import SotoSecretsManager
 

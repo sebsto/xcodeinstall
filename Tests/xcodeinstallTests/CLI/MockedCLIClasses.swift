@@ -5,7 +5,6 @@
 //  Created by Stormacq, Sebastien on 15/08/2022.
 //
 
-import CLIlib
 import Foundation
 
 @testable import xcodeinstall
@@ -18,7 +17,7 @@ import Foundation
 final class MockedDisplay: DisplayProtocol {
     var string: String = ""
 
-    func display(_ msg: String, terminator: String) {
+    func display(_ msg: String, terminator: String, style: DisplayStyle) {
         self.string = msg + terminator
     }
 }

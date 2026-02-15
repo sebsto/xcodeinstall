@@ -5,7 +5,6 @@
 //  Created by Stormacq, Sebastien on 27/08/2022.
 //
 
-import CLIlib
 import Foundation
 
 @testable import xcodeinstall
@@ -81,7 +80,7 @@ class MockedProgressBar: CLIProgressBarProtocol {
     var text = ""
     private var _defineCalled = false
 
-    func define(animationType: CLIlib.ProgressBarType, message: String) {
+    func define(animationType: ProgressBarType, message: String) {
         _defineCalled = true
     }
     func defineCalled() -> Bool {
