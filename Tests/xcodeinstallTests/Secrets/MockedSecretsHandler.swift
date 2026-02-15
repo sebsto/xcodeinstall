@@ -77,7 +77,7 @@ final class MockedSecretsStorageAWSSDK: SecretsStorageAWSSDKProtocol {
         appleCredentials = .init(AppleCredentialsSecret(username: "", password: ""))
     }
 
-    static func forRegion(_ region: String, log: Logger) throws -> any xcodeinstall.SecretsStorageAWSSDKProtocol {
+    static func forRegion(_ region: String, profileName: String? = nil, log: Logger) throws -> any xcodeinstall.SecretsStorageAWSSDKProtocol {
         let mock = try MockedSecretsStorageAWSSDK()
         mock._regionSet.withLock { $0 = true }
         return mock

@@ -30,11 +30,12 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
         self.log = log
     }
 
-    static func forRegion(_ region: String, log: Logger) throws -> SecretsStorageAWSSDKProtocol {
-        try SecretsStorageAWSSoto.forRegion(region, awsClient: nil, smClient: nil, log: log)
+    static func forRegion(_ region: String, profileName: String? = nil, log: Logger) throws -> SecretsStorageAWSSDKProtocol {
+        try SecretsStorageAWSSoto.forRegion(region, profileName: profileName, awsClient: nil, smClient: nil, log: log)
     }
     static func forRegion(
         _ region: String,
+        profileName: String? = nil,
         awsClient: AWSClient? = nil,
         smClient: SecretsManager? = nil,
         log: Logger
@@ -45,7 +46,12 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
         var newAwsClient: AWSClient? = nil
         if awsClient == nil {
             newAwsClient = AWSClient(
-                credentialProvider: .selector(.environment, .ec2, .configFile()),
+                credentialProvider: .selector(
+                    .environment,
+                    .ec2,
+                    .configFile(profile: profileName),
+                    .login()
+                ),
                 retryPolicy: .jitter()
             )
         }

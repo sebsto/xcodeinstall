@@ -37,6 +37,12 @@ struct MainCommand: AsyncParsableCommand {
             help: "Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region"
         )
         var secretManagerRegion: String?
+
+        @Option(
+            name: [.customLong("profile"), .customShort("p")],
+            help: "The AWS profile name to use for authentication (from ~/.aws/credentials and ~/.aws/config)"
+        )
+        var profileName: String?
     }
 
     @OptionGroup var globalOptions: GlobalOptions
@@ -68,6 +74,7 @@ struct MainCommand: AsyncParsableCommand {
     public static func XCodeInstaller(
         with deps: AppDependencies? = nil,
         for region: String? = nil,
+        profileName: String? = nil,
         verbose: Bool
     ) async throws -> XCodeInstall {
 
@@ -90,7 +97,7 @@ struct MainCommand: AsyncParsableCommand {
         var downloader: AppleDownloaderProtocol
 
         if let region {
-            let awsSecrets = try await SecretsStorageAWS(region: region, log: logger)
+            let awsSecrets = try await SecretsStorageAWS(region: region, profileName: profileName, log: logger)
             secrets = awsSecrets
         } else {
             secrets = await SecretsStorageFile(log: logger)

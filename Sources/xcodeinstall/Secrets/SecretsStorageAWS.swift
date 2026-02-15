@@ -69,7 +69,7 @@ struct AppleSessionSecret: Codable, Secrets {
 
 // the methods that must be implemented by the class encapsulating the SDK we are using
 protocol SecretsStorageAWSSDKProtocol {
-    static func forRegion(_ region: String, log: Logger) throws -> SecretsStorageAWSSDKProtocol
+    static func forRegion(_ region: String, profileName: String?, log: Logger) throws -> SecretsStorageAWSSDKProtocol
     func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws
     func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T
 }
@@ -83,12 +83,12 @@ protocol SecretsStorageAWSSDKProtocol {
 class SecretsStorageAWS: SecretsHandlerProtocol {
     let log: Logger
     let awsSDK: SecretsStorageAWSSDKProtocol
-    public init(sdk: SecretsStorageAWSSDKProtocol? = nil, region: String = "us-east-1", log: Logger) throws {
+    public init(sdk: SecretsStorageAWSSDKProtocol? = nil, region: String = "us-east-1", profileName: String? = nil, log: Logger) throws {
         self.log = log
         if let sdk {
             self.awsSDK = sdk
         } else {
-            self.awsSDK = try SecretsStorageAWSSoto.forRegion(region, log: self.log)
+            self.awsSDK = try SecretsStorageAWSSoto.forRegion(region, profileName: profileName, log: self.log)
         }
     }
 
