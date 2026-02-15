@@ -154,6 +154,9 @@ struct FileHandler: FileHandlerProtocol {
 
     func saveDownloadList(list: DownloadList) throws -> DownloadList {
 
+        // ensure base directory exists before saving
+        let _: URL = baseFilePath()
+
         // save list
         let data = try JSONEncoder().encode(list)
         try data.write(to: downloadListPath())
