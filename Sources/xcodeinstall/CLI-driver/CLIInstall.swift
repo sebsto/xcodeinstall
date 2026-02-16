@@ -40,7 +40,11 @@ extension MainCommand {
                 verbose: globalOptions.verbose
             )
 
-            _ = try await xci.install(file: name)
+            do {
+                try await xci.install(file: name)
+            } catch {
+                throw ExitCode.failure
+            }
         }
     }
 }

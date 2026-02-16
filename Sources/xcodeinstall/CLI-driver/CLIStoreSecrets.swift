@@ -50,7 +50,12 @@ extension MainCommand {
                 verbose: globalOptions.verbose
             )
 
-            _ = try await xci.storeSecrets()
+            do {
+                _ = try await xci.storeSecrets()
+            } catch {
+                try? await xci.deps.secrets?.shutdown()
+                throw ExitCode.failure
+            }
 
             // Gracefully shut down AWS client before process exits
             // to avoid RotatingCredentialProvider crash during deallocation

@@ -141,6 +141,7 @@ struct DownloadListParser {
     }
 }
 
+// Thread-safe: isolated to @MainActor via defaultIsolation(MainActor.self) in Package.swift
 private let appleDownloadDateFormatter: DateFormatter = {
     let f = DateFormatter()
     f.locale = Locale(identifier: "en_US_POSIX")

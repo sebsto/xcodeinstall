@@ -5,6 +5,7 @@
 //  Created by Stormacq, Sebastien on 22/08/2022.
 //
 
+import ArgumentParser
 import Testing
 
 @testable import xcodeinstall
@@ -28,7 +29,7 @@ extension CLITests {
         )
 
         // when
-        await #expect(throws: Never.self) { try await inst.run(with: deps) }
+        await #expect(throws: ExitCode.self) { try await inst.run(with: deps) }
 
         // test parsing of commandline arguments
         #expect(inst.globalOptions.verbose)

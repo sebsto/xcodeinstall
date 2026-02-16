@@ -85,16 +85,21 @@ extension XCodeInstall {
                 "Session expired, you need to re-authenticate.",
                 style: .error(nextSteps: ["xcodeinstall authenticate"])
             )
+            throw DownloadError.authenticationRequired
         } catch CLIError.userCancelled {
             return
         } catch CLIError.invalidInput {
             display("Invalid input", style: .error())
+            throw CLIError.invalidInput
         } catch DownloadError.unknownFile(let fileName) {
             display("Unknown file name : \(fileName)", style: .error())
+            throw DownloadError.unknownFile(file: fileName)
         } catch let error as SecretsStorageAWSError {
             display("AWS Error: \(error.localizedDescription)", style: .error())
+            throw error
         } catch {
             display("Unexpected error : \(error)", style: .error())
+            throw error
         }
     }
 

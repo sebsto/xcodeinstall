@@ -44,14 +44,19 @@ extension MainCommand {
                 verbose: globalOptions.verbose
             )
 
-            try await xci.download(
-                fileName: name,
-                force: downloadListOptions.force,
-                xCodeOnly: downloadListOptions.onlyXcode,
-                majorVersion: downloadListOptions.xCodeVersion,
-                sortMostRecentFirst: downloadListOptions.mostRecentFirst,
-                datePublished: downloadListOptions.datePublished
-            )
+            do {
+                try await xci.download(
+                    fileName: name,
+                    force: downloadListOptions.force,
+                    xCodeOnly: downloadListOptions.onlyXcode,
+                    majorVersion: downloadListOptions.xCodeVersion,
+                    sortMostRecentFirst: downloadListOptions.mostRecentFirst,
+                    datePublished: downloadListOptions.datePublished
+                )
+            } catch {
+                try? await xci.deps.secrets?.shutdown()
+                throw ExitCode.failure
+            }
 
             // Gracefully shut down AWS client before process exits
             // to avoid RotatingCredentialProvider crash during deallocation
