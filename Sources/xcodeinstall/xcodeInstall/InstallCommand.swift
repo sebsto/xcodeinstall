@@ -101,6 +101,10 @@ extension XCodeInstall {
             throw CLIError.invalidInput
         }
 
+        guard num >= 0, num < installableFiles.count else {
+            throw CLIError.invalidInput
+        }
+
         return self.deps.fileHandler.downloadDirectory().appendingPathComponent(installableFiles[num])
     }
 }

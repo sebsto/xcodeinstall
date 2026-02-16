@@ -119,6 +119,10 @@ extension XCodeInstall {
 
         let num = try askUser(prompt: "Which one do you want to download? ")
 
+        guard num >= 0, num < parsedList.count else {
+            throw CLIError.invalidInput
+        }
+
         if parsedList[num].files.count == 1 {
             return parsedList[num].files[0]
         } else {
@@ -131,6 +135,9 @@ extension XCodeInstall {
             line += "\n Which one do you want to download? "
 
             let fileNum = try askUser(prompt: line)
+            guard fileNum >= 0, fileNum < parsedList[num].files.count else {
+                throw CLIError.invalidInput
+            }
             return parsedList[num].files[fileNum]
         }
     }
