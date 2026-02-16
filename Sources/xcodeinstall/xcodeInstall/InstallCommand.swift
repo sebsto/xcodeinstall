@@ -31,7 +31,7 @@ extension XCodeInstall {
             if nil == file {
                 fileToInstall = try promptForFile()
             } else {
-                fileToInstall = FileHandler(log: self.log).downloadDirectory().appendingPathComponent(file!)
+                fileToInstall = self.deps.fileHandler.downloadDirectory().appendingPathComponent(file!)
             }
             log.debug("Going to attempt to install \(fileToInstall!.path)")
 
@@ -99,6 +99,6 @@ extension XCodeInstall {
             throw CLIError.invalidInput
         }
 
-        return FileHandler(log: self.log).downloadDirectory().appendingPathComponent(installableFiles[num])
+        return self.deps.fileHandler.downloadDirectory().appendingPathComponent(installableFiles[num])
     }
 }
