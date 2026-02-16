@@ -51,6 +51,7 @@ final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
 
     var nextError: AuthenticationError?
     var nextMFAError: AuthenticationError?
+    var nextGenericError: (any Error)?
     var session: AppleSession?
 
     func authenticate(
@@ -59,6 +60,11 @@ final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
     ) async throws {
         // Get credentials from delegate (consumes readline inputs)
         let (_, _) = try await delegate.requestCredentials()
+
+        // Allow tests to throw arbitrary (non-AuthenticationError) errors
+        if let genericError = nextGenericError {
+            throw genericError
+        }
 
         if let error = nextError {
             if error == .requires2FA {
@@ -91,7 +97,10 @@ final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
         }
 
     }
-    func signout() async throws {}
+    var nextSignoutError: Error?
+    func signout() async throws {
+        if let nextSignoutError { throw nextSignoutError }
+    }
     func handleTwoFactorAuthentication() async throws -> Int {
         if let nextMFAError {
             throw nextMFAError
@@ -110,13 +119,15 @@ final class MockedAppleDownloader: AppleDownloaderProtocol {
     func list(force: Bool) async throws -> (DownloadList, ListSource) {
         if let error = nextListError { throw error }
         if let list = nextListResult { return (list, nextListSource) }
-        // Default: load from test data (cache behavior)
+        // Default: load from test data
         let listData = try loadTestData(file: .downloadList)
         let list = try JSONDecoder().decode(DownloadList.self, from: listData)
-        return (list, .cache)
+        return (list, nextListSource)
     }
 
+    var nextDownloadError: Error?
     func download(file: DownloadList.File) async throws -> AsyncThrowingStream<DownloadProgress, Error> {
+        if let nextDownloadError { throw nextDownloadError }
         let dm = MockDownloadManager()
         return dm.download(from: URL(string: file.filename)!)
 

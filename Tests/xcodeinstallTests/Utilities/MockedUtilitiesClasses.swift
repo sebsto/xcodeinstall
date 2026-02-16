@@ -30,8 +30,10 @@ final class MockedFileHandler: FileHandlerProtocol, @unchecked Sendable {
             return true
         }
     }
+    var nextDownloadedFilesError: Error? = nil
     func downloadedFiles() throws -> [String] {
-        ["name.pkg", "name.dmg"]
+        if let nextDownloadedFilesError { throw nextDownloadedFilesError }
+        return ["name.pkg", "name.dmg"]
     }
 
     func downloadDirectory() -> URL {

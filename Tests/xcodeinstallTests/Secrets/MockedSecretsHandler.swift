@@ -65,7 +65,9 @@ final class MockedSecretsHandler: SecretsHandlerProtocol {
 
         return AppleCredentialsSecret(username: rl.readLine(prompt: "")!, password: rl.readLine(prompt: "")!)
     }
+    var nextStoreCredentialsError: Error? = nil
     func storeAppleCredentials(_ credentials: xcodeinstall.AppleCredentialsSecret) async throws {
+        if let nextStoreCredentialsError { throw nextStoreCredentialsError }
     }
 
 }

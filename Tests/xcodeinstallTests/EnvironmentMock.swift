@@ -22,6 +22,7 @@ import SystemPackage
 @MainActor
 final class MockedShell: ShellExecuting {
     static var runRecorder = MockedRunRecorder()
+    var nextError: Error? = nil
 
     nonisolated func run(
         _ executable: Executable,
@@ -35,9 +36,14 @@ final class MockedShell: ShellExecuting {
         arguments: Arguments,
         workingDirectory: FilePath?
     ) async throws -> ShellOutput {
-        await MainActor.run {
+        let error = await MainActor.run {
             MockedShell.runRecorder.lastExecutable = executable
             MockedShell.runRecorder.lastArguments = arguments
+            return self.nextError
+        }
+
+        if let error {
+            throw error
         }
 
         return CollectedResult(

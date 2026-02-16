@@ -16,9 +16,11 @@ import Foundation
 // mocked display (use class because string is mutating)
 final class MockedDisplay: DisplayProtocol {
     var string: String = ""
+    var allMessages: [String] = []
 
     func display(_ msg: String, terminator: String, style: DisplayStyle) {
         self.string = msg + terminator
+        self.allMessages.append(msg)
     }
 }
 
@@ -36,6 +38,13 @@ final class MockedReadLine: ReadLineProtocol {
             fatalError("mocked not correctly initialized")
         }
         return input.popLast()
+    }
+}
+
+// mocked read line that always returns nil
+final class NilMockedReadLine: ReadLineProtocol {
+    func readLine(prompt: String, silent: Bool = false) -> String? {
+        return nil
     }
 }
 

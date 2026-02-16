@@ -54,6 +54,15 @@ final class CLITests {
     func assertDisplayStartsWith(_ msg: String) {
         assertDisplayStartsWith(env: self.env, msg)
     }
+
+    func assertDisplayContains(env: MockedEnvironment, _ msg: String) {
+        let allMessages = (env.display as! MockedDisplay).allMessages
+        #expect(allMessages.contains(where: { $0.contains(msg) }))
+    }
+
+    func assertDisplayContains(_ msg: String) {
+        assertDisplayContains(env: self.env, msg)
+    }
 }
 
 // MARK: - Basic CLI Tests
