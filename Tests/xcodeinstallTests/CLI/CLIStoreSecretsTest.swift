@@ -79,9 +79,8 @@ extension CLITests {
             let result = try xci.promptForCredentials()
 
             // then
-            #expect(result.count == 2)
-            #expect(result[0] == "username")
-            #expect(result[1] == "password")
+            #expect(result.username == "username")
+            #expect(result.password == "password")
 
         } catch {
             // then
