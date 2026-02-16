@@ -113,22 +113,7 @@ struct DownloadManager {
         withBody body: Data? = nil,
         withHeaders headers: [String: String]? = nil
     ) -> URLRequest {
-
-        let url = URL(string: url)!
-        var request = URLRequest(url: url)
-        request.httpMethod = method.rawValue
-
-        if let body {
-            request.httpBody = body
-        }
-
-        if let headers {
-            for (key, value) in headers {
-                request.addValue(value, forHTTPHeaderField: key)
-            }
-        }
-
-        return request
+        buildURLRequest(for: url, method: method, withBody: body, withHeaders: headers)
     }
 }
 

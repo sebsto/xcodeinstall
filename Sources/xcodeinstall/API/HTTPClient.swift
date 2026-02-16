@@ -169,26 +169,36 @@ class HTTPClient {
         withBody body: Data? = nil,
         withHeaders headers: [String: String]? = nil
     ) -> URLRequest {
-
-        // create the request
-        let url = URL(string: url)!
-        var request = URLRequest(url: url)
-
-        // add HTTP verb
-        request.httpMethod = method.rawValue
-
-        // add body
-        if let body {
-            request.httpBody = body
-        }
-
-        // add headers
-        if let headers {
-            for (key, value) in headers {
-                request.addValue(value, forHTTPHeaderField: key)
-            }
-        }
-
-        return request
+        buildURLRequest(for: url, method: method, withBody: body, withHeaders: headers)
     }
+}
+
+// Shared URL request builder used by both HTTPClient and DownloadManager.
+internal func buildURLRequest(
+    for url: String,
+    method: HTTPVerb = .GET,
+    withBody body: Data? = nil,
+    withHeaders headers: [String: String]? = nil
+) -> URLRequest {
+
+    // create the request
+    let url = URL(string: url)!
+    var request = URLRequest(url: url)
+
+    // add HTTP verb
+    request.httpMethod = method.rawValue
+
+    // add body
+    if let body {
+        request.httpBody = body
+    }
+
+    // add headers
+    if let headers {
+        for (key, value) in headers {
+            request.addValue(value, forHTTPHeaderField: key)
+        }
+    }
+
+    return request
 }
