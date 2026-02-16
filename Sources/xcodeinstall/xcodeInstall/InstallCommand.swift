@@ -5,7 +5,6 @@
 //  Created by Stormacq, Sebastien on 22/08/2022.
 //
 
-
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -16,7 +15,12 @@ extension XCodeInstall {
 
     func install(file: String?) async throws {
 
-        let installer = ShellInstaller(fileHandler: self.deps.fileHandler, progressBar: self.deps.progressBar, shellExecutor: self.deps.shell, log: self.log)
+        let installer = ShellInstaller(
+            fileHandler: self.deps.fileHandler,
+            progressBar: self.deps.progressBar,
+            shellExecutor: self.deps.shell,
+            log: self.log
+        )
 
         // progress bar to report progress feedback
         let progressBar = self.deps.progressBar

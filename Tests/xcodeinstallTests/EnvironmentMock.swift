@@ -111,7 +111,7 @@ final class MockedEnvironment {
 
     /// Build an AppDependencies from this mock's current state
     func toDeps(log: Logger = Logger(label: "test")) -> AppDependencies {
-        return AppDependencies(
+        AppDependencies(
             fileHandler: self.fileHandler,
             display: self.display,
             readLine: self.readLine,

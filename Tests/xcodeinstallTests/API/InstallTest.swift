@@ -71,7 +71,12 @@ final class InstallTest {
 
         // when
         let _ = await #expect(throws: Never.self) {
-            let installer = ShellInstaller(fileHandler: self.env.fileHandler, progressBar: self.env.progressBar, shellExecutor: self.env.shell, log: self.log)
+            let installer = ShellInstaller(
+                fileHandler: self.env.fileHandler,
+                progressBar: self.env.progressBar,
+                shellExecutor: self.env.shell,
+                log: self.log
+            )
             let _ = try await installer.installPkg(atURL: srcFile)
         }
 
@@ -96,7 +101,12 @@ final class InstallTest {
         // when
         // (give a file name that exists, otherwise, it throws an exception)
         let error = await #expect(throws: InstallerError.self) {
-            let installer = ShellInstaller(fileHandler: self.env.fileHandler, progressBar: self.env.progressBar, shellExecutor: self.env.shell, log: log)
+            let installer = ShellInstaller(
+                fileHandler: self.env.fileHandler,
+                progressBar: self.env.progressBar,
+                shellExecutor: self.env.shell,
+                log: log
+            )
             let _ = try await installer.uncompressXIP(atURL: srcFile)
         }
         #expect(error == InstallerError.fileDoesNotExistOrIncorrect)
@@ -109,7 +119,12 @@ final class InstallTest {
 
         // when
         let _ = await #expect(throws: Never.self) {
-            let installer = ShellInstaller(fileHandler: self.env.fileHandler, progressBar: self.env.progressBar, shellExecutor: self.env.shell, log: log)
+            let installer = ShellInstaller(
+                fileHandler: self.env.fileHandler,
+                progressBar: self.env.progressBar,
+                shellExecutor: self.env.shell,
+                log: log
+            )
             _ = try await installer.moveApp(at: src)
         }
 
@@ -303,7 +318,12 @@ final class InstallTest {
         mfh.nextFileExist = true
 
         // when
-        let installer = ShellInstaller(fileHandler: self.env.fileHandler, progressBar: self.env.progressBar, shellExecutor: self.env.shell, log: log)
+        let installer = ShellInstaller(
+            fileHandler: self.env.fileHandler,
+            progressBar: self.env.progressBar,
+            shellExecutor: self.env.shell,
+            log: log
+        )
         let existAndCorrect = installer.fileMatch(file: file)
 
         // then
@@ -321,7 +341,12 @@ final class InstallTest {
         mfh.nextFileExist = false
 
         // when
-        let installer = ShellInstaller(fileHandler: self.env.fileHandler, progressBar: self.env.progressBar, shellExecutor: self.env.shell, log: log)
+        let installer = ShellInstaller(
+            fileHandler: self.env.fileHandler,
+            progressBar: self.env.progressBar,
+            shellExecutor: self.env.shell,
+            log: log
+        )
         let fileExists = installer.fileMatch(file: file)
 
         // then
@@ -339,7 +364,12 @@ final class InstallTest {
         mfh.nextFileExist = true
 
         // when
-        let installer = ShellInstaller(fileHandler: self.env.fileHandler, progressBar: self.env.progressBar, shellExecutor: self.env.shell, log: log)
+        let installer = ShellInstaller(
+            fileHandler: self.env.fileHandler,
+            progressBar: self.env.progressBar,
+            shellExecutor: self.env.shell,
+            log: log
+        )
         let fileExists = installer.fileMatch(file: file)
 
         // then
@@ -358,7 +388,12 @@ final class InstallTest {
 
         // when
         let error = await #expect(throws: InstallerError.self) {
-            let installer = ShellInstaller(fileHandler: self.env.fileHandler, progressBar: self.env.progressBar, shellExecutor: self.env.shell, log: log)
+            let installer = ShellInstaller(
+                fileHandler: self.env.fileHandler,
+                progressBar: self.env.progressBar,
+                shellExecutor: self.env.shell,
+                log: log
+            )
             try await installer.install(file: file)
         }
         #expect(error == InstallerError.fileDoesNotExistOrIncorrect)
@@ -376,7 +411,12 @@ final class InstallTest {
 
         // when
         let error = await #expect(throws: InstallerError.self) {
-            let installer = ShellInstaller(fileHandler: self.env.fileHandler, progressBar: self.env.progressBar, shellExecutor: self.env.shell, log: log)
+            let installer = ShellInstaller(
+                fileHandler: self.env.fileHandler,
+                progressBar: self.env.progressBar,
+                shellExecutor: self.env.shell,
+                log: log
+            )
             try await installer.install(file: file)
         }
         #expect(error == InstallerError.fileDoesNotExistOrIncorrect)
@@ -394,7 +434,12 @@ final class InstallTest {
 
         // when
         let error = await #expect(throws: InstallerError.self) {
-            let installer = ShellInstaller(fileHandler: self.env.fileHandler, progressBar: self.env.progressBar, shellExecutor: self.env.shell, log: log)
+            let installer = ShellInstaller(
+                fileHandler: self.env.fileHandler,
+                progressBar: self.env.progressBar,
+                shellExecutor: self.env.shell,
+                log: log
+            )
             try await installer.install(file: file)
         }
         #expect(error == InstallerError.unsupportedInstallation)

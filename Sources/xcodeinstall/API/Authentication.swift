@@ -5,7 +5,6 @@
 //  Created by Stormacq, Sebastien on 18/07/2022.
 //
 
-
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -207,7 +206,9 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             // Send the SMS
             try await requestSMSCode(phoneId: phoneId)
             // Ask for the code (the delegate will prompt the user for the code they received)
-            let (_, smsCode) = try await delegate.requestMFACode(options: [.sms(phoneNumber: phone, codeLength: codeLength)])
+            let (_, smsCode) = try await delegate.requestMFACode(options: [
+                .sms(phoneNumber: phone, codeLength: codeLength)
+            ])
             try await verifySMSCode(smsCode, phoneId: phoneId)
         }
     }

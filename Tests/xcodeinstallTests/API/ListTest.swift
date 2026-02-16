@@ -104,7 +104,8 @@ extension DownloadTests {
 
             // given
             self.env.downloader.nextListError = DownloadError.unknownError(
-                errorCode: 9999, errorMessage: "Unknown error"
+                errorCode: 9999,
+                errorMessage: "Unknown error"
             )
 
             // when

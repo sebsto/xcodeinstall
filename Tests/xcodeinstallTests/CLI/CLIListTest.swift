@@ -61,7 +61,13 @@ extension CLITests {
 
         // when
         await #expect(throws: DownloadError.self) {
-            try await xci.list(force: false, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: false, datePublished: false)
+            try await xci.list(
+                force: false,
+                xCodeOnly: true,
+                majorVersion: "14",
+                sortMostRecentFirst: false,
+                datePublished: false
+            )
         }
 
         // then
@@ -78,7 +84,13 @@ extension CLITests {
 
         // when
         await #expect(throws: DownloadError.self) {
-            try await xci.list(force: false, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: false, datePublished: false)
+            try await xci.list(
+                force: false,
+                xCodeOnly: true,
+                majorVersion: "14",
+                sortMostRecentFirst: false,
+                datePublished: false
+            )
         }
 
         // then
@@ -96,7 +108,13 @@ extension CLITests {
 
         // when
         await #expect(throws: DownloadError.self) {
-            try await xci.list(force: false, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: false, datePublished: false)
+            try await xci.list(
+                force: false,
+                xCodeOnly: true,
+                majorVersion: "14",
+                sortMostRecentFirst: false,
+                datePublished: false
+            )
         }
 
         // then
@@ -113,7 +131,13 @@ extension CLITests {
 
         // when
         await #expect(throws: DownloadError.self) {
-            try await xci.list(force: false, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: false, datePublished: false)
+            try await xci.list(
+                force: false,
+                xCodeOnly: true,
+                majorVersion: "14",
+                sortMostRecentFirst: false,
+                datePublished: false
+            )
         }
 
         // then
@@ -130,7 +154,13 @@ extension CLITests {
 
         // when
         await #expect(throws: SecretsStorageAWSError.self) {
-            try await xci.list(force: false, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: false, datePublished: false)
+            try await xci.list(
+                force: false,
+                xCodeOnly: true,
+                majorVersion: "14",
+                sortMostRecentFirst: false,
+                datePublished: false
+            )
         }
 
         // then
@@ -147,7 +177,13 @@ extension CLITests {
 
         // when
         await #expect(throws: MockError.self) {
-            try await xci.list(force: false, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: false, datePublished: false)
+            try await xci.list(
+                force: false,
+                xCodeOnly: true,
+                majorVersion: "14",
+                sortMostRecentFirst: false,
+                datePublished: false
+            )
         }
 
         // then
@@ -164,7 +200,13 @@ extension CLITests {
 
         // when
         await #expect(throws: Never.self) {
-            _ = try await xci.list(force: true, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: false, datePublished: false)
+            _ = try await xci.list(
+                force: true,
+                xCodeOnly: true,
+                majorVersion: "14",
+                sortMostRecentFirst: false,
+                datePublished: false
+            )
         }
 
         // then
@@ -181,7 +223,13 @@ extension CLITests {
 
         // when
         await #expect(throws: Never.self) {
-            _ = try await xci.list(force: false, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: false, datePublished: false)
+            _ = try await xci.list(
+                force: false,
+                xCodeOnly: true,
+                majorVersion: "14",
+                sortMostRecentFirst: false,
+                datePublished: false
+            )
         }
 
         // then

@@ -100,7 +100,7 @@ class ProgressBar: ProgressUpdateProtocol {
 
     func update(step: Int, total: Int, text: String = "") {
 
-        if (!titlePrinted), let title {
+        if !titlePrinted, let title {
             printTitle(title)
         }
 

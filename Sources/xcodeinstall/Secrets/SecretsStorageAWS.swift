@@ -102,7 +102,12 @@ protocol SecretsStorageAWSSDKProtocol {
 class SecretsStorageAWS: SecretsHandlerProtocol {
     let log: Logger
     let awsSDK: SecretsStorageAWSSDKProtocol
-    public init(sdk: SecretsStorageAWSSDKProtocol? = nil, region: String = "us-east-1", profileName: String? = nil, log: Logger) throws {
+    public init(
+        sdk: SecretsStorageAWSSDKProtocol? = nil,
+        region: String = "us-east-1",
+        profileName: String? = nil,
+        log: Logger
+    ) throws {
         self.log = log
         if let sdk {
             self.awsSDK = sdk

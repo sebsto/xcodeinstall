@@ -128,7 +128,7 @@ struct DownloadManager {
 /// All delegate methods are `nonisolated` — they run on URLSession's background
 /// serial queue, not on MainActor. No async callbacks, no isolation conflicts.
 final class DownloadDelegate: NSObject,
-    URLSessionDownloadDelegate 
+    URLSessionDownloadDelegate
 {
     // Safety invariant: all properties are either:
     // - set once in init and never mutated (continuation, totalBytes, startTime, dstPath, fileHandler, log)

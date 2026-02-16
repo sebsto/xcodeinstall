@@ -44,7 +44,7 @@ final class MockedReadLine: ReadLineProtocol {
 // mocked read line that always returns nil
 final class NilMockedReadLine: ReadLineProtocol {
     func readLine(prompt: String, silent: Bool = false) -> String? {
-        return nil
+        nil
     }
 }
 

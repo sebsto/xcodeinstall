@@ -467,7 +467,9 @@ extension AuthenticationTests {
         let error = await #expect(throws: AuthenticationError.self) {
             try await authenticator.verifySMSCode("123456", phoneId: 2)
         }
-        #expect(error == AuthenticationError.accountNeedsRepair(location: "https://repair.apple.com", repairToken: "secret"))
+        #expect(
+            error == AuthenticationError.accountNeedsRepair(location: "https://repair.apple.com", repairToken: "secret")
+        )
     }
 
     @Test("verifySMSCode throws unexpectedHTTPReturnCode on unknown status")

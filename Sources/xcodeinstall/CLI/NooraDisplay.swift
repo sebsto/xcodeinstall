@@ -20,7 +20,7 @@ final class NooraDisplay: DisplayProtocol {
         switch style {
         case .normal:
             let styledText: TerminalText = TerminalText("\(msg)\(terminator)")
-            noora.passthrough(styledText, pipeline: .output)            
+            noora.passthrough(styledText, pipeline: .output)
         case .success:
             noora.success(SuccessAlert(stringLiteral: msg))
         case .error(let nextSteps):
@@ -36,7 +36,7 @@ final class NooraDisplay: DisplayProtocol {
             noora.info(InfoAlert(stringLiteral: msg))
         case .security:
             let styledText: TerminalText = TerminalText("🔐 \(msg)\(terminator)")
-            noora.passthrough(styledText, pipeline: .output)            
+            noora.passthrough(styledText, pipeline: .output)
         }
     }
 }

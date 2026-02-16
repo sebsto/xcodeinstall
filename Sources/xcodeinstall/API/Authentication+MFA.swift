@@ -5,7 +5,6 @@
 //  Created by Stormacq, Sebastien on 22/07/2022.
 //
 
-
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -146,7 +145,8 @@ extension AppleAuthenticator {
         var options: [MFAOption] = []
         let codeLength = mfaType.securityCode?.length ?? 6
 
-        let isThrottled = mfaType.securityCode?.tooManyCodesSent == true
+        let isThrottled =
+            mfaType.securityCode?.tooManyCodesSent == true
             || mfaType.securityCode?.securityCodeCooldown == true
             || mfaType.securityCode?.securityCodeLocked == true
 
@@ -158,14 +158,14 @@ extension AppleAuthenticator {
 
         // Trusted device is an option unless codes are being throttled
         if !isThrottled,
-           let phoneNumbers = mfaType.trustedPhoneNumbers, !phoneNumbers.isEmpty
+            let phoneNumbers = mfaType.trustedPhoneNumbers, !phoneNumbers.isEmpty
         {
             options.append(.trustedDevice(codeLength: codeLength))
         }
 
         // Add SMS options for each trusted phone number (unless hidden)
         if mfaType.hideSendSMSCodeOption != true,
-           let phones = mfaType.trustedPhoneNumbers
+            let phones = mfaType.trustedPhoneNumbers
         {
             for phone in phones {
                 options.append(.sms(phoneNumber: phone, codeLength: codeLength))
@@ -174,7 +174,7 @@ extension AppleAuthenticator {
 
         // If throttled but SMS is also hidden, still offer trusted device as last resort
         if options.isEmpty,
-           let phoneNumbers = mfaType.trustedPhoneNumbers, !phoneNumbers.isEmpty
+            let phoneNumbers = mfaType.trustedPhoneNumbers, !phoneNumbers.isEmpty
         {
             options.append(.trustedDevice(codeLength: codeLength))
         }

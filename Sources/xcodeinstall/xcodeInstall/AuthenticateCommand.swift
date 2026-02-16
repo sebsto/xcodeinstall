@@ -5,13 +5,13 @@
 //  Created by Stormacq, Sebastien on 16/08/2022.
 //
 
+import SotoSecretsManager
+
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-
-import SotoSecretsManager
 
 // MARK: - CLIAuthenticationDelegate
 
@@ -63,9 +63,9 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
         }
 
         guard let choiceStr = deps.readLine.readLine(prompt: "Choice: ", silent: false),
-              let choice = Int(choiceStr),
-              choice > 0,
-              choice <= options.count
+            let choice = Int(choiceStr),
+            choice > 0,
+            choice <= options.count
         else {
             throw CLIError.invalidInput
         }

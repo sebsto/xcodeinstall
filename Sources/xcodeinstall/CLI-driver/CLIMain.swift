@@ -104,7 +104,12 @@ struct MainCommand: AsyncParsableCommand {
         }
 
         authenticator = await AppleAuthenticator(secrets: secrets, urlSession: urlSession, log: logger)
-        downloader = await AppleDownloader(secrets: secrets, urlSession: urlSession, fileHandler: fileHandler, log: logger)
+        downloader = await AppleDownloader(
+            secrets: secrets,
+            urlSession: urlSession,
+            fileHandler: fileHandler,
+            log: logger
+        )
 
         let deps = await AppDependencies(
             fileHandler: fileHandler,

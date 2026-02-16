@@ -24,14 +24,19 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
     let awsClient: AWSClient?  // var for injection
     let smClient: SecretsManager?  // var for injection
 
-    private init(awsClient: AWSClient? = nil, smClient: SecretsManager? = nil, profileName: String? = nil, log: Logger) {
+    private init(awsClient: AWSClient? = nil, smClient: SecretsManager? = nil, profileName: String? = nil, log: Logger)
+    {
         self.awsClient = awsClient
         self.smClient = smClient
         self.profileName = profileName
         self.log = log
     }
 
-    static func forRegion(_ region: String, profileName: String? = nil, log: Logger) throws -> SecretsStorageAWSSDKProtocol {
+    static func forRegion(
+        _ region: String,
+        profileName: String? = nil,
+        log: Logger
+    ) throws -> SecretsStorageAWSSDKProtocol {
         try SecretsStorageAWSSoto.forRegion(region, profileName: profileName, awsClient: nil, smClient: nil, log: log)
     }
     static func forRegion(

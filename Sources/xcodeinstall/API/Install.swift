@@ -46,7 +46,12 @@ class ShellInstaller {
     let fileHandler: FileHandlerProtocol
     let progressBar: CLIProgressBarProtocol
     let shellExecutor: any ShellExecuting
-    public init(fileHandler: FileHandlerProtocol, progressBar: CLIProgressBarProtocol, shellExecutor: any ShellExecuting, log: Logger) {
+    public init(
+        fileHandler: FileHandlerProtocol,
+        progressBar: CLIProgressBarProtocol,
+        shellExecutor: any ShellExecuting,
+        log: Logger
+    ) {
         self.fileHandler = fileHandler
         self.progressBar = progressBar
         self.shellExecutor = shellExecutor

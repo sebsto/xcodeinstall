@@ -221,7 +221,8 @@ extension CLITests {
     func testAuthenticateUnableToRetrieveServiceKey() async throws {
         // given
         let env = MockedEnvironment(readLine: MockedReadLine(["username", "password"]))
-        (env.authenticator as! MockedAppleAuthentication).nextError = AuthenticationError.unableToRetrieveAppleServiceKey(nil)
+        (env.authenticator as! MockedAppleAuthentication).nextError =
+            AuthenticationError.unableToRetrieveAppleServiceKey(nil)
         let deps = env.toDeps(log: log)
 
         // when
@@ -238,7 +239,9 @@ extension CLITests {
     func testAuthenticateNotImplemented() async throws {
         // given
         let env = MockedEnvironment(readLine: MockedReadLine(["username", "password"]))
-        (env.authenticator as! MockedAppleAuthentication).nextError = AuthenticationError.notImplemented(featureName: "SomeFeature")
+        (env.authenticator as! MockedAppleAuthentication).nextError = AuthenticationError.notImplemented(
+            featureName: "SomeFeature"
+        )
         let deps = env.toDeps(log: log)
 
         // when
@@ -255,7 +258,9 @@ extension CLITests {
     func testAuthenticateSecretsStorageAWSError() async throws {
         // given
         let env = MockedEnvironment(readLine: MockedReadLine(["username", "password"]))
-        (env.authenticator as! MockedAppleAuthentication).nextGenericError = SecretsStorageAWSError.invalidRegion(region: "bad-region")
+        (env.authenticator as! MockedAppleAuthentication).nextGenericError = SecretsStorageAWSError.invalidRegion(
+            region: "bad-region"
+        )
         let deps = env.toDeps(log: log)
 
         // when
@@ -311,10 +316,16 @@ extension CLITests {
         let deps = env.toDeps(log: log)
         let delegate = CLIAuthenticationDelegate(deps: deps)
 
-        let testPhone = MFAType.PhoneNumber(numberWithDialCode: "+1 (555) 123-4567", pushMode: nil, obfuscatedNumber: "*******4567", lastTwoDigits: "67", id: 1)
+        let testPhone = MFAType.PhoneNumber(
+            numberWithDialCode: "+1 (555) 123-4567",
+            pushMode: nil,
+            obfuscatedNumber: "*******4567",
+            lastTwoDigits: "67",
+            id: 1
+        )
         let options: [MFAOption] = [
             .trustedDevice(codeLength: 6),
-            .sms(phoneNumber: testPhone, codeLength: 6)
+            .sms(phoneNumber: testPhone, codeLength: 6),
         ]
 
         // when
@@ -336,10 +347,16 @@ extension CLITests {
         let deps = env.toDeps(log: log)
         let delegate = CLIAuthenticationDelegate(deps: deps)
 
-        let testPhone = MFAType.PhoneNumber(numberWithDialCode: "+1 (555) 123-4567", pushMode: nil, obfuscatedNumber: "*******4567", lastTwoDigits: "67", id: 1)
+        let testPhone = MFAType.PhoneNumber(
+            numberWithDialCode: "+1 (555) 123-4567",
+            pushMode: nil,
+            obfuscatedNumber: "*******4567",
+            lastTwoDigits: "67",
+            id: 1
+        )
         let options: [MFAOption] = [
             .trustedDevice(codeLength: 6),
-            .sms(phoneNumber: testPhone, codeLength: 6)
+            .sms(phoneNumber: testPhone, codeLength: 6),
         ]
 
         // when
@@ -360,10 +377,16 @@ extension CLITests {
         let deps = env.toDeps(log: log)
         let delegate = CLIAuthenticationDelegate(deps: deps)
 
-        let testPhone = MFAType.PhoneNumber(numberWithDialCode: "+1 (555) 123-4567", pushMode: nil, obfuscatedNumber: "*******4567", lastTwoDigits: "67", id: 1)
+        let testPhone = MFAType.PhoneNumber(
+            numberWithDialCode: "+1 (555) 123-4567",
+            pushMode: nil,
+            obfuscatedNumber: "*******4567",
+            lastTwoDigits: "67",
+            id: 1
+        )
         let options: [MFAOption] = [
             .trustedDevice(codeLength: 6),
-            .sms(phoneNumber: testPhone, codeLength: 6)
+            .sms(phoneNumber: testPhone, codeLength: 6),
         ]
 
         // when/then
@@ -379,7 +402,13 @@ extension CLITests {
         let deps = env.toDeps(log: log)
         let delegate = CLIAuthenticationDelegate(deps: deps)
 
-        let testPhone = MFAType.PhoneNumber(numberWithDialCode: "+1 (555) 123-4567", pushMode: nil, obfuscatedNumber: "*******4567", lastTwoDigits: "67", id: 1)
+        let testPhone = MFAType.PhoneNumber(
+            numberWithDialCode: "+1 (555) 123-4567",
+            pushMode: nil,
+            obfuscatedNumber: "*******4567",
+            lastTwoDigits: "67",
+            id: 1
+        )
         let options: [MFAOption] = [.sms(phoneNumber: testPhone, codeLength: 6)]
 
         // when

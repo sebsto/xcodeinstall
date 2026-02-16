@@ -18,7 +18,12 @@ struct DownloadListParser {
     let majorVersion: String
     let sortMostRecentFirst: Bool
 
-    init(fileHandler: FileHandlerProtocol, xCodeOnly: Bool = true, majorVersion: String = "13", sortMostRecentFirst: Bool = false) {
+    init(
+        fileHandler: FileHandlerProtocol,
+        xCodeOnly: Bool = true,
+        majorVersion: String = "13",
+        sortMostRecentFirst: Bool = false
+    ) {
         self.fileHandler = fileHandler
         self.xCodeOnly = xCodeOnly
         self.majorVersion = majorVersion
@@ -152,6 +157,6 @@ private let appleDownloadDateFormatter: DateFormatter = {
 extension String {
 
     func toDate() -> Date? {
-        return appleDownloadDateFormatter.date(from: self)
+        appleDownloadDateFormatter.date(from: self)
     }
 }

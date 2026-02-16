@@ -77,7 +77,9 @@ final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
 
                 // If SMS was chosen, simulate sending SMS and asking for code again
                 if case .sms(let phone, let codeLength) = chosen {
-                    let (_, _) = try await delegate.requestMFACode(options: [.sms(phoneNumber: phone, codeLength: codeLength)])
+                    let (_, _) = try await delegate.requestMFACode(options: [
+                        .sms(phoneNumber: phone, codeLength: codeLength)
+                    ])
                 }
                 // MFA succeeded (mock doesn't actually verify)
                 return
