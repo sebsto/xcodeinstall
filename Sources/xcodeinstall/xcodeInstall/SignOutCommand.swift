@@ -17,9 +17,15 @@ extension XCodeInstall {
 
         let auth = self.deps.authenticator
 
-        display("Signing out...")
-        try await auth.signout()
-        display("Signed out.", style: .success)
+        do {
+            display("Signing out...")
+            try await auth.signout()
+            display("Signed out.", style: .success)
+        } catch let error as SecretsStorageAWSError {
+            display("AWS Error: \(error.localizedDescription)", style: .error())
+        } catch {
+            display("Unexpected error : \(error)", style: .error())
+        }
 
     }
 }

@@ -67,10 +67,8 @@ extension XCodeInstall {
                     "Session expired, you need to re-authenticate.",
                     style: .error(nextSteps: ["xcodeinstall authenticate"])
                 )
-                throw error
             case .accountNeedUpgrade(let code, let message):
                 display("\(message) (Apple Portal error code : \(code))", style: .error())
-                throw error
             case .needToAcceptTermsAndCondition:
                 display(
                     """
@@ -80,26 +78,24 @@ extension XCodeInstall {
                     """,
                     style: .error()
                 )
-                throw error
             case .unknownError(let code, let message):
                 display("\(message) (Unhandled download error : \(code))", style: .error())
                 display(
                     "Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title="
                 )
-                throw error
             default:
                 display("Unknown download error : \(error)", style: .error())
                 display(
                     "Please file an error report at https://github.com/sebsto/xcodeinstall/issues/new?assignees=&labels=&template=bug_report.md&title="
                 )
-                throw error
             }
+            return []
         } catch let error as SecretsStorageAWSError {
             display("AWS Error: \(error.localizedDescription)", style: .error())
-            throw error
+            return []
         } catch {
             display("Unexpected error : \(error)", style: .error())
-            throw error
+            return []
         }
 
     }
