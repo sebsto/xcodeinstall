@@ -19,9 +19,15 @@ import FoundationNetworking
 final class MockedSecretsHandler: SecretsHandlerProtocol {
     var nextError: SecretsStorageAWSError?
     var readLine: ReadLineProtocol
+    var shutdownCalled = false
+
     public init(readLine: ReadLineProtocol, nextError: SecretsStorageAWSError? = nil) {
         self.nextError = nextError
         self.readLine = readLine
+    }
+
+    func shutdown() async throws {
+        shutdownCalled = true
     }
 
     /// Convenience init that extracts readLine from a MockedEnvironment
@@ -67,6 +73,7 @@ final class MockedSecretsHandler: SecretsHandlerProtocol {
 @available(macOS 15.0, *)
 final class MockedSecretsStorageAWSSDK: SecretsStorageAWSSDKProtocol {
 
+    private let _shutdownCalled: Mutex<Bool> = .init(false)
     private let _regionSet: Mutex<Bool> = .init(false)
     let appleSession: Mutex<AppleSessionSecret>
     let appleCredentials: Mutex<AppleCredentialsSecret>
@@ -114,5 +121,11 @@ final class MockedSecretsStorageAWSSDK: SecretsStorageAWSSDKProtocol {
         }
     }
 
-    func shutdown() async throws {}
+    func wasShutdown() -> Bool {
+        _shutdownCalled.withLock { $0 }
+    }
+
+    func shutdown() async throws {
+        _shutdownCalled.withLock { $0 = true }
+    }
 }

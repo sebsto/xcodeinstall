@@ -44,8 +44,6 @@ extension MainCommand {
                 verbose: globalOptions.verbose
             )
 
-            defer { Task { try? await xci.deps.secrets?.shutdown() } }
-
             try await xci.download(
                 fileName: name,
                 force: downloadListOptions.force,
@@ -54,6 +52,10 @@ extension MainCommand {
                 sortMostRecentFirst: downloadListOptions.mostRecentFirst,
                 datePublished: downloadListOptions.datePublished
             )
+
+            // Gracefully shut down AWS client before process exits
+            // to avoid RotatingCredentialProvider crash during deallocation
+            try? await xci.deps.secrets?.shutdown()
         }
     }
 

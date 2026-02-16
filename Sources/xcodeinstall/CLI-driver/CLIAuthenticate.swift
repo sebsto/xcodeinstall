@@ -39,11 +39,11 @@ extension MainCommand {
                 verbose: globalOptions.verbose,
             )
 
+            try await xci.authenticate(with: AuthenticationMethod.withSRP(srp))
+
             // Gracefully shut down AWS client before process exits
             // to avoid RotatingCredentialProvider crash during deallocation
-            defer { Task { try? await xci.deps.secrets?.shutdown() } }
-
-            try await xci.authenticate(with: AuthenticationMethod.withSRP(srp))
+            try? await xci.deps.secrets?.shutdown()
         }
     }
 
@@ -65,10 +65,11 @@ extension MainCommand {
                 profileName: cloudOption.profileName,
                 verbose: globalOptions.verbose
             )
-
-            defer { Task { try? await xci.deps.secrets?.shutdown() } }
-
             try await xci.signout()
+
+            // Gracefully shut down AWS client before process exits
+            // to avoid RotatingCredentialProvider crash during deallocation
+            try? await xci.deps.secrets?.shutdown()
         }
     }
 

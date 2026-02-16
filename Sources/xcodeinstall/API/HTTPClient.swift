@@ -182,11 +182,9 @@ internal func buildURLRequest(
 ) -> URLRequest {
 
     // create the request
-    // create the request
     guard let url = URL(string: url) else {
-        throw URLError(.badURL)
+        fatalError("Invalid URL: \(url)")
     }
-    var request = URLRequest(url: url)
     var request = URLRequest(url: url)
 
     // add HTTP verb

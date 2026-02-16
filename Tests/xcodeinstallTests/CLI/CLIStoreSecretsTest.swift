@@ -59,6 +59,9 @@ extension CLITests {
 
         // did we call setRegion on the SDK class ?
         #expect((secretsHandler.awsSDK as? MockedSecretsStorageAWSSDK)?.regionSet() ?? false)
+
+        // verify shutdown was called on the AWS SDK
+        #expect((secretsHandler.awsSDK as? MockedSecretsStorageAWSSDK)?.wasShutdown() ?? false)
     }
     #endif
 

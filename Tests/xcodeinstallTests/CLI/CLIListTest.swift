@@ -43,5 +43,8 @@ extension CLITests {
 
         // mocked list succeeded
         assertDisplay("16 items")
+
+        // verify shutdown was called on the secrets handler
+        #expect((deps.secrets as? MockedSecretsHandler)?.shutdownCalled == true)
     }
 }

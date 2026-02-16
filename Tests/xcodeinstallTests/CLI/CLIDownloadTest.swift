@@ -104,6 +104,9 @@ extension CLITests {
 
         // mocked list succeeded
         assertDisplay("\(fileName) downloaded")
+
+        // verify shutdown was called on the secrets handler
+        #expect((deps.secrets as? MockedSecretsHandler)?.shutdownCalled == true)
     }
 
     @Test("Test Download with incorrect file name")
@@ -139,6 +142,9 @@ extension CLITests {
 
         // mocked list succeeded
         assertDisplay("Unknown file name : xxx.xip")
+
+        // verify shutdown was called on the secrets handler
+        #expect((deps.secrets as? MockedSecretsHandler)?.shutdownCalled == true)
     }
 
 }

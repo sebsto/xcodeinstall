@@ -37,6 +37,9 @@ extension CLITests {
         }
 
         assertDisplay("Signed out.")
+
+        // verify shutdown was called on the secrets handler
+        #expect((deps.secrets as? MockedSecretsHandler)?.shutdownCalled == true)
     }
 
     @Test("Test Authenticate")
@@ -44,6 +47,7 @@ extension CLITests {
 
         // given
         let env = MockedEnvironment(readLine: MockedReadLine(["username", "password"]))
+        env.secrets = MockedSecretsHandler(readLine: env.readLine)
 
         let authenticator = (env.authenticator as! MockedAppleAuthentication)
         authenticator.nextError = nil
@@ -70,6 +74,9 @@ extension CLITests {
 
         // two prompts have been proposed (username + password via delegate)
         #expect((env.readLine as! MockedReadLine).input.count == 0)
+
+        // verify shutdown was called on the secrets handler
+        #expect((deps.secrets as? MockedSecretsHandler)?.shutdownCalled == true)
 
     }
 

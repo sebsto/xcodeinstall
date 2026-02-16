@@ -50,9 +50,11 @@ extension MainCommand {
                 verbose: globalOptions.verbose
             )
 
-            defer { Task { try? await xci.deps.secrets?.shutdown() } }
-
             _ = try await xci.storeSecrets()
+
+            // Gracefully shut down AWS client before process exits
+            // to avoid RotatingCredentialProvider crash during deallocation
+            try? await xci.deps.secrets?.shutdown()
         }
     }
 
