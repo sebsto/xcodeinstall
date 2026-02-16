@@ -16,6 +16,18 @@ protocol Secrets {
     func string() throws -> String?
 }
 
+// Generic error type for secrets storage operations shared across all backends
+enum SecretsStorageError: Error, LocalizedError {
+    case invalidOperation  // when an operation is not supported by the current backend
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidOperation:
+            return "Invalid operation for the current secrets storage backend"
+        }
+    }
+}
+
 // the data to be stored in Secrets Manager as JSON
 struct AppleCredentialsSecret: Codable, Secrets {
 

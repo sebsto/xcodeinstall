@@ -21,7 +21,6 @@ import FoundationNetworking
 enum SecretsStorageAWSError: Error, LocalizedError {
     case invalidRegion(region: String)
     case secretDoesNotExist(secretname: String)
-    case invalidOperation  // when trying to retrieve secrets Apple credentials from file
     case noCredentialProvider(profileName: String?, underlyingError: Error)
 
     var errorDescription: String? {
@@ -30,8 +29,6 @@ enum SecretsStorageAWSError: Error, LocalizedError {
             return "Invalid AWS region: '\(region)'"
         case .secretDoesNotExist(let secretname):
             return "AWS secret '\(secretname)' does not exist"
-        case .invalidOperation:
-            return "Invalid operation for the current secrets storage backend"
         case .noCredentialProvider(let profileName, let underlyingError):
             if let profileName {
                 return "No AWS credentials found for profile '\(profileName)'. "
