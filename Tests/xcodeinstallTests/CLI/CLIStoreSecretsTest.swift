@@ -62,6 +62,7 @@ extension CLITests {
     }
     #endif
 
+    @Test("Test Prompt For Credentials")
     func testPromptForCredentials() {
 
         // given
