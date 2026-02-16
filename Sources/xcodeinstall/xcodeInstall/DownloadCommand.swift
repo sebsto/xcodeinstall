@@ -85,6 +85,8 @@ extension XCodeInstall {
                 "Session expired, you need to re-authenticate.",
                 style: .error(nextSteps: ["xcodeinstall authenticate"])
             )
+        } catch CLIError.userCancelled {
+            return
         } catch CLIError.invalidInput {
             display("Invalid input", style: .error())
         } catch DownloadError.unknownFile(let fileName) {
@@ -143,7 +145,7 @@ extension XCodeInstall {
         else {
 
             if (response ?? "") == "" {
-                exit(0)
+                throw CLIError.userCancelled
             }
             throw CLIError.invalidInput
         }

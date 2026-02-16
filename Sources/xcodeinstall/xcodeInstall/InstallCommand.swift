@@ -38,6 +38,8 @@ extension XCodeInstall {
             try await installer.install(file: fileToInstall!)
             self.deps.progressBar.complete(success: true)
             display("\(fileToInstall!) installed", style: .success)
+        } catch CLIError.userCancelled {
+            return
         } catch CLIError.invalidInput {
             display("Invalid input", style: .error())
             self.deps.progressBar.complete(success: false)
@@ -94,7 +96,7 @@ extension XCodeInstall {
         else {
 
             if (response ?? "") == "" {
-                exit(0)
+                throw CLIError.userCancelled
             }
             throw CLIError.invalidInput
         }
