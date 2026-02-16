@@ -82,7 +82,6 @@ final class MockedEnvironment {
     var authenticator: AppleAuthenticatorProtocol
     var urlSessionData: URLSessionProtocol
     let shell: MockedShell
-    var awsSDK: SecretsStorageAWSSDKProtocol?
 
     init(
         fileHandler: FileHandlerProtocol = MockedFileHandler(),
