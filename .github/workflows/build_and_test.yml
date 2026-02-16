@@ -29,7 +29,6 @@ jobs:
       # run: swift build -c release
 
   test:
-    if: false
     runs-on: self-hosted
     steps:
     - name: Checkout

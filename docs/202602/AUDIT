@@ -1,0 +1,52 @@
+Perform a comprehensive audit of this Swift codebase (xcodeinstall). Work through the entire repo systematically — read every source file and every test file before drawing conclusions. Do NOT make any code changes. Output a single markdown document called AUDIT.md at the repo root.
+
+Structure your analysis as follows:
+
+1. Architecture Overview
+Map out the full dependency graph between modules: API/, CLI/, CLI-driver/, xcodeInstall/ (commands), Secrets/, Utilities/
+Identify the role and responsibility of each layer
+Document how data flows through the system (authentication → list → download → install)
+Flag any circular dependencies or unclear boundaries between layers
+2. Design Review
+Evaluate protocol usage: are protocols justified or are they abstracting things that don't need abstraction? Are there protocols with a single conformance that add indirection without value?
+Assess the dependency injection approach — is it consistent? Overly complex? Could it be simpler?
+Review the Environment type and how global/shared state is managed
+Evaluate the command pattern implementation (ArgumentParser commands vs the *Command types in xcodeInstall/) — is there unnecessary duplication between CLI-driver and xcodeInstall layers?
+Look at error handling strategy across the codebase — is it consistent and meaningful?
+3. Implementation Quality
+Identify dead code, unused parameters, redundant type annotations
+Find any force unwraps, force casts, or unsafe patterns
+Check for proper async/await usage vs legacy concurrency patterns (DispatchSemaphore, etc.)
+Look for code duplication across files — especially in the Install*.swift files and Authentication*.swift files
+Evaluate naming consistency and Swift conventions compliance
+Check if the Secrets layer (AWS + File storage) has clean separation
+4. Test Coverage Analysis
+Map which source files have corresponding tests and which don't
+Evaluate mock quality — are mocks testing real behavior or just satisfying the compiler?
+Identify critical paths that lack test coverage
+Check if tests are testing implementation details vs actual behavior
+Look at the test helpers and mocked classes — are they maintainable?
+5. Simplification Opportunities
+Identify layers, protocols, or abstractions that could be removed or merged without losing readability or testability
+Find places where Swift's built-in features (enums, extensions, Result type) could replace custom infrastructure
+Evaluate if the CLI-driver / xcodeInstall command split is necessary or could be consolidated
+Look for opportunities to reduce file count by merging small, related files
+Assess whether the Install*.swift file split (InstallPkg, InstallXcode, InstallCLTools, InstallSupportedFiles, InstallDownloadListExtension) is warranted or could be simplified
+Check if utilities are pulling their weight or could use standard library alternatives
+6. Action Plan
+Break the recommended changes into an ordered list of independent, manageable chunks. For each chunk:
+
+Give it a clear title
+Describe what changes it involves (be specific about which files)
+Estimate relative effort (small / medium / large)
+Note any dependencies on other chunks
+Explain the expected benefit
+Order the chunks so that: (1) low-risk high-value items come first, (2) each chunk leaves the codebase in a working state, (3) related changes are grouped logically.
+
+Important constraints:
+
+Do NOT sacrifice readability for cleverness
+Do NOT suggest changes that would hurt performance
+Prioritize reducing cognitive complexity and maintenance burden
+Be specific — reference actual file names, type names, and function names in your findings
+If something is well-designed, say so. This isn't about finding problems everywhere.
