@@ -15,7 +15,9 @@ extension XCodeInstall {
 
     func storeSecrets() async throws {
 
-        let secretsHandler = self.deps.secrets!
+        guard let secretsHandler = self.deps.secrets else {
+            preconditionFailure("storeSecrets() called without a secrets backend — this is a programming error")
+        }
         do {
             // separate func for testability
             let credentials = try promptForCredentials()
