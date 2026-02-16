@@ -32,12 +32,18 @@ extension MainCommand {
 
         func run(with deps: AppDependencies?) async throws {
 
-            let xci = try await MainCommand.XCodeInstaller(
-                with: deps,
-                for: cloudOption.secretManagerRegion,
-                profileName: cloudOption.profileName,
-                verbose: globalOptions.verbose,
-            )
+            let xci: XCodeInstall
+            do {
+                xci = try await MainCommand.XCodeInstaller(
+                    with: deps,
+                    for: cloudOption.secretManagerRegion,
+                    profileName: cloudOption.profileName,
+                    verbose: globalOptions.verbose,
+                )
+            } catch {
+                await NooraDisplay().display(error.localizedDescription, terminator: "\n", style: .error())
+                throw ExitCode.failure
+            }
 
             do {
                 try await xci.authenticate(with: AuthenticationMethod.withSRP(srp))
@@ -64,12 +70,18 @@ extension MainCommand {
 
         func run(with deps: AppDependencies?) async throws {
 
-            let xci = try await MainCommand.XCodeInstaller(
-                with: deps,
-                for: cloudOption.secretManagerRegion,
-                profileName: cloudOption.profileName,
-                verbose: globalOptions.verbose
-            )
+            let xci: XCodeInstall
+            do {
+                xci = try await MainCommand.XCodeInstaller(
+                    with: deps,
+                    for: cloudOption.secretManagerRegion,
+                    profileName: cloudOption.profileName,
+                    verbose: globalOptions.verbose
+                )
+            } catch {
+                await NooraDisplay().display(error.localizedDescription, terminator: "\n", style: .error())
+                throw ExitCode.failure
+            }
 
             do {
                 try await xci.signout()
