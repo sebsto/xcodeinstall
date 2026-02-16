@@ -33,7 +33,7 @@ extension XCodeInstall {
             } else {
                 fileToInstall = FileHandler(log: self.log).downloadDirectory().appendingPathComponent(file!)
             }
-            log.debug("Going to attemp to install \(fileToInstall!.path)")
+            log.debug("Going to attempt to install \(fileToInstall!.path)")
 
             try await installer.install(file: fileToInstall!)
             self.deps.progressBar.complete(success: true)

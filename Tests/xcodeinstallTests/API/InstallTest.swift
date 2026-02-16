@@ -30,7 +30,7 @@ final class InstallTest {
         let result: SupportedInstallation = SupportedInstallation.supported(pkgName)
 
         // then
-        #expect(result == .unsuported)
+        #expect(result == .unsupported)
 
     }
 

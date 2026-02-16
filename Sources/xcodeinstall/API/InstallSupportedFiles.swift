@@ -14,7 +14,7 @@ import Foundation
 enum SupportedInstallation {
     case xCode
     case xCodeCommandLineTools
-    case unsuported
+    case unsupported
 
     static func supported(_ file: String) -> SupportedInstallation {
 
@@ -43,29 +43,17 @@ enum SupportedInstallation {
             if file.hasPrefix(filePrefix) && file.hasSuffix(SupportedFiles.extensions[index]) {
                 return SupportedFiles.values[index]
             } else {
-                return SupportedInstallation.unsuported
+                return SupportedInstallation.unsupported
             }
         }
 
         // then remove all unsupported values
         let result: [SupportedInstallation] = tempResult.filter { installationType in
-            installationType != .unsuported
+            installationType != .unsupported
         }
 
         // at this stage we should have 0 or 1 value left
         assert(result.count == 0 || result.count == 1)
-        return result.count == 0 ? .unsuported : result[0]
-
-        // non generic method to test the file type
-
-        //        if file.hasPrefix("Command Line Tools for Xcode") && file.hasSuffix(".dmg") {
-        //            result = .xCodeCommandLineTools
-        //        } else if file.hasPrefix("Xcode") && file.hasSuffix(".xip") {
-        //            result = .xCode
-        //        } else {
-        //            result = .unsuported
-        //        }
-
-        //        return result
+        return result.count == 0 ? .unsupported : result[0]
     }
 }

@@ -1,5 +1,5 @@
 //
-//  DownloadData.swift
+//  DownloadListData.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 21/08/2022.
@@ -20,7 +20,7 @@ enum DownloadError: Error, Equatable {
     case invalidResponse
     case unknownFile(file: String)
     case needToAcceptTermsAndCondition
-    case accountneedUpgrade(errorCode: Int, errorMessage: String)
+    case accountNeedUpgrade(errorCode: Int, errorMessage: String)
 
     static func == (lhs: DownloadError, rhs: DownloadError) -> Bool {
         switch (lhs, rhs) {
@@ -45,7 +45,7 @@ enum DownloadError: Error, Equatable {
             return file1 == file2
         case (.needToAcceptTermsAndCondition, .needToAcceptTermsAndCondition):
             return true
-        case let (.accountneedUpgrade(code1, _), .accountneedUpgrade(code2, _)):
+        case let (.accountNeedUpgrade(code1, _), .accountNeedUpgrade(code2, _)):
             return code1 == code2
         default:
             return false

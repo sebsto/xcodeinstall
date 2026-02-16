@@ -49,7 +49,7 @@ func _log(request: URLRequest, to logger: Logger) {
 
 func _log(response: HTTPURLResponse?, data: Data?, error: Error?, to logger: Logger) {
 
-    logger.debug("\n - - - - - - - - - - INCOMMING - - - - - - - - - - \n")
+    logger.debug("\n - - - - - - - - - - INCOMING - - - - - - - - - - \n")
     defer { logger.debug("\n - - - - - - - - - -  END - - - - - - - - - - \n") }
     let urlString = response?.url?.absoluteString
     let components = NSURLComponents(string: urlString ?? "")

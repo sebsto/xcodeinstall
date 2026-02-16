@@ -10,10 +10,6 @@ import Foundation
 import FoundationNetworking
 #endif
 
-protocol DownloadManagerProtocol: Sendable {
-    func download(from url: URL) -> AsyncThrowingStream<DownloadProgress, Error>
-}
-
 struct DownloadTarget: Sendable {
     let totalFileSize: Int
     let dstFilePath: URL

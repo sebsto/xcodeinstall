@@ -1,5 +1,5 @@
 //
-//  CLIAuthenticate.swift
+//  CLIDownload.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 23/07/2022.
@@ -28,7 +28,7 @@ extension MainCommand {
 
         @Option(
             name: .shortAndLong,
-            help: "The exact package name to downloads. When omited, it asks interactively"
+            help: "The exact package name to downloads. When omitted, it asks interactively"
         )
         var name: String?
 

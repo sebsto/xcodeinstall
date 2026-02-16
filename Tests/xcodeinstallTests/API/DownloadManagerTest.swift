@@ -3,7 +3,7 @@ import Testing
 
 @testable import xcodeinstall
 
-struct MockDownloadManager: DownloadManagerProtocol {
+struct MockDownloadManager {
     var mockProgress: [DownloadProgress] = []
     var shouldFail = false
 

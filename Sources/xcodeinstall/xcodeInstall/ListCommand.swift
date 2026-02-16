@@ -68,7 +68,7 @@ extension XCodeInstall {
                     style: .error(nextSteps: ["xcodeinstall authenticate"])
                 )
                 throw error
-            case .accountneedUpgrade(let code, let message):
+            case .accountNeedUpgrade(let code, let message):
                 display("\(message) (Apple Portal error code : \(code))", style: .error())
                 throw error
             case .needToAcceptTermsAndCondition:

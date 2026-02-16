@@ -1,5 +1,5 @@
 //
-//  XcodeInstall.swift
+//  XcodeInstallCommand.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 16/08/2022.
@@ -24,7 +24,7 @@ final class XCodeInstall {
     }
 
     // display a message to the user
-    // avoid having to replicate the \n torough the code
+    // avoid having to replicate the \n thorough the code
     func display(_ msg: String, terminator: String = "\n") {
         self.deps.display.display(msg, terminator: terminator)
     }

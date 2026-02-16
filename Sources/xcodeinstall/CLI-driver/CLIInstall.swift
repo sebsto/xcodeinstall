@@ -26,7 +26,7 @@ extension MainCommand {
 
         @Option(
             name: .shortAndLong,
-            help: "The exact package name to install. When omited, it asks interactively"
+            help: "The exact package name to install. When omitted, it asks interactively"
         )
         var name: String?
 
