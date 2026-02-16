@@ -15,11 +15,12 @@ extension XCodeInstall {
 
     func storeSecrets() async throws {
 
-        let secretsHandler = self.deps.secrets!
+        guard let secretsHandler = self.deps.secrets else {
+            preconditionFailure("storeSecrets() called without a secrets backend — this is a programming error")
+        }
         do {
             // separate func for testability
-            let input = try promptForCredentials()
-            let credentials = AppleCredentialsSecret(username: input[0], password: input[1])
+            let credentials = try promptForCredentials()
 
             try await secretsHandler.storeAppleCredentials(credentials)
             display("Credentials are securely stored", style: .security)
@@ -34,7 +35,7 @@ extension XCodeInstall {
 
     }
 
-    func promptForCredentials() throws -> [String] {
+    func promptForCredentials() throws -> AppleCredentialsSecret {
         display(
             """
 
@@ -63,7 +64,7 @@ extension XCodeInstall {
             throw CLIError.invalidInput
         }
 
-        return [username, password]
+        return AppleCredentialsSecret(username: username, password: password)
     }
 
 }
