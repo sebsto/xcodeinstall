@@ -16,6 +16,7 @@ import Foundation
 
 enum CLIError: Error {
     case invalidInput
+    case userCancelled
 }
 
 @main
