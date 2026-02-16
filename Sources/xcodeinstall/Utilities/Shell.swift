@@ -1,27 +1,16 @@
 //
-//  Environment.swift
+//  ShellOutput.swift
+//  xcodeinstall
 //
-//
-//  Created by Stormacq, Sebastien on 22/11/2022.
+//  Created by Stormacq, Sebastien on 16/05/2025.
 //
 
-import Logging
 import Subprocess
 
 #if canImport(System)
 import System
 #else
 import SystemPackage
-#endif
-
-#if canImport(FoundationNetworking)
-import FoundationNetworking
-#endif
-
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
-import Foundation
 #endif
 
 /// Shell command execution
@@ -65,17 +54,10 @@ struct SystemShell: ShellExecuting, Sendable {
     }
 }
 
-// MARK: - AppDependencies
+typealias ShellOutput = CollectedResult<StringOutput<Unicode.UTF8>, StringOutput<Unicode.UTF8>>
 
-struct AppDependencies: Sendable {
-    let fileHandler: FileHandlerProtocol
-    var display: DisplayProtocol
-    var readLine: ReadLineProtocol
-    var progressBar: CLIProgressBarProtocol
-    var secrets: SecretsHandlerProtocol?
-    var authenticator: AppleAuthenticatorProtocol
-    var downloader: AppleDownloaderProtocol
-    let urlSessionData: URLSessionProtocol
-    let shell: any ShellExecuting
-    let log: Logger
+extension Executable {
+    public static func path(_ path: String) -> Self {
+        Executable.path(FilePath(path))
+    }
 }
