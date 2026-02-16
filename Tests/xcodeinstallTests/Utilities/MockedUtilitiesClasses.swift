@@ -14,12 +14,14 @@ final class MockedFileHandler: FileHandlerProtocol, @unchecked Sendable {
 
     var moveSrc: URL? = nil
     var moveDst: URL? = nil
+    var nextMoveError: Error? = nil
     var nextFileExist: Bool? = nil
     var nextFileCorrect: Bool? = nil
 
     func move(from src: URL, to dst: URL) throws {
         moveSrc = src
         moveDst = dst
+        if let nextMoveError { throw nextMoveError }
     }
     func fileExists(file: URL, fileSize: Int) -> Bool {
         if let nextFileExist {
