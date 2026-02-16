@@ -1,5 +1,5 @@
 //
-//  CLI.swift
+//  CLIMain.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 18/07/2022.

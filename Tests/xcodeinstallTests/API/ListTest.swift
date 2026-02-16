@@ -187,7 +187,7 @@ extension DownloadTests {
 
         #expect(
             error
-                == DownloadError.accountneedUpgrade(
+                == DownloadError.accountNeedUpgrade(
                     errorCode: 2170,
                     errorMessage:
                         "Your developer account needs to be updated.  Please visit Apple Developer Registration."

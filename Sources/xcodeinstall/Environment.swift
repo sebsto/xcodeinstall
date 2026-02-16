@@ -24,25 +24,6 @@ import FoundationEssentials
 import Foundation
 #endif
 
-// MARK: - Focused dependency protocols
-
-/// File system operations (download list cache, file existence checks, move)
-protocol FileHandling: Sendable {
-    var fileHandler: FileHandlerProtocol { get }
-}
-
-/// CLI user interaction (display messages, read input, progress bars)
-protocol CLIInterface: Sendable {
-    var display: DisplayProtocol { get }
-    var readLine: ReadLineProtocol { get }
-    var progressBar: CLIProgressBarProtocol { get }
-}
-
-/// Secrets storage (cookies, sessions, credentials)
-protocol SecretStoring: Sendable {
-    var secrets: SecretsHandlerProtocol? { get }
-}
-
 /// Shell command execution
 protocol ShellExecuting: Sendable {
     func run(
@@ -54,13 +35,6 @@ protocol ShellExecuting: Sendable {
         _ executable: Executable,
         arguments: Arguments
     ) async throws -> ShellOutput
-}
-
-/// Network operations (authentication, downloads)
-protocol Networking: Sendable {
-    var authenticator: AppleAuthenticatorProtocol { get }
-    var downloader: AppleDownloaderProtocol { get }
-    var urlSessionData: URLSessionProtocol { get }
 }
 
 // MARK: - Production shell executor

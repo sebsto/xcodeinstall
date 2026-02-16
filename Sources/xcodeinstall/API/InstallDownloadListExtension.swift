@@ -37,10 +37,6 @@ extension DownloadList {
         let result: [File?] = list.compactMap { element -> File? in
             comparison(element)
         }
-        // then remove all nil values
-        //        .filter { file in
-        //            return file != nil
-        //        }
 
         // we should have 0 or 1 element
         if result.count > 0 {

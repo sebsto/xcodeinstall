@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Authentication+Hashcash.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 30/10/2024.

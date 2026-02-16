@@ -79,7 +79,7 @@ extension AppleDownloader {
                     log.error(
                         "Error \(downloadList!.resultCode) : \(downloadList!.userString ?? "no user string")"
                     )
-                    throw DownloadError.accountneedUpgrade(
+                    throw DownloadError.accountNeedUpgrade(
                         errorCode: downloadList!.resultCode,
                         errorMessage: downloadList!.userString ?? "Your developer account needs to be updated"
                     )
@@ -87,7 +87,7 @@ extension AppleDownloader {
                     // is there other error cases that I need to handle explicitly ?
                     throw DownloadError.unknownError(
                         errorCode: downloadList!.resultCode,
-                        errorMessage: downloadList!.userString ?? "Unknwon error"
+                        errorMessage: downloadList!.userString ?? "Unknown error"
                     )
                 }
             }

@@ -1,5 +1,5 @@
 //
-//  AuthenticationMFA.swift
+//  Authentication+MFA.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 22/07/2022.

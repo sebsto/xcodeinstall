@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  ShellOutput.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 16/05/2025.

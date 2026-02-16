@@ -13,16 +13,6 @@ import FoundationEssentials
 import Foundation
 #endif
 
-protocol InstallerProtocol {
-    func install(file: URL) async throws
-    func installCommandLineTools(atPath file: URL) async throws
-    func installPkg(atURL pkg: URL) async throws -> ShellOutput
-    func installXcode(at src: URL) async throws
-    func uncompressXIP(atURL file: URL) async throws
-    func moveApp(at src: URL) async throws -> String
-    func fileMatch(file: URL) async -> Bool
-}
-
 enum InstallerError: Error {
     case unsupportedInstallation
     case fileDoesNotExistOrIncorrect
@@ -33,7 +23,7 @@ enum InstallerError: Error {
     case CLToolsInstallationError
 }
 
-class ShellInstaller: InstallerProtocol {
+class ShellInstaller {
 
     let log: Logger
     let fileHandler: FileHandlerProtocol
@@ -78,7 +68,7 @@ class ShellInstaller: InstallerProtocol {
 
         // verify this is one the files we do support
         let installationType = SupportedInstallation.supported(file.lastPathComponent)
-        guard installationType != .unsuported else {
+        guard installationType != .unsupported else {
             log.debug("Unsupported installation type")
             throw InstallerError.unsupportedInstallation
         }
@@ -96,7 +86,7 @@ class ShellInstaller: InstallerProtocol {
             try await self.installXcode(at: file)
         case .xCodeCommandLineTools:
             try await self.installCommandLineTools(atPath: file)
-        case .unsuported:
+        case .unsupported:
             throw InstallerError.unsupportedInstallation
         }
     }

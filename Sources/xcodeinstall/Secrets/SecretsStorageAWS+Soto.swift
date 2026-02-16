@@ -1,5 +1,5 @@
 //
-//  SecretsStorageAWSSoto.swift
+//  SecretsStorageAWS+Soto.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 04/09/2022.

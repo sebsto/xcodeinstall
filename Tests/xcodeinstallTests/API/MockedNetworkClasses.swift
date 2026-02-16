@@ -150,7 +150,7 @@ final class MockedAppleDownloader: AppleDownloaderProtocol {
         case 1100:
             throw DownloadError.authenticationRequired
         case 2170:
-            throw DownloadError.accountneedUpgrade(
+            throw DownloadError.accountNeedUpgrade(
                 errorCode: downloadList.resultCode,
                 errorMessage: downloadList.userString ?? "Your developer account needs to be updated"
             )

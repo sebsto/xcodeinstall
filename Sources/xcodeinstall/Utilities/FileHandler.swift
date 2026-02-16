@@ -1,5 +1,5 @@
 //
-//  FileManagerExtension.swift
+//  FileHandler.swift
 //  xcodeinstall
 //
 //  Created by Stormacq, Sebastien on 20/08/2022.
@@ -125,7 +125,7 @@ struct FileHandler: FileHandlerProtocol {
     /// - Parameters:
     ///     - filePath the path of the file to verify
     ///     - fileSize the expected size of the file (in bytes).
-    ///       when omited, file size is not checked
+    ///       when omitted, file size is not checked
     func fileExists(file: URL, fileSize: Int = 0) -> Bool {
 
         let filePath = file.path

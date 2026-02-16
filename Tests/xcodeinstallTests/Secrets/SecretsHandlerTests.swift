@@ -13,14 +13,6 @@ import Testing
 import FoundationNetworking
 #endif
 
-protocol SecretsHandlerTestsProtocol {
-    func testMergeCookiesNoConflict() async throws
-    func testMergeCookiesOneConflict() async throws
-    func testLoadAndSaveSession() async throws
-    func testLoadAndSaveCookies() async throws
-    func testLoadSessionNoExist() async
-}
-
 struct SecretsHandlerTestsBase<T: SecretsHandlerProtocol> {
 
     var secrets: T?
