@@ -97,13 +97,7 @@ final class MockedEnvironment {
         self.shell = MockedShell()
     }
 
-    /// Computed property that wires up the mocked downloader with current session/secrets
-    var downloader: AppleDownloaderProtocol {
-        let mockedDownloader = MockedAppleDownloader()
-        mockedDownloader.urlSession = self.urlSessionData
-        mockedDownloader.secrets = self.secrets
-        return mockedDownloader
-    }
+    var downloader: MockedAppleDownloader = MockedAppleDownloader()
 
     var urlSessionDownload: URLSessionProtocol {
         self.urlSessionData
