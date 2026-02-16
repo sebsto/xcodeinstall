@@ -143,9 +143,9 @@ struct SecretsStorageFile: SecretsHandlerProtocol {
 
     //MARK: these operations are only valid on SecretsStorageAWS
     func retrieveAppleCredentials() async throws -> AppleCredentialsSecret {
-        throw SecretsStorageAWSError.invalidOperation
+        throw SecretsStorageError.invalidOperation
     }
     func storeAppleCredentials(_ credentials: AppleCredentialsSecret) async throws {
-        throw SecretsStorageAWSError.invalidOperation
+        throw SecretsStorageError.invalidOperation
     }
 }

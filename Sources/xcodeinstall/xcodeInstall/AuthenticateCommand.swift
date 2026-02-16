@@ -117,7 +117,7 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
                 display("Credentials stored in AWS Secrets Manager", style: .security)
             }
 
-        } catch SecretsStorageAWSError.invalidOperation {
+        } catch SecretsStorageError.invalidOperation {
 
             // we have a file secrets handler, prompt for credentials interactively
             appleCredentials = try promptForCredentials()
