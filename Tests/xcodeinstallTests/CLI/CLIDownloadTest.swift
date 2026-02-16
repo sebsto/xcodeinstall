@@ -128,7 +128,7 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: Never.self) {
+        await #expect(throws: ExitCode.self) {
             try await download.run(with: deps)
         }
 

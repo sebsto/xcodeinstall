@@ -39,7 +39,12 @@ extension MainCommand {
                 verbose: globalOptions.verbose,
             )
 
-            try await xci.authenticate(with: AuthenticationMethod.withSRP(srp))
+            do {
+                try await xci.authenticate(with: AuthenticationMethod.withSRP(srp))
+            } catch {
+                try? await xci.deps.secrets?.shutdown()
+                throw ExitCode.failure
+            }
 
             // Gracefully shut down AWS client before process exits
             // to avoid RotatingCredentialProvider crash during deallocation
@@ -65,7 +70,13 @@ extension MainCommand {
                 profileName: cloudOption.profileName,
                 verbose: globalOptions.verbose
             )
-            try await xci.signout()
+
+            do {
+                try await xci.signout()
+            } catch {
+                try? await xci.deps.secrets?.shutdown()
+                throw ExitCode.failure
+            }
 
             // Gracefully shut down AWS client before process exits
             // to avoid RotatingCredentialProvider crash during deallocation

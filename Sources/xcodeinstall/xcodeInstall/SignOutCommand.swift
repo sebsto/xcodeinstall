@@ -23,8 +23,10 @@ extension XCodeInstall {
             display("Signed out.", style: .success)
         } catch let error as SecretsStorageAWSError {
             display("AWS Error: \(error.localizedDescription)", style: .error())
+            throw error
         } catch {
             display("Unexpected error : \(error)", style: .error())
+            throw error
         }
 
     }

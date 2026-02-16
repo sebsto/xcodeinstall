@@ -210,6 +210,7 @@ extension XCodeInstall {
 
             // handle invalid username or password
             display("Invalid username or password.", style: .error())
+            throw AuthenticationError.invalidUsernamePassword
 
         } catch AuthenticationError.requires2FATrustedPhoneNumber {
 
@@ -221,11 +222,13 @@ extension XCodeInstall {
                 """,
                 style: .security
             )
+            throw AuthenticationError.requires2FATrustedPhoneNumber
 
         } catch AuthenticationError.serviceUnavailable {
 
             // service unavailable means that the authentication method requested is not available
             display("Requested authentication method is not available. Try with SRP.", style: .error())
+            throw AuthenticationError.serviceUnavailable
 
         } catch AuthenticationError.unableToRetrieveAppleServiceKey(let error) {
 
@@ -234,6 +237,7 @@ extension XCodeInstall {
                 "Can not connect to Apple Developer Portal.\nOriginal error : \(error?.localizedDescription ?? "nil")",
                 style: .error()
             )
+            throw AuthenticationError.unableToRetrieveAppleServiceKey(error)
 
         } catch AuthenticationError.notImplemented(let feature) {
 
@@ -242,12 +246,15 @@ extension XCodeInstall {
                 "\(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available.",
                 style: .error()
             )
+            throw AuthenticationError.notImplemented(featureName: feature)
 
         } catch let error as SecretsStorageAWSError {
             display("AWS Error: \(error.localizedDescription)", style: .error())
+            throw error
 
         } catch {
             display("Unexpected Error : \(error)", style: .error())
+            throw error
         }
     }
 

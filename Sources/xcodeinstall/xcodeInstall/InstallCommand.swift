@@ -43,31 +43,38 @@ extension XCodeInstall {
         } catch CLIError.invalidInput {
             display("Invalid input", style: .error())
             self.deps.progressBar.complete(success: false)
+            throw CLIError.invalidInput
         } catch FileHandlerError.noDownloadedList {
             display("There is no downloaded file to be installed", style: .warning)
             self.deps.progressBar.complete(success: false)
+            throw FileHandlerError.noDownloadedList
         } catch InstallerError.xCodeXIPInstallationError {
             display("Can not expand XIP file. Is there enough space on / ? (16GiB required)", style: .error())
             self.deps.progressBar.complete(success: false)
+            throw InstallerError.xCodeXIPInstallationError
         } catch InstallerError.xCodeMoveInstallationError {
             display("Can not move Xcode to /Applications", style: .error())
             self.deps.progressBar.complete(success: false)
+            throw InstallerError.xCodeMoveInstallationError
         } catch InstallerError.xCodePKGInstallationError {
             display(
                 "Can not install additional packages.",
                 style: .error()
             )
             self.deps.progressBar.complete(success: false)
+            throw InstallerError.xCodePKGInstallationError
         } catch InstallerError.unsupportedInstallation {
             display(
                 "Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)",
                 style: .error()
             )
             self.deps.progressBar.complete(success: false)
+            throw InstallerError.unsupportedInstallation
         } catch {
             display("Error while installing \(String(describing: fileToInstall!))", style: .error())
             log.debug("\(error)")
             self.deps.progressBar.complete(success: false)
+            throw error
         }
     }
 

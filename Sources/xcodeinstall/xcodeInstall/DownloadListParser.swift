@@ -141,15 +141,17 @@ struct DownloadListParser {
     }
 }
 
+// Thread-safe: isolated to @MainActor via defaultIsolation(MainActor.self) in Package.swift
+private let appleDownloadDateFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.locale = Locale(identifier: "en_US_POSIX")
+    f.dateFormat = "MM-dd-yy HH:mm"
+    return f
+}()
+
 extension String {
 
     func toDate() -> Date? {
-
-        let appleDownloadDateFormatter = DateFormatter()
-        appleDownloadDateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        appleDownloadDateFormatter.dateFormat = "MM-dd-yy HH:mm"
-        //        appleDownloadDateFormatter.timeZone = TimeZone(secondsFromGMT: 0) // assume GMT timezone
-
         return appleDownloadDateFormatter.date(from: self)
     }
 }
