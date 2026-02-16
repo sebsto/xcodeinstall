@@ -141,12 +141,12 @@ extension CLITests {
     func testListUnexpectedError() async throws {
         // given
         let env = MockedEnvironment()
-        env.downloader.nextListError = NSError(domain: "test", code: 42)
+        env.downloader.nextListError = MockError.genericTestError
         let deps = env.toDeps(log: log)
         let xci = XCodeInstall(log: log, deps: deps)
 
         // when
-        await #expect(throws: NSError.self) {
+        await #expect(throws: MockError.self) {
             try await xci.list(force: false, xCodeOnly: true, majorVersion: "14", sortMostRecentFirst: false, datePublished: false)
         }
 

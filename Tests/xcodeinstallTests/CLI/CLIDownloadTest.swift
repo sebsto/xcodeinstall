@@ -261,7 +261,7 @@ extension CLITests {
     func testDownloadGenericError() async throws {
 
         // given
-        env.downloader.nextListError = NSError(domain: "test", code: 42, userInfo: nil)
+        env.downloader.nextListError = MockError.genericTestError
 
         let deps = env.toDeps(log: log)
 

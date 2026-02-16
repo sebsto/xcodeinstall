@@ -50,4 +50,5 @@ final class NilMockedReadLine: ReadLineProtocol {
 
 enum MockError: Error {
     case invalidMockData
+    case genericTestError
 }

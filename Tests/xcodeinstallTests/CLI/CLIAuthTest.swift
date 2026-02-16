@@ -184,14 +184,13 @@ extension CLITests {
         // given
         let env = MockedEnvironment()
         env.secrets = MockedSecretsHandler(readLine: env.readLine)
-        (env.authenticator as! MockedAppleAuthentication).nextSignoutError =
-            NSError(domain: "test", code: 42, userInfo: [NSLocalizedDescriptionKey: "test error"])
+        (env.authenticator as! MockedAppleAuthentication).nextSignoutError = MockError.genericTestError
 
         let deps = env.toDeps(log: log)
         let xci = XCodeInstall(log: log, deps: deps)
 
         // when
-        await #expect(throws: NSError.self) {
+        await #expect(throws: MockError.self) {
             try await xci.signout()
         }
 
@@ -273,11 +272,11 @@ extension CLITests {
     func testAuthenticateUnexpectedError() async throws {
         // given
         let env = MockedEnvironment(readLine: MockedReadLine(["username", "password"]))
-        (env.authenticator as! MockedAppleAuthentication).nextGenericError = NSError(domain: "test", code: 42)
+        (env.authenticator as! MockedAppleAuthentication).nextGenericError = MockError.genericTestError
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: NSError.self) {
+        await #expect(throws: MockError.self) {
             let xci = XCodeInstall(log: log, deps: deps)
             try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
         }
