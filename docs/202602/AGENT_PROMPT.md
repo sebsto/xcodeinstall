@@ -60,6 +60,7 @@ Make exactly the changes described in the chunk. Follow these rules:
 - Do not add imports unless required by your changes.
 - Preserve existing code style (indentation, spacing, brace placement).
 - When renaming identifiers, use grep to find ALL references across Sources/ and Tests/ before editing.
+- **Force unwrap rule:** When replacing a force unwrap (`!`), determine whether nil represents a *user error* or a *programming error*. If the value should never be nil due to prior logic or mandatory CLI arguments, use `guard let … else { preconditionFailure("descriptive message") }`. Only use `throw` for cases where nil is a legitimate runtime condition the user can cause.
 
 ### Step 6: Build
 

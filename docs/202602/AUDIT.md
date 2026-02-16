@@ -363,21 +363,22 @@ Each chunk below is an independent unit of work. An AI coding agent will impleme
 
 **While implementing:**
 4. Make only the changes described in the chunk. Do not refactor surrounding code, add comments, or fix unrelated issues.
-5. After all changes are made, the code **must compile**: run `swift build` and verify it succeeds with zero errors.
-6. After build passes, **all tests must pass**: run `swift test` and verify all 115 tests pass (or more, if the chunk adds tests).
-7. If build or tests fail, fix the issue before considering the chunk complete. Do not move on with failures.
+5. **Force unwrap rule:** When replacing a force unwrap (`!`), determine whether nil represents a *user error* or a *programming error*. If the value should never be nil due to prior logic or mandatory CLI arguments, use `guard let … else { preconditionFailure("descriptive message") }`. Only use `throw` for cases where nil is a legitimate runtime condition the user can cause.
+6. After all changes are made, the code **must compile**: run `swift build` and verify it succeeds with zero errors.
+7. After build passes, **all tests must pass**: run `swift test` and verify all 115 tests pass (or more, if the chunk adds tests).
+8. If build or tests fail, fix the issue before considering the chunk complete. Do not move on with failures.
 
 **After completing a chunk:**
-8. **Do NOT commit.** Leave the changes unstaged. The user will review the diff and commit manually.
-9. **Write a summary file** at `docs/202602/chunk-NN.md` (e.g., `chunk-01.md`, `chunk-02.md`). The file must contain:
-   - Chunk number and title
-   - List of files changed (added, modified, deleted)
-   - Brief description of each change made
-   - Build result (`swift build` output — pass/fail)
-   - Test result (`swift test` output — number of tests, pass/fail)
-   - Any issues encountered and how they were resolved
-   - Any deviations from the plan and why
-10. Report to the user: which files were changed, what was done, and confirm both `swift build` and `swift test` passed.
+9. **Do NOT commit.** Leave the changes unstaged. The user will review the diff and commit manually.
+10. **Write a summary file** at `docs/202602/chunk-NN.md` (e.g., `chunk-01.md`, `chunk-02.md`). The file must contain:
+    - Chunk number and title
+    - List of files changed (added, modified, deleted)
+    - Brief description of each change made
+    - Build result (`swift build` output — pass/fail)
+    - Test result (`swift test` output — number of tests, pass/fail)
+    - Any issues encountered and how they were resolved
+    - Any deviations from the plan and why
+11. Report to the user: which files were changed, what was done, and confirm both `swift build` and `swift test` passed.
 
 **Dependency handling:**
 - Some chunks have dependencies on others (noted in each chunk). If a chunk depends on another that hasn't been merged to main yet, skip it and move to the next independent chunk.
