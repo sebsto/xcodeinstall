@@ -73,8 +73,8 @@ extension DownloadDelegateTests {
         delegate.urlSession(session, downloadTask: dummyTask, didFinishDownloadingTo: srcFile)
 
         // Then — the stream should finish without error
-        for try await _ in stream {
-            // Consume any yielded progress (there shouldn't be any from this method)
+        await #expect(throws: Never.self) {
+            for try await _ in stream {}
         }
 
         // Verify the file handler was asked to move from src to dst
@@ -103,13 +103,10 @@ extension DownloadDelegateTests {
         delegate.urlSession(session, downloadTask: dummyTask, didFinishDownloadingTo: srcFile)
 
         // Then — the stream should finish with authenticationRequired error
-        var caughtError: Error?
-        do {
+        let error = await #expect(throws: DownloadError.self) {
             for try await _ in stream {}
-        } catch {
-            caughtError = error
         }
-        #expect(caughtError as? DownloadError == .authenticationRequired)
+        #expect(error == .authenticationRequired)
 
         // The error page file should have been cleaned up
         #expect(!fileManager.fileExists(atPath: srcFile.path))
@@ -136,13 +133,10 @@ extension DownloadDelegateTests {
         delegate.urlSession(session, downloadTask: dummyTask, didFinishDownloadingTo: srcFile)
 
         // Then — should throw authenticationRequired
-        var caughtError: Error?
-        do {
+        let error = await #expect(throws: DownloadError.self) {
             for try await _ in stream {}
-        } catch {
-            caughtError = error
         }
-        #expect(caughtError as? DownloadError == .authenticationRequired)
+        #expect(error == .authenticationRequired)
     }
 
     @Test("Sign in page triggers error page detection")
@@ -166,13 +160,10 @@ extension DownloadDelegateTests {
         delegate.urlSession(session, downloadTask: dummyTask, didFinishDownloadingTo: srcFile)
 
         // Then — should throw authenticationRequired
-        var caughtError: Error?
-        do {
+        let error = await #expect(throws: DownloadError.self) {
             for try await _ in stream {}
-        } catch {
-            caughtError = error
         }
-        #expect(caughtError as? DownloadError == .authenticationRequired)
+        #expect(error == .authenticationRequired)
     }
 
     @Test("File move failure propagates error through stream")
@@ -200,15 +191,11 @@ extension DownloadDelegateTests {
         delegate.urlSession(session, downloadTask: dummyTask, didFinishDownloadingTo: srcFile)
 
         // Then — the stream should finish with the move error
-        var caughtError: Error?
-        do {
+        let error = await #expect(throws: NSError.self) {
             for try await _ in stream {}
-        } catch {
-            caughtError = error
         }
-        let nsError = caughtError as? NSError
-        #expect(nsError?.domain == "test")
-        #expect(nsError?.code == 42)
+        #expect(error?.domain == "test")
+        #expect(error?.code == 42)
     }
 }
 
@@ -231,15 +218,11 @@ extension DownloadDelegateTests {
         delegate.urlSession(session, task: dummyTask, didCompleteWithError: downloadError)
 
         // Then — the stream should finish with that error
-        var caughtError: Error?
-        do {
+        let error = await #expect(throws: NSError.self) {
             for try await _ in stream {}
-        } catch {
-            caughtError = error
         }
-        let nsError = caughtError as? NSError
-        #expect(nsError?.domain == NSURLErrorDomain)
-        #expect(nsError?.code == NSURLErrorTimedOut)
+        #expect(error?.domain == NSURLErrorDomain)
+        #expect(error?.code == NSURLErrorTimedOut)
     }
 
     @Test("didCompleteWithError with nil does not throw after successful download")
@@ -266,9 +249,8 @@ extension DownloadDelegateTests {
         delegate.urlSession(session, task: dummyTask, didCompleteWithError: nil)
 
         // Then — the stream should complete without error
-        for try await _ in stream {
-            // Consume progress (none expected)
+        await #expect(throws: Never.self) {
+            for try await _ in stream {}
         }
-        // No error thrown means the test passes — the stream finished cleanly
     }
 }
