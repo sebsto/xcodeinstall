@@ -103,63 +103,17 @@ final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
 
 @MainActor
 final class MockedAppleDownloader: AppleDownloaderProtocol {
-    var urlSession: URLSessionProtocol?
-    var secrets: SecretsHandlerProtocol?
+    var nextListResult: DownloadList?
+    var nextListError: Error?
+    var nextListSource: ListSource = .cache
 
     func list(force: Bool) async throws -> (DownloadList, ListSource) {
-        if !force {
-            let listData = try loadTestData(file: .downloadList)
-            let list: DownloadList = try JSONDecoder().decode(DownloadList.self, from: listData)
-            return (list, .cache)
-        }
-
-        // For forced list, check mocked URLSession data
-        guard let mockedSession = urlSession as? MockedURLSession,
-            let data = mockedSession.nextData,
-            let response = mockedSession.nextResponse as? HTTPURLResponse
-        else {
-            throw MockError.invalidMockData
-        }
-
-        // Check response status code first
-        guard response.statusCode == 200 else {
-            throw DownloadError.invalidResponse
-        }
-
-        // Check for cookies (except for specific test cases)
-        let hasCookies = response.value(forHTTPHeaderField: "Set-Cookie") != nil
-
-        // Try to decode the response first to check if it's valid JSON
-        let downloadList: DownloadList
-        do {
-            downloadList = try JSONDecoder().decode(DownloadList.self, from: data)
-        } catch {
-            // If JSON parsing fails, throw parsing error
-            throw DownloadError.parsingError(error: nil)
-        }
-
-        // Now check for cookies after successful JSON parsing
-        if !hasCookies && downloadList.resultCode == 0 {
-            throw DownloadError.invalidResponse
-        }
-
-        // Check result code for various error conditions
-        switch downloadList.resultCode {
-        case 0:
-            return (downloadList, .network)
-        case 1100:
-            throw DownloadError.authenticationRequired
-        case 2170:
-            throw DownloadError.accountNeedUpgrade(
-                errorCode: downloadList.resultCode,
-                errorMessage: downloadList.userString ?? "Your developer account needs to be updated"
-            )
-        default:
-            throw DownloadError.unknownError(
-                errorCode: downloadList.resultCode,
-                errorMessage: downloadList.userString ?? "Unknown error"
-            )
-        }
+        if let error = nextListError { throw error }
+        if let list = nextListResult { return (list, nextListSource) }
+        // Default: load from test data (cache behavior)
+        let listData = try loadTestData(file: .downloadList)
+        let list = try JSONDecoder().decode(DownloadList.self, from: listData)
+        return (list, .cache)
     }
 
     func download(file: DownloadList.File) async throws -> AsyncThrowingStream<DownloadProgress, Error> {

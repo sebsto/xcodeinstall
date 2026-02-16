@@ -31,12 +31,6 @@ final class DownloadTests {
     func getDownloadManager() -> DownloadManager {
         DownloadManager(logger: log)
     }
-
-    func setSessionData(data: Data?, response: HTTPURLResponse?) {
-        #expect(self.env.urlSessionData as? MockedURLSession != nil)
-        (self.env.urlSessionData as? MockedURLSession)?.nextData = data
-        (self.env.urlSessionData as? MockedURLSession)?.nextResponse = response
-    }
 }
 
 // MARK: - Test Cases
