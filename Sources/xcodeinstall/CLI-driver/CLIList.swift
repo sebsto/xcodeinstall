@@ -70,6 +70,8 @@ extension MainCommand {
                 verbose: globalOptions.verbose
             )
 
+            defer { Task { try? await xci.deps.secrets?.shutdown() } }
+
             _ = try await xci.list(
                 force: downloadListOptions.force,
                 xCodeOnly: downloadListOptions.onlyXcode,

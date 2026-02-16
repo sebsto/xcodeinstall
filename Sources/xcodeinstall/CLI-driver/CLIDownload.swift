@@ -44,6 +44,8 @@ extension MainCommand {
                 verbose: globalOptions.verbose
             )
 
+            defer { Task { try? await xci.deps.secrets?.shutdown() } }
+
             try await xci.download(
                 fileName: name,
                 force: downloadListOptions.force,

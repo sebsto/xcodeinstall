@@ -50,6 +50,8 @@ extension MainCommand {
                 verbose: globalOptions.verbose
             )
 
+            defer { Task { try? await xci.deps.secrets?.shutdown() } }
+
             _ = try await xci.storeSecrets()
         }
     }
