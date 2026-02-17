@@ -89,6 +89,44 @@ struct MainCommand: AsyncParsableCommand {
             return await XCodeInstall(log: logger, deps: deps)
         }
 
+        // Load saved config
+        let baseDirectory = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".xcodeinstall")
+        let configHandler = await ConfigHandler(log: logger, baseDirectory: baseDirectory)
+        let savedConfig = await configHandler.loadConfig()
+
+        // Merge CLI args with saved config (CLI takes precedence)
+        let effectiveRegion = region ?? savedConfig?.secretManagerRegion
+        let effectiveProfile = profileName ?? savedConfig?.profileName
+
+        // Display info message for loaded (non-overridden) settings
+        let display = NooraDisplay()
+        if effectiveRegion != nil || effectiveProfile != nil {
+            var savedParts: [String] = []
+            if let r = effectiveRegion, region == nil {
+                savedParts.append("-s \(r)")
+            }
+            if let p = effectiveProfile, profileName == nil {
+                savedParts.append("-p \(p)")
+            }
+            if !savedParts.isEmpty {
+                await display.display(
+                    "Using saved settings: \(savedParts.joined(separator: " "))",
+                    style: .info
+                )
+            }
+        }
+
+        // Save config if CLI args provided (merge with existing)
+        if region != nil || profileName != nil {
+            let newConfig = PersistentConfig(
+                secretManagerRegion: region ?? savedConfig?.secretManagerRegion,
+                profileName: profileName ?? savedConfig?.profileName
+            )
+            try? await configHandler.saveConfig(newConfig)
+            logger.debug("Saved config")
+        }
+
         let fileHandler = await FileHandler(log: logger)
         let urlSession = URLSession.shared
 
@@ -96,8 +134,12 @@ struct MainCommand: AsyncParsableCommand {
         var authenticator: AppleAuthenticatorProtocol
         var downloader: AppleDownloaderProtocol
 
-        if let region {
-            let awsSecrets = try await SecretsStorageAWS(region: region, profileName: profileName, log: logger)
+        if let effectiveRegion {
+            let awsSecrets = try await SecretsStorageAWS(
+                region: effectiveRegion,
+                profileName: effectiveProfile,
+                log: logger
+            )
             secrets = awsSecrets
         } else {
             secrets = await SecretsStorageFile(log: logger)
@@ -113,7 +155,7 @@ struct MainCommand: AsyncParsableCommand {
 
         let deps = await AppDependencies(
             fileHandler: fileHandler,
-            display: NooraDisplay(),
+            display: display,
             readLine: NooraReadLine(),
             progressBar: CLIProgressBar(),
             secrets: secrets,
