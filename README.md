@@ -24,12 +24,12 @@ This is a command line utility to download and install Xcode in headless mode (f
 
 ### Key Features
 
-✅ **Automated Downloads**: Download any Xcode version from Apple Developer Portal
-✅ **Headless Installation**: Install Xcode without GUI interaction
-✅ **AWS Secrets Manager Integration**: Securely store credentials and session tokens in the cloud
-✅ **Persistent Configuration**: Automatically saves AWS region and profile settings after first use
-✅ **Multi-Machine Support**: Share authentication sessions between your laptop and cloud machines
-✅ **MFA Support**: Works with Apple's two-factor authentication (requires manual code entry)
+✅ **Automated Downloads**: Download any Xcode version from Apple Developer Portal  
+✅ **Headless Installation**: Install Xcode without GUI interaction  
+✅ **AWS Secrets Manager Integration**: Securely store credentials and session tokens in the cloud  
+✅ **Persistent Configuration**: Automatically saves AWS region and profile settings after first use  
+✅ **Multi-Machine Support**: Share authentication sessions between your laptop and cloud machines  
+✅ **MFA Support**: Works with Apple's two-factor authentication (requires manual code entry)  
 
 ### How It Works
 
