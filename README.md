@@ -17,17 +17,37 @@ This is a command line utility to download and install Xcode in headless mode (f
 
 ## What is it
 
-`xcodeinstall` is a command line utility to download and install Xcode from the terminal only. It may work interactively or unattended. In **interactive mode**, it prompts you for your Apple Developer account username, password and MFA code.  In **unattended mode**, it fetches your Apple Developer username and password from AWS Secrets Manager. (Instructions to configure this are below).
+`xcodeinstall` is a command line utility to download and install Xcode from the terminal only. It works both interactively and unattended:
 
-When **MFA is configured** on your Apple developer account (which we highly recommend), a human interaction is required to enter the MFA code sent to your device.  This step cannot be automated.
+- **Interactive mode**: Prompts you for your Apple Developer account username, password, and MFA code
+- **Unattended mode**: Fetches your Apple Developer credentials from AWS Secrets Manager
 
-The Apple Developer Portal username and password ARE NOT STORED on the local volume. They are used to interact with Apple's Developer Portal API and collect a session token.  The session token is stored in `$HOME/.xcodeinstall` or on AWS Secrets Manager.
+### Key Features
 
-When using AWS Secrets Manager, Apple session token and cookies are securely stored on AWS Secrets Manager. The session token and cookies may be shared from multiple cloud machines. For example: you may authenticate interactively, using MFA, from your laptop, and have the command running unattended, from a script running on your cloud machine.
+✅ **Automated Downloads**: Download any Xcode version from Apple Developer Portal
+✅ **Headless Installation**: Install Xcode without GUI interaction
+✅ **AWS Secrets Manager Integration**: Securely store credentials and session tokens in the cloud
+✅ **Persistent Configuration**: Automatically saves AWS region and profile settings after first use
+✅ **Multi-Machine Support**: Share authentication sessions between your laptop and cloud machines
+✅ **MFA Support**: Works with Apple's two-factor authentication (requires manual code entry)
 
-The session stays valid for several days, sometimes weeks before it expires.  When the session expires, you have to authenticate again. Apple might prompts you for a new authentication when connecting from a new IP address or location (switching between laptop and EC2 instance for example)
+### How It Works
 
-> When using Secrets Manager for authentication, it is required to use it FROM THE SAME AWS REGION, for the `list` and `download` command.
+**Authentication Flow:**
+1. When **MFA is configured** on your Apple Developer account (highly recommended), you must manually enter the MFA code sent to your device. This step cannot be automated for security reasons.
+
+2. Your Apple Developer Portal **username and password are NEVER stored** on disk. They are only used to authenticate with Apple's API and obtain a session token.
+
+3. The **session token is stored** either locally in `~/.xcodeinstall/` or on AWS Secrets Manager (your choice).
+
+4. Sessions typically remain valid for several days or weeks. When expired, re-authentication is required. Apple may also prompt for re-authentication when connecting from a new IP address or location.
+
+**AWS Secrets Manager Benefits:**
+- **Secure storage**: Credentials and session tokens stored in AWS cloud
+- **Multi-machine access**: Authenticate on your laptop, use the session on EC2 instances
+- **Automatic configuration**: Region and profile settings saved after first use
+
+> **Important**: When using AWS Secrets Manager, you must use the same AWS region and profile for all commands (`authenticate`, `list`, `download`). The tool automatically saves these settings after your first authentication.
 
 ## Demo 
 
@@ -72,9 +92,34 @@ Already downloaded: /Users/stormacq/Library/Caches/Homebrew/downloads/03a2cadcdf
 
 Once installed, it is in the path, you can just type `xcodeinstall` to start the tool.
 
-## How to use 
+## How to use
 
-### Overview 
+### Quick Start for First-Time Users
+
+The typical workflow is:
+
+1. **Authenticate** - Sign in to Apple Developer Portal (one time)
+2. **List** - Browse available Xcode versions
+3. **Download** - Download your desired Xcode version
+4. **Install** - Install the downloaded Xcode
+
+```bash
+# Step 1: Authenticate (prompts for Apple ID and password)
+xcodeinstall authenticate
+
+# Step 2: List available Xcode versions
+xcodeinstall list --only-xcode
+
+# Step 3: Download a specific version (prompts if --name is omitted)
+xcodeinstall download --name "Xcode 15.2.xip"
+
+# Step 4: Install the downloaded version
+xcodeinstall install --name "Xcode 15.2.xip"
+```
+
+**Using AWS Secrets Manager?** Add `-s <region>` and `-p <profile>` flags to the authenticate command. These settings are **automatically saved** and reused for subsequent commands. See [AWS Secrets Manager](#using-aws-secrets-manager-1) section below.
+
+### Overview
 
 ```
 ➜  ~ xcodeinstall
@@ -94,41 +139,74 @@ SUBCOMMANDS:
   list                    List available versions of Xcode and development tools
   download                Download the specified version of Xcode
   install                 Install a specific XCode version or addon package
+  storesecrets            Store Apple Developer credentials in AWS Secrets Manager
 
   See 'xcodeinstall help <subcommand>' for detailed help.
 ```
 
-### Authentication 
+### Persistent Configuration
+
+When using AWS Secrets Manager, `xcodeinstall` **automatically saves** your `-s` (AWS region) and `-p` (AWS profile) settings to `~/.xcodeinstall/config.json`.
+
+**First time:** Specify the options explicitly:
+```bash
+xcodeinstall authenticate -s us-west-2 -p myprofile
+```
+
+**Subsequent commands:** Options are loaded automatically:
+```bash
+xcodeinstall list
+# Info: Using saved settings: -s us-west-2 -p myprofile
+```
+
+**Override saved settings:** Command-line arguments always take precedence:
+```bash
+xcodeinstall list -s us-east-1
+# Info: Using saved settings: -p myprofile
+# Uses: us-east-1 (overridden) + myprofile (saved)
+```
+
+**Partial updates:** Specifying only one option preserves the other:
+```bash
+xcodeinstall authenticate -p newprofile
+# Keeps saved region, updates profile
+```
+
+This eliminates repetitive typing of `-s` and `-p` flags while maintaining full control through command-line overrides.
+
+### Authentication
 
 ```
-➜  ~ xcodeinstall authenticate -h 
+➜  ~ xcodeinstall authenticate -h
 
 OVERVIEW: Authenticate yourself against Apple Developer Portal
 
-USAGE: xcodeinstall authenticate [--verbose]
+USAGE: xcodeinstall authenticate [--verbose] [-s <region>] [-p <profile>]
 
 OPTIONS:
   -v, --verbose           Produce verbose output for debugging
   -s, --secretmanager-region <secretmanager-region>
-                          Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region  
+                          Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region
+  -p, --profile <profile> The AWS profile name to use for authentication (from ~/.aws/credentials and ~/.aws/config)
   --version               Show the version.
   -h, --help              Show help information.
 ```
 
-#### Interactive authentication 
+#### Interactive Authentication (Local Storage)
 
-```
-➜  ~ xcodeinstall authenticate    
+For local development or testing, authenticate without AWS Secrets Manager:
+
+```bash
+➜  ~ xcodeinstall authenticate
 
 ⚠️⚠️⚠️
 This tool prompts you for your Apple ID username, password, and two factors authentication code.
 These values are not stored anywhere. They are used to get an Apple session ID.
 
-The Session ID is securely stored on your AWS Account, using AWS Secrets Manager.
-The AWS Secrets Manager secret name is "xcodeinstall_session"
+The Session ID is stored locally in ~/.xcodeinstall/
 
 ⌨️  Enter your Apple ID username: <your apple id email>
-⌨️  Enter your Apple ID password: 
+⌨️  Enter your Apple ID password:
 Authenticating...
 🔐 Two factors authentication is enabled, enter your 2FA code: 000000
 ✅ Authenticated with MFA.
@@ -136,32 +214,34 @@ Authenticating...
 
 #### Using AWS Secrets Manager
 
-When your Apple Developer Portal credentials are stored on AWS Secrets Manager, you can just specify the AWS Region 
+For production, CI/CD, or multi-machine setups, use AWS Secrets Manager to store credentials and session tokens securely:
 
-```
-➜  ~ xcodeinstall authenticate -s us-east-1
+```bash
+➜  ~ xcodeinstall authenticate -s us-west-2 -p myprofile
 
 Retrieving Apple Developer Portal credentials...
 Authenticating...
-🔐 Two factors authentication is enabled, enter your 2FA code: 00000
+🔐 Two factors authentication is enabled, enter your 2FA code: 000000
 ✅ Authenticated with MFA.
 ```
 
-> When using Secrets Manager for authentication, it is required to use it FROM THE SAME AWS REGION, for the `list` and `download` command.
+**Important:** The `-s` (region) and `-p` (profile) options are **automatically saved** to `~/.xcodeinstall/config.json` for subsequent commands. You only need to specify them once.
 
-The two above command (interactive and AWS Secrets Manager based) triggers the following prompt on your registered machines (laptop, phone, or tablet)
+> **Note:** When using Secrets Manager, you must use the **same AWS region and profile** for all commands (`authenticate`, `list`, `download`). The saved configuration ensures consistency across commands.
+
+The two authentication methods (interactive and AWS Secrets Manager based) trigger the following prompt on your registered devices (laptop, phone, or tablet):
 
 ![Apple MFA Authorization](img/mfa-01.png)
 
 ![Apple MFA code](img/mfa-02.png)
 
-### List files available to download 
+### List Files Available to Download
 
-```
+```bash
 ➜  ~ xcodeinstall list -h
 OVERVIEW: List available versions of Xcode and development tools
 
-USAGE: xcodeinstall list [--verbose] [--force] [--only-xcode] [--xcode-version <xcode-version>] [--most-recent-first] [--date-published]
+USAGE: xcodeinstall list [--verbose] [--force] [--only-xcode] [--xcode-version <xcode-version>] [--most-recent-first] [--date-published] [-s <region>] [-p <profile>]
 
 OPTIONS:
   -v, --verbose           Produce verbose output for debugging
@@ -172,18 +252,36 @@ OPTIONS:
   -m, --most-recent-first Sort by most recent releases first
   -d, --date-published    Show publication date
   -s, --secretmanager-region <secretmanager-region>
-                          Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region  
+                          Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region
+  -p, --profile <profile> The AWS profile name to use for authentication
   --version               Show the version.
   -h, --help              Show help information.
-  ```
-
-### Download file 
-
 ```
+
+**Examples:**
+
+```bash
+# List all available downloads
+xcodeinstall list
+
+# List only Xcode packages, most recent first
+xcodeinstall list --only-xcode --most-recent-first
+
+# Filter by Xcode version 15
+xcodeinstall list --only-xcode --xcode-version 15
+
+# With AWS Secrets Manager (uses saved settings if available)
+xcodeinstall list
+# Info: Using saved settings: -s us-west-2 -p myprofile
+```
+
+### Download File
+
+```bash
 ➜  ~ xcodeinstall download -h
 OVERVIEW: Download the specified version of Xcode
 
-USAGE: xcodeinstall download [--verbose] [--force] [--only-xcode] [--xcode-version <xcode-version>] [--most-recent-first] [--date-published] [--name <name>]
+USAGE: xcodeinstall download [--verbose] [--force] [--only-xcode] [--xcode-version <xcode-version>] [--most-recent-first] [--date-published] [--name <name>] [-s <region>] [-p <profile>]
 
 OPTIONS:
   -v, --verbose           Produce verbose output for debugging
@@ -193,47 +291,70 @@ OPTIONS:
                           Filter on provided Xcode version number (default: 13)
   -m, --most-recent-first Sort by most recent releases first
   -d, --date-published    Show publication date
-  -n, --name <name>       The exact package name to downloads. When omited, it asks interactively
+  -n, --name <name>       The exact package name to download. When omitted, it prompts interactively
   -s, --secretmanager-region <secretmanager-region>
                           Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region
+  -p, --profile <profile> The AWS profile name to use for authentication
   --version               Show the version.
   -h, --help              Show help information.
-  ```
-
-  When you known the name of the file (for example `Xcode 13.4.1.xip`), you can use the `--name` option, otherwise it prompts your for the file name.
-
-  ```
-  xcodeinstall download --name "Xcode 13.4.1.xip"
-  ```
-
-### Install file 
-
-This tool call `sudo` to install packages.  Be sure your userid has a a `sudoers` file configured to not prompt for a password.
-
 ```
-➜  ~ cat /etc/sudoers.d/your_user_id 
+
+**Examples:**
+
+```bash
+# Interactive mode - prompts for file selection
+xcodeinstall download --only-xcode
+
+# Specify exact file name (useful for automation)
+xcodeinstall download --name "Xcode 15.2.xip"
+
+# With AWS Secrets Manager (uses saved settings if available)
+xcodeinstall download --name "Xcode 15.2.xip"
+# Info: Using saved settings: -s us-west-2 -p myprofile
+```
+
+Downloads are stored in `~/.xcodeinstall/download/`
+
+### Install File
+
+This command uses `sudo` to install packages. For unattended installations, configure your user account to run `sudo` without a password prompt:
+
+```bash
+# Create a sudoers file for your user
+➜  ~ cat /etc/sudoers.d/your_user_id
 # Give your_user_id sudo access
 your_user_id ALL=(ALL) NOPASSWD:ALL
 ```
 
-```
-➜  ~ xcodeinstall install -h 
+**Command Help:**
+
+```bash
+➜  ~ xcodeinstall install -h
 OVERVIEW: Install a specific XCode version or addon package
 
 USAGE: xcodeinstall install [--verbose] [--name <name>]
 
 OPTIONS:
   -v, --verbose           Produce verbose output for debugging
-  -n, --name <name>       The exact package name to install. When omited, it asks interactively
+  -n, --name <name>       The exact package name to install. When omitted, it prompts interactively
   --version               Show the version.
   -h, --help              Show help information.
 ```
 
-When you known the name of the file (for example `Xcode 13.4.1.xip`), you can use the `--name` option, otherwise it prompts your for the file name.
+**Examples:**
 
-  ```
-  xcodeinstall install --name "Xcode 13.4.1.xip"
-  ```
+```bash
+# Interactive mode - lists downloaded files and prompts for selection
+xcodeinstall install
+
+# Specify exact file name (useful for automation)
+xcodeinstall install --name "Xcode 15.2.xip"
+```
+
+The installation process:
+1. Extracts the `.xip` file (this takes several minutes)
+2. Moves `Xcode.app` to `/Applications/`
+3. Runs `xcode-select --install` to register the new Xcode version
 
 ## Minimum IAM Permissions required to use AWS Secrets Manager 
 
@@ -356,49 +477,129 @@ aws ec2 associate-iam-instance-profile \
 
 When you start other EC2 Mac instance, you just need to attach the profile to the new instance.  The Policy and Role can be reused for multiple EC2 instances.
 
-## How to store your secrets on AWS Secrets Manager
+## How to Store Your Secrets on AWS Secrets Manager
 
-When using AWS Secrets Manager to retrieve your Apple Developer Portal username and password, you have to prepare an AWS Secrets Manager secret as following:
+When using AWS Secrets Manager to store your Apple Developer Portal credentials, you need to create a secret in the following format:
 
-- secret name : `xcodeinstall-apple-credentials`
-- secret format : a JSON string similar to this one :
+- **Secret name:** `xcodeinstall-apple-credentials`
+- **Secret format:** JSON with username and password:
 
 ```json
 {"username":"your_username","password":"your_password"}
 ```
 
-To help you to create this secret, you may use the following command.
+### Using the `storesecrets` Command
 
-Be sure to adjust the name of the AWS Region to your requirements. Using an AWS Region geographically close to you helps to reduce latency)
+The easiest way to create this secret is using the built-in `storesecrets` command:
 
-```zsh
-➜  ~ xcodeinstall storesecrets -s us-east-1
+```bash
+➜  ~ xcodeinstall storesecrets -s us-west-2 -p myprofile
 
-This command captures your Apple ID username and password and store them securely in AWS Secrets Manager.
+This command captures your Apple ID username and password and stores them securely in AWS Secrets Manager.
 It allows this command to authenticate automatically, as long as no MFA is prompted.
 
-⌨️  Enter your Apple ID username: sebsto@me.com
-⌨️  Enter your Apple ID password: 
+⌨️  Enter your Apple ID username: your.email@example.com
+⌨️  Enter your Apple ID password:
 ✅ Credentials are securely stored
 ```
 
-## How to contribute 
+**Options:**
+- `-s, --secretmanager-region`: AWS region where the secret will be stored (choose a region close to you for lower latency)
+- `-p, --profile`: AWS profile name to use (from `~/.aws/credentials` and `~/.aws/config`)
 
-I welcome all type of contributions, not only code : testing and creating bug report, documentation, tutorial etc...
+**Important:** Unlike other commands, `storesecrets` requires you to specify `-s` and `-p` every time, as it's typically a one-time setup operation.
+
+### After Storing Credentials
+
+Once credentials are stored in AWS Secrets Manager:
+
+1. Authenticate once with the same region and profile:
+   ```bash
+   xcodeinstall authenticate -s us-west-2 -p myprofile
+   ```
+
+2. The region and profile are saved automatically. Subsequent commands work without flags:
+   ```bash
+   xcodeinstall list
+   xcodeinstall download --name "Xcode 15.2.xip"
+   ```
+
+## Troubleshooting
+
+### Configuration Files and Data Locations
+
+`xcodeinstall` stores its files in `~/.xcodeinstall/`:
+
+```bash
+~/.xcodeinstall/
+├── config.json           # Saved AWS region and profile settings
+├── downloadList          # Cached list of available downloads
+└── download/             # Downloaded Xcode files
+```
+
+### Managing Saved Settings
+
+**View saved settings:**
+```bash
+cat ~/.xcodeinstall/config.json
+```
+
+**Clear saved settings:**
+```bash
+rm ~/.xcodeinstall/config.json
+```
+
+After clearing, you'll need to specify `-s` and `-p` flags again on your next command.
+
+**Reset everything (including downloads and cache):**
+```bash
+rm -rf ~/.xcodeinstall/
+```
+
+### Common Issues
+
+**"Using saved settings" message appears with wrong region/profile:**
+- Override with command-line flags: `xcodeinstall list -s us-east-1 -p newprofile`
+- Or clear the config file: `rm ~/.xcodeinstall/config.json`
+
+**Session expired errors:**
+- Run `xcodeinstall authenticate` (with `-s` and `-p` if using AWS Secrets Manager)
+- Enter your MFA code when prompted
+
+**AWS credentials not found:**
+- Ensure your AWS credentials are configured in `~/.aws/credentials` or via IAM instance profile
+- Check that the profile name matches what you specified with `-p`
+
+**Permission denied when installing:**
+- Configure passwordless `sudo` (see [Install File](#install-file) section)
+- Or run with `sudo` when prompted
+
+## How to Contribute
+
+I welcome all types of contributions, not only code: testing and creating bug reports, documentation, tutorials, etc.
 If you are not sure how to get started or how to be useful, contact me at stormacq@amazon.com
 
 I listed a couple of ideas below.
 
-## List of ideas 
+## List of Ideas
 
-- improve UX: 
-   - manage multiple versions of xcode (rename xcode.app to xcode-version.app and use symlinks)
-   - use -f by default when no local cache is found, 
-   - download the latest xcode version by default 
-   - capture stderr and stdout of subprocess to emit on the logger 
-- add a CloudWatch Log backend to Logging framework 
-- add possibility to emit SNS notifications on error, such as Session Expired
-[x] clean room implementation of progres sbar to remove dependency on Swift Tools Core library 
+**UX Improvements:**
+- Manage multiple versions of Xcode (rename `Xcode.app` to `Xcode-version.app` and use symlinks)
+- Download the latest Xcode version by default
+- Capture stderr and stdout of subprocess to emit on the logger
+
+**AWS Integration:**
+- Add possibility to emit SNS notifications on errors (e.g., Session Expired)
+- Support for additional AWS authentication methods (SSO, OIDC)
+
+**Configuration Management:**
+- Add explicit config management commands (`config show`, `config clear`)
+- Support for multiple named profiles (`--save-as dev`, `--use-profile dev`)
+- Environment variable fallback (`XCODEINSTALL_REGION`, `XCODEINSTALL_PROFILE`)
+
+**Completed:**
+- [x] Clean room implementation of progress bar to remove dependency on Swift Tools Core library
+- [x] Persistent configuration for `-s` and `-p` options 
 
 ## Credits 
 
