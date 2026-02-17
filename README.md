@@ -31,24 +31,6 @@ This is a command line utility to download and install Xcode in headless mode (f
 ✅ **Multi-Machine Support**: Share authentication sessions between your laptop and cloud machines  
 ✅ **MFA Support**: Works with Apple's two-factor authentication (requires manual code entry)  
 
-### How It Works
-
-**Authentication Flow:**
-1. When **MFA is configured** on your Apple Developer account (highly recommended), you must manually enter the MFA code sent to your device. This step cannot be automated for security reasons.
-
-2. Your Apple Developer Portal **username and password are NEVER stored** on disk. They are only used to authenticate with Apple's API and obtain a session token.
-
-3. The **session token is stored** either locally in `~/.xcodeinstall/` or on AWS Secrets Manager (your choice).
-
-4. Sessions typically remain valid for several days or weeks. When expired, re-authentication is required. Apple may also prompt for re-authentication when connecting from a new IP address or location.
-
-**AWS Secrets Manager Benefits:**
-- **Secure storage**: Credentials and session tokens stored in AWS cloud
-- **Multi-machine access**: Authenticate on your laptop, use the session on EC2 instances
-- **Automatic configuration**: Region and profile settings saved after first use
-
-> **Important**: When using AWS Secrets Manager, you must use the same AWS region and profile for all commands (`authenticate`, `list`, `download`). The tool automatically saves these settings after your first authentication.
-
 ## Demo 
 
 ![Video Demo](img/xcodeinstall-demo.gif)
@@ -225,15 +207,27 @@ Authenticating...
 ✅ Authenticated with MFA.
 ```
 
-**Important:** The `-s` (region) and `-p` (profile) options are **automatically saved** to `~/.xcodeinstall/config.json` for subsequent commands. You only need to specify them once.
-
-> **Note:** When using Secrets Manager, you must use the **same AWS region and profile** for all commands (`authenticate`, `list`, `download`). The saved configuration ensures consistency across commands.
-
-The two authentication methods (interactive and AWS Secrets Manager based) trigger the following prompt on your registered devices (laptop, phone, or tablet):
+**Authentication Flow:**
+1. When **MFA is configured** on your Apple Developer account (highly recommended), you must manually enter the MFA code sent to your device. This step cannot be automated for security reasons.
 
 ![Apple MFA Authorization](img/mfa-01.png)
 
 ![Apple MFA code](img/mfa-02.png)
+
+2. Your Apple Developer Portal **username and password are NEVER stored** on disk. They are only used to authenticate with Apple's API and obtain a session token. When using AWS Secrets Manager, **your username and password are stored and encrypted on Secrets Manager**.
+
+3. The **session token is stored** either locally in `~/.xcodeinstall/` or on AWS Secrets Manager (your choice).
+
+4. Sessions typically remain valid for several days or weeks. When expired, re-authentication is required. Apple may also prompt for re-authentication when connecting from a new IP address or location.
+
+**AWS Secrets Manager Benefits:**
+- **Secure storage**: Credentials and session tokens stored in AWS cloud
+- **Multi-machine access**: Authenticate on your laptop, use the session on EC2 instances
+- **Automatic configuration**: Region and profile settings saved after first use
+
+**Important:** The `-s` (region) and `-p` (profile) options are **automatically saved** to `~/.xcodeinstall/config.json` for subsequent commands. You only need to specify them once.
+
+> **Note:** When using Secrets Manager, you must use the **same AWS region and profile** for all commands (`authenticate`, `list`, `download`). The saved configuration ensures consistency across commands.
 
 ### List Files Available to Download
 
