@@ -11,7 +11,7 @@ import FoundationEssentials
 import Foundation
 #endif
 
-// MARK: - OutputBuffer (from CLIlib/progressbar/OutputBuffer.swift)
+// MARK: - OutputBuffer
 
 protocol OutputBuffer {
     func write(_ text: String)
@@ -35,9 +35,8 @@ extension FileHandle: OutputBuffer {
     func write(_ text: String) {
         guard let textData = text.data(using: .utf8) else { return }
 
-        // Combine \r + text into a single write to avoid recursive calls
         var payload = Data()
-        payload.append(0x0D)  // \r — carriage return to beginning of line
+        payload.append(0x0D)
         payload.append(textData)
         self.write(payload)
     }
@@ -48,40 +47,32 @@ extension FileHandle: OutputBuffer {
     }
 }
 
-// MARK: - ProgressUpdateProtocol & ProgressBarType (from CLIlib/progressbar/ProgressBar.swift)
-
-@MainActor
-protocol ProgressUpdateProtocol {
-    /// Update the animation with a new step.
-    func update(step: Int, total: Int, text: String)
-
-    /// Complete the animation.
-    func complete(success: Bool)
-
-    /// Clear the animation.
-    func clear()
-}
+// MARK: - ProgressBarType
 
 enum ProgressBarType {
-    // 30% [============--------------------]
     case percentProgressAnimation
-
-    // [ 1/2 ]
     case countingProgressAnimation
-
-    // [ 1/2 ]
-    // [ 2/2 ]
     case countingProgressAnimationMultiLine
 }
 
-// MARK: - ProgressBar (from CLIlib/progressbar/ProgressBar.swift)
+// MARK: - ProgressBarProtocol (single unified protocol)
 
 @MainActor
-class ProgressBar: ProgressUpdateProtocol {
+protocol ProgressBarProtocol {
+    func define(animationType: ProgressBarType, message: String)
+    func update(step: Int, total: Int, text: String)
+    func complete(success: Bool)
+    func clear()
+}
 
-    private let progressBarType: ProgressBarType
-    private var output: OutputBuffer
-    private let title: String?
+// MARK: - ProgressBar (single concrete implementation)
+
+@MainActor
+class ProgressBar: ProgressBarProtocol {
+
+    private let output: OutputBuffer
+    private var progressBarType: ProgressBarType = .percentProgressAnimation
+    private var title: String?
     private var titlePrinted = false
 
     private let bold = "\u{001B}[1m"
@@ -92,10 +83,14 @@ class ProgressBar: ProgressUpdateProtocol {
     var fullSign: String = "="
     var emptySign: String = "-"
 
-    init(output: OutputBuffer, progressBarType: ProgressBarType, title: String? = nil) {
+    init(output: OutputBuffer = FileHandle.standardOutput) {
         self.output = output
-        self.progressBarType = progressBarType
-        self.title = title
+    }
+
+    func define(animationType: ProgressBarType, message: String) {
+        self.progressBarType = animationType
+        self.title = message
+        self.titlePrinted = false
     }
 
     func update(step: Int, total: Int, text: String = "") {
@@ -137,8 +132,8 @@ class ProgressBar: ProgressUpdateProtocol {
         let progress = Float(step) / Float(total)
         let numberOfBars = Int(floor(progress * Float(width)))
         let numberOfTicks = width - numberOfBars
-        let bars = fullSign * numberOfBars
-        let ticks = emptySign * numberOfTicks
+        let bars = String(repeating: fullSign, count: numberOfBars)
+        let ticks = String(repeating: emptySign, count: numberOfTicks)
 
         let percentage = Int(floor(progress * 100))
         var string = ""
@@ -171,7 +166,7 @@ class ProgressBar: ProgressUpdateProtocol {
         switch self.progressBarType {
         case .percentProgressAnimation:
             let numberOfSpaces = self.width - title.count
-            let prefix = " " * ((numberOfSpaces / 2) + "99% [".count)
+            let prefix = String(repeating: " ", count: (numberOfSpaces / 2) + "99% [".count)
             output.write("\(prefix)\(blue)\(bold)\(title)\(reset)\n")
 
         default:
@@ -182,46 +177,3 @@ class ProgressBar: ProgressUpdateProtocol {
     }
 }
 
-extension String {
-    static func * (char: String, count: Int) -> String {
-        var str = ""
-        for _ in 0..<count {
-            str.append(char)
-        }
-        return str
-    }
-}
-
-// MARK: - CLIProgressBar (moved from CLI-driver/CLIProgressBar.swift)
-
-protocol CLIProgressBarProtocol: ProgressUpdateProtocol {
-    func define(animationType: ProgressBarType, message: String)
-}
-
-class CLIProgressBar: CLIProgressBarProtocol {
-
-    private var progressAnimation: ProgressUpdateProtocol?
-    private var message: String?
-    private let stream: OutputBuffer = FileHandle.standardOutput
-
-    func define(animationType: ProgressBarType, message: String) {
-        self.message = message
-        self.progressAnimation = ProgressBar(
-            output: stream,
-            progressBarType: animationType,
-            title: self.message
-        )
-    }
-
-    func update(step: Int, total: Int, text: String) {
-        self.progressAnimation?.update(step: step, total: total, text: text)
-    }
-
-    func complete(success: Bool) {
-        self.progressAnimation?.complete(success: success)
-    }
-
-    func clear() {
-        self.progressAnimation?.clear()
-    }
-}

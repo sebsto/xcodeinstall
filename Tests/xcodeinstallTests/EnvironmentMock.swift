@@ -83,7 +83,7 @@ final class MockedEnvironment {
     let fileHandler: FileHandlerProtocol
     var display: DisplayProtocol
     var readLine: ReadLineProtocol
-    var progressBar: CLIProgressBarProtocol
+    var progressBar: ProgressBarProtocol
     var secrets: SecretsHandlerProtocol?
     var authenticator: AppleAuthenticatorProtocol
     var urlSessionData: URLSessionProtocol
@@ -92,7 +92,7 @@ final class MockedEnvironment {
     init(
         fileHandler: FileHandlerProtocol = MockedFileHandler(),
         readLine: ReadLineProtocol = MockedReadLine([]),
-        progressBar: CLIProgressBarProtocol = MockedProgressBar()
+        progressBar: ProgressBarProtocol = MockedProgressBar()
     ) {
         self.fileHandler = fileHandler
         self.readLine = readLine

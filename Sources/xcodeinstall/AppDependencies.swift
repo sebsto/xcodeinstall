@@ -13,7 +13,7 @@ struct AppDependencies: Sendable {
     let fileHandler: FileHandlerProtocol
     var display: DisplayProtocol
     var readLine: ReadLineProtocol
-    var progressBar: CLIProgressBarProtocol
+    var progressBar: ProgressBarProtocol
     var secrets: SecretsHandlerProtocol?
     var authenticator: AppleAuthenticatorProtocol
     var downloader: AppleDownloaderProtocol

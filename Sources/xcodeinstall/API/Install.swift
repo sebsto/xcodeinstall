@@ -44,11 +44,11 @@ class ShellInstaller {
 
     let log: Logger
     let fileHandler: FileHandlerProtocol
-    let progressBar: CLIProgressBarProtocol
+    let progressBar: ProgressBarProtocol
     let shellExecutor: any ShellExecuting
     public init(
         fileHandler: FileHandlerProtocol,
-        progressBar: CLIProgressBarProtocol,
+        progressBar: ProgressBarProtocol,
         shellExecutor: any ShellExecuting,
         log: Logger
     ) {
