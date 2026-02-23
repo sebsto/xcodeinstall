@@ -28,7 +28,7 @@ let package = Package(
         // .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"), 
         .package(url: "https://github.com/soto-project/soto.git", from: "7.12.0"), 
         
-        .package(url: "https://github.com/tuist/Noora", .upToNextMajor(from: "0.54.2")),
+        .package(url: "https://github.com/tuist/Noora", .upToNextMajor(from: "0.55.1")),
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.1.0"),
         
         // disable "SubprocessSpan" until Swift 6.2.1 is resolved
