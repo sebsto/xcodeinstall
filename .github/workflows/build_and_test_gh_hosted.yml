@@ -13,30 +13,40 @@ on:
 jobs:
 
   build:
-    # disabled because libunxip doesn't compile on Linux
-    if: false 
     runs-on: ubuntu-latest
     container: swift:6.2-noble
 
     steps:
     - name: Checkout
       uses: actions/checkout@v6
+    - name: Cache SPM dependencies
+      uses: actions/cache@v4
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
     - name: Build
       run: |
         apt-get update -y 
-        apt-get install liblzma-dev
+        apt-get install -y liblzma-dev zlib1g-dev
         swift build -c release
 
-  # disabled until this project compiles on Linux
   test:
-    if: false 
     runs-on: ubuntu-latest
     container: swift:6.2-noble
 
     steps:
     - uses: actions/checkout@v6
+    - name: Cache SPM dependencies
+      uses: actions/cache@v4
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
     - name: Run tests
       run: |
         apt-get update -y 
-        apt-get install liblzma-dev
+        apt-get install -y liblzma-dev zlib1g-dev
         swift test
