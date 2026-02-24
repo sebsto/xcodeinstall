@@ -22,11 +22,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v6
     - name: Build
-      run: xcodebuild -scheme xcodeinstall -destination "platform=macOS" | /opt/homebrew/bin/xcbeautify
+      # run: xcodebuild -scheme xcodeinstall -destination "platform=macOS" | /opt/homebrew/bin/xcbeautify
       # disabled until the libswiftCompatibilitySpan.dylib issue is solved (with swift 6.2.1, Xcode 26.1)
       # https://github.com/swiftlang/swift/issues/84379
       # https://github.com/swiftlang/swift-package-manager/issues/9163
-      # run: swift build -c release
+      run: swift build -c release
 
   test:
     runs-on: self-hosted
@@ -34,8 +34,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v6
     - name: Run tests
-      run: xcodebuild test -scheme xcodeinstall -destination 'platform=macOS,arch=arm64' | /opt/homebrew/bin/xcbeautify
+      # run: xcodebuild test -scheme xcodeinstall -destination 'platform=macOS,arch=arm64' | /opt/homebrew/bin/xcbeautify
       # disabled until the libswiftCompatibilitySpan.dylib issue is solved (with swift 6.2.1, Xcode 26.1)
       # https://github.com/swiftlang/swift/issues/84379
       # https://github.com/swiftlang/swift-package-manager/issues/9163
-      # run: swift test
+      run: swift test
