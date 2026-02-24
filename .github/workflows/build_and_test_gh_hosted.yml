@@ -7,14 +7,10 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
-# env:
-#   DEVELOPER_DIR: /Applications/Xcode_15.1.app/Contents/Developer
-
 jobs:
 
   build:
-    runs-on: ubuntu-latest
-    container: swift:6.2-noble
+    runs-on: macos-15
 
     steps:
     - name: Checkout
@@ -27,14 +23,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-spm-
     - name: Build
-      run: |
-        apt-get update -y 
-        apt-get install -y liblzma-dev zlib1g-dev
-        swift build -c release
+      run: swift build -c release
 
   test:
-    runs-on: ubuntu-latest
-    container: swift:6.2-noble
+    runs-on: macos-15
 
     steps:
     - uses: actions/checkout@v6
@@ -46,7 +38,4 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-spm-
     - name: Run tests
-      run: |
-        apt-get update -y 
-        apt-get install -y liblzma-dev zlib1g-dev
-        swift test
+      run: swift test
