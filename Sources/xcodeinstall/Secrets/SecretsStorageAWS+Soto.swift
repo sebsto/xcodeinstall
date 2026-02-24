@@ -56,6 +56,7 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
                     .environment,
                     .ec2,
                     .configFile(profile: profileName),
+                    .sso(profileName: profileName),
                     .login(profileName: profileName)
                 ),
                 retryPolicy: .jitter()

@@ -19,26 +19,20 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.7.0"),
+        .package(url: "https://github.com/apple/swift-crypto", from: "3.15.1"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.10.1"),
-        
-        // do not use Soto 7.x
-        // it has a transitive dependency on swift-service-context whichs fails to compile 
-        // under the brew sandbox (when creating the bottle) 
-        // see https://github.com/orgs/Homebrew/discussions/59
-        // .package(url: "https://github.com/soto-project/soto.git", from: "6.8.0"), 
-        .package(url: "https://github.com/soto-project/soto.git", from: "7.12.0"), 
-        
-        .package(url: "https://github.com/tuist/Noora", .upToNextMajor(from: "0.55.1")),
-        .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.2.0"),
-        
+        .package(url: "https://github.com/apple/swift-system", from: "1.5.0"),
+
         // disable "SubprocessSpan" until Swift 6.2.1 is resolved
         // https://github.com/swiftlang/swift/issues/84379
         // https://github.com/swiftlang/swift-package-manager/issues/9163
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.2.0", traits: ["SubprocessFoundation"]), 
-        .package(url: "https://github.com/apple/swift-crypto", from: "3.15.1"),
-        .package(url: "https://github.com/apple/swift-system", from: "1.5.0"),
+    
+        .package(url: "https://github.com/soto-project/soto.git", from: "7.12.0"),     
+        .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.2.0"),
+
+        .package(url: "https://github.com/tuist/Noora", .upToNextMajor(from: "0.55.1")),        
         .package(url: "https://github.com/saagarjha/unxip.git", from: "3.2.0")
-        //.package(path: "../CLIlib")
     ],
 
     targets: [

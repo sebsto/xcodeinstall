@@ -157,7 +157,7 @@ struct MainCommand: AsyncParsableCommand {
             fileHandler: fileHandler,
             display: display,
             readLine: NooraReadLine(),
-            progressBar: CLIProgressBar(),
+            progressBar: ProgressBar(),
             secrets: secrets,
             authenticator: authenticator,
             downloader: downloader,
