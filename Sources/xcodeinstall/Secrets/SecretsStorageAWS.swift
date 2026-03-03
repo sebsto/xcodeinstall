@@ -17,32 +17,6 @@ import Foundation
 import FoundationNetworking
 #endif
 
-// the errors thrown by the SecretsManager class
-enum SecretsStorageAWSError: Error, LocalizedError {
-    case invalidRegion(region: String)
-    case secretDoesNotExist(secretname: String)
-    case noCredentialProvider(profileName: String?, underlyingError: Error)
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidRegion(let region):
-            return "Invalid AWS region: '\(region)'"
-        case .secretDoesNotExist(let secretname):
-            return "AWS secret '\(secretname)' does not exist"
-        case .noCredentialProvider(let profileName, let underlyingError):
-            if let profileName {
-                return "No AWS credentials found for profile '\(profileName)'. "
-                    + "Verify the profile exists in ~/.aws/credentials or ~/.aws/config. "
-                    + "Underlying error: \(underlyingError)"
-            } else {
-                return "No AWS credential provider found. "
-                    + "Configure credentials via environment variables, ~/.aws/credentials, or an EC2 instance profile. "
-                    + "Underlying error: \(underlyingError)"
-            }
-        }
-    }
-}
-
 // the names we are using to store the secrets
 enum AWSSecretsName: String {
     case appleCredentials = "xcodeinstall-apple-credentials"
@@ -164,7 +138,7 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
             )
 
         } catch {
-            log.error("⚠️ can not save cookies file in AWS Secret Manager: \(error)")
+            log.debug("⚠️ can not save cookies file in AWS Secret Manager: \(error)")
             throw error
         }
 
@@ -180,7 +154,7 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
             let result = session.cookies()
             return result
         } catch {
-            log.error("Error when trying to load session : \(error)")
+            log.debug("Error when trying to load session : \(error)")
             throw error
         }
     }
@@ -204,7 +178,7 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
                 newValue: newSessionSecret
             )
         } catch {
-            log.error("Error when trying to save session : \(error)")
+            log.debug("Error when trying to save session : \(error)")
             throw error
         }
 
@@ -224,7 +198,7 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
             return try await self.awsSDK.retrieveSecret(secretId: AWSSecretsName.appleCredentials)
 
         } catch {
-            log.error("Error when trying to load session : \(error)")
+            log.debug("Error when trying to load credentials : \(error)")
             throw error
         }
     }
@@ -238,7 +212,7 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
             )
 
         } catch {
-            log.error("Error when trying to save credentials : \(error)")
+            log.debug("Error when trying to save credentials : \(error)")
             throw error
         }
 
