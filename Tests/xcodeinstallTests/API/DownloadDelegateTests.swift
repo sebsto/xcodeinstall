@@ -16,22 +16,6 @@ struct DownloadDelegateTests {
     let log = Logger(label: "DownloadDelegateTests")
     let fileManager = FileManager.default
 
-    /// Runs `body` with a freshly created temporary directory, removing it on exit.
-    func withTempDirectory<T>(_ body: (URL) throws -> T) throws -> T {
-        let tempDir = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        defer { try? fileManager.removeItem(at: tempDir) }
-        return try body(tempDir)
-    }
-
-    /// Async variant of `withTempDirectory`.
-    func withTempDirectory<T>(_ body: (URL) async throws -> T) async throws -> T {
-        let tempDir = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        defer { try? fileManager.removeItem(at: tempDir) }
-        return try await body(tempDir)
-    }
-
     /// Creates a DownloadDelegate backed by an AsyncThrowingStream, returning both.
     /// The stream can be consumed to verify what the delegate yielded/threw.
     func makeDelegate(
@@ -61,7 +45,7 @@ extension DownloadDelegateTests {
 
     @Test("Successful file move via didFinishDownloadingTo")
     func testDidFinishDownloadingTo_movesFile() async throws {
-        try await withTempDirectory { tempDir in
+        try await withTemporaryDirectory { tempDir in
             // Given — a source file at a temp location and a destination path
             let srcFile = tempDir.appendingPathComponent("source.xip")
             let dstFile = tempDir.appendingPathComponent("destination.xip")
@@ -92,7 +76,7 @@ extension DownloadDelegateTests {
 
     @Test("Error page detection with Error tag in small download")
     func testDidFinishDownloadingTo_detectsErrorPage() async throws {
-        try await withTempDirectory { tempDir in
+        try await withTemporaryDirectory { tempDir in
             // Given — a small file containing an error page marker
             let srcFile = tempDir.appendingPathComponent("error_response.xml")
             let errorContent = "<Error><Code>AccessDenied</Code></Error>"
@@ -121,7 +105,7 @@ extension DownloadDelegateTests {
 
     @Test("AccessDenied string triggers error page detection")
     func testDidFinishDownloadingTo_detectsAccessDenied() async throws {
-        try await withTempDirectory { tempDir in
+        try await withTemporaryDirectory { tempDir in
             // Given — a small file containing "AccessDenied"
             let srcFile = tempDir.appendingPathComponent("access_denied.txt")
             let content = "AccessDenied"
@@ -147,7 +131,7 @@ extension DownloadDelegateTests {
 
     @Test("Sign in page triggers error page detection")
     func testDidFinishDownloadingTo_detectsSignInPage() async throws {
-        try await withTempDirectory { tempDir in
+        try await withTemporaryDirectory { tempDir in
             // Given — a small file containing Apple sign-in page marker
             let srcFile = tempDir.appendingPathComponent("signin_page.html")
             let content = "<html>Sign in to your Apple Account</html>"
@@ -173,7 +157,7 @@ extension DownloadDelegateTests {
 
     @Test("File move failure propagates error through stream")
     func testDidFinishDownloadingTo_moveFailure() async throws {
-        try await withTempDirectory { tempDir in
+        try await withTemporaryDirectory { tempDir in
             // Given — a source file and a file handler that will fail on move
             let srcFile = tempDir.appendingPathComponent("source.xip")
             let paddedContent = String(repeating: "x", count: 10_001)
@@ -231,7 +215,7 @@ extension DownloadDelegateTests {
 
     @Test("didCompleteWithError with nil does not throw after successful download")
     func testDidCompleteWithError_withNil() async throws {
-        try await withTempDirectory { tempDir in
+        try await withTemporaryDirectory { tempDir in
             // Given — simulate the scenario where didFinishDownloadingTo already completed the stream
             let srcFile = tempDir.appendingPathComponent("source.xip")
             let paddedContent = String(repeating: "x", count: 10_001)

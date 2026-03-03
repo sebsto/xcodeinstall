@@ -14,17 +14,6 @@ struct ConfigHandlerTests {
         self.fileManager = FileManager.default
     }
 
-    /// Executes body with a URL to a temporary directory that will be deleted after
-    /// the closure finishes executing.
-    func withTemporaryDirectory<T>(_ body: (URL) throws -> T) throws -> T {
-        let tempDirURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDirURL, withIntermediateDirectories: true)
-        defer {
-            try? fileManager.removeItem(at: tempDirURL)
-        }
-        return try body(tempDirURL)
-    }
-
     @Test("Save and load config")
     func testSaveAndLoad() throws {
         try withTemporaryDirectory { tempDir in

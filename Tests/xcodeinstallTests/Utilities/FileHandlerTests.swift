@@ -19,17 +19,6 @@ struct FileHandlerTests {
 
     // MARK: - Helper Methods
 
-    /// Executes body with a URL to a temporary directory that will be deleted after
-    /// the closure finishes executing.
-    func withTemporaryDirectory<T>(_ body: (URL) throws -> T) throws -> T {
-        let tempDirURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDirURL, withIntermediateDirectories: true)
-        defer {
-            try? fileManager.removeItem(at: tempDirURL)
-        }
-        return try body(tempDirURL)
-    }
-
     private func createSrcFile(inDirectory tempDirectory: URL) throws -> URL {
         let srcFile: URL = tempDirectory.appendingPathComponent("temp.txt")
         let _ = fileManager.createFile(atPath: srcFile.path, contents: test_data.data(using: .utf8))
@@ -42,7 +31,7 @@ extension FileHandlerTests {
 
     @Test("Test Moving Files Successfully")
     func testMoveSucceed() async throws {
-        try self.withTemporaryDirectory { url in
+        try withTemporaryDirectory { url in
             // Given
             let srcFile = try createSrcFile(inDirectory: url)
 
@@ -69,7 +58,7 @@ extension FileHandlerTests {
 
     @Test("Test Moving Files When Destination Already Exists")
     func testMoveDstExists() async throws {
-        try self.withTemporaryDirectory { url in
+        try withTemporaryDirectory { url in
             // Given
             let test_data2: String = "data already exists"
             let srcFile = try createSrcFile(inDirectory: url)
