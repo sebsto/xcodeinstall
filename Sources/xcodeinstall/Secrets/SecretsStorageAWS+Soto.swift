@@ -223,7 +223,7 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
             )
 
         } catch {
-            log.error("Unexpected error while updating secrets\n\(error)")
+            log.debug("Unexpected error while updating secrets\n\(error)")
             throw wrapCredentialError(error)
         }
     }
@@ -257,7 +257,7 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
             throw error
 
         } catch {
-            log.error("Unexpected error while retrieving secrets\n\(error)")
+            log.debug("Unexpected error while retrieving secrets\n\(error)")
             throw wrapCredentialError(error)
 
         }
