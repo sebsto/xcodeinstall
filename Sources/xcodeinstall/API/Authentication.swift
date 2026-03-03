@@ -303,13 +303,14 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
     }
 
     func saveSession(response: HTTPURLResponse, session: AppleSession) async throws {
-        guard let cookies = response.value(forHTTPHeaderField: "Set-Cookie") else {
-            log.debug("No cookies set, just saving the session")
-            _ = try await self.secrets.saveSession(session)
-            return
-        }
+        // always persist the session object (contains xAppleIdSessionId, scnt, etc.)
+        _ = try await self.secrets.saveSession(session)
 
-        // save session data to reuse in future invocation
-        _ = try await self.secrets.saveCookies(cookies)
+        // also persist cookies when present
+        if let cookies = response.value(forHTTPHeaderField: "Set-Cookie") {
+            _ = try await self.secrets.saveCookies(cookies)
+        } else {
+            log.debug("No cookies in response, session saved without cookies")
+        }
     }
 }

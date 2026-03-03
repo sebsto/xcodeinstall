@@ -50,6 +50,7 @@ enum ExpectedResponseCode {
 enum HTTPVerb: String {
     case GET
     case POST
+    case PUT
 }
 
 // provide common code for all network clients

@@ -193,7 +193,7 @@ extension AppleAuthenticator {
         let body = SMSRequest(phoneNumber: PhoneId(id: phoneId), mode: "sms")
         let (_, _) = try await apiCall(
             url: "https://idmsa.apple.com/appleauth/auth/verify/phone",
-            method: .POST,
+            method: .PUT,
             body: try JSONEncoder().encode(body),
             validResponse: .range(200..<300)
         )
@@ -240,6 +240,7 @@ extension AppleAuthenticator {
                 )
             }
         case 200, 204:
+            try await trustSession()
             try await self.saveSession(response: response, session: session)
         default:
             throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)
@@ -289,6 +290,7 @@ extension AppleAuthenticator {
 
         case 200, 204:
             // success
+            try await trustSession()
             try await self.saveSession(response: response, session: session)
 
         default:
@@ -300,6 +302,23 @@ extension AppleAuthenticator {
         // should we save additional cookies ?
         // return (try await getDESCookie(), session)
 
+    }
+
+    /// Ask Apple to trust this session, upgrading cookies from short-lived to long-lived.
+    /// This matches Spaceship's post-verification trust step.
+    func trustSession() async throws {
+        let (_, response) = try await apiCall(
+            url: "https://idmsa.apple.com/appleauth/auth/2sv/trust",
+            validResponse: .range(200..<300)
+        )
+
+        // Update session headers if the trust response provides new values
+        if let newSessionId = response.value(forHTTPHeaderField: "X-Apple-ID-Session-Id") {
+            session.xAppleIdSessionId = newSessionId
+        }
+        if let newScnt = response.value(forHTTPHeaderField: "scnt") {
+            session.scnt = newScnt
+        }
     }
 
     func getMFAType() async throws -> MFAType {
