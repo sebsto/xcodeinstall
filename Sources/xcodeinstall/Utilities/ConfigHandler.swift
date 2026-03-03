@@ -18,6 +18,7 @@ protocol ConfigHandlerProtocol: Sendable {
     func saveConfig(_ config: PersistentConfig) throws
     func loadConfig() -> PersistentConfig?
     nonisolated func configPath() -> URL
+    func resolvedConfig(cliRegion: String?, cliProfile: String?, display: DisplayProtocol) async throws -> PersistentConfig
 }
 
 // Config data model
@@ -41,7 +42,6 @@ struct ConfigHandler: ConfigHandlerProtocol {
     }
 
     func saveConfig(_ config: PersistentConfig) throws {
-        // Create directory if needed
         let fm = FileManager.default
         if !fm.fileExists(atPath: baseDirectory.path) {
             do {
@@ -51,8 +51,6 @@ struct ConfigHandler: ConfigHandlerProtocol {
                 throw error
             }
         }
-
-        // Encode and save
         let data = try JSONEncoder().encode(config)
         try data.write(to: configPath())
         log.debug("Saved config to \(configPath().path)")
@@ -60,14 +58,10 @@ struct ConfigHandler: ConfigHandlerProtocol {
 
     func loadConfig() -> PersistentConfig? {
         let path = configPath()
-
-        // Return nil if file doesn't exist (not an error)
         guard FileManager.default.fileExists(atPath: path.path) else {
             log.debug("No config file found at \(path.path)")
             return nil
         }
-
-        // Try to load and decode
         do {
             let data = try Data(contentsOf: path)
             let config = try JSONDecoder().decode(PersistentConfig.self, from: data)
@@ -77,5 +71,43 @@ struct ConfigHandler: ConfigHandlerProtocol {
             log.warning("⚠️ Failed to load config file (corrupted or invalid JSON): \(error)")
             return nil
         }
+    }
+
+    /// Merges CLI arguments with saved config, displays an info message for
+    /// values that were loaded from disk (not provided on the CLI), and
+    /// saves back when CLI arguments were provided.
+    /// Returns the effective config to use for this invocation.
+    func resolvedConfig(
+        cliRegion: String?,
+        cliProfile: String?,
+        display: DisplayProtocol
+    ) async throws -> PersistentConfig {
+        let saved = loadConfig()
+
+        let effectiveRegion = cliRegion ?? saved?.secretManagerRegion
+        let effectiveProfile = cliProfile ?? saved?.profileName
+
+        // Show info message for values coming from saved config
+        var savedParts: [String] = []
+        if let r = effectiveRegion, cliRegion == nil { savedParts.append("-s \(r)") }
+        if let p = effectiveProfile, cliProfile == nil { savedParts.append("-p \(p)") }
+        if !savedParts.isEmpty {
+            display.display(
+                "Using saved settings: \(savedParts.joined(separator: " "))",
+                style: .info
+            )
+        }
+
+        // Persist when CLI provided new values, merging with existing
+        if cliRegion != nil || cliProfile != nil {
+            let updated = PersistentConfig(
+                secretManagerRegion: effectiveRegion,
+                profileName: effectiveProfile
+            )
+            try? saveConfig(updated)
+            log.debug("Saved config")
+        }
+
+        return PersistentConfig(secretManagerRegion: effectiveRegion, profileName: effectiveProfile)
     }
 }

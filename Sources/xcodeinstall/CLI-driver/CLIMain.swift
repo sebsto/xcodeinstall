@@ -79,74 +79,44 @@ struct MainCommand: AsyncParsableCommand {
     ) async throws -> XCodeInstall {
 
         var logger = Logger(label: "xcodeinstall")
-        if verbose {
-            logger.logLevel = .debug
-        } else {
-            logger.logLevel = .error
-        }
+        logger.logLevel = verbose ? .debug : .error
 
         if let deps {
             return await XCodeInstall(log: logger, deps: deps)
         }
 
-        // Load saved config
+        // Resolve config: merge CLI args with saved settings, display info, persist
         let baseDirectory = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".xcodeinstall")
         let configHandler = await ConfigHandler(log: logger, baseDirectory: baseDirectory)
-        let savedConfig = await configHandler.loadConfig()
-
-        // Merge CLI args with saved config (CLI takes precedence)
-        let effectiveRegion = region ?? savedConfig?.secretManagerRegion
-        let effectiveProfile = profileName ?? savedConfig?.profileName
-
-        // Display info message for loaded (non-overridden) settings
         let display = NooraDisplay()
-        if effectiveRegion != nil || effectiveProfile != nil {
-            var savedParts: [String] = []
-            if let r = effectiveRegion, region == nil {
-                savedParts.append("-s \(r)")
-            }
-            if let p = effectiveProfile, profileName == nil {
-                savedParts.append("-p \(p)")
-            }
-            if !savedParts.isEmpty {
-                await display.display(
-                    "Using saved settings: \(savedParts.joined(separator: " "))",
-                    style: .info
-                )
-            }
-        }
+        let resolved = try await configHandler.resolvedConfig(
+            cliRegion: region,
+            cliProfile: profileName,
+            display: display
+        )
 
-        // Save config if CLI args provided (merge with existing)
-        if region != nil || profileName != nil {
-            let newConfig = PersistentConfig(
-                secretManagerRegion: region ?? savedConfig?.secretManagerRegion,
-                profileName: profileName ?? savedConfig?.profileName
-            )
-            try? await configHandler.saveConfig(newConfig)
-            logger.debug("Saved config")
-        }
-
+        // Wire dependencies using resolved values
         let fileHandler = await FileHandler(log: logger)
         let urlSession = URLSession.shared
 
-        var secrets: SecretsHandlerProtocol
-        var authenticator: AppleAuthenticatorProtocol
-        var downloader: AppleDownloaderProtocol
-
-        if let effectiveRegion {
-            let awsSecrets = try await SecretsStorageAWS(
+        let secrets: SecretsHandlerProtocol
+        if let effectiveRegion = resolved.secretManagerRegion {
+            secrets = try await SecretsStorageAWS(
                 region: effectiveRegion,
-                profileName: effectiveProfile,
+                profileName: resolved.profileName,
                 log: logger
             )
-            secrets = awsSecrets
         } else {
             secrets = await SecretsStorageFile(log: logger)
         }
 
-        authenticator = await AppleAuthenticator(secrets: secrets, urlSession: urlSession, log: logger)
-        downloader = await AppleDownloader(
+        let authenticator: AppleAuthenticatorProtocol = await AppleAuthenticator(
+            secrets: secrets,
+            urlSession: urlSession,
+            log: logger
+        )
+        let downloader: AppleDownloaderProtocol = await AppleDownloader(
             secrets: secrets,
             urlSession: urlSession,
             fileHandler: fileHandler,
