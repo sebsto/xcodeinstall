@@ -18,7 +18,7 @@ let package = Package(
         .executable(name: "xcodeinstall", targets: ["xcodeinstall"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.7.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.7.1"),
         .package(url: "https://github.com/apple/swift-crypto", from: "4.5.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.10.1"),
         .package(url: "https://github.com/apple/swift-system", from: "1.6.4"),
