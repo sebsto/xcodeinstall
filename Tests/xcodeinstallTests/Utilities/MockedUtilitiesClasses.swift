@@ -73,6 +73,26 @@ final class MockedFileHandler: FileHandlerProtocol, @unchecked Sendable {
     func baseFilePath() -> String {
         "/tmp"
     }
+
+    var symlinkLink: URL? = nil
+    var symlinkTarget: URL? = nil
+    var nextSymlinkError: Error? = nil
+    var installedXcodes: [String] = []
+    var nextIsSymlink: Bool = true
+
+    func createSymlink(at link: URL, pointingTo target: URL) throws {
+        symlinkLink = link
+        symlinkTarget = target
+        if let nextSymlinkError { throw nextSymlinkError }
+    }
+
+    func listInstalledXcodes() throws -> [String] {
+        return installedXcodes
+    }
+
+    func isSymlink(at url: URL) -> Bool {
+        return nextIsSymlink
+    }
 }
 
 class MockedProgressBar: ProgressBarProtocol {

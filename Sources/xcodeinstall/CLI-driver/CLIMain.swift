@@ -64,6 +64,7 @@ struct MainCommand: AsyncParsableCommand {
         subcommands: [
             Authenticate.self, Signout.self, List.self,
             Download.self, Install.self, StoreSecrets.self,
+            SwitchVersion.self,
         ]
 
         // A default subcommand, when provided, is automatically selected if a

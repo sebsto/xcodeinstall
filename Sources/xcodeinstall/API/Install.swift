@@ -14,7 +14,7 @@ import FoundationEssentials
 import Foundation
 #endif
 
-enum InstallerError: Error {
+enum InstallerError: Error, Equatable {
     case unsupportedInstallation
     case fileDoesNotExistOrIncorrect
     case xCodeUnxipDirectoryDoesntExist
@@ -22,6 +22,10 @@ enum InstallerError: Error {
     case xCodeMoveInstallationError
     case xCodePKGInstallationError
     case CLToolsInstallationError
+    case xcodeSelectFailed
+    case noInstalledXcodeVersions
+    case xcodeVersionNotInstalled(String)
+    case existingXcodeAppIsNotSymlink
 }
 
 enum SupportedInstallation {
@@ -86,7 +90,7 @@ class ShellInstaller {
     ///   **Command_Line_Tools_for_Xcode** is provided as a DMG file. The installation procedure is as follow:
     ///   - the DMG file is mounted
     ///   - Package `/Volumes/Command\ Line\ Developer\ Tools/Command\ Line\ Tools.pkg` is installed.
-    func install(file: URL) async throws {
+    func install(file: URL, version: String? = nil) async throws {
 
         // verify this is one the files we do support
         let installationType = SupportedInstallation.supported(file.lastPathComponent)
@@ -105,7 +109,7 @@ class ShellInstaller {
         // Dispatch installation between DMG and XIP
         switch installationType {
         case .xCode:
-            try await self.installXcode(at: file)
+            try await self.installXcode(at: file, version: version)
         case .xCodeCommandLineTools:
             try await self.installCommandLineTools(atPath: file)
         case .unsupported:

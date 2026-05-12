@@ -13,7 +13,7 @@ import Foundation
 
 extension XCodeInstall {
 
-    func install(file: String?) async throws {
+    func install(file: String?, version: String? = nil) async throws {
 
         let installer = ShellInstaller(
             fileHandler: self.deps.fileHandler,
@@ -39,9 +39,19 @@ extension XCodeInstall {
             }
             log.debug("Going to attempt to install \(fileToInstall!.path)")
 
-            try await installer.install(file: fileToInstall!)
+            // resolve version: CLI flag > auto-extract > prompt user
+            let resolvedVersion = try resolveVersion(
+                explicitVersion: version,
+                filename: fileToInstall!.lastPathComponent
+            )
+
+            try await installer.install(file: fileToInstall!, version: resolvedVersion)
             self.deps.progressBar.complete(success: true)
-            display("\(fileToInstall!) installed", style: .success)
+            if let resolvedVersion {
+                display("Xcode \(resolvedVersion) installed and activated", style: .success)
+            } else {
+                display("\(fileToInstall!) installed", style: .success)
+            }
         } catch CLIError.userCancelled {
             return
         } catch CLIError.invalidInput {
@@ -67,6 +77,17 @@ extension XCodeInstall {
             )
             self.deps.progressBar.complete(success: false)
             throw InstallerError.xCodePKGInstallationError
+        } catch InstallerError.existingXcodeAppIsNotSymlink {
+            display(
+                "/Applications/Xcode.app exists and is not a symlink. Please rename or remove it before installing a versioned Xcode.",
+                style: .error()
+            )
+            self.deps.progressBar.complete(success: false)
+            throw InstallerError.existingXcodeAppIsNotSymlink
+        } catch InstallerError.xcodeSelectFailed {
+            display("Failed to run xcode-select to activate Xcode", style: .error())
+            self.deps.progressBar.complete(success: false)
+            throw InstallerError.xcodeSelectFailed
         } catch InstallerError.unsupportedInstallation {
             display(
                 "Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)",
@@ -80,6 +101,32 @@ extension XCodeInstall {
             self.deps.progressBar.complete(success: false)
             throw error
         }
+    }
+
+    func resolveVersion(explicitVersion: String?, filename: String) throws -> String? {
+        if let explicitVersion {
+            return explicitVersion
+        }
+
+        if let extracted = XcodeVersionExtractor().extractVersion(from: filename) {
+            return extracted
+        }
+
+        // Only prompt for Xcode XIP files — not for command line tools
+        let installationType = SupportedInstallation.supported(filename)
+        guard installationType == .xCode else {
+            return nil
+        }
+
+        display("Could not determine Xcode version from filename '\(filename)'.", style: .warning)
+        let response: String? = self.deps.readLine.readLine(
+            prompt: "Please enter the version (e.g., 16.2): ",
+            silent: false
+        )
+        guard let version = response, !version.isEmpty else {
+            throw CLIError.userCancelled
+        }
+        return version
     }
 
     func promptForFile() throws -> URL {
