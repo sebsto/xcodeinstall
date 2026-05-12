@@ -492,4 +492,93 @@ extension AuthenticationTests {
         }
         #expect(error == AuthenticationError.unexpectedHTTPReturnCode(code: 300))
     }
+
+    // MARK: - Trust Session Cookie Persistence Tests
+
+    @Test("trustSession saves cookies from trust response")
+    func testTrustSessionSavesCookies() async {
+        let url = "https://dummy"
+        let trustCookies = "myacinfo=TRUST_TOKEN; Domain=apple.com; Path=/; Secure; HttpOnly"
+
+        let trustResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: ["Set-Cookie": trustCookies]
+        )!
+
+        self.sessionData.enqueueResponse(data: Data(), response: trustResponse)
+
+        let authenticator = getAppleAuthenticator()
+        authenticator.session = getAppleSession()
+
+        try! await authenticator.trustSession()
+
+        let secrets = env.secrets as! MockedSecretsHandler
+        #expect(secrets.savedCookies.contains(trustCookies))
+    }
+
+    @Test("2FA trusted device saves cookies from trust response")
+    func testTwoFactorAuthenticationSavesTrustCookies() async {
+        let url = "https://dummy"
+        let trustCookies = "myacinfo=TRUST_TOKEN; Domain=apple.com; Path=/; Secure; HttpOnly"
+
+        // First response: 2FA verification succeeds (no cookies)
+        let verifyResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        self.sessionData.enqueueResponse(data: Data(), response: verifyResponse)
+
+        // Second response: trust step returns long-lived cookies
+        let trustResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: ["Set-Cookie": trustCookies]
+        )!
+        self.sessionData.enqueueResponse(data: Data(), response: trustResponse)
+
+        let authenticator = getAppleAuthenticator()
+        authenticator.session = getAppleSession()
+
+        try! await authenticator.twoFactorAuthentication(pin: "123456")
+
+        let secrets = env.secrets as! MockedSecretsHandler
+        #expect(secrets.savedCookies.contains(trustCookies))
+    }
+
+    @Test("SMS verification saves cookies from trust response")
+    func testVerifySMSCodeSavesTrustCookies() async {
+        let url = "https://dummy"
+        let trustCookies = "myacinfo=TRUST_TOKEN; Domain=apple.com; Path=/; Secure; HttpOnly"
+
+        // First response: SMS verification succeeds (no cookies)
+        let verifyResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        self.sessionData.enqueueResponse(data: Data(), response: verifyResponse)
+
+        // Second response: trust step returns long-lived cookies
+        let trustResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: ["Set-Cookie": trustCookies]
+        )!
+        self.sessionData.enqueueResponse(data: Data(), response: trustResponse)
+
+        let authenticator = getAppleAuthenticator()
+        authenticator.session = getAppleSession()
+
+        try! await authenticator.verifySMSCode("123456", phoneId: 2)
+
+        let secrets = env.secrets as! MockedSecretsHandler
+        #expect(secrets.savedCookies.contains(trustCookies))
+    }
 }

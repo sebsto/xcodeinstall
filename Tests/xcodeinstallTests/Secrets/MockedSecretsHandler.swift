@@ -39,8 +39,13 @@ final class MockedSecretsHandler: SecretsHandlerProtocol {
 
     }
 
+    private(set) var savedCookies: [String] = []
+
     func saveCookies(_ cookies: String?) async throws -> String? {
-        ""
+        if let cookies {
+            savedCookies.append(cookies)
+        }
+        return cookies
     }
 
     func loadCookies() async throws -> [HTTPCookie] {

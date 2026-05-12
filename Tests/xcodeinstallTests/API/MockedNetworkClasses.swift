@@ -21,24 +21,37 @@ final class MockedURLSession: URLSessionProtocol {
     let log = Logger(label: "MockedURLSession")
     private(set) var lastURL: URL?
     private(set) var lastRequest: URLRequest?
+    private(set) var allRequests: [URLRequest] = []
 
     var nextData: Data?
     var nextError: Error?
     var nextResponse: URLResponse?
 
+    private var responseQueue: [(data: Data, response: URLResponse)] = []
+
+    func enqueueResponse(data: Data, response: URLResponse) {
+        responseQueue.append((data: data, response: response))
+    }
+
     func data(for request: URLRequest, delegate: URLSessionTaskDelegate? = nil) async throws -> (Data, URLResponse) {
+
+        lastURL = request.url
+        lastRequest = request
+        allRequests.append(request)
+
+        if nextError != nil {
+            throw nextError!
+        }
+
+        if !responseQueue.isEmpty {
+            let queued = responseQueue.removeFirst()
+            return (queued.data, queued.response)
+        }
 
         guard let data = nextData,
             let response = nextResponse
         else {
             throw MockError.invalidMockData
-        }
-
-        lastURL = request.url
-        lastRequest = request
-
-        if nextError != nil {
-            throw nextError!
         }
 
         return (data, response)
