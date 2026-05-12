@@ -319,6 +319,12 @@ extension AppleAuthenticator {
         if let newScnt = response.value(forHTTPHeaderField: "scnt") {
             session.scnt = newScnt
         }
+
+        // The trust response carries the long-lived session cookies that subsequent
+        // commands need. Without saving them here, the next command fails with
+        // "session expired" because only the verification response (which may lack
+        // cookies) was being persisted.
+        try await self.saveSession(response: response, session: session)
     }
 
     func getMFAType() async throws -> MFAType {
