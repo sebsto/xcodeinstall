@@ -22,6 +22,9 @@ extension XCodeInstall {
             log: self.log
         )
 
+        // check if passwordless sudo is available before starting installation
+        await installer.checkSudoersConfiguration()
+
         // progress bar to report progress feedback
         let progressBar = self.deps.progressBar
         progressBar.define(

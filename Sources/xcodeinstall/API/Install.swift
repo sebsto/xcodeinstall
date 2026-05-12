@@ -71,6 +71,40 @@ class ShellInstaller {
         "MobileDeviceDevelopment.pkg",
     ]
 
+    /// Check whether the current user can run sudo without a password prompt.
+    /// If not, log a warning with instructions on how to configure passwordless sudo.
+    /// This check warns but does not abort — the user might still enter their password interactively.
+    func checkSudoersConfiguration() async {
+        let username = ProcessInfo.processInfo.userName
+
+        do {
+            let result = try await self.shellExecutor.run(
+                .path(SUDOCOMMAND),
+                arguments: ["-n", "true"]
+            )
+            if !result.terminationStatus.isSuccess {
+                logSudoersWarning(username: username)
+            }
+        } catch {
+            logSudoersWarning(username: username)
+        }
+    }
+
+    private func logSudoersWarning(username: String) {
+        log.warning(
+            """
+            Passwordless sudo is not configured for user '\(username)'.
+            The install command requires sudo to run the system installer.
+            You may be prompted for your password during installation.
+
+            To enable passwordless sudo, create the file /etc/sudoers.d/\(username) with:
+              \(username) ALL=(ALL) NOPASSWD: ALL
+
+            Run: sudo sh -c 'echo "\(username) ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/\(username)'
+            """
+        )
+    }
+
     /// Install Xcode or Xcode Command Line Tools
     ///  At this stage, we do support only these two installation.
     ///
