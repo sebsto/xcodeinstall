@@ -8,7 +8,7 @@
 ![platform](https://img.shields.io/badge/platform-macOS-green)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-This is a command line utility to download and install Xcode in headless mode (from a Terminal only).
+A command line utility to download and install Xcode in headless mode — designed for preparing EC2 Mac AMIs with AWS Secrets Manager integration.
 
 ## TL;DR
 
@@ -24,13 +24,14 @@ This is a command line utility to download and install Xcode in headless mode (f
 
 ### Key Features
 
+✅ **AMI Automation Ready**: Fully scriptable for Packer, Ansible, or shell-based image builds  
+✅ **AWS Secrets Manager Integration**: Centralized credentials and shared session tokens across your fleet  
+✅ **Multi-Machine Support**: Authenticate once on your laptop, use the session on all EC2 instances  
+✅ **Multi-Version Management**: Install multiple Xcode versions side-by-side and switch between them  
 ✅ **Automated Downloads**: Download any Xcode version from Apple Developer Portal  
 ✅ **Headless Installation**: Install Xcode without GUI interaction  
-✅ **Multi-Version Management**: Install multiple Xcode versions side-by-side and switch between them  
-✅ **AWS Secrets Manager Integration**: Securely store credentials and session tokens in the cloud  
-✅ **Persistent Configuration**: Automatically saves AWS region and profile settings after first use  
-✅ **Multi-Machine Support**: Share authentication sessions between your laptop and cloud machines  
 ✅ **MFA Support**: Works with Apple's two-factor authentication (requires manual code entry)  
+✅ **Persistent Configuration**: Automatically saves AWS region and profile settings after first use  
 
 ## Demo 
 
@@ -41,6 +42,37 @@ This is a command line utility to download and install Xcode in headless mode (f
 When preparing a macOS machine in the cloud for CI/CD, you don't always have access to the login screen, or you don't want to access it.
 
 It is a best practice to automate the preparation of your build environment to ensure they are always identical.
+
+## Built for EC2 Mac AMI Preparation
+
+Unlike other Xcode management tools designed for local development, `xcodeinstall` is purpose-built for **automating EC2 Mac AMI creation** — the step where you bake Xcode into a golden image that your build fleet launches from.
+
+**The problem:** Preparing an EC2 Mac AMI with Xcode requires downloading and installing from Apple Developer Portal without GUI access. Authentication requires credentials and MFA codes, session tokens expire unpredictably, and you want the process fully automated in your image pipeline.
+
+**How `xcodeinstall` solves it:**
+
+1. **Centralized credentials with AWS Secrets Manager** — Store your Apple Developer credentials once, access them from any EC2 Mac instance during AMI builds. No SSH-ing into machines to paste passwords.
+
+2. **Shared session tokens** — Authenticate on your laptop (where you can receive the MFA code), then your Packer or Ansible image build uses that session via Secrets Manager.
+
+3. **IAM-based access control** — No API keys or config files baked into the image. Attach an IAM role to the builder instance and `xcodeinstall` authenticates to Secrets Manager automatically via the instance profile.
+
+4. **Fully scriptable** — Every command works non-interactively with `--name` flags, integrating cleanly into Packer provisioners, Ansible playbooks, or EC2 Image Builder components.
+
+**Typical AMI build workflow:**
+
+```bash
+# One-time setup (from your laptop, where you can receive MFA)
+xcodeinstall storesecrets -s us-west-2 -p myprofile
+xcodeinstall authenticate -s us-west-2 -p myprofile
+# Enter MFA code when prompted
+
+# In your Packer provisioner / Ansible playbook (IAM role attached, no flags needed)
+xcodeinstall download --name "Xcode_16.2_Apple_silicon.xip"
+xcodeinstall install --name "Xcode_16.2_Apple_silicon.xip"
+```
+
+No credentials on disk, no interactive prompts during the image build, reproducible golden images every time.
 
 ## How to install 
 
