@@ -241,7 +241,6 @@ extension AppleAuthenticator {
             }
         case 200, 204:
             try await trustSession()
-            try await self.saveSession(response: response, session: session)
         default:
             throw AuthenticationError.unexpectedHTTPReturnCode(code: response.statusCode)
         }
@@ -291,7 +290,6 @@ extension AppleAuthenticator {
         case 200, 204:
             // success
             try await trustSession()
-            try await self.saveSession(response: response, session: session)
 
         default:
             // unknown error, fail gracefully
