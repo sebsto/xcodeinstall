@@ -61,6 +61,26 @@ final class InstallTest {
 
     }
 
+    @Test("Test Check Sudoers Configuration Runs Sudo Non-Interactive")
+    func testCheckSudoersConfiguration() async throws {
+        // given
+        let installer = ShellInstaller(
+            fileHandler: self.env.fileHandler,
+            progressBar: self.env.progressBar,
+            shellExecutor: self.env.shell,
+            log: self.log
+        )
+
+        // when
+        await installer.checkSudoersConfiguration()
+
+        // then — verify that `sudo -n true` was invoked
+        let runRecorder = MockedShell.runRecorder
+        #expect(runRecorder.containsExecutable("/usr/bin/sudo"))
+        #expect(runRecorder.containsArgument("-n"))
+        #expect(runRecorder.containsArgument("true"))
+    }
+
     @Test("Test Install Pkg Uses Sudo")
     func testInstallPkgUsesSudo() async throws {
         // given
