@@ -68,8 +68,8 @@ xcodeinstall authenticate -s us-west-2 -p myprofile
 # Enter MFA code when prompted
 
 # In your Packer provisioner / Ansible playbook (IAM role attached, no flags needed)
-xcodeinstall download --name "Xcode_16.2_Apple_silicon.xip"
-xcodeinstall install --name "Xcode_16.2_Apple_silicon.xip"
+xcodeinstall download --name "Xcode_26.5_Apple_silicon.xip"
+xcodeinstall install --name "Xcode_26.5_Apple_silicon.xip"
 ```
 
 No credentials on disk, no interactive prompts during the image build, reproducible golden images every time.
@@ -127,13 +127,13 @@ xcodeinstall authenticate
 xcodeinstall list --only-xcode
 
 # Step 3: Download a specific version (prompts if --name is omitted)
-xcodeinstall download --name "Xcode_16.2_Apple_silicon.xip"
+xcodeinstall download --name "Xcode_26.5_Apple_silicon.xip"
 
-# Step 4: Install the downloaded version (installs as Xcode-16.2.app)
-xcodeinstall install --name "Xcode_16.2_Apple_silicon.xip"
+# Step 4: Install the downloaded version (installs as Xcode-26.5.app)
+xcodeinstall install --name "Xcode_26.5_Apple_silicon.xip"
 
 # Step 5: Switch between installed versions
-xcodeinstall switch 16.1
+xcodeinstall switch 26.4
 ```
 
 **Using AWS Secrets Manager?** Add `-s <region>` and `-p <profile>` flags to the authenticate command. These settings are **automatically saved** and reused for subsequent commands. See [AWS Secrets Manager](#using-aws-secrets-manager-1) section below.
@@ -370,7 +370,7 @@ OPTIONS:
   -v, --verbose           Produce verbose output for debugging
   -n, --name <name>       The exact package name to install. When omitted, it prompts interactively
   --xcode-version <xcode-version>
-                          Override the Xcode version identifier (e.g., '16.2'). Auto-detected from
+                          Override the Xcode version identifier (e.g., '26.5'). Auto-detected from
                           filename if omitted.
   --version               Show the version.
   -h, --help              Show help information.
@@ -383,10 +383,10 @@ OPTIONS:
 xcodeinstall install
 
 # Specify exact file name (useful for automation)
-xcodeinstall install --name "Xcode_16.2_Apple_silicon.xip"
+xcodeinstall install --name "Xcode_26.5_Apple_silicon.xip"
 
 # Override the version identifier
-xcodeinstall install --name "Xcode_16.2.xip" --xcode-version "16.2-custom"
+xcodeinstall install --name "Xcode_26.5.xip" --xcode-version "26.5-custom"
 ```
 
 The installation process:
@@ -405,9 +405,9 @@ Architecture suffixes like "Apple silicon" or "Universal" are automatically stri
 After installing multiple versions, your `/Applications` directory looks like:
 
 ```
-/Applications/Xcode-16.1.app
-/Applications/Xcode-16.2.app
-/Applications/Xcode.app -> Xcode-16.2.app    (symlink to active version)
+/Applications/Xcode-26.4.app
+/Applications/Xcode-26.5.app
+/Applications/Xcode.app -> Xcode-26.5.app    (symlink to active version)
 ```
 
 #### Switching Versions
@@ -421,7 +421,7 @@ OVERVIEW: Switch the active Xcode version (requires sudo for xcode-select)
 USAGE: xcodeinstall switch [--verbose] [<version>]
 
 ARGUMENTS:
-  <version>               The Xcode version to activate (e.g., '16.2'). When omitted, it asks
+  <version>               The Xcode version to activate (e.g., '26.5'). When omitted, it asks
                           interactively.
 
 OPTIONS:
@@ -437,7 +437,7 @@ OPTIONS:
 xcodeinstall switch
 
 # Switch directly to a specific version
-xcodeinstall switch 16.2
+xcodeinstall switch 26.5
 ```
 
 Switching updates both the `/Applications/Xcode.app` symlink and runs `sudo xcode-select -s` to register the change system-wide.
