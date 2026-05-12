@@ -98,9 +98,9 @@ class ShellInstaller {
             You may be prompted for your password during installation.
 
             To enable passwordless sudo, create the file /etc/sudoers.d/\(username) with:
-              \(username) ALL=(ALL) NOPASSWD: ALL
+              \(username) ALL=(ALL) NOPASSWD: /usr/sbin/installer, /usr/bin/hdiutil
 
-            Run: sudo sh -c 'echo "\(username) ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/\(username)'
+            Run: sudo sh -c 'echo "\(username) ALL=(ALL) NOPASSWD: /usr/sbin/installer, /usr/bin/hdiutil" > /etc/sudoers.d/\(username)'
             """
         )
     }
