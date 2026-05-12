@@ -26,6 +26,7 @@ This is a command line utility to download and install Xcode in headless mode (f
 
 ✅ **Automated Downloads**: Download any Xcode version from Apple Developer Portal  
 ✅ **Headless Installation**: Install Xcode without GUI interaction  
+✅ **Multi-Version Management**: Install multiple Xcode versions side-by-side and switch between them  
 ✅ **AWS Secrets Manager Integration**: Securely store credentials and session tokens in the cloud  
 ✅ **Persistent Configuration**: Automatically saves AWS region and profile settings after first use  
 ✅ **Multi-Machine Support**: Share authentication sessions between your laptop and cloud machines  
@@ -83,7 +84,8 @@ The typical workflow is:
 1. **Authenticate** - Sign in to Apple Developer Portal (one time)
 2. **List** - Browse available Xcode versions
 3. **Download** - Download your desired Xcode version
-4. **Install** - Install the downloaded Xcode
+4. **Install** - Install the downloaded Xcode (versioned, with symlink)
+5. **Switch** - Switch between installed versions
 
 ```bash
 # Step 1: Authenticate (prompts for Apple ID and password)
@@ -93,10 +95,13 @@ xcodeinstall authenticate
 xcodeinstall list --only-xcode
 
 # Step 3: Download a specific version (prompts if --name is omitted)
-xcodeinstall download --name "Xcode 15.2.xip"
+xcodeinstall download --name "Xcode_16.2_Apple_silicon.xip"
 
-# Step 4: Install the downloaded version
-xcodeinstall install --name "Xcode 15.2.xip"
+# Step 4: Install the downloaded version (installs as Xcode-16.2.app)
+xcodeinstall install --name "Xcode_16.2_Apple_silicon.xip"
+
+# Step 5: Switch between installed versions
+xcodeinstall switch 16.1
 ```
 
 **Using AWS Secrets Manager?** Add `-s <region>` and `-p <profile>` flags to the authenticate command. These settings are **automatically saved** and reused for subsequent commands. See [AWS Secrets Manager](#using-aws-secrets-manager-1) section below.
@@ -121,6 +126,7 @@ SUBCOMMANDS:
   list                    List available versions of Xcode and development tools
   download                Download the specified version of Xcode
   install                 Install a specific XCode version or addon package
+  switch                  Switch the active Xcode version
   storesecrets            Store Apple Developer credentials in AWS Secrets Manager
 
   See 'xcodeinstall help <subcommand>' for detailed help.
@@ -311,7 +317,7 @@ Downloads are stored in `~/.xcodeinstall/download/`
 
 ### Install File
 
-This command uses `sudo` to install packages. For unattended installations, configure your user account to run `sudo` without a password prompt:
+This command uses `sudo` to install packages and run `xcode-select`. For unattended installations, configure your user account to run `sudo` without a password prompt:
 
 ```bash
 # Create a sudoers file for your user
@@ -326,11 +332,14 @@ your_user_id ALL=(ALL) NOPASSWD:ALL
 ➜  ~ xcodeinstall install -h
 OVERVIEW: Install a specific XCode version or addon package
 
-USAGE: xcodeinstall install [--verbose] [--name <name>]
+USAGE: xcodeinstall install [--verbose] [--name <name>] [--xcode-version <xcode-version>]
 
 OPTIONS:
   -v, --verbose           Produce verbose output for debugging
   -n, --name <name>       The exact package name to install. When omitted, it prompts interactively
+  --xcode-version <xcode-version>
+                          Override the Xcode version identifier (e.g., '16.2'). Auto-detected from
+                          filename if omitted.
   --version               Show the version.
   -h, --help              Show help information.
 ```
@@ -342,13 +351,69 @@ OPTIONS:
 xcodeinstall install
 
 # Specify exact file name (useful for automation)
-xcodeinstall install --name "Xcode 15.2.xip"
+xcodeinstall install --name "Xcode_16.2_Apple_silicon.xip"
+
+# Override the version identifier
+xcodeinstall install --name "Xcode_16.2.xip" --xcode-version "16.2-custom"
 ```
 
 The installation process:
 1. Extracts the `.xip` file (this takes several minutes)
-2. Moves `Xcode.app` to `/Applications/`
-3. Runs `xcode-select --install` to register the new Xcode version
+2. Moves to `/Applications/Xcode-{version}.app` (version auto-detected from filename)
+3. Installs additional system packages
+4. Creates a symlink `/Applications/Xcode.app` pointing to the newly installed version
+5. Runs `xcode-select -s` to activate the new version
+
+Architecture suffixes like "Apple silicon" or "Universal" are automatically stripped from the version identifier.
+
+### Multi-Version Management
+
+`xcodeinstall` supports installing multiple Xcode versions side-by-side and switching between them.
+
+After installing multiple versions, your `/Applications` directory looks like:
+
+```
+/Applications/Xcode-16.1.app
+/Applications/Xcode-16.2.app
+/Applications/Xcode.app -> Xcode-16.2.app    (symlink to active version)
+```
+
+#### Switching Versions
+
+Use the `switch` subcommand to change the active Xcode version:
+
+```bash
+➜  ~ xcodeinstall switch -h
+OVERVIEW: Switch the active Xcode version (requires sudo for xcode-select)
+
+USAGE: xcodeinstall switch [--verbose] [<version>]
+
+ARGUMENTS:
+  <version>               The Xcode version to activate (e.g., '16.2'). When omitted, it asks
+                          interactively.
+
+OPTIONS:
+  -v, --verbose           Produce verbose output for debugging
+  --version               Show the version.
+  -h, --help              Show help information.
+```
+
+**Examples:**
+
+```bash
+# Interactive mode - lists installed versions and prompts for selection
+xcodeinstall switch
+
+# Switch directly to a specific version
+xcodeinstall switch 16.2
+```
+
+Switching updates both the `/Applications/Xcode.app` symlink and runs `sudo xcode-select -s` to register the change system-wide.
+
+#### Safety
+
+- If `/Applications/Xcode.app` already exists as a real directory (not a symlink), the tool will refuse to overwrite it and ask you to rename or remove it first.
+- Existing versioned installations are never modified when installing a new version.
 
 ## Minimum IAM Permissions required to use AWS Secrets Manager 
 
@@ -578,7 +643,6 @@ I listed a couple of ideas below.
 ## List of Ideas
 
 **UX Improvements:**
-- Manage multiple versions of Xcode (rename `Xcode.app` to `Xcode-version.app` and use symlinks)
 - Download the latest Xcode version by default
 - Capture stderr and stdout of subprocess to emit on the logger
 
@@ -593,7 +657,8 @@ I listed a couple of ideas below.
 
 **Completed:**
 - [x] Clean room implementation of progress bar to remove dependency on Swift Tools Core library
-- [x] Persistent configuration for `-s` and `-p` options 
+- [x] Persistent configuration for `-s` and `-p` options
+- [x] Manage multiple versions of Xcode (rename `Xcode.app` to `Xcode-version.app` and use symlinks)
 
 ## Credits 
 

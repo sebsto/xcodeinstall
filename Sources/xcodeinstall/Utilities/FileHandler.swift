@@ -26,6 +26,9 @@ protocol FileHandlerProtocol: Sendable {
     func baseFilePath() -> URL
     func baseFilePath() -> String
     func downloadDirectory() -> URL
+    func createSymlink(at link: URL, pointingTo target: URL) throws
+    func listInstalledXcodes() throws -> [String]
+    func isSymlink(at url: URL) -> Bool
 }
 
 enum FileHandlerError: Error {
@@ -171,5 +174,29 @@ struct FileHandler: FileHandlerProtocol {
         let listData = try Data(contentsOf: downloadListPath())
 
         return try JSONDecoder().decode(DownloadList.self, from: listData)
+    }
+
+    func createSymlink(at link: URL, pointingTo target: URL) throws {
+        let fm = FileManager.default
+        if fm.fileExists(atPath: link.path) {
+            try fm.removeItem(at: link)
+        }
+        try fm.createSymbolicLink(atPath: link.path, withDestinationPath: target.lastPathComponent)
+    }
+
+    func listInstalledXcodes() throws -> [String] {
+        let fm = FileManager.default
+        let apps = try fm.contentsOfDirectory(atPath: "/Applications")
+        return apps.filter { $0.hasPrefix("Xcode-") && $0.hasSuffix(".app") }.sorted()
+    }
+
+    func isSymlink(at url: URL) -> Bool {
+        let fm = FileManager.default
+        guard let attrs = try? fm.attributesOfItem(atPath: url.path),
+              let type = attrs[.type] as? FileAttributeType
+        else {
+            return false
+        }
+        return type == .typeSymbolicLink
     }
 }

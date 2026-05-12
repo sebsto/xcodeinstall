@@ -18,17 +18,17 @@ import Foundation
 // XCode installation functions
 extension ShellInstaller {
 
-    func installXcode(at src: URL) async throws {
+    func installXcode(at src: URL, version: String? = nil) async throws {
 
-        // unXIP, mv, 4 PKG to install
-        let totalSteps = 2 + PKGTOINSTALL.count
+        // unXIP, mv, 4 PKG to install, activate (symlink + xcode-select)
+        let hasVersion = version != nil
+        let totalSteps = 2 + PKGTOINSTALL.count + (hasVersion ? 1 : 0)
         var currentStep: Int = 0
 
         var result: ShellOutput
 
         // first uncompress file
         log.debug("Decompressing files")
-        // run synchronously as there is no output for this operation
         currentStep += 1
         self.progressBar.update(
             step: currentStep,
@@ -43,7 +43,7 @@ extension ShellInstaller {
             throw InstallerError.xCodeXIPInstallationError
         }
 
-        // second move file to /Applications
+        // second move file to /Applications (versioned if version provided)
         log.debug("Moving app to destination")
         currentStep += 1
         self.progressBar.update(
@@ -63,9 +63,10 @@ extension ShellInstaller {
         }
 
         let installedFile =
-            try await self.moveApp(at: self.fileHandler.downloadDirectory().appendingPathComponent(appFile[0]))
-
-        // /Applications/Xcode.app/Contents/Resources/Packages/
+            try await self.moveApp(
+                at: self.fileHandler.downloadDirectory().appendingPathComponent(appFile[0]),
+                version: version
+            )
 
         // third install packages provided with Xcode app
         for pkg in PKGTOINSTALL {
@@ -85,6 +86,16 @@ extension ShellInstaller {
             }
         }
 
+        // fourth activate this version (symlink + xcode-select)
+        if let version {
+            currentStep += 1
+            self.progressBar.update(
+                step: currentStep,
+                total: totalSteps,
+                text: "Activating Xcode \(version)"
+            )
+            try await self.activateXcode(version: version)
+        }
     }
 
     // expand a XIP file.  There is no way to create XIP file.
@@ -116,19 +127,45 @@ extension ShellInstaller {
         }
     }
 
-    func moveApp(at src: URL) async throws -> String {
+    func moveApp(at src: URL, version: String? = nil) async throws -> String {
 
-        // extract file name
-        let fileName = src.lastPathComponent
+        let fileName: String
+        if let version {
+            fileName = "Xcode-\(version).app"
+        } else {
+            fileName = src.lastPathComponent
+        }
 
-        // create source and destination URL
         let appURL = URL(fileURLWithPath: "/Applications/\(fileName)")
 
         log.debug("Going to move \n \(src) to \n \(appURL)")
-        // move synchronously
         try self.fileHandler.move(from: src, to: appURL)
 
         return appURL.path
+    }
+
+    func activateXcode(version: String) async throws {
+        let xcodeSelectCommand = "/usr/bin/xcode-select"
+        let versionedApp = URL(fileURLWithPath: "/Applications/Xcode-\(version).app")
+        let symlinkURL = URL(fileURLWithPath: "/Applications/Xcode.app")
+
+        // Check if Xcode.app exists and is NOT a symlink (real app bundle)
+        if self.fileHandler.fileExists(file: symlinkURL, fileSize: 0)
+            && !self.fileHandler.isSymlink(at: symlinkURL)
+        {
+            throw InstallerError.existingXcodeAppIsNotSymlink
+        }
+
+        try self.fileHandler.createSymlink(at: symlinkURL, pointingTo: versionedApp)
+
+        let result = try await self.shellExecutor.run(
+            .path(SUDOCOMMAND),
+            arguments: [xcodeSelectCommand, "-s", versionedApp.path]
+        )
+        if !result.terminationStatus.isSuccess {
+            log.error("Failed to run xcode-select: \(result)")
+            throw InstallerError.xcodeSelectFailed
+        }
     }
 
     // MARK: Command Line Tools

@@ -131,7 +131,7 @@ final class InstallTest {
         }
         #expect(error == InstallerError.fileDoesNotExistOrIncorrect)
     }
-    @Test("Test Move App")
+    @Test("Test Move App without version")
     func testMoveApp() async {
         // given
         let src = URL(fileURLWithPath: "/Users/stormacq/.xcodeinstall/Downloads/Xcode 14 beta 5.app")
@@ -145,14 +145,36 @@ final class InstallTest {
                 shellExecutor: self.env.shell,
                 log: log
             )
-            _ = try await installer.moveApp(at: src)
+            _ = try await installer.moveApp(at: src, version: nil)
         }
 
         // then
         let mfh = env.fileHandler as! MockedFileHandler
         #expect(mfh.moveSrc?.path == src.path)
         #expect(mfh.moveDst?.path == dst.path)
+    }
 
+    @Test("Test Move App with version")
+    func testMoveAppWithVersion() async {
+        // given
+        let src = URL(fileURLWithPath: "/Users/stormacq/.xcodeinstall/Downloads/Xcode.app")
+        let dst = URL(fileURLWithPath: "/Applications/Xcode-14.0.1.app")
+
+        // when
+        let _ = await #expect(throws: Never.self) {
+            let installer = ShellInstaller(
+                fileHandler: self.env.fileHandler,
+                progressBar: self.env.progressBar,
+                shellExecutor: self.env.shell,
+                log: log
+            )
+            _ = try await installer.moveApp(at: src, version: "14.0.1")
+        }
+
+        // then
+        let mfh = env.fileHandler as! MockedFileHandler
+        #expect(mfh.moveSrc?.path == src.path)
+        #expect(mfh.moveDst?.path == dst.path)
     }
 
     @Test("Test Find In Download List File Exists")
