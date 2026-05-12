@@ -1,3 +1,16 @@
+## version 0.22.0
+
+- fix session cookies not persisted after 2FA trust step — subsequent commands no longer fail with "session expired" errors after authenticating (#133)
+- improve error reporting for AWS credential failures — xcodeinstall now detects your profile type (SSO, `aws login`, static credentials) and suggests the appropriate reauthentication command (#124)
+- bump swift-srp to 2.3.0 (#131)
+- bump swift-log to 1.12.0 (#130)
+- bump swift-argument-parser to 1.7.1 (#128)
+- bump swift-crypto to 4.5.0 (#127)
+- bump Noora to 0.56.0 (#126)
+- bump soto to 7.14.0 (#125)
+- update Swift Docker tag to v6.3 (#129)
+- consolidate test helper for temporary directory creation (#123)
+
 ## version 0.15
 
 - add `--profile` (`-p`) option to specify an AWS profile name from `~/.aws/credentials` or `~/.aws/config`
