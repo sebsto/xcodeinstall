@@ -21,7 +21,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-log.git", from: "1.12.1"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.8.0"),
         .package(url: "https://github.com/apple/swift-crypto", from: "4.5.0"),
-        .package(url: "https://github.com/apple/swift-system", from: "1.6.4"),
+        .package(url: "https://github.com/apple/swift-system", from: "1.7.2"),
 
         // disable "SubprocessSpan" until Swift 6.2.1 is resolved
         // https://github.com/swiftlang/swift/issues/84379
