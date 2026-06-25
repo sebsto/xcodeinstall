@@ -63,7 +63,7 @@ EOF
 
     BOTTLE_SHA=$(shasum -a 256 "bottles/$bottle_name" | awk '{print $1}')
 
-    for platform in arm64_sonoma arm64_sequoia arm64_tahoe sonoma sequoia tahoe; do
+    for platform in arm64_sonoma arm64_sequoia arm64_tahoe ventura sonoma sequoia tahoe; do
         cp "bottles/$bottle_name" "bottles/xcodeinstall-$VERSION.$platform.bottle.tar.gz"
     done
 
