@@ -1,11 +1,8 @@
 name: Build And Test on EC2
 
+# Automatic CI on the self-hosted EC2 mac runner is disabled.
+# Run manually via the Actions tab (workflow_dispatch) if needed.
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    types: [opened, reopened, synchronize]
-    branches: [ "main" ]
   workflow_dispatch:
 
 # As per Checkov CKV2_GHA_1
