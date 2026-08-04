@@ -26,7 +26,7 @@ let package = Package(
         // disable "SubprocessSpan" until Swift 6.2.1 is resolved
         // https://github.com/swiftlang/swift/issues/84379
         // https://github.com/swiftlang/swift-package-manager/issues/9163
-        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.2.0", traits: ["SubprocessFoundation"]), 
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "1.0.0", traits: ["SubprocessFoundation"]), 
     
         .package(url: "https://github.com/soto-project/soto.git", from: "7.14.0"),     
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.3.0"),
