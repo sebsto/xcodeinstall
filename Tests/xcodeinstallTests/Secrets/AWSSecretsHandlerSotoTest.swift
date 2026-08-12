@@ -8,7 +8,7 @@
 import Foundation
 import Logging
 import SotoCore
-import SotoSecretsManager
+import SotoSSM
 import Testing
 
 @testable import xcodeinstall
@@ -28,13 +28,13 @@ struct SecretsStorageAWSSotoTest {
             let awsClient = AWSClient(
                 credentialProvider: TestEnvironment.credentialProvider,
             )
-            let smClient = SecretsManager(
+            let ssmClient = SSM(
                 client: awsClient,
                 endpoint: TestEnvironment.getEndPoint()
             )
 
             secretHandler =
-                try SecretsStorageAWSSoto.forRegion(region, awsClient: awsClient, smClient: smClient, log: log)
+                try SecretsStorageAWSSoto.forRegion(region, awsClient: awsClient, ssmClient: ssmClient, log: log)
                 as? SecretsStorageAWSSoto
             #expect(secretHandler != nil)
 

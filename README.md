@@ -8,7 +8,7 @@
 ![platform](https://img.shields.io/badge/platform-macOS-green)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-A command line utility to download and install Xcode in headless mode — designed for preparing EC2 Mac AMIs with AWS Secrets Manager integration.
+A command line utility to download and install Xcode in headless mode — designed for preparing EC2 Mac AMIs with AWS Parameter Store integration.
 
 ## TL;DR
 
@@ -20,12 +20,12 @@ A command line utility to download and install Xcode in headless mode — design
 `xcodeinstall` is a command line utility to download and install Xcode from the terminal only. It works both interactively and unattended:
 
 - **Interactive mode**: Prompts you for your Apple Developer account username, password, and MFA code
-- **Unattended mode**: Fetches your Apple Developer credentials from AWS Secrets Manager
+- **Unattended mode**: Fetches your Apple Developer credentials from AWS Parameter Store
 
 ### Key Features
 
 ✅ **AMI Automation Ready**: Fully scriptable for Packer, Ansible, or shell-based image builds  
-✅ **AWS Secrets Manager Integration**: Centralized credentials and shared session tokens across your fleet  
+✅ **AWS Parameter Store Integration**: Centralized credentials and shared session tokens across your fleet, at no storage cost  
 ✅ **Multi-Machine Support**: Authenticate once on your laptop, use the session on all EC2 instances  
 ✅ **Multi-Version Management**: Install multiple Xcode versions side-by-side and switch between them  
 ✅ **Automated Downloads**: Download any Xcode version from Apple Developer Portal  
@@ -51,11 +51,11 @@ Unlike other Xcode management tools designed for local development, `xcodeinstal
 
 **How `xcodeinstall` solves it:**
 
-1. **Centralized credentials with AWS Secrets Manager** — Store your Apple Developer credentials once, access them from any EC2 Mac instance during AMI builds. No SSH-ing into machines to paste passwords.
+1. **Centralized credentials with AWS Parameter Store** — Store your Apple Developer credentials once, access them from any EC2 Mac instance during AMI builds. No SSH-ing into machines to paste passwords.
 
-2. **Shared session tokens** — Authenticate on your laptop (where you can receive the MFA code), then your Packer or Ansible image build uses that session via Secrets Manager.
+2. **Shared session tokens** — Authenticate on your laptop (where you can receive the MFA code), then your Packer or Ansible image build uses that session via Parameter Store.
 
-3. **IAM-based access control** — No API keys or config files baked into the image. Attach an IAM role to the builder instance and `xcodeinstall` authenticates to Secrets Manager automatically via the instance profile.
+3. **IAM-based access control** — No API keys or config files baked into the image. Attach an IAM role to the builder instance and `xcodeinstall` authenticates to Parameter Store automatically via the instance profile.
 
 4. **Fully scriptable** — Every command works non-interactively with `--name` flags, integrating cleanly into Packer provisioners, Ansible playbooks, or EC2 Image Builder components.
 
@@ -136,7 +136,7 @@ xcodeinstall install --name "Xcode_26.5_Apple_silicon.xip"
 xcodeinstall switch 26.4
 ```
 
-**Using AWS Secrets Manager?** Add `-s <region>` and `-p <profile>` flags to the authenticate command. These settings are **automatically saved** and reused for subsequent commands. See [AWS Secrets Manager](#using-aws-secrets-manager-1) section below.
+**Using AWS Parameter Store?** Add `-s <region>` and `-p <profile>` flags to the authenticate command. These settings are **automatically saved** and reused for subsequent commands. See [AWS Parameter Store](#using-aws-parameter-store) section below.
 
 ### Overview
 
@@ -159,14 +159,14 @@ SUBCOMMANDS:
   download                Download the specified version of Xcode
   install                 Install a specific XCode version or addon package
   switch                  Switch the active Xcode version
-  storesecrets            Store Apple Developer credentials in AWS Secrets Manager
+  storesecrets            Store Apple Developer credentials in AWS Parameter Store
 
   See 'xcodeinstall help <subcommand>' for detailed help.
 ```
 
 ### Persistent Configuration
 
-When using AWS Secrets Manager, `xcodeinstall` **automatically saves** your `-s` (AWS region) and `-p` (AWS profile) settings to `~/.xcodeinstall/config.json`.
+When using AWS Parameter Store, `xcodeinstall` **automatically saves** your `-s` (AWS region) and `-p` (AWS profile) settings to `~/.xcodeinstall/config.json`.
 
 **First time:** Specify the options explicitly:
 ```bash
@@ -206,7 +206,7 @@ USAGE: xcodeinstall authenticate [--verbose] [-s <region>] [-p <profile>]
 OPTIONS:
   -v, --verbose           Produce verbose output for debugging
   -s, --secretmanager-region <secretmanager-region>
-                          Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region
+                          Instructs to use AWS Parameter Store to store and read secrets in the given AWS Region
   -p, --profile <profile> The AWS profile name to use for authentication (from ~/.aws/credentials and ~/.aws/config)
   --version               Show the version.
   -h, --help              Show help information.
@@ -214,7 +214,7 @@ OPTIONS:
 
 #### Interactive Authentication (Local Storage)
 
-For local development or testing, authenticate without AWS Secrets Manager:
+For local development or testing, authenticate without AWS Parameter Store:
 
 ```bash
 ➜  ~ xcodeinstall authenticate
@@ -232,9 +232,18 @@ Authenticating...
 ✅ Authenticated with MFA.
 ```
 
-#### Using AWS Secrets Manager
+#### Using AWS Parameter Store
 
-For production, CI/CD, or multi-machine setups, use AWS Secrets Manager to store credentials and session tokens securely:
+> **Migrating from AWS Secrets Manager?** Earlier versions of `xcodeinstall` stored secrets in AWS Secrets Manager. Nothing carries over automatically. Re-run `storesecrets` and `authenticate` to populate the new parameters, then delete the old secrets so they stop costing $0.40/month each:
+>
+> ```bash
+> aws secretsmanager delete-secret --secret-id xcodeinstall-apple-credentials --force-delete-without-recovery
+> aws secretsmanager delete-secret --secret-id xcodeinstall-apple-session-token --force-delete-without-recovery
+> ```
+>
+> Your saved `-s` region and `-p` profile in `~/.xcodeinstall/config.json` are unaffected, and the `-s`/`-p` flags are unchanged.
+
+For production, CI/CD, or multi-machine setups, use AWS Parameter Store to store credentials and session tokens securely:
 
 ```bash
 ➜  ~ xcodeinstall authenticate -s us-west-2 -p myprofile
@@ -252,20 +261,21 @@ Authenticating...
 
 ![Apple MFA code](img/mfa-02.png)
 
-2. Your Apple Developer Portal **username and password are NEVER stored** on disk. They are only used to authenticate with Apple's API and obtain a session token. When using AWS Secrets Manager, **your username and password are stored and encrypted on Secrets Manager**.
+2. Your Apple Developer Portal **username and password are NEVER stored** on disk. They are only used to authenticate with Apple's API and obtain a session token. When using AWS Parameter Store, **your username and password are stored as an encrypted `SecureString` parameter**.
 
-3. The **session token is stored** either locally in `~/.xcodeinstall/` or on AWS Secrets Manager (your choice).
+3. The **session token is stored** either locally in `~/.xcodeinstall/` or on AWS Parameter Store (your choice).
 
 4. Sessions typically remain valid for several days or weeks. When expired, re-authentication is required. Apple may also prompt for re-authentication when connecting from a new IP address or location.
 
-**AWS Secrets Manager Benefits:**
-- **Secure storage**: Credentials and session tokens stored in AWS cloud
+**AWS Parameter Store Benefits:**
+- **Secure storage**: Credentials and session tokens stored in AWS cloud as encrypted `SecureString` parameters
 - **Multi-machine access**: Authenticate on your laptop, use the session on EC2 instances
 - **Automatic configuration**: Region and profile settings saved after first use
+- **No storage cost**: Standard-tier parameters are free, and they are encrypted with the account's default `aws/ssm` KMS key at no extra charge
 
 **Important:** The `-s` (region) and `-p` (profile) options are **automatically saved** to `~/.xcodeinstall/config.json` for subsequent commands. You only need to specify them once.
 
-> **Note:** When using Secrets Manager, you must use the **same AWS region and profile** for all commands (`authenticate`, `list`, `download`). The saved configuration ensures consistency across commands.
+> **Note:** When using Parameter Store, you must use the **same AWS region and profile** for all commands (`authenticate`, `list`, `download`). The saved configuration ensures consistency across commands.
 
 ### List Files Available to Download
 
@@ -284,7 +294,7 @@ OPTIONS:
   -m, --most-recent-first Sort by most recent releases first
   -d, --date-published    Show publication date
   -s, --secretmanager-region <secretmanager-region>
-                          Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region
+                          Instructs to use AWS Parameter Store to store and read secrets in the given AWS Region
   -p, --profile <profile> The AWS profile name to use for authentication
   --version               Show the version.
   -h, --help              Show help information.
@@ -302,7 +312,7 @@ xcodeinstall list --only-xcode --most-recent-first
 # Filter by Xcode version 15
 xcodeinstall list --only-xcode --xcode-version 15
 
-# With AWS Secrets Manager (uses saved settings if available)
+# With AWS Parameter Store (uses saved settings if available)
 xcodeinstall list
 # Info: Using saved settings: -s us-west-2 -p myprofile
 ```
@@ -325,7 +335,7 @@ OPTIONS:
   -d, --date-published    Show publication date
   -n, --name <name>       The exact package name to download. When omitted, it prompts interactively
   -s, --secretmanager-region <secretmanager-region>
-                          Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region
+                          Instructs to use AWS Parameter Store to store and read secrets in the given AWS Region
   -p, --profile <profile> The AWS profile name to use for authentication
   --version               Show the version.
   -h, --help              Show help information.
@@ -340,7 +350,7 @@ xcodeinstall download --only-xcode
 # Specify exact file name (useful for automation)
 xcodeinstall download --name "Xcode 15.2.xip"
 
-# With AWS Secrets Manager (uses saved settings if available)
+# With AWS Parameter Store (uses saved settings if available)
 xcodeinstall download --name "Xcode 15.2.xip"
 # Info: Using saved settings: -s us-west-2 -p myprofile
 ```
@@ -447,9 +457,9 @@ Switching updates both the `/Applications/Xcode.app` symlink and runs `sudo xcod
 - If `/Applications/Xcode.app` already exists as a real directory (not a symlink), the tool will refuse to overwrite it and ask you to rename or remove it first.
 - Existing versioned installations are never modified when installing a new version.
 
-## Minimum IAM Permissions required to use AWS Secrets Manager 
+## Minimum IAM Permissions required to use AWS Parameter Store
 
-The minimum IAM permisions required to use this tool with AWS Secrets Manager is as below (do not forget to replace 000000000000 with your AWS Account ID)
+The minimum IAM permisions required to use this tool with AWS Parameter Store is as below (do not forget to replace 000000000000 with your AWS Account ID)
 
 ```json
 {
@@ -459,19 +469,20 @@ The minimum IAM permisions required to use this tool with AWS Secrets Manager is
             "Sid": "xcodeinstall",
             "Effect": "Allow",
             "Action": [
-                "secretsmanager:CreateSecret",
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:PutSecretValue"
+                "ssm:PutParameter",
+                "ssm:GetParameter"
             ],
-            "Resource": "arn:aws:secretsmanager:*:000000000000:secret:xcodeinstall-*"
+            "Resource": "arn:aws:ssm:*:000000000000:parameter/xcodeinstall/*"
         }
     ]
 }
 ```
 
+No `kms:*` permission is required. `xcodeinstall` stores its parameters as `SecureString`, encrypted with your account's default `aws/ssm` AWS managed key, which every principal in the account may use through Systems Manager. If you prefer a customer managed KMS key, add `kms:Encrypt` and `kms:Decrypt` for that key (`kms:GenerateDataKey` instead of `kms:Encrypt` if the parameter is promoted to the advanced tier).
+
 Once associated with an IAM Role, you can attach the role to any IAM principal : user, group or an AWS service, such as an EC2 Mac instance. Here are instructions to do so.
 
- *Create* an IAM role that contains the minimum set of permissions to allow `xcodeinstall` to interact with AWS Secrets Manager, then *attach* this role to the EC2 Mac instance where you run `xcodeinstall`. 
+ *Create* an IAM role that contains the minimum set of permissions to allow `xcodeinstall` to interact with AWS Parameter Store, then *attach* this role to the EC2 Mac instance where you run `xcodeinstall`.
 
 From a machine where the AWS CLI is installed and where you have AWS credentials allowing you to create roles and permissions (typically your laptop), type the following commands :
 
@@ -499,7 +510,7 @@ aws iam create-role \
     --assume-role-policy-document file://ec2-role-trust-policy.json
 ```
 
-2. Second, create a policy that contains the minimum set of permissions to interact with AWS Secrets Manager 
+2. Second, create a policy that contains the minimum set of permissions to interact with AWS Parameter Store
 
 ```zsh 
 # Create the policy file with the set of permissions
@@ -512,11 +523,10 @@ cat << EOF > ec2-policy.json
             "Sid": "xcodeinstall",
             "Effect": "Allow",
             "Action": [
-                "secretsmanager:CreateSecret",
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:PutSecretValue"
+                "ssm:PutParameter",
+                "ssm:GetParameter"
             ],
-            "Resource": "arn:aws:secretsmanager:*:000000000000:secret:xcodeinstall-*"
+            "Resource": "arn:aws:ssm:*:000000000000:parameter/xcodeinstall/*"
         }
     ]
 }
@@ -568,16 +578,21 @@ aws ec2 associate-iam-instance-profile \
 
 When you start other EC2 Mac instance, you just need to attach the profile to the new instance.  The Policy and Role can be reused for multiple EC2 instances.
 
-## How to Store Your Secrets on AWS Secrets Manager
+## How to Store Your Secrets on AWS Parameter Store
 
-When using AWS Secrets Manager to store your Apple Developer Portal credentials, you need to create a secret in the following format:
+When using AWS Parameter Store to store your Apple Developer Portal credentials, you need to create a parameter in the following format:
 
-- **Secret name:** `xcodeinstall-apple-credentials`
-- **Secret format:** JSON with username and password:
+- **Parameter name:** `/xcodeinstall/apple-credentials`
+- **Parameter type:** `SecureString`
+- **Parameter value:** JSON with username and password:
 
 ```json
 {"username":"your_username","password":"your_password"}
 ```
+
+`xcodeinstall` also maintains a second parameter, `/xcodeinstall/apple-session-token`, which holds the Apple session and cookies. You never create that one yourself — `authenticate` writes it for you.
+
+Both parameters are created with the `Intelligent-Tiering` tier. They stay in the free standard tier while under 4 KB and are promoted automatically to the advanced tier ($0.05/parameter/month) only if the stored session grows past that. Note that this promotion is one-way: an advanced parameter cannot be reverted to standard.
 
 ### Using the `storesecrets` Command
 
@@ -586,7 +601,7 @@ The easiest way to create this secret is using the built-in `storesecrets` comma
 ```bash
 ➜  ~ xcodeinstall storesecrets -s us-west-2 -p myprofile
 
-This command captures your Apple ID username and password and stores them securely in AWS Secrets Manager.
+This command captures your Apple ID username and password and stores them securely in AWS Parameter Store.
 It allows this command to authenticate automatically, as long as no MFA is prompted.
 
 ⌨️  Enter your Apple ID username: your.email@example.com
@@ -595,14 +610,14 @@ It allows this command to authenticate automatically, as long as no MFA is promp
 ```
 
 **Options:**
-- `-s, --secretmanager-region`: AWS region where the secret will be stored (choose a region close to you for lower latency)
+- `-s, --secretmanager-region`: AWS region where the parameter will be stored (choose a region close to you for lower latency)
 - `-p, --profile`: AWS profile name to use (from `~/.aws/credentials` and `~/.aws/config`)
 
 **Important:** Unlike other commands, `storesecrets` requires you to specify `-s` and `-p` every time, as it's typically a one-time setup operation.
 
 ### After Storing Credentials
 
-Once credentials are stored in AWS Secrets Manager:
+Once credentials are stored in AWS Parameter Store:
 
 1. Authenticate once with the same region and profile:
    ```bash
@@ -654,7 +669,7 @@ rm -rf ~/.xcodeinstall/
 - Or clear the config file: `rm ~/.xcodeinstall/config.json`
 
 **Session expired errors:**
-- Run `xcodeinstall authenticate` (with `-s` and `-p` if using AWS Secrets Manager)
+- Run `xcodeinstall authenticate` (with `-s` and `-p` if using AWS Parameter Store)
 - Enter your MFA code when prompted
 
 **AWS credentials not found:**

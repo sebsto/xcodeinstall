@@ -28,7 +28,7 @@ enum SecretsStorageError: Error, LocalizedError {
     }
 }
 
-// the data to be stored in Secrets Manager as JSON
+// the data to be stored in Parameter Store as JSON
 struct AppleCredentialsSecret: Codable, Secrets {
 
     let username: String

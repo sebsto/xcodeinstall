@@ -20,7 +20,7 @@ extension MainCommand {
         nonisolated static let configuration =
             CommandConfiguration(
                 commandName: "storesecrets",
-                abstract: "Store your Apple Developer Portal username and password in AWS Secrets Manager"
+                abstract: "Store your Apple Developer Portal username and password in AWS Parameter Store"
             )
 
         @OptionGroup var globalOptions: GlobalOptions
@@ -28,7 +28,7 @@ extension MainCommand {
         // repeat of CloudOption but this time mandatory
         @Option(
             name: [.customLong("secretmanager-region"), .short],
-            help: "Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region"
+            help: "Instructs to use AWS Parameter Store to store and read secrets in the given AWS Region"
         )
         var secretManagerRegion: String
 

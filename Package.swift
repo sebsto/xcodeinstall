@@ -41,7 +41,7 @@ let package = Package(
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "SotoSecretsManager", package: "soto"),
+                .product(name: "SotoSSM", package: "soto"),
                 .product(name: "SRP", package: "swift-srp"),
                 .product(name: "Noora", package: "Noora"),
                 .product(name: "_CryptoExtras", package: "swift-crypto"),

@@ -5,7 +5,7 @@
 //  Created by Stormacq, Sebastien on 16/08/2022.
 //
 
-import SotoSecretsManager
+import SotoSSM
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -105,16 +105,16 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
 
         var appleCredentials: AppleCredentialsSecret
         do {
-            // first try on AWS Secrets Manager
+            // first try on AWS Parameter Store
             display("Retrieving Apple Developer Portal credentials...")
             appleCredentials = try await secrets.retrieveAppleCredentials()
 
-            // empty credentials means the secret exists but has no real values
+            // empty credentials means the parameter exists but has no real values
             if appleCredentials.username.isEmpty || appleCredentials.password.isEmpty {
-                display("Apple credentials secret exists but is empty.")
+                display("Apple credentials parameter exists but is empty.")
                 appleCredentials = try promptForCredentials(storingToAWS: true)
                 try await secrets.storeAppleCredentials(appleCredentials)
-                display("Credentials stored in AWS Secrets Manager", style: .security)
+                display("Credentials stored in AWS Parameter Store", style: .security)
             }
 
         } catch SecretsStorageError.invalidOperation {
@@ -122,15 +122,13 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
             // we have a file secrets handler, prompt for credentials interactively
             appleCredentials = try promptForCredentials()
 
-        } catch let error as SotoSecretsManager.SecretsManagerErrorType
-            where error == .resourceNotFoundException
-        {
-            // the apple credentials secret doesn't exist yet in AWS Secrets Manager
+        } catch let error as SSMErrorType where error == .parameterNotFound {
+            // the apple credentials parameter doesn't exist yet in AWS Parameter Store
             // prompt the user and create it transparently
-            display("Apple credentials not found in AWS Secrets Manager, capturing them now...")
+            display("Apple credentials not found in AWS Parameter Store, capturing them now...")
             appleCredentials = try promptForCredentials(storingToAWS: true)
             try await secrets.storeAppleCredentials(appleCredentials)
-            display("Credentials stored in AWS Secrets Manager", style: .security)
+            display("Credentials stored in AWS Parameter Store", style: .security)
 
         } catch {
 
@@ -145,7 +143,7 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
         if storingToAWS {
             display(
                 """
-                Your Apple ID credentials will be securely stored in AWS Secrets Manager
+                Your Apple ID credentials will be securely stored in AWS Parameter Store
                 for future authentication.
                 """,
                 style: .security
@@ -156,7 +154,7 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
                 We prompt you for your Apple ID username, password, and two factors authentication code.
                 These values are not stored anywhere. They are used to get an Apple session ID.
 
-                Alternatively, you may store your credentials on AWS Secrets Manager
+                Alternatively, you may store your credentials on AWS Parameter Store
                 """,
                 style: .security
             )

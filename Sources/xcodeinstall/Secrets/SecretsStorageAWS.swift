@@ -18,12 +18,14 @@ import FoundationNetworking
 #endif
 
 // the names we are using to store the secrets
+// these are AWS Systems Manager Parameter Store parameter names, organised as a hierarchy
+// so that a single IAM resource (parameter/xcodeinstall/*) covers them all
 enum AWSSecretsName: String {
-    case appleCredentials = "xcodeinstall-apple-credentials"
-    case appleSessionToken = "xcodeinstall-apple-session-token"
+    case appleCredentials = "/xcodeinstall/apple-credentials"
+    case appleSessionToken = "/xcodeinstall/apple-session-token"
 }
 
-// the data to be stored in Secrets Manager as JSON
+// the data to be stored in Parameter Store as JSON
 struct AppleSessionSecret: Codable, Secrets {
     var rawCookies: String?
     var session: AppleSession?
@@ -68,10 +70,10 @@ protocol SecretsStorageAWSSDKProtocol {
 }
 
 // permissions needed
-// secretsmanager:CreateSecret
-// secretsmanager:TagResource ?
-// secretsmanager:GetSecretValue
-// secretsmanager:PutSecretValue
+// ssm:PutParameter
+// ssm:GetParameter
+// no kms:* action is required : SecureString parameters are encrypted with the account's
+// default aws/ssm AWS managed key, which every principal in the account may use
 
 class SecretsStorageAWS: SecretsHandlerProtocol {
     let log: Logger
@@ -96,9 +98,8 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
         try await awsSDK.shutdown()
     }
 
-    // I do not delete the secrets because there is a 30 days deletion policy
-    // https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_DeleteSecret.html
-    // Instead, I update the secret value with an empty secret
+    // I do not delete the parameter, I overwrite it with an empty session instead.
+    // This keeps ssm:DeleteParameter out of the IAM permissions this tool requires.
     func clearSecrets() async throws {
 
         let emptySession = AppleSessionSecret()
@@ -138,7 +139,7 @@ class SecretsStorageAWS: SecretsHandlerProtocol {
             )
 
         } catch {
-            log.debug("⚠️ can not save cookies file in AWS Secret Manager: \(error)")
+            log.debug("⚠️ can not save cookies in AWS Parameter Store: \(error)")
             throw error
         }
 

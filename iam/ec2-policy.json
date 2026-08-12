@@ -5,11 +5,10 @@
             "Sid": "xcodeinstall",
             "Effect": "Allow",
             "Action": [
-                "secretsmanager:CreateSecret",
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:PutSecretValue"
+                "ssm:PutParameter",
+                "ssm:GetParameter"
             ],
-            "Resource": "arn:aws:secretsmanager:*:000000000000:secret:xcodeinstall-*"
+            "Resource": "arn:aws:ssm:*:000000000000:parameter/xcodeinstall/*"
         }
     ]
 }
