@@ -148,16 +148,27 @@ enum ErrorPresenter {
         }
     }
 
+    /// Exhaustive on purpose: a new installation failure must come with the message
+    /// the user will read, and the compiler is the reminder.
     private static func presentation(for error: InstallerError) -> ErrorPresentation {
         switch error {
         case .unsupportedInstallation:
             return .failure("Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)")
+        case .fileDoesNotExistOrIncorrect:
+            return .failure(
+                "The file to install does not exist, or its size does not match the one announced by Apple.",
+                style: .error(nextSteps: ["xcodeinstall download"])
+            )
+        case .xCodeUnxipDirectoryDoesntExist:
+            return .failure("Can not find the directory where Xcode was expanded")
         case .xCodeXIPInstallationError:
             return .failure("Can not expand XIP file. Is there enough space on / ? (16GiB required)")
         case .xCodeMoveInstallationError:
             return .failure("Can not move Xcode to /Applications")
         case .xCodePKGInstallationError:
             return .failure("Can not install additional packages.")
+        case .CLToolsInstallationError:
+            return .failure("Can not install the Xcode Command Line Tools")
         case .existingXcodeAppIsNotSymlink:
             return .failure(
                 "/Applications/Xcode.app exists and is not a symlink. Please rename or remove it before installing a versioned Xcode."
@@ -170,8 +181,6 @@ enum ErrorPresenter {
             return .failure("No versioned Xcode installations found in /Applications", style: .warning)
         case .xcodeVersionNotInstalled(let version):
             return .failure("Xcode \(version) is not installed in /Applications")
-        default:
-            return .failure(unexpected(error))
         }
     }
 

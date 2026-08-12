@@ -60,16 +60,25 @@ extension XCodeInstall {
             message: "Downloading \(fileToDownload.displayName ?? fileToDownload.filename)"
         )
 
-        for try await progress in try await download.download(file: fileToDownload) {
-            var text = "\(progress.bytesWritten/1024/1024) MB"
-            text += String(format: " / %.2f MBs", progress.bandwidth)
-            progressBar.update(
-                step: Int(progress.bytesWritten / 1024),
-                total: Int(progress.totalBytes / 1024),
-                text: text
-            )
+        // the progress bar is only started once the stream produces its first update,
+        // so a failure to open the stream leaves nothing to close
+        let progressStream = try await download.download(file: fileToDownload)
+        do {
+            for try await progress in progressStream {
+                var text = "\(progress.bytesWritten/1024/1024) MB"
+                text += String(format: " / %.2f MBs", progress.bandwidth)
+                progressBar.update(
+                    step: Int(progress.bytesWritten / 1024),
+                    total: Int(progress.totalBytes / 1024),
+                    text: text
+                )
+            }
+            progressBar.complete(success: true)
+        } catch {
+            // close the progress bar line, the error itself is reported by the CLI layer
+            progressBar.complete(success: false)
+            throw error
         }
-        progressBar.complete(success: true)
 
         // check if the downloaded file is complete
         let fh = self.deps.fileHandler
