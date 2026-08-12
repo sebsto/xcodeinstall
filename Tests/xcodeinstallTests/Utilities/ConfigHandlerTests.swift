@@ -20,7 +20,7 @@ struct ConfigHandlerTests {
             // Given
             let configHandler = ConfigHandler(log: log, baseDirectory: tempDir)
             let config = PersistentConfig(
-                secretManagerRegion: "us-west-2",
+                secretRegion: "us-west-2",
                 profileName: "myprofile"
             )
 
@@ -30,7 +30,7 @@ struct ConfigHandlerTests {
 
             // Then
             #expect(loadedConfig != nil)
-            #expect(loadedConfig?.secretManagerRegion == "us-west-2")
+            #expect(loadedConfig?.secretRegion == "us-west-2")
             #expect(loadedConfig?.profileName == "myprofile")
         }
     }
@@ -74,7 +74,7 @@ struct ConfigHandlerTests {
             // Given
             let configHandler = ConfigHandler(log: log, baseDirectory: tempDir)
             let config = PersistentConfig(
-                secretManagerRegion: "us-east-1",
+                secretRegion: "us-east-1",
                 profileName: nil
             )
 
@@ -84,7 +84,7 @@ struct ConfigHandlerTests {
 
             // Then
             #expect(loadedConfig != nil)
-            #expect(loadedConfig?.secretManagerRegion == "us-east-1")
+            #expect(loadedConfig?.secretRegion == "us-east-1")
             #expect(loadedConfig?.profileName == nil)
         }
     }
@@ -95,7 +95,7 @@ struct ConfigHandlerTests {
             // Given
             let configHandler = ConfigHandler(log: log, baseDirectory: tempDir)
             let config = PersistentConfig(
-                secretManagerRegion: nil,
+                secretRegion: nil,
                 profileName: "testprofile"
             )
 
@@ -105,7 +105,7 @@ struct ConfigHandlerTests {
 
             // Then
             #expect(loadedConfig != nil)
-            #expect(loadedConfig?.secretManagerRegion == nil)
+            #expect(loadedConfig?.secretRegion == nil)
             #expect(loadedConfig?.profileName == "testprofile")
         }
     }
@@ -116,11 +116,11 @@ struct ConfigHandlerTests {
             // Given
             let configHandler = ConfigHandler(log: log, baseDirectory: tempDir)
             let initialConfig = PersistentConfig(
-                secretManagerRegion: "us-west-1",
+                secretRegion: "us-west-1",
                 profileName: "profile1"
             )
             let updatedConfig = PersistentConfig(
-                secretManagerRegion: "eu-west-1",
+                secretRegion: "eu-west-1",
                 profileName: "profile2"
             )
 
@@ -131,7 +131,7 @@ struct ConfigHandlerTests {
 
             // Then
             #expect(loadedConfig != nil)
-            #expect(loadedConfig?.secretManagerRegion == "eu-west-1")
+            #expect(loadedConfig?.secretRegion == "eu-west-1")
             #expect(loadedConfig?.profileName == "profile2")
         }
     }

@@ -23,7 +23,7 @@ protocol ConfigHandlerProtocol: Sendable {
 
 // Config data model
 struct PersistentConfig: Codable, Sendable {
-    var secretManagerRegion: String?
+    var secretRegion: String?
     var profileName: String?
 }
 
@@ -84,7 +84,7 @@ struct ConfigHandler: ConfigHandlerProtocol {
     ) async throws -> PersistentConfig {
         let saved = loadConfig()
 
-        let effectiveRegion = cliRegion ?? saved?.secretManagerRegion
+        let effectiveRegion = cliRegion ?? saved?.secretRegion
         let effectiveProfile = cliProfile ?? saved?.profileName
 
         // Show info message for values coming from saved config
@@ -101,13 +101,13 @@ struct ConfigHandler: ConfigHandlerProtocol {
         // Persist when CLI provided new values, merging with existing
         if cliRegion != nil || cliProfile != nil {
             let updated = PersistentConfig(
-                secretManagerRegion: effectiveRegion,
+                secretRegion: effectiveRegion,
                 profileName: effectiveProfile
             )
             try? saveConfig(updated)
             log.debug("Saved config")
         }
 
-        return PersistentConfig(secretManagerRegion: effectiveRegion, profileName: effectiveProfile)
+        return PersistentConfig(secretRegion: effectiveRegion, profileName: effectiveProfile)
     }
 }

@@ -27,10 +27,10 @@ extension MainCommand {
 
         // repeat of CloudOption but this time mandatory
         @Option(
-            name: [.customLong("secretmanager-region"), .short],
-            help: "Instructs to use AWS Parameter Store to store and read secrets in the given AWS Region"
+            name: [.customLong("secret-region"), .short],
+            help: "Instructs to store and read secrets on AWS in the given AWS Region"
         )
-        var secretManagerRegion: String
+        var secretRegion: String
 
         @Option(
             name: [.customLong("profile"), .customShort("p")],
@@ -45,7 +45,7 @@ extension MainCommand {
         func run(with deps: AppDependencies?) async throws {
             let xci = try await MainCommand.makeXCodeInstall(
                 with: deps,
-                for: secretManagerRegion,
+                for: secretRegion,
                 profileName: profileName,
                 verbose: globalOptions.verbose
             )

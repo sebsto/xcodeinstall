@@ -34,7 +34,7 @@ extension MainCommand {
 
             let xci = try await MainCommand.makeXCodeInstall(
                 with: deps,
-                for: cloudOption.secretManagerRegion,
+                for: cloudOption.secretRegion,
                 profileName: cloudOption.profileName,
                 verbose: globalOptions.verbose
             )
@@ -59,7 +59,7 @@ extension MainCommand {
 
             let xci = try await MainCommand.makeXCodeInstall(
                 with: deps,
-                for: cloudOption.secretManagerRegion,
+                for: cloudOption.secretRegion,
                 profileName: cloudOption.profileName,
                 verbose: globalOptions.verbose
             )

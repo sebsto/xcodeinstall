@@ -205,8 +205,8 @@ USAGE: xcodeinstall authenticate [--verbose] [-s <region>] [-p <profile>]
 
 OPTIONS:
   -v, --verbose           Produce verbose output for debugging
-  -s, --secretmanager-region <secretmanager-region>
-                          Instructs to use AWS Parameter Store to store and read secrets in the given AWS Region
+  -s, --secret-region <secret-region>
+                          Instructs to store and read secrets on AWS in the given AWS Region
   -p, --profile <profile> The AWS profile name to use for authentication (from ~/.aws/credentials and ~/.aws/config)
   --version               Show the version.
   -h, --help              Show help information.
@@ -234,14 +234,22 @@ Authenticating...
 
 #### Using AWS Parameter Store
 
-> **Migrating from AWS Secrets Manager?** Earlier versions of `xcodeinstall` stored secrets in AWS Secrets Manager. Nothing carries over automatically. Re-run `storesecrets` and `authenticate` to populate the new parameters, then delete the old secrets so they stop costing $0.40/month each:
+> ### ⚠️ Migrating from AWS Secrets Manager
+>
+> Earlier versions of `xcodeinstall` stored secrets in AWS Secrets Manager. This is a **breaking change** and needs three things from you.
+>
+> **1. Update your IAM policy.** The permissions changed from `secretsmanager:*` to `ssm:PutParameter` and `ssm:GetParameter`. See [Minimum IAM Permissions](#minimum-iam-permissions-required-to-use-aws-parameter-store). Nothing works until the policy is updated.
+>
+> **2. Re-create your secrets.** Nothing migrates automatically. Re-run `storesecrets` and `authenticate`, then delete the old secrets so they stop costing $0.40/month each:
 >
 > ```bash
 > aws secretsmanager delete-secret --secret-id xcodeinstall-apple-credentials --force-delete-without-recovery
 > aws secretsmanager delete-secret --secret-id xcodeinstall-apple-session-token --force-delete-without-recovery
 > ```
 >
-> Your saved `-s` region and `-p` profile in `~/.xcodeinstall/config.json` are unaffected, and the `-s`/`-p` flags are unchanged.
+> **3. Rename the flag in your scripts.** `--secretmanager-region` is now `--secret-region`. The short form `-s` is unchanged, so `-s <region>` keeps working and only the long form needs updating.
+>
+> Also note that `~/.xcodeinstall/config.json` uses a new key name for the region, so your saved region is dropped on first run after upgrading. The next command that passes `-s` saves it again. Your saved `-p` profile is unaffected.
 
 For production, CI/CD, or multi-machine setups, use AWS Parameter Store to store credentials and session tokens securely:
 
@@ -293,8 +301,8 @@ OPTIONS:
                           Filter on provided Xcode version number (default: 13)
   -m, --most-recent-first Sort by most recent releases first
   -d, --date-published    Show publication date
-  -s, --secretmanager-region <secretmanager-region>
-                          Instructs to use AWS Parameter Store to store and read secrets in the given AWS Region
+  -s, --secret-region <secret-region>
+                          Instructs to store and read secrets on AWS in the given AWS Region
   -p, --profile <profile> The AWS profile name to use for authentication
   --version               Show the version.
   -h, --help              Show help information.
@@ -334,8 +342,8 @@ OPTIONS:
   -m, --most-recent-first Sort by most recent releases first
   -d, --date-published    Show publication date
   -n, --name <name>       The exact package name to download. When omitted, it prompts interactively
-  -s, --secretmanager-region <secretmanager-region>
-                          Instructs to use AWS Parameter Store to store and read secrets in the given AWS Region
+  -s, --secret-region <secret-region>
+                          Instructs to store and read secrets on AWS in the given AWS Region
   -p, --profile <profile> The AWS profile name to use for authentication
   --version               Show the version.
   -h, --help              Show help information.
@@ -610,7 +618,7 @@ It allows this command to authenticate automatically, as long as no MFA is promp
 ```
 
 **Options:**
-- `-s, --secretmanager-region`: AWS region where the parameter will be stored (choose a region close to you for lower latency)
+- `-s, --secret-region`: AWS region where the parameter will be stored (choose a region close to you for lower latency)
 - `-p, --profile`: AWS profile name to use (from `~/.aws/credentials` and `~/.aws/config`)
 
 **Important:** Unlike other commands, `storesecrets` requires you to specify `-s` and `-p` every time, as it's typically a one-time setup operation.
