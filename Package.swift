@@ -23,10 +23,10 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-crypto", from: "4.5.0"),
         .package(url: "https://github.com/apple/swift-system", from: "1.7.2"),
 
-        // disable "SubprocessSpan" until Swift 6.2.1 is resolved
-        // https://github.com/swiftlang/swift/issues/84379
-        // https://github.com/swiftlang/swift-package-manager/issues/9163
-        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "0.2.0", traits: ["SubprocessFoundation"]), 
+        // 1.0.0 removed the "SubprocessSpan" trait, so the workaround for
+        // https://github.com/swiftlang/swift/issues/84379 is no longer needed.
+        // Its default trait set is ["SubprocessFoundation"], which is what we want.
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "1.0.0"),
     
         .package(url: "https://github.com/soto-project/soto.git", from: "7.14.0"),     
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.3.0"),

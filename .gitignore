@@ -9,7 +9,6 @@ dist
 Tests/Data/curl.txt
 scripts/deploy/xcodeinstall.rb
 BOTTLE_BLOCK
-Package.resolved
 bottles
 
 # Xcode

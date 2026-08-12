@@ -8,7 +8,8 @@
 import Foundation
 import Logging
 
-@testable import Subprocess  // to be able to call internal init() functions
+import Subprocess
+
 @testable import xcodeinstall
 
 #if canImport(System)
@@ -46,20 +47,15 @@ final class MockedShell: ShellExecuting {
             throw error
         }
 
-        return CollectedResult(
-            processIdentifier: ProcessIdentifier(value: 9999),
-            terminationStatus: TerminationStatus.exited(0),
+        return ShellOutput(
+            terminationStatus: .exited(0),
             standardOutput: "mocked output",
             standardError: "mocked error"
         )
     }
 }
 
-struct MockedRunRecorder: InputProtocol, OutputProtocol {
-    func write(with writer: Subprocess.StandardInputWriter) async throws {
-
-    }
-
+struct MockedRunRecorder {
     var lastExecutable: Executable?
     var lastArguments: Arguments = []
 
