@@ -43,29 +43,16 @@ extension MainCommand {
         }
 
         func run(with deps: AppDependencies?) async throws {
-            let xci: XCodeInstall
-            do {
-                xci = try await MainCommand.XCodeInstaller(
-                    with: deps,
-                    for: secretManagerRegion,
-                    profileName: profileName,
-                    verbose: globalOptions.verbose
-                )
-            } catch {
-                await NooraDisplay().display(error.localizedDescription, terminator: "\n", style: .error())
-                throw ExitCode.failure
-            }
+            let xci = try await MainCommand.makeXCodeInstall(
+                with: deps,
+                for: secretManagerRegion,
+                profileName: profileName,
+                verbose: globalOptions.verbose
+            )
 
-            do {
-                _ = try await xci.storeSecrets()
-            } catch {
-                try? await xci.deps.secrets?.shutdown()
-                throw ExitCode.failure
+            try await MainCommand.run(on: xci) {
+                try await xci.storeSecrets()
             }
-
-            // Gracefully shut down AWS client before process exits
-            // to avoid RotatingCredentialProvider crash during deallocation
-            try? await xci.deps.secrets?.shutdown()
         }
     }
 

@@ -32,74 +32,34 @@ extension XCodeInstall {
             message: "Installing..."
         )
 
-        var fileToInstall: URL?
         do {
+            let fileToInstall: URL
             // when no file is specified, prompt user to select one
             if nil == file {
                 fileToInstall = try promptForFile()
             } else {
                 fileToInstall = self.deps.fileHandler.downloadDirectory().appendingPathComponent(file!)
             }
-            log.debug("Going to attempt to install \(fileToInstall!.path)")
+            log.debug("Going to attempt to install \(fileToInstall.path)")
 
             // resolve version: CLI flag > auto-extract > prompt user
             let resolvedVersion = try resolveVersion(
                 explicitVersion: version,
-                filename: fileToInstall!.lastPathComponent
+                filename: fileToInstall.lastPathComponent
             )
 
-            try await installer.install(file: fileToInstall!, version: resolvedVersion)
+            try await installer.install(file: fileToInstall, version: resolvedVersion)
             self.deps.progressBar.complete(success: true)
             if let resolvedVersion {
                 display("Xcode \(resolvedVersion) installed and activated", style: .success)
             } else {
-                display("\(fileToInstall!) installed", style: .success)
+                display("\(fileToInstall) installed", style: .success)
             }
         } catch CLIError.userCancelled {
-            return
-        } catch CLIError.invalidInput {
-            display("Invalid input", style: .error())
-            self.deps.progressBar.complete(success: false)
-            throw CLIError.invalidInput
-        } catch FileHandlerError.noDownloadedList {
-            display("There is no downloaded file to be installed", style: .warning)
-            self.deps.progressBar.complete(success: false)
-            throw FileHandlerError.noDownloadedList
-        } catch InstallerError.xCodeXIPInstallationError {
-            display("Can not expand XIP file. Is there enough space on / ? (16GiB required)", style: .error())
-            self.deps.progressBar.complete(success: false)
-            throw InstallerError.xCodeXIPInstallationError
-        } catch InstallerError.xCodeMoveInstallationError {
-            display("Can not move Xcode to /Applications", style: .error())
-            self.deps.progressBar.complete(success: false)
-            throw InstallerError.xCodeMoveInstallationError
-        } catch InstallerError.xCodePKGInstallationError {
-            display(
-                "Can not install additional packages.",
-                style: .error()
-            )
-            self.deps.progressBar.complete(success: false)
-            throw InstallerError.xCodePKGInstallationError
-        } catch InstallerError.existingXcodeAppIsNotSymlink {
-            display(
-                "/Applications/Xcode.app exists and is not a symlink. Please rename or remove it before installing a versioned Xcode.",
-                style: .error()
-            )
-            self.deps.progressBar.complete(success: false)
-            throw InstallerError.existingXcodeAppIsNotSymlink
-        } catch InstallerError.xcodeSelectFailed {
-            display("Failed to run xcode-select to activate Xcode", style: .error())
-            self.deps.progressBar.complete(success: false)
-            throw InstallerError.xcodeSelectFailed
-        } catch InstallerError.unsupportedInstallation {
-            display(
-                "Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)",
-                style: .error()
-            )
-            self.deps.progressBar.complete(success: false)
-            throw InstallerError.unsupportedInstallation
+            // the user interrupted a prompt, the installation never started
+            throw CLIError.userCancelled
         } catch {
-            display("Error while installing \(String(describing: fileToInstall!))", style: .error())
+            // the error itself is reported by the CLI layer, we only close the progress bar
             log.debug("\(error)")
             self.deps.progressBar.complete(success: false)
             throw error

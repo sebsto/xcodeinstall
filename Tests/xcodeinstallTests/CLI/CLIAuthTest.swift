@@ -90,10 +90,9 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: AuthenticationError.self) {
-            _ = try parse(MainCommand.Authenticate.self, ["authenticate"])
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
+        await #expect(throws: ExitCode.self) {
+            let auth = try parse(MainCommand.Authenticate.self, ["authenticate", "--srp", "false"])
+            try await auth.run(with: deps)
         }
 
         assertDisplay(env: env, "Invalid username or password.")
@@ -143,9 +142,9 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: AuthenticationError.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
+        await #expect(throws: ExitCode.self) {
+            let auth = try parse(MainCommand.Authenticate.self, ["authenticate", "--srp", "false"])
+            try await auth.run(with: deps)
         }
 
         // username and password consumed by delegate.requestCredentials()
@@ -167,11 +166,11 @@ extension CLITests {
             SecretsStorageAWSError.invalidRegion(region: "bad-region")
 
         let deps = env.toDeps(log: log)
-        let xci = XCodeInstall(log: log, deps: deps)
 
         // when
-        await #expect(throws: SecretsStorageAWSError.self) {
-            try await xci.signout()
+        await #expect(throws: ExitCode.self) {
+            let signout = try parse(MainCommand.Signout.self, ["signout"])
+            try await signout.run(with: deps)
         }
 
         // then — verify the AWS Error message was displayed
@@ -187,11 +186,11 @@ extension CLITests {
         (env.authenticator as! MockedAppleAuthentication).nextSignoutError = MockError.genericTestError
 
         let deps = env.toDeps(log: log)
-        let xci = XCodeInstall(log: log, deps: deps)
 
         // when
-        await #expect(throws: MockError.self) {
-            try await xci.signout()
+        await #expect(throws: ExitCode.self) {
+            let signout = try parse(MainCommand.Signout.self, ["signout"])
+            try await signout.run(with: deps)
         }
 
         // then — verify the Unexpected error message was displayed
@@ -208,9 +207,9 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: AuthenticationError.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
+        await #expect(throws: ExitCode.self) {
+            let auth = try parse(MainCommand.Authenticate.self, ["authenticate", "--srp", "false"])
+            try await auth.run(with: deps)
         }
 
         // then
@@ -226,9 +225,9 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: AuthenticationError.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
+        await #expect(throws: ExitCode.self) {
+            let auth = try parse(MainCommand.Authenticate.self, ["authenticate", "--srp", "false"])
+            try await auth.run(with: deps)
         }
 
         // then
@@ -245,9 +244,9 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: AuthenticationError.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
+        await #expect(throws: ExitCode.self) {
+            let auth = try parse(MainCommand.Authenticate.self, ["authenticate", "--srp", "false"])
+            try await auth.run(with: deps)
         }
 
         // then
@@ -264,9 +263,9 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: SecretsStorageAWSError.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
+        await #expect(throws: ExitCode.self) {
+            let auth = try parse(MainCommand.Authenticate.self, ["authenticate", "--srp", "false"])
+            try await auth.run(with: deps)
         }
 
         // then
@@ -281,13 +280,13 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: MockError.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.authenticate(with: AuthenticationMethod.withSRP(false))
+        await #expect(throws: ExitCode.self) {
+            let auth = try parse(MainCommand.Authenticate.self, ["authenticate", "--srp", "false"])
+            try await auth.run(with: deps)
         }
 
         // then
-        assertDisplayContains(env: env, "Unexpected Error")
+        assertDisplayContains(env: env, "Unexpected error")
     }
 
     @Test("Test Authenticate With Username Password Method")
