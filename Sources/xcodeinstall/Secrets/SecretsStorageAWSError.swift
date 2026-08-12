@@ -11,10 +11,11 @@ import FoundationEssentials
 import Foundation
 #endif
 
-/// Errors thrown by AWS Secrets Manager operations
+/// Errors thrown by AWS Parameter Store operations
 enum SecretsStorageAWSError: Error, LocalizedError {
     case invalidRegion(region: String)
     case secretDoesNotExist(secretname: String)
+    case invalidSecretValue(secretname: String)
     case noCredentialProvider(profileName: String?, underlyingError: Error)
 
     var errorDescription: String? {
@@ -23,6 +24,8 @@ enum SecretsStorageAWSError: Error, LocalizedError {
             return "Invalid AWS region: '\(region)'"
         case .secretDoesNotExist(let secretname):
             return "AWS secret '\(secretname)' does not exist"
+        case .invalidSecretValue(let secretname):
+            return "Can not serialize the value of AWS secret '\(secretname)'"
         case .noCredentialProvider(let profileName, let underlyingError):
             return buildCredentialErrorMessage(profileName: profileName, underlyingError: underlyingError)
         }

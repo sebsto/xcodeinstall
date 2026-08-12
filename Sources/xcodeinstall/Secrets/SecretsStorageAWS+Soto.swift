@@ -6,7 +6,7 @@
 //
 
 import Logging
-import SotoSecretsManager
+import SotoSSM
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -18,16 +18,14 @@ import Foundation
 final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
 
     let log: Logger
-    let maxRetries = 3
     let profileName: String?
 
     let awsClient: AWSClient?  // var for injection
-    let smClient: SecretsManager?  // var for injection
+    let ssmClient: SSM?  // var for injection
 
-    private init(awsClient: AWSClient? = nil, smClient: SecretsManager? = nil, profileName: String? = nil, log: Logger)
-    {
+    private init(awsClient: AWSClient? = nil, ssmClient: SSM? = nil, profileName: String? = nil, log: Logger) {
         self.awsClient = awsClient
-        self.smClient = smClient
+        self.ssmClient = ssmClient
         self.profileName = profileName
         self.log = log
     }
@@ -37,13 +35,13 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
         profileName: String? = nil,
         log: Logger
     ) throws -> SecretsStorageAWSSDKProtocol {
-        try SecretsStorageAWSSoto.forRegion(region, profileName: profileName, awsClient: nil, smClient: nil, log: log)
+        try SecretsStorageAWSSoto.forRegion(region, profileName: profileName, awsClient: nil, ssmClient: nil, log: log)
     }
     static func forRegion(
         _ region: String,
         profileName: String? = nil,
         awsClient: AWSClient? = nil,
-        smClient: SecretsManager? = nil,
+        ssmClient: SSM? = nil,
         log: Logger
     ) throws -> SecretsStorageAWSSDKProtocol {
         guard let awsRegion = Region(awsRegionName: region) else {
@@ -62,16 +60,16 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
                 retryPolicy: .jitter()
             )
         }
-        var newSMClient: SecretsManager?
-        if smClient == nil {
-            newSMClient = SecretsManager(
+        var newSSMClient: SSM?
+        if ssmClient == nil {
+            newSSMClient = SSM(
                 client: awsClient ?? newAwsClient!,
                 region: awsRegion
             )
         }
         return SecretsStorageAWSSoto(
             awsClient: awsClient ?? newAwsClient!,
-            smClient: smClient ?? newSMClient!,
+            ssmClient: ssmClient ?? newSSMClient!,
             profileName: profileName,
             log: log
         )
@@ -104,123 +102,47 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
         }
     }
 
-    // MARK: private functions - AWS SecretsManager Call using Soto SDK
-
-    //    func list() async throws {
-    //        print("calling list secrets")
-    //        let request = SecretsManager.ListSecretsRequest()
-    //        _ = try await smClient.listSecrets(request)
-    //    }
+    // MARK: private functions - AWS Systems Manager Parameter Store calls using Soto SDK
 
     ///
-    /// Create a secret in AWS SecretsManager
-    /// - Parameters:
-    ///     - secretId : the name of the secret
-    ///     - secretValue : a string to store as a secret
-    /// - Throws:
-    ///         This function throws error from the underlying SDK
+    ///  Create or update a parameter holding a secret value.
     ///
-    private func createSecret(secretId: String, secretValue: Secrets) async throws {
-        do {
-            let secretString = try secretValue.string()
-            let createSecretRequest = SecretsManager.CreateSecretRequest(
-                description: "xcodeinstall secret",
-                name: secretId,
-                secretString: secretString
-            )
-            _ = try await smClient?.createSecret(createSecretRequest)
-        } catch {
-            log.error("Can not create secret \(secretId) : \(error)")
-            throw error
-        }
-    }
-
+    ///  `PutParameter` with `overwrite: true` is an upsert, so — unlike Secrets Manager's
+    ///  `PutSecretValue` — there is no need to create the parameter first when it does not exist yet.
     ///
-    ///  Execute an API call AWS SecretsManager and create the secret when the secret name does not exist.
-    ///  Aftre creating the secret, the API call is attempted again.  The function tries 3 times before abording
+    ///  The parameter is stored as a `SecureString`, encrypted with the account's default
+    ///  `aws/ssm` AWS managed KMS key (no additional cost, no extra KMS permission required).
     ///
-    /// - Parameters:
-    ///     - secretId : the name of the secret
-    ///     - secretValue : a string to store as a secret,
-    ///     - step: the current retry step (start at 1)
-    ///     - block: the block of code to execute (contains the call to SecretsManager)
-    /// - Throws:
-    ///         This function throws error from the underlying SDK
+    ///  `Intelligent-Tiering` lets AWS create the parameter in the free standard tier and promote it
+    ///  to the advanced tier only if the value grows beyond the 4 KB standard-tier limit. Measured
+    ///  session secrets sit around 2.3–2.8 KB, but the cookie jar only ever grows, so this avoids a
+    ///  hard failure at the cost of $0.05/month in the worst case. Note that the promotion to the
+    ///  advanced tier is one-way: an advanced parameter cannot be reverted to standard.
     ///
-
-    private func executeRequestAndCreateWhenNotExist(
-        secretId: String,
-        secretValue: Secrets,
-        step: Int,
-        block: () async throws -> Void
-    ) async throws {
-
-        do {
-            // try to execute the supplied block
-            try await block()
-
-            // if it fails with a resource not found error,
-        } catch let error as SotoSecretsManager.SecretsManagerErrorType {
-
-            // create the resource and try again
-            if error == .resourceNotFoundException {
-                log.debug("Secrets \(secretId) does not exist, creating it")
-                try await self.createSecret(secretId: secretId, secretValue: secretValue)
-
-                if step <= maxRetries {
-                    // recursive call to ourselevs
-                    log.debug("Re-trying the block call (attempt #\(step + 1))")
-                    try await self.executeRequestAndCreateWhenNotExist(
-                        secretId: secretId,
-                        secretValue: secretValue,
-                        step: step + 1,
-                        block: block
-                    )
-                } else {
-                    log.error("Max attempt to call Secrets Manager")
-                }
-
-            } else {
-                log.error("AWS API Error\n\(error)")
-                throw error
-            }
-
-        }
-    }
-
-    ///
-    ///  Update an existing secret
-    ///
-    ///  - Parameters
-    ///     - secretId : the name of the secret
-    ///     - newValue : the updated value
-    /// - Throws:
+    ///  - Parameters:
+    ///     - secretId : the name of the parameter
+    ///     - newValue : the value to store
+    ///  - Throws:
     ///         This function throws error from the underlying SDK
     ///
     func updateSecret<T: Secrets>(secretId: AWSSecretsName, newValue: T) async throws {
         do {
+            guard let secretString = try newValue.string() else {
+                throw SecretsStorageAWSError.invalidSecretValue(secretname: secretId.rawValue)
+            }
 
-            // maybe the secret does not exist yet - so wrap our call with
-            // a function hat will create it in case it does not exist
-            try await executeRequestAndCreateWhenNotExist(
-                secretId: secretId.rawValue,
-                secretValue: newValue,
-                step: 1,
-                block: {
-
-                    let secretString = try newValue.string()
-                    let putSecretRequest = SecretsManager.PutSecretValueRequest(
-                        secretId: secretId.rawValue,
-                        secretString: secretString
-                    )
-
-                    log.debug("Updating secret \(secretId) with \(newValue)")
-                    let putSecretResponse = try await smClient?.putSecretValue(putSecretRequest)
-                    log.debug(
-                        "\(putSecretResponse?.name ?? "") has version \(putSecretResponse?.versionId ?? "")"
-                    )
-                }
+            let putParameterRequest = SSM.PutParameterRequest(
+                description: "xcodeinstall secret",
+                name: secretId.rawValue,
+                overwrite: true,
+                tier: .intelligentTiering,
+                type: .secureString,
+                value: secretString
             )
+
+            log.debug("Updating parameter \(secretId.rawValue)")
+            let putParameterResponse = try await ssmClient?.putParameter(putParameterRequest)
+            log.debug("\(secretId.rawValue) now has version \(putParameterResponse?.version ?? 0)")
 
         } catch {
             log.debug("Unexpected error while updating secrets\n\(error)")
@@ -228,17 +150,26 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
         }
     }
 
+    ///
+    ///  Retrieve and decode a secret stored in a Parameter Store parameter.
+    ///
+    ///  - Parameters:
+    ///     - secretId : the name of the parameter
+    ///  - Throws:
+    ///         `SSMErrorType.parameterNotFound` when the parameter does not exist,
+    ///         or any other error from the underlying SDK
+    ///
     // FIXME: improve error handling when secret is not retrieved
     // swiftlint:disable force_cast
     func retrieveSecret<T: Secrets>(secretId: AWSSecretsName) async throws -> T {
         do {
-            let getSecretRequest = SecretsManager.GetSecretValueRequest(secretId: secretId.rawValue)
-            log.debug("Retrieving secret \(secretId)")
-            let getSecretResponse = try await smClient?.getSecretValue(getSecretRequest)
-            log.debug("Secret \(getSecretResponse?.name ?? "nil") retrieved")
+            let getParameterRequest = SSM.GetParameterRequest(name: secretId.rawValue, withDecryption: true)
+            log.debug("Retrieving parameter \(secretId.rawValue)")
+            let getParameterResponse = try await ssmClient?.getParameter(getParameterRequest)
+            log.debug("Parameter \(getParameterResponse?.parameter?.name ?? "nil") retrieved")
 
-            guard let secret = getSecretResponse?.secretString else {
-                log.error("⚠️ no value returned by AWS Secrets Manager secret \(secretId)")
+            guard let secret = getParameterResponse?.parameter?.value else {
+                log.error("⚠️ no value returned by AWS Parameter Store for parameter \(secretId)")
                 return secretId == .appleCredentials
                     ? AppleCredentialsSecret() as! T : AppleSessionSecret() as! T
             }
@@ -250,10 +181,8 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
                 return try AppleSessionSecret(fromString: secret) as! T
             }
 
-        } catch let error as SotoSecretsManager.SecretsManagerErrorType
-            where error == .resourceNotFoundException
-        {
-            log.debug("Secret \(secretId.rawValue) does not exist in AWS Secrets Manager")
+        } catch let error as SSMErrorType where error == .parameterNotFound {
+            log.debug("Parameter \(secretId.rawValue) does not exist in AWS Parameter Store")
             throw error
 
         } catch {

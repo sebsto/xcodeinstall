@@ -65,7 +65,7 @@ extension MainCommand {
         func run(with deps: AppDependencies?) async throws {
             let xci = try await MainCommand.makeXCodeInstall(
                 with: deps,
-                for: cloudOption.secretManagerRegion,
+                for: cloudOption.secretRegion,
                 profileName: cloudOption.profileName,
                 verbose: globalOptions.verbose
             )

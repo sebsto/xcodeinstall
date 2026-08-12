@@ -33,10 +33,10 @@ struct MainCommand: AsyncParsableCommand {
     struct CloudOptions: ParsableArguments {
 
         @Option(
-            name: [.customLong("secretmanager-region"), .short],
-            help: "Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region"
+            name: [.customLong("secret-region"), .short],
+            help: "Instructs to store and read secrets on AWS in the given AWS Region"
         )
-        var secretManagerRegion: String?
+        var secretRegion: String?
 
         @Option(
             name: [.customLong("profile"), .customShort("p")],
@@ -102,7 +102,7 @@ struct MainCommand: AsyncParsableCommand {
         let urlSession = URLSession.shared
 
         let secrets: SecretsHandlerProtocol
-        if let effectiveRegion = resolved.secretManagerRegion {
+        if let effectiveRegion = resolved.secretRegion {
             secrets = try await SecretsStorageAWS(
                 region: effectiveRegion,
                 profileName: resolved.profileName,

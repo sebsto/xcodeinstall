@@ -7,7 +7,7 @@
 #
 # Prerequisites:
 #   - AWS credentials configured for profile "pro-login"
-#   - Apple Developer account credentials stored in AWS Secrets Manager (eu-central-1)
+#   - Apple Developer account credentials stored in AWS Parameter Store (eu-central-1)
 #   - swift build must have been run first (or use swift run which builds automatically)
 #
 
@@ -58,7 +58,7 @@ fi
 step "Step 2: Authenticate"
 
 $XCODEINSTALL authenticate $AWS_OPTS || fail "authenticate failed"
-pass "authenticate succeeded (session stored in AWS Secrets Manager)"
+pass "authenticate succeeded (session stored in AWS Parameter Store)"
 
 # ------------------------------------------------------------------
 step "Step 3: List"

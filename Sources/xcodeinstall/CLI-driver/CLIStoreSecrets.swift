@@ -20,17 +20,17 @@ extension MainCommand {
         nonisolated static let configuration =
             CommandConfiguration(
                 commandName: "storesecrets",
-                abstract: "Store your Apple Developer Portal username and password in AWS Secrets Manager"
+                abstract: "Store your Apple Developer Portal username and password in AWS Parameter Store"
             )
 
         @OptionGroup var globalOptions: GlobalOptions
 
         // repeat of CloudOption but this time mandatory
         @Option(
-            name: [.customLong("secretmanager-region"), .short],
-            help: "Instructs to use AWS Secrets Manager to store and read secrets in the given AWS Region"
+            name: [.customLong("secret-region"), .short],
+            help: "Instructs to store and read secrets on AWS in the given AWS Region"
         )
-        var secretManagerRegion: String
+        var secretRegion: String
 
         @Option(
             name: [.customLong("profile"), .customShort("p")],
@@ -45,7 +45,7 @@ extension MainCommand {
         func run(with deps: AppDependencies?) async throws {
             let xci = try await MainCommand.makeXCodeInstall(
                 with: deps,
-                for: secretManagerRegion,
+                for: secretRegion,
                 profileName: profileName,
                 verbose: globalOptions.verbose
             )
