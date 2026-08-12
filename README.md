@@ -703,14 +703,14 @@ I listed a couple of ideas below.
 
 **AWS Integration:**
 - Add possibility to emit SNS notifications on errors (e.g., Session Expired)
-- Support for additional AWS authentication methods (SSO, OIDC)
 
 **Configuration Management:**
 - Add explicit config management commands (`config show`, `config clear`)
-- Support for multiple named profiles (`--save-as dev`, `--use-profile dev`)
 - Environment variable fallback (`XCODEINSTALL_REGION`, `XCODEINSTALL_PROFILE`)
 
 **Completed:**
+- [x] Support for multiple named profiles (`--save-as dev`, `--use-profile dev`)
+- [x] Support for additional AWS authentication methods (SSO, OIDC) - done by SotoCore.
 - [x] Clean room implementation of progress bar to remove dependency on Swift Tools Core library
 - [x] Persistent configuration for `-s` and `-p` options
 - [x] Manage multiple versions of Xcode (rename `Xcode.app` to `Xcode-version.app` and use symlinks)
