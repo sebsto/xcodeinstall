@@ -18,21 +18,12 @@ extension XCodeInstall {
         guard let secretsHandler = self.deps.secrets else {
             preconditionFailure("storeSecrets() called without a secrets backend — this is a programming error")
         }
-        do {
-            // separate func for testability
-            let credentials = try promptForCredentials()
 
-            try await secretsHandler.storeAppleCredentials(credentials)
-            display("Credentials are securely stored", style: .security)
+        // separate func for testability
+        let credentials = try promptForCredentials()
 
-        } catch let error as SecretsStorageAWSError {
-            display("AWS Error: \(error.localizedDescription)", style: .error())
-            throw error
-        } catch {
-            display("Unexpected error : \(error)", style: .error())
-            throw error
-        }
-
+        try await secretsHandler.storeAppleCredentials(credentials)
+        display("Credentials are securely stored", style: .security)
     }
 
     func promptForCredentials() throws -> AppleCredentialsSecret {

@@ -23,6 +23,7 @@ enum InstallerError: Error, Equatable {
     case xCodePKGInstallationError
     case CLToolsInstallationError
     case xcodeSelectFailed
+    case unableToListInstalledXcodes
     case noInstalledXcodeVersions
     case xcodeVersionNotInstalled(String)
     case existingXcodeAppIsNotSymlink

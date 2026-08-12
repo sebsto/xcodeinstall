@@ -29,21 +29,13 @@ extension MainCommand {
         }
 
         func run(with deps: AppDependencies?) async throws {
-            let xci: XCodeInstall
-            do {
-                xci = try await MainCommand.XCodeInstaller(
-                    with: deps,
-                    verbose: globalOptions.verbose
-                )
-            } catch {
-                await NooraDisplay().display(error.localizedDescription, terminator: "\n", style: .error())
-                throw ExitCode.failure
-            }
+            let xci = try await MainCommand.makeXCodeInstall(
+                with: deps,
+                verbose: globalOptions.verbose
+            )
 
-            do {
+            try await MainCommand.run(on: xci) {
                 try await xci.switchVersion(to: version)
-            } catch {
-                throw ExitCode.failure
             }
         }
     }

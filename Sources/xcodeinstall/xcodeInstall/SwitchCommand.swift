@@ -12,12 +12,12 @@ extension XCodeInstall {
         do {
             installed = try self.deps.fileHandler.listInstalledXcodes()
         } catch {
-            display("Failed to list installed Xcode versions", style: .error())
-            throw error
+            // the underlying error carries no information for the user
+            log.debug("\(error)")
+            throw InstallerError.unableToListInstalledXcodes
         }
 
-        if installed.isEmpty {
-            display("No versioned Xcode installations found in /Applications", style: .warning)
+        guard !installed.isEmpty else {
             throw InstallerError.noInstalledXcodeVersions
         }
 
@@ -30,7 +30,6 @@ extension XCodeInstall {
 
         let targetApp = "Xcode-\(targetVersion).app"
         guard installed.contains(targetApp) else {
-            display("Xcode \(targetVersion) is not installed in /Applications", style: .error())
             throw InstallerError.xcodeVersionNotInstalled(targetVersion)
         }
 

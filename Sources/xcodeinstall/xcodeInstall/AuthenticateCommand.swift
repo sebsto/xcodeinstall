@@ -188,74 +188,25 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
 
 extension XCodeInstall {
 
+    /// Authenticates against the Apple Developer Portal.
+    ///
+    /// Errors are propagated untouched, the CLI layer renders them once
+    /// (see `ErrorPresenter`).
     func authenticate(with authenticationMethod: AuthenticationMethod) async throws {
 
         let auth = self.deps.authenticator
         let delegate = CLIAuthenticationDelegate(deps: self.deps)
 
-        do {
+        // delete previous session, if any
+        try await self.deps.secrets?.clearSecrets()
 
-            // delete previous session, if any
-            try await self.deps.secrets?.clearSecrets()
-
-            if authenticationMethod == .usernamePassword {
-                display("Authenticating with username and password (likely to fail) ...")
-            } else {
-                display("Authenticating...")
-            }
-            try await auth.authenticate(with: authenticationMethod, delegate: delegate)
-            display("Authenticated.", style: .success)
-
-        } catch AuthenticationError.invalidUsernamePassword {
-
-            // handle invalid username or password
-            display("Invalid username or password.", style: .error())
-            throw AuthenticationError.invalidUsernamePassword
-
-        } catch AuthenticationError.requires2FATrustedPhoneNumber {
-
-            display(
-                """
-                Two factors authentication is enabled but no verification methods are available.
-                Please ensure you have trusted devices or phone numbers configured:
-                https://support.apple.com/en-us/HT204915
-                """,
-                style: .security
-            )
-            throw AuthenticationError.requires2FATrustedPhoneNumber
-
-        } catch AuthenticationError.serviceUnavailable {
-
-            // service unavailable means that the authentication method requested is not available
-            display("Requested authentication method is not available. Try with SRP.", style: .error())
-            throw AuthenticationError.serviceUnavailable
-
-        } catch AuthenticationError.unableToRetrieveAppleServiceKey(let error) {
-
-            // handle connection errors
-            display(
-                "Can not connect to Apple Developer Portal.\nOriginal error : \(error?.localizedDescription ?? "nil")",
-                style: .error()
-            )
-            throw AuthenticationError.unableToRetrieveAppleServiceKey(error)
-
-        } catch AuthenticationError.notImplemented(let feature) {
-
-            // handle not yet implemented errors
-            display(
-                "\(feature) is not yet implemented. Try the next version of xcodeinstall when it will be available.",
-                style: .error()
-            )
-            throw AuthenticationError.notImplemented(featureName: feature)
-
-        } catch let error as SecretsStorageAWSError {
-            display("AWS Error: \(error.localizedDescription)", style: .error())
-            throw error
-
-        } catch {
-            display("Unexpected Error : \(error)", style: .error())
-            throw error
+        if authenticationMethod == .usernamePassword {
+            display("Authenticating with username and password (likely to fail) ...")
+        } else {
+            display("Authenticating...")
         }
+        try await auth.authenticate(with: authenticationMethod, delegate: delegate)
+        display("Authenticated.", style: .success)
     }
 
 }

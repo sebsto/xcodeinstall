@@ -77,11 +77,11 @@ extension CLITests {
         )
         (env.fileHandler as! MockedFileHandler).nextDownloadedFilesError = FileHandlerError.noDownloadedList
         let deps = env.toDeps(log: log)
-        let xci = XCodeInstall(log: log, deps: deps)
 
-        // when (file: nil triggers promptForFile which calls downloadedFiles())
-        await #expect(throws: FileHandlerError.self) {
-            try await xci.install(file: nil)
+        // when (no name triggers promptForFile which calls downloadedFiles())
+        await #expect(throws: ExitCode.self) {
+            let inst = try parse(MainCommand.Install.self, ["install"])
+            try await inst.run(with: deps)
         }
 
         // then
@@ -137,11 +137,11 @@ extension CLITests {
         // given
         let env: MockedEnvironment = MockedEnvironment(progressBar: MockedProgressBar())
         let deps = env.toDeps(log: log)
-        let xci = XCodeInstall(log: log, deps: deps)
 
         // when (test.txt is not a supported installation type)
-        await #expect(throws: InstallerError.self) {
-            try await xci.install(file: "test.txt")
+        await #expect(throws: ExitCode.self) {
+            let inst = try parse(MainCommand.Install.self, ["install", "--name", "test.txt"])
+            try await inst.run(with: deps)
         }
 
         // then
@@ -156,16 +156,19 @@ extension CLITests {
         // configure the shell to throw a generic error
         env.shell.nextError = MockError.invalidMockData
         let deps = env.toDeps(log: log)
-        let xci = XCodeInstall(log: log, deps: deps)
 
         // when (Command Line Tools dmg file is a supported type, fileExists returns true by default,
         // but the shell will throw when trying to mount the DMG)
-        await #expect(throws: MockError.self) {
-            try await xci.install(file: "Command Line Tools for Xcode 14.dmg")
+        await #expect(throws: ExitCode.self) {
+            let inst = try parse(
+                MainCommand.Install.self,
+                ["install", "--name", "Command Line Tools for Xcode 14.dmg"]
+            )
+            try await inst.run(with: deps)
         }
 
         // then
-        assertDisplayStartsWith(env: env, "Error while installing")
+        assertDisplayStartsWith(env: env, "Unexpected error")
     }
 
 }

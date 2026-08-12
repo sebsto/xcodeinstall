@@ -5,6 +5,7 @@
 //  Created by Stormacq, Sebastien on 22/08/2022.
 //
 
+import ArgumentParser
 import Foundation
 import Testing
 
@@ -50,25 +51,27 @@ extension CLITests {
     }
 
     // MARK: - List Error Path Tests
+    // errors are rendered by the CLI layer, so these run the command end to end
+
+    /// Runs `xcodeinstall list` against a downloader that fails with `error`.
+    private func runListExpectingFailure(
+        _ error: Error,
+        in env: MockedEnvironment
+    ) async throws {
+        env.downloader.nextListError = error
+        let deps = env.toDeps(log: log)
+        let list = try parse(MainCommand.List.self, ["list", "--only-xcode", "--xcode-version", "14"])
+
+        await #expect(throws: ExitCode.self) { try await list.run(with: deps) }
+    }
 
     @Test("Test List Authentication Required")
     func testListAuthenticationRequired() async throws {
         // given
         let env = MockedEnvironment()
-        env.downloader.nextListError = DownloadError.authenticationRequired
-        let deps = env.toDeps(log: log)
-        let xci = XCodeInstall(log: log, deps: deps)
 
         // when
-        await #expect(throws: DownloadError.self) {
-            try await xci.list(
-                force: false,
-                xCodeOnly: true,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
-            )
-        }
+        try await runListExpectingFailure(DownloadError.authenticationRequired, in: env)
 
         // then
         assertDisplayContains(env: env, "Session expired")
@@ -78,20 +81,12 @@ extension CLITests {
     func testListAccountNeedUpgrade() async throws {
         // given
         let env = MockedEnvironment()
-        env.downloader.nextListError = DownloadError.accountNeedUpgrade(errorCode: 2170, errorMessage: "upgrade needed")
-        let deps = env.toDeps(log: log)
-        let xci = XCodeInstall(log: log, deps: deps)
 
         // when
-        await #expect(throws: DownloadError.self) {
-            try await xci.list(
-                force: false,
-                xCodeOnly: true,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
-            )
-        }
+        try await runListExpectingFailure(
+            DownloadError.accountNeedUpgrade(errorCode: 2170, errorMessage: "upgrade needed"),
+            in: env
+        )
 
         // then
         assertDisplayContains(env: env, "upgrade needed")
@@ -102,20 +97,9 @@ extension CLITests {
     func testListNeedToAcceptTermsAndCondition() async throws {
         // given
         let env = MockedEnvironment()
-        env.downloader.nextListError = DownloadError.needToAcceptTermsAndCondition
-        let deps = env.toDeps(log: log)
-        let xci = XCodeInstall(log: log, deps: deps)
 
         // when
-        await #expect(throws: DownloadError.self) {
-            try await xci.list(
-                force: false,
-                xCodeOnly: true,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
-            )
-        }
+        try await runListExpectingFailure(DownloadError.needToAcceptTermsAndCondition, in: env)
 
         // then
         assertDisplayContains(env: env, "you need first to accept")
@@ -125,20 +109,12 @@ extension CLITests {
     func testListUnknownError() async throws {
         // given
         let env = MockedEnvironment()
-        env.downloader.nextListError = DownloadError.unknownError(errorCode: 9999, errorMessage: "Something broke")
-        let deps = env.toDeps(log: log)
-        let xci = XCodeInstall(log: log, deps: deps)
 
         // when
-        await #expect(throws: DownloadError.self) {
-            try await xci.list(
-                force: false,
-                xCodeOnly: true,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
-            )
-        }
+        try await runListExpectingFailure(
+            DownloadError.unknownError(errorCode: 9999, errorMessage: "Something broke"),
+            in: env
+        )
 
         // then
         assertDisplayContains(env: env, "Unhandled download error")
@@ -148,20 +124,9 @@ extension CLITests {
     func testListSecretsStorageAWSError() async throws {
         // given
         let env = MockedEnvironment()
-        env.downloader.nextListError = SecretsStorageAWSError.invalidRegion(region: "bad-region")
-        let deps = env.toDeps(log: log)
-        let xci = XCodeInstall(log: log, deps: deps)
 
         // when
-        await #expect(throws: SecretsStorageAWSError.self) {
-            try await xci.list(
-                force: false,
-                xCodeOnly: true,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
-            )
-        }
+        try await runListExpectingFailure(SecretsStorageAWSError.invalidRegion(region: "bad-region"), in: env)
 
         // then
         assertDisplayContains(env: env, "AWS Error")
@@ -171,13 +136,25 @@ extension CLITests {
     func testListUnexpectedError() async throws {
         // given
         let env = MockedEnvironment()
-        env.downloader.nextListError = MockError.genericTestError
+
+        // when
+        try await runListExpectingFailure(MockError.genericTestError, in: env)
+
+        // then
+        assertDisplayContains(env: env, "Unexpected error")
+    }
+
+    @Test("Test List propagates the error to its caller")
+    func testListPropagatesError() async throws {
+        // given
+        let env = MockedEnvironment()
+        env.downloader.nextListError = DownloadError.authenticationRequired
         let deps = env.toDeps(log: log)
         let xci = XCodeInstall(log: log, deps: deps)
 
-        // when
-        await #expect(throws: MockError.self) {
-            try await xci.list(
+        // when — the business layer throws without displaying anything
+        await #expect(throws: DownloadError.authenticationRequired) {
+            _ = try await xci.list(
                 force: false,
                 xCodeOnly: true,
                 majorVersion: "14",
@@ -187,7 +164,8 @@ extension CLITests {
         }
 
         // then
-        assertDisplayContains(env: env, "Unexpected error")
+        let messages = (env.display as! MockedDisplay).allMessages
+        #expect(!messages.contains(where: { $0.contains("Session expired") }))
     }
 
     @Test("Test List From Network Forced")

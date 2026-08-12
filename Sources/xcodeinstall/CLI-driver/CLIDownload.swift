@@ -37,20 +37,14 @@ extension MainCommand {
         }
 
         func run(with deps: AppDependencies?) async throws {
-            let xci: XCodeInstall
-            do {
-                xci = try await MainCommand.XCodeInstaller(
-                    with: deps,
-                    for: cloudOption.secretManagerRegion,
-                    profileName: cloudOption.profileName,
-                    verbose: globalOptions.verbose
-                )
-            } catch {
-                await NooraDisplay().display(error.localizedDescription, terminator: "\n", style: .error())
-                throw ExitCode.failure
-            }
+            let xci = try await MainCommand.makeXCodeInstall(
+                with: deps,
+                for: cloudOption.secretManagerRegion,
+                profileName: cloudOption.profileName,
+                verbose: globalOptions.verbose
+            )
 
-            do {
+            try await MainCommand.run(on: xci) {
                 try await xci.download(
                     fileName: name,
                     force: downloadListOptions.force,
@@ -59,14 +53,7 @@ extension MainCommand {
                     sortMostRecentFirst: downloadListOptions.mostRecentFirst,
                     datePublished: downloadListOptions.datePublished
                 )
-            } catch {
-                try? await xci.deps.secrets?.shutdown()
-                throw ExitCode.failure
             }
-
-            // Gracefully shut down AWS client before process exits
-            // to avoid RotatingCredentialProvider crash during deallocation
-            try? await xci.deps.secrets?.shutdown()
         }
     }
 

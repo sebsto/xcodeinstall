@@ -161,20 +161,33 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: DownloadError.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.download(
-                fileName: fileName,
-                force: false,
-                xCodeOnly: false,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
-            )
+        await #expect(throws: ExitCode.self) {
+            let download = try parse(MainCommand.Download.self, ["download", "--name", fileName])
+            try await download.run(with: deps)
         }
 
         // then
         assertDisplayStartsWith("Session expired")
+    }
+
+    @Test("Test Download reports an expired session only once")
+    func testDownloadAuthenticationRequiredReportedOnce() async throws {
+
+        // given — no --name, so download asks the list for the available files
+        let env = MockedEnvironment()
+        env.downloader.nextListError = DownloadError.authenticationRequired
+
+        let deps = env.toDeps(log: log)
+
+        // when
+        await #expect(throws: ExitCode.self) {
+            let download = try parse(MainCommand.Download.self, ["download", "--only-xcode"])
+            try await download.run(with: deps)
+        }
+
+        // then — the error travels through list() and download(), yet is rendered once
+        let messages = (env.display as! MockedDisplay).allMessages
+        #expect(messages.filter({ $0.contains("Session expired") }).count == 1)
     }
 
     @Test("Test Download user cancelled")
@@ -189,18 +202,18 @@ extension CLITests {
 
         let deps = env.toDeps(log: log)
 
-        // when - userCancelled is caught silently with return, no error thrown
+        // when - a cancellation exits successfully and reports nothing
         await #expect(throws: Never.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.download(
-                fileName: nil,
-                force: false,
-                xCodeOnly: true,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
+            let download = try parse(
+                MainCommand.Download.self,
+                ["download", "--only-xcode", "--xcode-version", "14"]
             )
+            try await download.run(with: deps)
         }
+
+        // then
+        let messages = (env.display as! MockedDisplay).allMessages
+        #expect(!messages.contains(where: { $0.contains("Invalid input") }))
     }
 
     @Test("Test Download invalid input")
@@ -216,16 +229,12 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: CLIError.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.download(
-                fileName: nil,
-                force: false,
-                xCodeOnly: true,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
+        await #expect(throws: ExitCode.self) {
+            let download = try parse(
+                MainCommand.Download.self,
+                ["download", "--only-xcode", "--xcode-version", "14"]
             )
+            try await download.run(with: deps)
         }
 
         // then
@@ -241,16 +250,9 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: SecretsStorageAWSError.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.download(
-                fileName: "Xcode 14.xip",
-                force: false,
-                xCodeOnly: false,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
-            )
+        await #expect(throws: ExitCode.self) {
+            let download = try parse(MainCommand.Download.self, ["download", "--name", "Xcode 14.xip"])
+            try await download.run(with: deps)
         }
 
         // then
@@ -266,16 +268,9 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: Error.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.download(
-                fileName: "Xcode 14.xip",
-                force: false,
-                xCodeOnly: false,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
-            )
+        await #expect(throws: ExitCode.self) {
+            let download = try parse(MainCommand.Download.self, ["download", "--name", "Xcode 14.xip"])
+            try await download.run(with: deps)
         }
 
         // then
@@ -295,16 +290,12 @@ extension CLITests {
         let deps = env.toDeps(log: log)
 
         // when
-        await #expect(throws: CLIError.self) {
-            let xci = XCodeInstall(log: log, deps: deps)
-            try await xci.download(
-                fileName: nil,
-                force: false,
-                xCodeOnly: true,
-                majorVersion: "14",
-                sortMostRecentFirst: false,
-                datePublished: false
+        await #expect(throws: ExitCode.self) {
+            let download = try parse(
+                MainCommand.Download.self,
+                ["download", "--only-xcode", "--xcode-version", "14"]
             )
+            try await download.run(with: deps)
         }
 
         // then
