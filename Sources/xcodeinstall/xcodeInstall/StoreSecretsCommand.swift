@@ -37,25 +37,11 @@ extension XCodeInstall {
             style: .security
         )
 
-        guard
-            let username = self.deps.readLine.readLine(
-                prompt: "Enter your Apple ID username: ",
-                silent: false
-            )
-        else {
-            throw CLIError.invalidInput
-        }
-
-        guard
-            let password = self.deps.readLine.readLine(
-                prompt: "Enter your Apple ID password: ",
-                silent: true
-            )
-        else {
-            throw CLIError.invalidInput
-        }
-
-        return AppleCredentialsSecret(username: username, password: password)
+        return try promptForAppleCredentials(
+            context: .storingToAWS,
+            display: self.deps.display,
+            readLine: self.deps.readLine
+        )
     }
 
 }

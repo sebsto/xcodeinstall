@@ -140,45 +140,11 @@ struct CLIAuthenticationDelegate: AuthenticationDelegate, Sendable {
     }
 
     private func promptForCredentials(storingToAWS: Bool = false) throws -> AppleCredentialsSecret {
-        if storingToAWS {
-            display(
-                """
-                Your Apple ID credentials will be securely stored in AWS Parameter Store
-                for future authentication.
-                """,
-                style: .security
-            )
-        } else {
-            display(
-                """
-                We prompt you for your Apple ID username, password, and two factors authentication code.
-                These values are not stored anywhere. They are used to get an Apple session ID.
-
-                Alternatively, you may store your credentials on AWS Parameter Store
-                """,
-                style: .security
-            )
-        }
-
-        guard
-            let username = deps.readLine.readLine(
-                prompt: "Enter your Apple ID username: ",
-                silent: false
-            )
-        else {
-            throw CLIError.invalidInput
-        }
-
-        guard
-            let password = deps.readLine.readLine(
-                prompt: "Enter your Apple ID password: ",
-                silent: true
-            )
-        else {
-            throw CLIError.invalidInput
-        }
-
-        return AppleCredentialsSecret(username: username, password: password)
+        try promptForAppleCredentials(
+            context: storingToAWS ? .storingToAWS : .interactive,
+            display: deps.display,
+            readLine: deps.readLine
+        )
     }
 }
 
