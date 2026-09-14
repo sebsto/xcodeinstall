@@ -1,8 +1,9 @@
  
 build:
-	swift build
+	# use the macos 26 SDK with Swift 6.3.x. Can be remove when switching to Swift 6.4
+	SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk swift build
 test:
-	swift test
+	SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk swift test
 clean:
 	rm -rf .build
 
