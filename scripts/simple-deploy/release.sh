@@ -38,15 +38,35 @@ struct Version {
 EOF
 
     echo "🏗️ Building fat binary"
-    swift build --configuration release --arch arm64 --arch x86_64
+    BUILD_FLAGS=(--configuration release --arch arm64 --arch x86_64)
+    swift build "${BUILD_FLAGS[@]}"
+
+    # Ask SwiftPM where it put the binary rather than hardcoding a path: the
+    # universal-build output dir moved from .build/apple/Products/Release to
+    # .build/out/Products/Release with the new build system.
+    RELEASE_BIN_DIR=$(swift build "${BUILD_FLAGS[@]}" --show-bin-path)
+    if [ ! -f "$RELEASE_BIN_DIR/xcodeinstall" ]; then
+        echo "❌ Release binary not found at $RELEASE_BIN_DIR/xcodeinstall"
+        exit 1
+    fi
 
     # 2. Create GitHub release
     echo "🏷️ Creating GitHub release"
     git add Sources/xcodeinstall/Version.swift
-    git commit -m "Bump version to $VERSION"
+    # The version bump may already be committed by an interrupted earlier run,
+    # in which case there is nothing to commit and that is not an error.
+    if git diff --cached --quiet; then
+        echo "   Version already committed, skipping commit"
+    else
+        git commit -m "Bump version to $VERSION"
+    fi
     git tag "$TAG"
     git push --no-verify origin main "$TAG"
-    gh release create "$TAG" --generate-notes
+    if gh release view "$TAG" >/dev/null 2>&1; then
+        echo "   Release $TAG already exists, skipping creation"
+    else
+        gh release create "$TAG" --generate-notes
+    fi
 
     # 3. Create and upload bottles
     echo "📦 Creating bottles"
@@ -54,7 +74,7 @@ EOF
     bottle_name="xcodeinstall-$VERSION.arm64_ventura.bottle.tar.gz"
     mkdir -p "xcodeinstall/$VERSION/bin"
     mkdir -p "xcodeinstall/$VERSION/.brew"
-    cp .build/apple/Products/Release/xcodeinstall "xcodeinstall/$VERSION/bin/"
+    cp "$RELEASE_BIN_DIR/xcodeinstall" "xcodeinstall/$VERSION/bin/"
     cp LICENSE "xcodeinstall/$VERSION/" 2>/dev/null || true
     cp README.md "xcodeinstall/$VERSION/" 2>/dev/null || true
     echo '{"homebrew_version":"4.0.0","used_options":[],"unused_options":[],"built_as_bottle":true,"poured_from_bottle":false,"loaded_from_api":true,"installed_as_dependency":false,"installed_on_request":true,"changed_files":[],"time":null,"source_modified_time":null,"compiler":"clang","aliases":[],"runtime_dependencies":[],"source":{"tap":"sebsto/macos","spec":"stable","versions":{"stable":"'$VERSION'","version_scheme":0}}}' > "xcodeinstall/$VERSION/INSTALL_RECEIPT.json"
@@ -67,7 +87,7 @@ EOF
         cp "bottles/$bottle_name" "bottles/xcodeinstall-$VERSION.$platform.bottle.tar.gz"
     done
 
-    gh release upload "$TAG" bottles/*
+    gh release upload "$TAG" bottles/* --clobber
     rm -rf bottles
 fi
 
