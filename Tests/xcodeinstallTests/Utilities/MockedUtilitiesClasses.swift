@@ -10,15 +10,16 @@ import Foundation
 @testable import xcodeinstall
 
 // used to test Installer component (see InstallerTest)
+@MainActor
 final class MockedFileHandler: FileHandlerProtocol, @unchecked Sendable {
 
-    var moveSrc: URL? = nil
-    var moveDst: URL? = nil
-    var nextMoveError: Error? = nil
+    nonisolated(unsafe) var moveSrc: URL? = nil
+    nonisolated(unsafe) var moveDst: URL? = nil
+    nonisolated(unsafe) var nextMoveError: Error? = nil
     var nextFileExist: Bool? = nil
     var nextFileCorrect: Bool? = nil
 
-    func move(from src: URL, to dst: URL) throws {
+    nonisolated func move(from src: URL, to dst: URL) throws {
         moveSrc = src
         moveDst = dst
         if let nextMoveError { throw nextMoveError }
