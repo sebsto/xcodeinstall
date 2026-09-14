@@ -256,7 +256,106 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
     }
 
     // by OOP design it should be private.
+    //
+    // The service key (Apple calls it the "widget key") is needed for every
+    // subsequent authentication call. There are two ways to obtain it, and this
+    // tries them in order:
+    //
+    // 1. The App Store Connect sign out route answers with a redirect whose
+    //    Location URL carries the very key Apple's own front end uses. This is
+    //    the source that works today.
+    // 2. The olympus config endpoint, which Apple removed in September 2026 and
+    //    which now answers 404 (fastlane#30199). Kept as a fallback in case it
+    //    comes back, since it is the source Apple documented rather than one
+    //    read out of a redirect.
     internal func getAppleServicekey() async throws -> AppleServiceKey {
+
+        if let key = try await fetchServiceKeyFromSignout() {
+            return key
+        }
+
+        return try await fetchServiceKeyFromOlympus()
+    }
+
+    // Read the key out of the sign out redirect, or nil if it is not there.
+    //
+    // Two things about this request matter, and neither is decoration:
+    //
+    // - It must not follow the redirect. The 302 points at a signout carrying
+    //   `asop=destroy-session`; following it would end the session this method
+    //   is being called to establish. The key is in the Location header, so a
+    //   HEAD that stops at the 302 is all that is wanted.
+    // - It must send no cookies, for the same reason: a signout over a request
+    //   that carries the session jar would destroy that session.
+    //
+    // `signoutRedirectLocation` isolates that no-redirect, no-cookie request
+    // behind an overridable seam so tests can drive it. Failure returns nil
+    // rather than throwing, so the caller falls through to the olympus fallback
+    // instead of this becoming a new single point of failure.
+    internal func fetchServiceKeyFromSignout() async throws -> AppleServiceKey? {
+
+        /*
+         ➜  ~ curl -sI https://appstoreconnect.apple.com/logout
+         HTTP/2 302
+         location: https://idmsa.apple.com/appleauth/signout?widgetKey=e0b80c3bf78523bfe80974d320935bfa30add02e1bff88ec2166c6bd5a706c42&asop=destroy-session&asoc=/&rv=3
+         */
+
+        let location: String?
+        do {
+            location = try await signoutRedirectLocation()
+        } catch {
+            // Only what this request can be expected to go wrong with (a network
+            // failure). Warn rather than debug: this is the source the key
+            // normally comes from now, so failing here means the run is about to
+            // depend on the olympus endpoint Apple already removed once.
+            log.warning(
+                "Could not read the Apple service key from the sign out redirect, falling back to the olympus endpoint: \(error)"
+            )
+            return nil
+        }
+
+        guard let location,
+            let components = URLComponents(string: location),
+            let key = components.queryItems?.first(where: { $0.name == "widgetKey" })?.value,
+            !key.isEmpty
+        else {
+            return nil
+        }
+
+        log.debug("Read the Apple service key from the sign out redirect")
+        return AppleServiceKey(authServiceUrl: "https://idmsa.apple.com/appleauth", authServiceKey: key)
+    }
+
+    // Issue HEAD /logout without following the redirect and without cookies,
+    // returning the raw Location header value (or nil if absent).
+    //
+    // This does not go through `apiCall`: that path uses the shared session,
+    // which follows redirects and carries the cookie jar, both of which would
+    // perform the signout. A dedicated ephemeral session with a redirect-
+    // suppressing delegate and no cookie storage is used instead. Overridable
+    // so tests can supply a Location without a live network.
+    internal func signoutRedirectLocation() async throws -> String? {
+
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.httpCookieAcceptPolicy = .never
+        configuration.httpShouldSetCookies = false
+        configuration.httpCookieStorage = nil
+
+        let delegate = NoRedirectDelegate()
+        let session = URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
+        defer { session.finishTasksAndInvalidate() }
+
+        var request = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/logout")!)
+        request.httpMethod = HTTPVerb.GET.rawValue
+
+        let (_, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            return nil
+        }
+        return httpResponse.value(forHTTPHeaderField: "Location")
+    }
+
+    internal func fetchServiceKeyFromOlympus() async throws -> AppleServiceKey {
 
         /*
          ➜  ~ curl https://appstoreconnect.apple.com/olympus/v1/app/config\?hostname\=itunesconnect.apple.com
@@ -312,5 +411,26 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         } else {
             log.debug("No cookies in response, session saved without cookies")
         }
+    }
+}
+
+// A URLSession delegate that stops the session from following redirects.
+//
+// The service key is read from the Location header of the /logout 302, so the
+// redirect must be surfaced rather than followed: following it would reach the
+// signout with `asop=destroy-session` and end the session being established.
+// Returning nil from the completion handler tells URLSession not to follow it.
+//
+// Stateless, so it is safe to share across the ephemeral session's callbacks
+// under Swift 6 strict concurrency.
+final class NoRedirectDelegate: NSObject, URLSessionTaskDelegate, Sendable {
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        completionHandler(nil)
     }
 }
