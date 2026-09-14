@@ -276,8 +276,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/adam-fowler/swift-srp",
       "state" : {
-        "revision" : "f558df594b4cc3d23b15645fd25f5cc64fc2b6c1",
-        "version" : "2.3.0"
+        "revision" : "1345dfeff4d1bc54fc36257325371df3d1d7a813",
+        "version" : "2.4.0"
       }
     },
     {
