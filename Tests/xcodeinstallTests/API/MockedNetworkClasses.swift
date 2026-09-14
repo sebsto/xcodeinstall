@@ -59,6 +59,21 @@ final class MockedURLSession: URLSessionProtocol {
 
 }
 
+// An AppleAuthenticator whose signout-redirect lookup is stubbed, so the service
+// key tests can drive the redirect source without a live network. `signoutError`
+// wins over `signoutLocation` when set, to exercise the network-failure path.
+final class StubbedSignoutAuthenticator: AppleAuthenticator, @unchecked Sendable {
+    var signoutLocation: String?
+    var signoutError: Error?
+
+    override func signoutRedirectLocation() async throws -> String? {
+        if let signoutError {
+            throw signoutError
+        }
+        return signoutLocation
+    }
+}
+
 @MainActor
 final class MockedAppleAuthentication: AppleAuthenticatorProtocol {
 

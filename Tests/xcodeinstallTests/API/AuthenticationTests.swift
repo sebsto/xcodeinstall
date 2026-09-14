@@ -42,6 +42,13 @@ final class AuthenticationTests {
         return aa
     }
 
+    // Authenticator whose signout-redirect lookup is stubbed, so service key
+    // tests exercise the two sources (signout redirect, olympus fallback)
+    // without a live network.
+    func getStubbedSignoutAuthenticator() -> StubbedSignoutAuthenticator {
+        StubbedSignoutAuthenticator(secrets: env.secrets!, urlSession: env.urlSessionData, log: log)
+    }
+
     func getHashcashHeaders() -> [String: String] {
         [
             "X-Apple-HC-Bits": "11",
@@ -57,7 +64,19 @@ final class AuthenticationTests {
 // MARK: - Test Cases
 extension AuthenticationTests {
 
-    @Test("Test Apple Service Key Retrieval")
+    @Test("Test service key read from the sign out redirect")
+    func testServiceKeyFromSignoutRedirect() async throws {
+        let authenticator = getStubbedSignoutAuthenticator()
+        authenticator.signoutLocation =
+            "https://idmsa.apple.com/appleauth/signout?widgetKey=key&asop=destroy-session&asoc=/&rv=3"
+
+        let serviceKey = try await authenticator.getAppleServicekey()
+
+        #expect(serviceKey.authServiceKey == "key")
+        #expect(serviceKey.authServiceUrl == "https://idmsa.apple.com/appleauth")
+    }
+
+    @Test("Test Apple Service Key Retrieval (olympus fallback)")
     func testAppleServiceKey() async throws {
         let url = "https://dummy"
         self.sessionData.nextData = try JSONEncoder().encode(
@@ -70,7 +89,30 @@ extension AuthenticationTests {
             headerFields: nil
         )
 
-        let authenticator = getAppleAuthenticator()
+        // The signout redirect carries no widgetKey, so it falls back to olympus.
+        let authenticator = getStubbedSignoutAuthenticator()
+        authenticator.signoutLocation = nil
+        let serviceKey = try await authenticator.getAppleServicekey()
+
+        #expect(serviceKey.authServiceKey == "key")
+    }
+
+    @Test("Test olympus fallback when the sign out request fails outright")
+    func testServiceKeyFallsBackWhenSignoutFails() async throws {
+        let url = "https://dummy"
+        self.sessionData.nextData = try JSONEncoder().encode(
+            AppleServiceKey(authServiceUrl: "url", authServiceKey: "key")
+        )
+        self.sessionData.nextResponse = HTTPURLResponse(
+            url: URL(string: url)!,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )
+
+        // A network failure on the signout request must not be fatal: fall back.
+        let authenticator = getStubbedSignoutAuthenticator()
+        authenticator.signoutError = URLError(.notConnectedToInternet)
         let serviceKey = try await authenticator.getAppleServicekey()
 
         #expect(serviceKey.authServiceKey == "key")
@@ -89,7 +131,9 @@ extension AuthenticationTests {
             headerFields: nil
         )
 
-        let authenticator = getAppleAuthenticator()
+        // Signout carries no key, olympus fallback then errors on the 500.
+        let authenticator = getStubbedSignoutAuthenticator()
+        authenticator.signoutLocation = nil
 
         do {
             _ = try await authenticator.getAppleServicekey()
@@ -213,7 +257,10 @@ extension AuthenticationTests {
             headerFields: header
         )
 
-        let authenticator = getAppleAuthenticator()
+        // Signout redirect carries no key, so it falls through to the olympus
+        // fallback, whose empty 200 body fails to decode into an AppleServiceKey.
+        let authenticator = getStubbedSignoutAuthenticator()
+        authenticator.signoutLocation = nil
         authenticator.session = getAppleSession()
         authenticator.session.itcServiceKey = nil
 

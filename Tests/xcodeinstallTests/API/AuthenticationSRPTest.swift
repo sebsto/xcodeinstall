@@ -105,7 +105,10 @@ extension AuthenticationTests {
         )
 
         let error = await #expect(throws: AuthenticationError.self) {
-            let authenticator = getAppleAuthenticator()
+            // Signout redirect carries no key, so it falls through to the olympus
+            // fallback, whose SRP-init 200 body fails to decode into an AppleServiceKey.
+            let authenticator = getStubbedSignoutAuthenticator()
+            authenticator.signoutLocation = nil
             authenticator.session = getAppleSession()
             authenticator.session.itcServiceKey = nil
 
