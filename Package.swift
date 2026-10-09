@@ -26,7 +26,7 @@ let package = Package(
         // 1.0.0 removed the "SubprocessSpan" trait, so the workaround for
         // https://github.com/swiftlang/swift/issues/84379 is no longer needed.
         // Its default trait set is ["SubprocessFoundation"], which is what we want.
-        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "1.0.0"),
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "1.0.1"),
     
         .package(url: "https://github.com/soto-project/soto.git", from: "7.14.0"),     
         .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.4.0"),
