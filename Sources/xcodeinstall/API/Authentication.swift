@@ -348,11 +348,20 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         var request = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/logout")!)
         request.httpMethod = HTTPVerb.GET.rawValue
 
-        let (_, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            return nil
+        // Apple's gateway answers 502 / 503 / 504 for a share of requests; this
+        // read-only request is safe to repeat.
+        for attempt in 1...5 {
+            let (_, response) = try await session.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                return nil
+            }
+            if [502, 503, 504].contains(httpResponse.statusCode), attempt < 5 {
+                try await Task.sleep(for: .milliseconds(300 * attempt))
+                continue
+            }
+            return httpResponse.value(forHTTPHeaderField: "Location")
         }
-        return httpResponse.value(forHTTPHeaderField: "Location")
+        return nil
     }
 
     internal func fetchServiceKeyFromOlympus() async throws -> AppleServiceKey {
@@ -369,7 +378,8 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             "https://appstoreconnect.apple.com/olympus/v1/app/config?hostname=itunesconnect.apple.com"
         let (data, _) = try await apiCall(
             url: url,
-            validResponse: .range(200..<400)  //FIXME: should this be .value(200) ?
+            validResponse: .range(200..<400),  //FIXME: should this be .value(200) ?
+            retryTransientErrors: true
         )
 
         return try JSONDecoder().decode(AppleServiceKey.self, from: data)

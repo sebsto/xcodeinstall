@@ -121,4 +121,41 @@ extension HTTPClientTests {
         // Then
         #expect(self.sessionData.lastURL?.debugDescription == url)
     }
+
+    // MARK: - Transient gateway errors
+
+    private func response(_ code: Int) -> HTTPURLResponse {
+        HTTPURLResponse(
+            url: URL(string: "https://idmsa.apple.com")!, statusCode: code, httpVersion: nil, headerFields: nil)!
+    }
+
+    @Test("apiCall retries 504 answers when asked to")
+    func apiCallRetriesTransientErrors() async throws {
+        sessionData.enqueueResponse(data: Data(), response: response(504))
+        sessionData.enqueueResponse(data: Data(), response: response(502))
+        sessionData.enqueueResponse(data: Data(), response: response(200))
+
+        let (_, http) = try await client.apiCall(
+            url: "https://idmsa.apple.com/appleauth/auth/signin",
+            validResponse: .value(200),
+            retryTransientErrors: true
+        )
+
+        #expect(http.statusCode == 200)
+        #expect(sessionData.allRequests.count == 3)
+    }
+
+    @Test("apiCall does not retry unless asked to")
+    func apiCallDoesNotRetryByDefault() async throws {
+        sessionData.enqueueResponse(data: Data(), response: response(504))
+        sessionData.enqueueResponse(data: Data(), response: response(200))
+
+        await #expect(throws: URLError.self) {
+            _ = try await client.apiCall(
+                url: "https://idmsa.apple.com/appleauth/auth/signin",
+                validResponse: .value(200)
+            )
+        }
+        #expect(sessionData.allRequests.count == 1)
+    }
 }

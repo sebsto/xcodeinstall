@@ -124,7 +124,8 @@ class HTTPClient {
         method: HTTPVerb = .GET,
         body: Data? = nil,
         headers: [String: String] = [:],
-        validResponse: ExpectedResponseCode = .value(0)
+        validResponse: ExpectedResponseCode = .value(0),
+        retryTransientErrors: Bool = false
     ) async throws -> (Data, HTTPURLResponse) {
 
         let request: URLRequest
@@ -145,8 +146,14 @@ class HTTPClient {
 
         _log(request: request, to: log)
 
-        // send request with that session
-        let (data, response) = try await self.urlSession.data(for: request, delegate: nil)
+        // send request with that session.
+        // Apple's sign in servers answer 502 / 503 / 504 for a share of otherwise
+        // valid requests. Callers whose request is safe to repeat (read-only GETs)
+        // opt in to a few retries; sign in POSTs never do.
+        let (data, response) = try await sendRetryingTransientErrors(
+            request,
+            attempts: retryTransientErrors ? 5 : 1
+        )
         guard let httpResponse = response as? HTTPURLResponse,
             validResponse.isValid(response: httpResponse.statusCode)
         else {
@@ -160,6 +167,28 @@ class HTTPClient {
         _log(response: httpResponse, data: data, error: nil, to: log)
 
         return (data, httpResponse)
+    }
+
+    // Send `request`, repeating it up to `attempts` times in total while Apple's
+    // gateway answers 502, 503 or 504. Any other answer is returned as is.
+    private func sendRetryingTransientErrors(
+        _ request: URLRequest,
+        attempts: Int
+    ) async throws -> (Data, URLResponse) {
+        var attempt = 1
+        while true {
+            let (data, response) = try await self.urlSession.data(for: request, delegate: nil)
+            if let http = response as? HTTPURLResponse,
+                [502, 503, 504].contains(http.statusCode),
+                attempt < attempts
+            {
+                log.debug("Transient HTTP \(http.statusCode), retrying (attempt \(attempt) of \(attempts))")
+                try await Task.sleep(for: .milliseconds(300 * attempt))
+                attempt += 1
+                continue
+            }
+            return (data, response)
+        }
     }
 
     // prepare an URLRequest for a given url, method, body, and headers
