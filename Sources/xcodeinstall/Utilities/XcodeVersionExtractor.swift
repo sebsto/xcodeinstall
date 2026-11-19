@@ -5,6 +5,8 @@ struct XcodeVersionExtractor {
 
         if let dotRange = name.range(of: ".xip", options: .backwards) {
             name = String(name[..<dotRange.lowerBound])
+        } else if let dotRange = name.range(of: ".aea", options: .backwards) {
+            name = String(name[..<dotRange.lowerBound])
         } else if let dotRange = name.range(of: ".app", options: .backwards) {
             name = String(name[..<dotRange.lowerBound])
         } else {

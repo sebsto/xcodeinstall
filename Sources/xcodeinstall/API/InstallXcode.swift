@@ -5,6 +5,7 @@
 //  Created by Stormacq, Sebastien on 29/08/2022.
 //
 
+import CryptoKit
 import Subprocess
 import libunxip
 
@@ -20,7 +21,7 @@ extension ShellInstaller {
 
     func installXcode(at src: URL, version: String? = nil) async throws {
 
-        // unXIP, mv, 4 PKG to install, activate (symlink + xcode-select)
+        // unXIP or unAEA, mv, 4 PKG to install, activate (symlink + xcode-select)
         let hasVersion = version != nil
         let totalSteps = 2 + PKGTOINSTALL.count + (hasVersion ? 1 : 0)
         var currentStep: Int = 0
@@ -30,17 +31,26 @@ extension ShellInstaller {
         // first uncompress file
         log.debug("Decompressing files")
         currentStep += 1
-        self.progressBar.update(
-            step: currentStep,
-            total: totalSteps,
-            text: "Expanding Xcode xip (this might take a while)"
-        )
+        if src.pathExtension == "aea" {
+            self.progressBar.update(
+                step: currentStep,
+                total: totalSteps,
+                text: "Expanding Xcode aea (this might take a while)"
+            )
+            try await self.uncompressAEA(atURL: src)
+        } else {
+            self.progressBar.update(
+                step: currentStep,
+                total: totalSteps,
+                text: "Expanding Xcode xip (this might take a while)"
+            )
 
-        do {
-            try await self.uncompressXIP(atURL: src)
-        } catch {
-            log.error("Failed to extract XIP file: \(error)")
-            throw InstallerError.xCodeXIPInstallationError
+            do {
+                try await self.uncompressXIP(atURL: src)
+            } catch {
+                log.error("Failed to extract XIP file: \(error)")
+                throw InstallerError.xCodeXIPInstallationError
+            }
         }
 
         // second move file to /Applications (versioned if version provided)
@@ -124,6 +134,33 @@ extension ShellInstaller {
             log.trace("Uncompressing XIP file at \(file.name)")
             // do nothing at the moment
             // a future version might report progress to the UI
+        }
+    }
+
+    // verify and expand an Apple Encrypted Archive (.aea) next to the archive.
+    // The archive must be signed by a certificate chain ending at Apple's root.
+    func uncompressAEA(atURL file: URL) async throws {
+
+        guard self.fileHandler.fileExists(file: file, fileSize: 0) else {
+            log.error("File to expand does not exist : \(file.path)")
+            throw InstallerError.fileDoesNotExistOrIncorrect
+        }
+
+        let archive = AppleEncryptedArchive(file: file)
+
+        let signingKey: P256.Signing.PublicKey
+        do {
+            signingKey = try archive.appleSigningKey()
+        } catch {
+            log.error("The archive is not signed by Apple: \(error)")
+            throw InstallerError.xCodeAEASignatureError
+        }
+
+        do {
+            try await archive.extract(to: file.deletingLastPathComponent(), signingKey: signingKey)
+        } catch {
+            log.error("Failed to extract AEA file: \(error)")
+            throw InstallerError.xCodeAEAInstallationError
         }
     }
 

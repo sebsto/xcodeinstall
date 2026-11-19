@@ -19,6 +19,8 @@ enum InstallerError: Error, Equatable {
     case fileDoesNotExistOrIncorrect
     case xCodeUnxipDirectoryDoesntExist
     case xCodeXIPInstallationError
+    case xCodeAEASignatureError
+    case xCodeAEAInstallationError
     case xCodeMoveInstallationError
     case xCodePKGInstallationError
     case CLToolsInstallationError
@@ -37,7 +39,7 @@ enum SupportedInstallation {
     static func supported(_ file: String) -> SupportedInstallation {
         if file.hasPrefix("Command Line Tools for Xcode") && file.hasSuffix(".dmg") {
             return .xCodeCommandLineTools
-        } else if file.hasPrefix("Xcode") && file.hasSuffix(".xip") {
+        } else if file.hasPrefix("Xcode") && (file.hasSuffix(".xip") || file.hasSuffix(".aea")) {
             return .xCode
         } else {
             return .unsupported
@@ -113,8 +115,8 @@ class ShellInstaller {
     /// Install Xcode or Xcode Command Line Tools
     ///  At this stage, we do support only these two installation.
     ///
-    ///   **Xcode** is provided as a XIP file. The installation procedure is as follow:
-    ///   - It is uncompressed
+    ///   **Xcode** is provided as a XIP file or as an Apple Encrypted Archive (AEA). The installation procedure is as follow:
+    ///   - It is uncompressed (for an AEA, after checking Apple signed it)
     ///   - It is moved to /Applications
     ///   - Four packages are installed
     ///         - `/Applications/Xcode.app/Contents/Resources/Packages/XcodeSystemResources.pkg`

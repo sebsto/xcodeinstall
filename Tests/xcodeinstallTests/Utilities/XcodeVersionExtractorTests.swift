@@ -38,6 +38,11 @@ struct XcodeVersionExtractorTests {
         #expect(XcodeVersionExtractor().extractVersion(from: "Xcode-14.0.1.app") == "14.0.1")
     }
 
+    @Test("Extracts version from an AEA beta file name")
+    func testAEABeta() {
+        #expect(XcodeVersionExtractor().extractVersion(from: "Xcode 27.3 beta 2.aea") == "27.3-beta-2")
+    }
+
     @Test("Returns nil for bare Xcode.xip")
     func testBareXcode() {
         #expect(XcodeVersionExtractor().extractVersion(from: "Xcode.xip") == nil)

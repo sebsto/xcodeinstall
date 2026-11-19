@@ -153,7 +153,9 @@ enum ErrorPresenter {
     private static func presentation(for error: InstallerError) -> ErrorPresentation {
         switch error {
         case .unsupportedInstallation:
-            return .failure("Unsupported installation type. (We support Xcode XIP files and Command Line Tools PKG)")
+            return .failure(
+                "Unsupported installation type. (We support Xcode XIP and AEA files and Command Line Tools PKG)"
+            )
         case .fileDoesNotExistOrIncorrect:
             return .failure(
                 "The file to install does not exist, or its size does not match the one announced by Apple.",
@@ -163,6 +165,15 @@ enum ErrorPresenter {
             return .failure("Can not find the directory where Xcode was expanded")
         case .xCodeXIPInstallationError:
             return .failure("Can not expand XIP file. Is there enough space on / ? (16GiB required)")
+        case .xCodeAEASignatureError:
+            return .failure(
+                "The Xcode archive is not signed by Apple. Delete it and download it again.",
+                style: .error(nextSteps: ["xcodeinstall download"])
+            )
+        case .xCodeAEAInstallationError:
+            return .failure(
+                "Can not verify or expand the Xcode AEA file. Is there enough space on / ? (16GiB required)"
+            )
         case .xCodeMoveInstallationError:
             return .failure("Can not move Xcode to /Applications")
         case .xCodePKGInstallationError:

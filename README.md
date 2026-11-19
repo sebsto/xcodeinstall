@@ -407,7 +407,7 @@ xcodeinstall install --name "Xcode_26.5.xip" --xcode-version "26.5-custom"
 ```
 
 The installation process:
-1. Extracts the `.xip` file (this takes several minutes)
+1. Extracts the `.xip` or `.aea` file (this takes several minutes). An `.aea` archive is installed only when its signature traces back to Apple's root certificate.
 2. Moves to `/Applications/Xcode-{version}.app` (version auto-detected from filename)
 3. Installs additional system packages
 4. Creates a symlink `/Applications/Xcode.app` pointing to the newly installed version
