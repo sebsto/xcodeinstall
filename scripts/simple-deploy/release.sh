@@ -8,6 +8,7 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
+REPO="sebsto/xcodeinstall"
 TAG="v$VERSION"
 echo "🚀 Releasing version $VERSION"
 
@@ -23,11 +24,41 @@ if ! command -v gh &> /dev/null; then
     exit 1
 fi
 
-# Check if this is a resume (tag exists)
-if git rev-parse "$TAG" >/dev/null 2>&1; then
-    echo "⏭️  Tag $TAG exists. Skipping to Homebrew update..."
-    BOTTLE_SHA=$(curl -sL "https://github.com/sebsto/xcodeinstall/releases/download/$TAG/xcodeinstall-$VERSION.arm64_ventura.bottle.tar.gz" | shasum -a 256 | awk '{print $1}')
+# `git push` uses the SSH key while `gh` uses its own OAuth token, so a working
+# push says nothing about whether gh can create the release. GitHub answers 404
+# (not 403) when the active token lacks write access, so check up front rather
+# than discovering it after a multi-minute build.
+GH_USER=$(gh api user --jq .login 2>/dev/null || true)
+if [ -z "$GH_USER" ]; then
+    echo "❌ GitHub CLI is not authenticated. Run: gh auth login"
+    exit 1
+fi
+if [ "$(gh api "repos/$REPO" --jq .permissions.push 2>/dev/null)" != "true" ]; then
+    echo "❌ Active gh account ($GH_USER) cannot push to $REPO."
+    echo "   Releases would fail with a misleading HTTP 404."
+    echo "   Switch account: gh auth switch --user sebsto"
+    exit 1
+fi
+
+# Check if this is a resume. Both the tag and the release must exist: a tag
+# without a release means an earlier run died between `git push` and
+# `gh release create`, and taking the shortcut there would compute BOTTLE_SHA
+# from a download that 404s, baking the hash of an error page into the formula.
+if git rev-parse "$TAG" >/dev/null 2>&1 && gh release view "$TAG" >/dev/null 2>&1; then
+    echo "⏭️  Tag $TAG and its release exist. Skipping to Homebrew update..."
+    BOTTLE_URL="https://github.com/$REPO/releases/download/$TAG/xcodeinstall-$VERSION.arm64_ventura.bottle.tar.gz"
+    BOTTLE_SHA=$(curl -fsL "$BOTTLE_URL" | shasum -a 256 | awk '{print $1}') || {
+        echo "❌ Could not download the published bottle to hash it:"
+        echo "   $BOTTLE_URL"
+        echo "   Re-upload the bottles, or delete the release and tag and start over."
+        exit 1
+    }
 else
+    if git rev-parse "$TAG" >/dev/null 2>&1; then
+        echo "⚠️  Tag $TAG exists but has no release (interrupted earlier run)."
+        echo "   Continuing: the release and bottles will be created now."
+    fi
+
     # 1. Update version and build
     echo "📝 Updating version in source code"
     cat > Sources/xcodeinstall/Version.swift << EOF
@@ -60,7 +91,12 @@ EOF
     else
         git commit -m "Bump version to $VERSION"
     fi
-    git tag "$TAG"
+    # Same for the tag and the push: both may already be done.
+    if git rev-parse "$TAG" >/dev/null 2>&1; then
+        echo "   Tag $TAG already exists, skipping creation"
+    else
+        git tag "$TAG"
+    fi
     git push --no-verify origin main "$TAG"
     if gh release view "$TAG" >/dev/null 2>&1; then
         echo "   Release $TAG already exists, skipping creation"
@@ -93,19 +129,22 @@ fi
 
 # 4. Generate Homebrew formula
 echo "🍺 Generating Homebrew formula"
-URL="https://github.com/sebsto/xcodeinstall/archive/refs/tags/$TAG.tar.gz"
-SHA256=$(curl -sL "$URL" | shasum -a 256 | awk '{print $1}')
+URL="https://github.com/$REPO/archive/refs/tags/$TAG.tar.gz"
+SHA256=$(curl -fsL "$URL" | shasum -a 256 | awk '{print $1}') || {
+    echo "❌ Could not download the source tarball to hash it: $URL"
+    exit 1
+}
 
 cat > xcodeinstall.rb << EOF
 class Xcodeinstall < Formula
   desc "This is a command-line tool to download and install Apple's Xcode"
-  homepage "https://github.com/sebsto/xcodeinstall"
+  homepage "https://github.com/$REPO"
   url "$URL"
   sha256 "$SHA256"
   license "Apache-2.0"
 
   bottle do
-    root_url "https://github.com/sebsto/xcodeinstall/releases/download/$TAG"
+    root_url "https://github.com/$REPO/releases/download/$TAG"
     sha256 cellar: :any_skip_relocation, arm64_ventura: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, arm64_sequoia: "$BOTTLE_SHA"
