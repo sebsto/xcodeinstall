@@ -29,7 +29,7 @@ let package = Package(
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "1.0.2"),
     
         .package(url: "https://github.com/soto-project/soto.git", from: "7.17.0"),     
-        .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.4.0"),
+        .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.4.1"),
 
         .package(url: "https://github.com/tuist/Noora", .upToNextMajor(from: "0.57.8")),        
         .package(url: "https://github.com/saagarjha/unxip.git", from: "3.2.0")

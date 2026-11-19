@@ -1,5 +1,5 @@
 {
-  "originHash" : "039cc2d9ea63f69b36ac7d088f67ebee209f15db47157fcceb430ae49c0e332d",
+  "originHash" : "5cf510f36ceb305bd930fbefb71cc3ed1772a4ec9b050a026c3c520079ab7ebe",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -123,8 +123,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-certificates.git",
       "state" : {
-        "revision" : "c8aece90ea05f9866bd392a5bf13b5cae56c0e03",
-        "version" : "1.20.0"
+        "revision" : "84f03fafeca28c19f5fc4b528df3d22ce8896bd7",
+        "version" : "1.21.1"
       }
     },
     {
@@ -276,8 +276,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/adam-fowler/swift-srp",
       "state" : {
-        "revision" : "1345dfeff4d1bc54fc36257325371df3d1d7a813",
-        "version" : "2.4.0"
+        "revision" : "8dca681a71b1a859c4e0ada43685414d4fc7f77c",
+        "version" : "2.4.1"
       }
     },
     {
