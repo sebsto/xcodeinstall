@@ -29,6 +29,8 @@ struct HTTPClientTests {
         self.sessionData = env.urlSessionData as? MockedURLSession
         self.sessionDownload = env.urlSessionDownload as? MockedURLSession
         self.client = HTTPClient(secrets: env.secrets!, urlSession: env.urlSessionData, log: log)
+        // no real pause between attempts in tests
+        self.client.retryPolicy.retryDelay = .zero
         try await env.secrets!.clearSecrets()
     }
 

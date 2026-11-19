@@ -76,6 +76,29 @@ extension AuthenticationTests {
         #expect(serviceKey.authServiceUrl == "https://idmsa.apple.com/appleauth")
     }
 
+    @Test("Test sign out redirect request retries transient gateway errors")
+    func testSignoutLocationRetriesTransientErrors() async throws {
+        let authenticator = getAppleAuthenticator()
+        authenticator.retryPolicy.retryDelay = .zero
+        let url = URL(string: "https://appstoreconnect.apple.com/logout")!
+        let location = "https://idmsa.apple.com/appleauth/signout?widgetKey=key&asop=destroy-session"
+
+        self.sessionData.enqueueResponse(
+            data: Data(),
+            response: HTTPURLResponse(url: url, statusCode: 504, httpVersion: nil, headerFields: nil)!
+        )
+        self.sessionData.enqueueResponse(
+            data: Data(),
+            response: HTTPURLResponse(
+                url: url, statusCode: 302, httpVersion: nil, headerFields: ["Location": location])!
+        )
+
+        let result = try await authenticator.signoutLocation(using: self.sessionData)
+
+        #expect(result == location)
+        #expect(self.sessionData.allRequests.count == 2)
+    }
+
     @Test("Test Apple Service Key Retrieval (olympus fallback)")
     func testAppleServiceKey() async throws {
         let url = "https://dummy"

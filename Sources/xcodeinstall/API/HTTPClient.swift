@@ -69,6 +69,9 @@ class HTTPClient {
     // some ID returned by Apple API to authenticate us
     var session = AppleSession()
 
+    // how read-only requests are repeated when Apple's gateway fails
+    var retryPolicy = TransientRetryPolicy()
+
     // to be shared between apiCall and download methods
     // prepare headers with correct cookies and X- value for Apple authentication
     func prepareAuthenticationHeaders() async -> [String: String] {
@@ -150,10 +153,12 @@ class HTTPClient {
         // Apple's sign in servers answer 502 / 503 / 504 for a share of otherwise
         // valid requests. Callers whose request is safe to repeat (read-only GETs)
         // opt in to a few retries; sign in POSTs never do.
-        let (data, response) = try await sendRetryingTransientErrors(
-            request,
-            attempts: retryTransientErrors ? 5 : 1
-        )
+        let (data, response) = try await retryPolicy.send(
+            maxAttempts: retryTransientErrors ? retryPolicy.maxAttempts : 1,
+            log: log
+        ) {
+            try await self.urlSession.data(for: request, delegate: nil)
+        }
         guard let httpResponse = response as? HTTPURLResponse,
             validResponse.isValid(response: httpResponse.statusCode)
         else {
@@ -167,28 +172,6 @@ class HTTPClient {
         _log(response: httpResponse, data: data, error: nil, to: log)
 
         return (data, httpResponse)
-    }
-
-    // Send `request`, repeating it up to `attempts` times in total while Apple's
-    // gateway answers 502, 503 or 504. Any other answer is returned as is.
-    private func sendRetryingTransientErrors(
-        _ request: URLRequest,
-        attempts: Int
-    ) async throws -> (Data, URLResponse) {
-        var attempt = 1
-        while true {
-            let (data, response) = try await self.urlSession.data(for: request, delegate: nil)
-            if let http = response as? HTTPURLResponse,
-                [502, 503, 504].contains(http.statusCode),
-                attempt < attempts
-            {
-                log.debug("Transient HTTP \(http.statusCode), retrying (attempt \(attempt) of \(attempts))")
-                try await Task.sleep(for: .milliseconds(300 * attempt))
-                attempt += 1
-                continue
-            }
-            return (data, response)
-        }
     }
 
     // prepare an URLRequest for a given url, method, body, and headers
@@ -233,4 +216,41 @@ internal func buildURLRequest(
     }
 
     return request
+}
+
+// Apple's sign in servers answer 502, 503 or 504 for a share of otherwise valid
+// requests. This policy repeats a request while one of those comes back, waiting
+// a little longer before each new attempt. Only requests that are safe to
+// repeat (read-only GETs) should use it.
+struct TransientRetryPolicy: Sendable {
+    // total number of attempts, the first one included
+    var maxAttempts = 5
+    // pause before the second attempt; each later pause adds one more of these
+    var retryDelay: Duration = .milliseconds(300)
+    // gateway status codes worth another attempt
+    var transientStatusCodes: Set<Int> = [502, 503, 504]
+
+    // Run `request` up to `maxAttempts` times (this policy's own limit when the
+    // caller passes none) and return the first answer that is not transient.
+    func send(
+        maxAttempts: Int? = nil,
+        log: Logger,
+        _ request: () async throws -> (Data, URLResponse)
+    ) async throws -> (Data, URLResponse) {
+        let limit = maxAttempts ?? self.maxAttempts
+        var attempt = 1
+        while true {
+            let (data, response) = try await request()
+            if let http = response as? HTTPURLResponse,
+                transientStatusCodes.contains(http.statusCode),
+                attempt < limit
+            {
+                log.debug("Transient HTTP \(http.statusCode), retrying (attempt \(attempt) of \(limit))")
+                try await Task.sleep(for: retryDelay * attempt)
+                attempt += 1
+                continue
+            }
+            return (data, response)
+        }
+    }
 }
