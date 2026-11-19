@@ -20,7 +20,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.17.1"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.8.2"),
-        .package(url: "https://github.com/apple/swift-crypto", from: "4.5.2"),
+        .package(url: "https://github.com/apple/swift-crypto", from: "5.1.1"),
         .package(url: "https://github.com/apple/swift-system", from: "1.9.0"),
 
         // 1.0.0 removed the "SubprocessSpan" trait, so the workaround for
@@ -29,7 +29,7 @@ let package = Package(
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", from: "1.0.2"),
     
         .package(url: "https://github.com/soto-project/soto.git", from: "7.17.0"),     
-        .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.4.0"),
+        .package(url: "https://github.com/adam-fowler/swift-srp", from: "2.4.1"),
 
         .package(url: "https://github.com/tuist/Noora", .upToNextMajor(from: "0.57.8")),        
         .package(url: "https://github.com/saagarjha/unxip.git", from: "3.2.0")
