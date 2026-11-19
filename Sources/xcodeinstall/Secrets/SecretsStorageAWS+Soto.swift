@@ -37,6 +37,30 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
     ) throws -> SecretsStorageAWSSDKProtocol {
         try SecretsStorageAWSSoto.forRegion(region, profileName: profileName, awsClient: nil, ssmClient: nil, log: log)
     }
+    // The credential source for the AWS client. Soto's selector uses the first
+    // provider that answers. When the user names a profile, that choice has to
+    // win over the EC2 instance role; otherwise on an EC2 host the role (often
+    // of another account) answers first and the profile is never used. Without
+    // a profile name, the instance role comes before the default profile.
+    static func credentialProvider(profileName: String?) -> CredentialProviderFactory {
+        if let profileName {
+            return .selector(
+                .environment,
+                .configFile(profile: profileName),
+                .sso(profileName: profileName),
+                .login(profileName: profileName),
+                .ec2
+            )
+        }
+        return .selector(
+            .environment,
+            .ec2,
+            .configFile(profile: nil),
+            .sso(profileName: nil),
+            .login(profileName: nil)
+        )
+    }
+
     static func forRegion(
         _ region: String,
         profileName: String? = nil,
@@ -50,13 +74,7 @@ final class SecretsStorageAWSSoto: SecretsStorageAWSSDKProtocol {
         var newAwsClient: AWSClient? = nil
         if awsClient == nil {
             newAwsClient = AWSClient(
-                credentialProvider: .selector(
-                    .environment,
-                    .ec2,
-                    .configFile(profile: profileName),
-                    .sso(profileName: profileName),
-                    .login(profileName: profileName)
-                ),
+                credentialProvider: Self.credentialProvider(profileName: profileName),
                 retryPolicy: .jitter()
             )
         }
