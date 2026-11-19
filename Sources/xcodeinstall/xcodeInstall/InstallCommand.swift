@@ -75,7 +75,7 @@ extension XCodeInstall {
             return extracted
         }
 
-        // Only prompt for Xcode XIP files — not for command line tools
+        // Only prompt for Xcode XIP and AEA files — not for command line tools
         let installationType = SupportedInstallation.supported(filename)
         guard installationType == .xCode else {
             return nil
@@ -96,7 +96,7 @@ extension XCodeInstall {
 
         // list files ready to install
         let installableFiles = try self.deps.fileHandler.downloadedFiles().filter({ fileName in
-            fileName.hasSuffix(".xip") || fileName.hasSuffix(".dmg")
+            fileName.hasSuffix(".xip") || fileName.hasSuffix(".aea") || fileName.hasSuffix(".dmg")
         })
 
         display("")

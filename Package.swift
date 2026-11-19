@@ -61,7 +61,9 @@ let package = Package(
             resources: [.process("data/download-list-20220723.json"),
                         .process("data/download-list-20231115.json"),
                         .process("data/download-error.json"),
-                        .process("data/download-unknown-error.json")
+                        .process("data/download-unknown-error.json"),
+                        .copy("data/apple-aea-certificate-chain.pem"),
+                        .copy("data/self-signed-certificate-chain.pem")
             ],
             swiftSettings: swiftSettings
         )

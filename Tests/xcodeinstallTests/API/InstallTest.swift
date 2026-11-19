@@ -47,6 +47,19 @@ final class InstallTest {
         #expect(result == .xCode)
     }
 
+    @Test("Test Install Support File Xcode AEA")
+    func testInstallSupportFileXcodeAEA() async throws {
+
+        // given
+        let pkgName = "Xcode 27.3 beta 2.aea"
+
+        // when
+        let result: SupportedInstallation = SupportedInstallation.supported(pkgName)
+
+        // then
+        #expect(result == .xCode)
+    }
+
     @Test("Test Install Support File Command Line Tools")
     func testInstallSupportFileCommandLineTools() async throws {
 
