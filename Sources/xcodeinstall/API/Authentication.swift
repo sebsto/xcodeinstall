@@ -345,14 +345,22 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
         let session = URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
         defer { session.finishTasksAndInvalidate() }
 
+        return try await signoutLocation(using: session)
+    }
+
+    // Send the GET /logout request on `session` and return the Location header.
+    // The request is read-only, so it goes through the same retry policy as the
+    // other authentication calls. Split from `signoutRedirectLocation` so tests
+    // can drive it with a mocked session.
+    internal func signoutLocation(using session: URLSessionProtocol) async throws -> String? {
+
         var request = URLRequest(url: URL(string: "https://appstoreconnect.apple.com/logout")!)
         request.httpMethod = HTTPVerb.GET.rawValue
 
-        let (_, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            return nil
+        let (_, response) = try await retryPolicy.send(log: log) {
+            try await session.data(for: request, delegate: nil)
         }
-        return httpResponse.value(forHTTPHeaderField: "Location")
+        return (response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Location")
     }
 
     internal func fetchServiceKeyFromOlympus() async throws -> AppleServiceKey {
@@ -369,7 +377,8 @@ class AppleAuthenticator: HTTPClient, AppleAuthenticatorProtocol {
             "https://appstoreconnect.apple.com/olympus/v1/app/config?hostname=itunesconnect.apple.com"
         let (data, _) = try await apiCall(
             url: url,
-            validResponse: .range(200..<400)  //FIXME: should this be .value(200) ?
+            validResponse: .range(200..<400),  //FIXME: should this be .value(200) ?
+            retryTransientErrors: true
         )
 
         return try JSONDecoder().decode(AppleServiceKey.self, from: data)

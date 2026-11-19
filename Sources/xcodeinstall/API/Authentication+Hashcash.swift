@@ -55,7 +55,8 @@ extension AppleAuthenticator {
             "https://idmsa.apple.com/appleauth/auth/signin?widgetKey=\(itServiceKey)"
         let (_, response) = try await apiCall(
             url: url,
-            validResponse: .value(200)
+            validResponse: .value(200),
+            retryTransientErrors: true
         )
 
         guard let hcString = response.allHeaderFields["X-Apple-HC-Bits"] as? String,

@@ -69,6 +69,9 @@ class HTTPClient {
     // some ID returned by Apple API to authenticate us
     var session = AppleSession()
 
+    // how read-only requests are repeated when Apple's gateway fails
+    var retryPolicy = TransientRetryPolicy()
+
     // to be shared between apiCall and download methods
     // prepare headers with correct cookies and X- value for Apple authentication
     func prepareAuthenticationHeaders() async -> [String: String] {
@@ -124,7 +127,8 @@ class HTTPClient {
         method: HTTPVerb = .GET,
         body: Data? = nil,
         headers: [String: String] = [:],
-        validResponse: ExpectedResponseCode = .value(0)
+        validResponse: ExpectedResponseCode = .value(0),
+        retryTransientErrors: Bool = false
     ) async throws -> (Data, HTTPURLResponse) {
 
         let request: URLRequest
@@ -145,8 +149,16 @@ class HTTPClient {
 
         _log(request: request, to: log)
 
-        // send request with that session
-        let (data, response) = try await self.urlSession.data(for: request, delegate: nil)
+        // send request with that session.
+        // Apple's sign in servers answer 502 / 503 / 504 for a share of otherwise
+        // valid requests. Callers whose request is safe to repeat (read-only GETs)
+        // opt in to a few retries; sign in POSTs never do.
+        let (data, response) = try await retryPolicy.send(
+            maxAttempts: retryTransientErrors ? retryPolicy.maxAttempts : 1,
+            log: log
+        ) {
+            try await self.urlSession.data(for: request, delegate: nil)
+        }
         guard let httpResponse = response as? HTTPURLResponse,
             validResponse.isValid(response: httpResponse.statusCode)
         else {
@@ -204,4 +216,41 @@ internal func buildURLRequest(
     }
 
     return request
+}
+
+// Apple's sign in servers answer 502, 503 or 504 for a share of otherwise valid
+// requests. This policy repeats a request while one of those comes back, waiting
+// a little longer before each new attempt. Only requests that are safe to
+// repeat (read-only GETs) should use it.
+struct TransientRetryPolicy: Sendable {
+    // total number of attempts, the first one included
+    var maxAttempts = 5
+    // pause before the second attempt; each later pause adds one more of these
+    var retryDelay: Duration = .milliseconds(300)
+    // gateway status codes worth another attempt
+    var transientStatusCodes: Set<Int> = [502, 503, 504]
+
+    // Run `request` up to `maxAttempts` times (this policy's own limit when the
+    // caller passes none) and return the first answer that is not transient.
+    func send(
+        maxAttempts: Int? = nil,
+        log: Logger,
+        _ request: () async throws -> (Data, URLResponse)
+    ) async throws -> (Data, URLResponse) {
+        let limit = maxAttempts ?? self.maxAttempts
+        var attempt = 1
+        while true {
+            let (data, response) = try await request()
+            if let http = response as? HTTPURLResponse,
+                transientStatusCodes.contains(http.statusCode),
+                attempt < limit
+            {
+                log.debug("Transient HTTP \(http.statusCode), retrying (attempt \(attempt) of \(limit))")
+                try await Task.sleep(for: retryDelay * attempt)
+                attempt += 1
+                continue
+            }
+            return (data, response)
+        }
+    }
 }

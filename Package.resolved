@@ -1,5 +1,5 @@
 {
-  "originHash" : "18299c90f6f7c8e213a41f48c82275419484a05ec8b82bf27f1870c5b2f765bb",
+  "originHash" : "039cc2d9ea63f69b36ac7d088f67ebee209f15db47157fcceb430ae49c0e332d",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Rainbow",
       "state" : {
-        "revision" : "cdf146ae671b2624917648b61c908d1244b98ca1",
-        "version" : "4.2.1"
+        "revision" : "711ca908ca19d16e577d575c8d0a48151a16bb1b",
+        "version" : "4.2.2"
       }
     },
     {
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/soto-project/soto-core.git",
       "state" : {
-        "revision" : "47454bf79649691da406978ae803b51b54246d6e",
-        "version" : "7.14.0"
+        "revision" : "4309f0c0f608b1f4db1d84e5928a925a3894ee91",
+        "version" : "7.17.0"
       }
     },
     {
@@ -186,8 +186,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log.git",
       "state" : {
-        "revision" : "c7413d967b97aae67c46452bf7645bdb7b200e8e",
-        "version" : "1.17.2"
+        "revision" : "34b131f794c303b62c38d19263bcf146e538da75",
+        "version" : "1.17.1"
       }
     },
     {
