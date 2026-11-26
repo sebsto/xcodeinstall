@@ -17,8 +17,9 @@ echo "🚀 Releasing version $VERSION"
 #   MACOS_BUNDLED_LIBS: macOS versions without the Swift compatibility
 #       libraries; their bottles carry a copy next to the binary.
 #   MACOS_SYSTEM_LIBS: macOS 26 and later ship those libraries in
-#       /usr/lib/swift; their bottles carry only the binary.
-# Add each new macOS release to MACOS_SYSTEM_LIBS.
+#       /usr/lib/swift; their bottles carry only the binary. Homebrew installs
+#       the newest older bottle on a newer macOS, so this list needs no entry
+#       for later releases.
 MACOS_BUNDLED_LIBS=(ventura sonoma sequoia)
 MACOS_SYSTEM_LIBS=(tahoe)
 
