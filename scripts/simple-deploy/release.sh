@@ -12,6 +12,50 @@ REPO="sebsto/xcodeinstall"
 TAG="v$VERSION"
 echo "🚀 Releasing version $VERSION"
 
+# The Swift compiler links back-deployment libraries such as
+# libswiftCompatibilitySpan.dylib through @rpath. macOS 26 ships them in
+# /usr/lib/swift; older systems do not, so they must travel with the binary.
+# The binary has an @loader_path rpath, so copying them next to it is enough.
+#   $1: the release binary   $2: the directory the bottle installs it into
+bundle_swift_compat_libs() {
+    local binary="$1" dest="$2"
+    local toolchain_lib
+    toolchain_lib="$(dirname "$(dirname "$(xcrun --find swift)")")/lib"
+
+    local libs
+    libs=$(otool -L "$binary" | awk '/@rpath\/libswiftCompatibility/ {print $1}' | sed 's|@rpath/||' | sort -u)
+
+    local lib src
+    for lib in $libs; do
+        src=$(ls "$toolchain_lib"/swift-*/macosx/"$lib" 2>/dev/null | sort -V | tail -1)
+        if [ -z "$src" ]; then
+            echo "❌ $lib is required by the binary but not found in $toolchain_lib"
+            exit 1
+        fi
+        cp "$src" "$dest/"
+        codesign --force --sign - "$dest/$lib"
+
+        # Both architectures must be present, or one family of Macs fails at launch.
+        local archs
+        archs=$(lipo -archs "$dest/$lib")
+        for arch in arm64 x86_64; do
+            case " $archs " in
+                *" $arch "*) ;;
+                *) echo "❌ $lib has no $arch slice (found: $archs)"; exit 1 ;;
+            esac
+        done
+        echo "   Bundled $lib ($archs)"
+    done
+
+    # Every back-deployment library the binary needs must now sit next to it.
+    for lib in $libs; do
+        if [ ! -f "$dest/$lib" ]; then
+            echo "❌ $lib is missing from the bottle"
+            exit 1
+        fi
+    done
+}
+
 # Pre-flight checks
 if [ ! -d "../homebrew-macos" ]; then
     echo "❌ ../homebrew-macos directory not found."
@@ -111,6 +155,7 @@ EOF
     mkdir -p "xcodeinstall/$VERSION/bin"
     mkdir -p "xcodeinstall/$VERSION/.brew"
     cp "$RELEASE_BIN_DIR/xcodeinstall" "xcodeinstall/$VERSION/bin/"
+    bundle_swift_compat_libs "$RELEASE_BIN_DIR/xcodeinstall" "xcodeinstall/$VERSION/bin"
     cp LICENSE "xcodeinstall/$VERSION/" 2>/dev/null || true
     cp README.md "xcodeinstall/$VERSION/" 2>/dev/null || true
     echo '{"homebrew_version":"4.0.0","used_options":[],"unused_options":[],"built_as_bottle":true,"poured_from_bottle":false,"loaded_from_api":true,"installed_as_dependency":false,"installed_on_request":true,"changed_files":[],"time":null,"source_modified_time":null,"compiler":"clang","aliases":[],"runtime_dependencies":[],"source":{"tap":"sebsto/macos","spec":"stable","versions":{"stable":"'$VERSION'","version_scheme":0}}}' > "xcodeinstall/$VERSION/INSTALL_RECEIPT.json"
