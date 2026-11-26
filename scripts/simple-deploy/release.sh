@@ -97,6 +97,12 @@ if git rev-parse "$TAG" >/dev/null 2>&1 && gh release view "$TAG" >/dev/null 2>&
         echo "   Re-upload the bottles, or delete the release and tag and start over."
         exit 1
     }
+    TAHOE_URL="https://github.com/$REPO/releases/download/$TAG/xcodeinstall-$VERSION.arm64_tahoe.bottle.tar.gz"
+    TAHOE_SHA=$(curl -fsL "$TAHOE_URL" | shasum -a 256 | awk '{print $1}') || {
+        echo "❌ Could not download the published Tahoe bottle to hash it:"
+        echo "   $TAHOE_URL"
+        exit 1
+    }
 else
     if git rev-parse "$TAG" >/dev/null 2>&1; then
         echo "⚠️  Tag $TAG exists but has no release (interrupted earlier run)."
@@ -160,13 +166,21 @@ EOF
     cp README.md "xcodeinstall/$VERSION/" 2>/dev/null || true
     echo '{"homebrew_version":"4.0.0","used_options":[],"unused_options":[],"built_as_bottle":true,"poured_from_bottle":false,"loaded_from_api":true,"installed_as_dependency":false,"installed_on_request":true,"changed_files":[],"time":null,"source_modified_time":null,"compiler":"clang","aliases":[],"runtime_dependencies":[],"source":{"tap":"sebsto/macos","spec":"stable","versions":{"stable":"'$VERSION'","version_scheme":0}}}' > "xcodeinstall/$VERSION/INSTALL_RECEIPT.json"
     tar -czf "bottles/$bottle_name" xcodeinstall
+
+    # macOS 26 (Tahoe) ships these libraries in /usr/lib/swift, so its bottles
+    # carry only the binary. Every older macOS gets the bundled copy.
+    tahoe_bottle_name="xcodeinstall-$VERSION.arm64_tahoe.bottle.tar.gz"
+    rm -f "xcodeinstall/$VERSION/bin/"libswiftCompatibility*.dylib
+    tar -czf "bottles/$tahoe_bottle_name" xcodeinstall
     rm -rf xcodeinstall
 
     BOTTLE_SHA=$(shasum -a 256 "bottles/$bottle_name" | awk '{print $1}')
+    TAHOE_SHA=$(shasum -a 256 "bottles/$tahoe_bottle_name" | awk '{print $1}')
 
-    for platform in arm64_sonoma arm64_sequoia arm64_tahoe ventura sonoma sequoia tahoe; do
+    for platform in arm64_sonoma arm64_sequoia ventura sonoma sequoia; do
         cp "bottles/$bottle_name" "bottles/xcodeinstall-$VERSION.$platform.bottle.tar.gz"
     done
+    cp "bottles/$tahoe_bottle_name" "bottles/xcodeinstall-$VERSION.tahoe.bottle.tar.gz"
 
     gh release upload "$TAG" bottles/* --clobber
     rm -rf bottles
@@ -193,11 +207,11 @@ class Xcodeinstall < Formula
     sha256 cellar: :any_skip_relocation, arm64_ventura: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, arm64_sequoia: "$BOTTLE_SHA"
-    sha256 cellar: :any_skip_relocation, arm64_tahoe: "$BOTTLE_SHA"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe: "$TAHOE_SHA"
     sha256 cellar: :any_skip_relocation, ventura: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, sonoma: "$BOTTLE_SHA"
     sha256 cellar: :any_skip_relocation, sequoia: "$BOTTLE_SHA"
-    sha256 cellar: :any_skip_relocation, tahoe: "$BOTTLE_SHA"
+    sha256 cellar: :any_skip_relocation, tahoe: "$TAHOE_SHA"
   end
 
   def install
